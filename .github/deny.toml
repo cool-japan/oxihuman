@@ -1,0 +1,96 @@
+# cargo-deny configuration for OxiHuman
+# Docs: https://embarkstudios.github.io/cargo-deny/
+
+[graph]
+# Use the workspace Cargo.lock
+targets = []
+
+# ---------------------------------------------------------------------------
+# Licenses
+# ---------------------------------------------------------------------------
+[licenses]
+# Confidence threshold for license text detection (0.0 – 1.0)
+confidence-threshold = 0.8
+
+# Approved licenses — compatible with our Apache-2.0 top-level license.
+allow = [
+  "Apache-2.0",
+  "MIT",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unlicense",
+  "CC0-1.0",
+  # Unicode data embedded in many crates
+  "Unicode-DFS-2016",
+  # OpenSSL exception is allowed when the crate itself is Apache/MIT
+  "Apache-2.0 WITH LLVM-exception",
+]
+
+# Denied licenses — copyleft, incompatible with Apache-2.0 distribution.
+deny = [
+  "GPL-2.0",
+  "GPL-3.0",
+  "LGPL-2.0",
+  "LGPL-2.1",
+  "LGPL-3.0",
+  "AGPL-3.0",
+]
+
+# ---------------------------------------------------------------------------
+# Security advisories (RustSec)
+# ---------------------------------------------------------------------------
+[advisories]
+# Path to local advisory database cache (populated by cargo-deny automatically)
+# db-urls = ["https://github.com/rustsec/advisory-db"]
+version = 2
+
+# Treat unmatched advisories as errors
+ignore = []
+
+# ---------------------------------------------------------------------------
+# Dependency bans
+# ---------------------------------------------------------------------------
+[bans]
+# Warn on multiple versions of the same crate in the dependency graph.
+multiple-versions = "warn"
+
+# Ban crates we explicitly do not want in the graph.
+deny = [
+  # openblas must not appear — use oxiblas instead (COOLJAPAN Policy)
+  { name = "openblas-src" },
+  { name = "openblas-sys" },
+  # bincode must not appear — use oxicode instead (COOLJAPAN Policy)
+  { name = "bincode" },
+  # zip crate must not appear — use oxiarc-archive instead (COOLJAPAN Policy)
+  { name = "zip" },
+  # rustfft must not appear — use OxiFFT instead (COOLJAPAN Policy)
+  { name = "rustfft" },
+  # z3 must not appear — use OxiZ instead (COOLJAPAN Policy)
+  { name = "z3" },
+]
+
+# Allow at most one copy of these high-traffic crates to avoid bloat.
+[[bans.deny]]
+name = "serde"
+wrappers = []
+
+[[bans.deny]]
+name = "anyhow"
+wrappers = []
+
+[[bans.deny]]
+name = "thiserror"
+wrappers = []
+
+# ---------------------------------------------------------------------------
+# Allowed source registries
+# ---------------------------------------------------------------------------
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+
+# Allow git sources for COOLJAPAN intra-workspace crates if needed
+allow-git = []

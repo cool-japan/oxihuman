@@ -1,0 +1,28 @@
+[package]
+name        = "oxihuman-viewer"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage    = "https://github.com/cool-japan/oxihuman"
+documentation = "https://docs.rs/oxihuman-viewer"
+description = "wgpu/WebGPU rendering adapter for OxiHuman"
+readme      = "README.md"
+keywords    = ["rendering", "wgpu", "webgpu", "human", "3d"]
+categories  = ["rendering", "graphics", "science"]
+exclude     = ["target/", "tests/fixtures/", "*.wasm"]
+
+[dependencies]
+anyhow.workspace       = true
+oxihuman-core.workspace  = true
+oxihuman-mesh.workspace  = true
+oxihuman-physics.workspace = true
+wgpu     = { version = "28",  optional = true }
+pollster = { version = "0.4", optional = true }
+winit    = { version = "0.30", optional = true }
+
+[features]
+default = []
+webgpu  = ["dep:wgpu", "dep:pollster"]
+winit   = ["dep:winit"]

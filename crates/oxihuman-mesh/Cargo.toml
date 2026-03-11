@@ -1,0 +1,30 @@
+[package]
+name        = "oxihuman-mesh"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage    = "https://github.com/cool-japan/oxihuman"
+documentation = "https://docs.rs/oxihuman-mesh"
+description = "Mesh processing, topology, and geometry algorithms for OxiHuman"
+readme      = "README.md"
+keywords    = ["mesh", "geometry", "uv", "human", "3d"]
+categories  = ["science", "algorithms", "rendering"]
+exclude     = ["target/", "tests/fixtures/", "*.wasm", "benches/data/"]
+
+[dependencies]
+anyhow.workspace       = true
+thiserror.workspace    = true
+serde.workspace        = true
+serde_json.workspace  = true
+oxihuman-core.workspace  = true
+oxihuman-morph.workspace = true
+
+[dev-dependencies]
+proptest.workspace     = true
+criterion.workspace    = true
+
+[[bench]]
+name    = "mesh_bench"
+harness = false

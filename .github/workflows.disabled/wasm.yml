@@ -1,0 +1,132 @@
+name: WASM Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/oxihuman-wasm/**"
+      - ".github/workflows/wasm.yml"
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  # Size thresholds (bytes)
+  WASM_SIZE_LIMIT_LITE: 5242880    # 5 MB
+  WASM_SIZE_LIMIT_FULL: 15728640   # 15 MB
+
+jobs:
+  wasm-build:
+    name: WASM Build and Size Report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable + wasm32 target)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo registry and target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "wasm"
+
+      - name: Install wasm-pack
+        run: |
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+          wasm-pack --version
+
+      - name: Install wasm-opt (via binaryen)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends binaryen
+          wasm-opt --version
+
+      - name: cargo build (wasm32 release)
+        run: >
+          cargo build
+          -p oxihuman-wasm
+          --target wasm32-unknown-unknown
+          --release
+
+      - name: wasm-pack build (web target)
+        working-directory: crates/oxihuman-wasm
+        run: >
+          wasm-pack build
+          --target web
+          --release
+          --out-dir pkg
+          -- --features web
+
+      - name: Optimize WASM with wasm-opt
+        working-directory: crates/oxihuman-wasm
+        run: |
+          WASM_FILE=$(find pkg -name "*.wasm" | head -1)
+          if [ -n "$WASM_FILE" ]; then
+            echo "Optimizing: $WASM_FILE"
+            wasm-opt -Oz --enable-simd "$WASM_FILE" -o "$WASM_FILE"
+          fi
+
+      - name: Report WASM binary size
+        working-directory: crates/oxihuman-wasm
+        run: |
+          echo "=== WASM artifact sizes ==="
+          find pkg -name "*.wasm" -exec sh -c '
+            FILE="$1"
+            SIZE=$(wc -c < "$FILE")
+            SIZE_KB=$(( SIZE / 1024 ))
+            SIZE_MB=$(echo "scale=2; $SIZE / 1048576" | bc)
+            echo "  $FILE: ${SIZE_KB} KB  (${SIZE_MB} MB)"
+          ' _ {} \;
+          echo "==========================="
+
+      - name: Upload WASM pkg artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oxihuman-wasm-pkg
+          path: crates/oxihuman-wasm/pkg/
+          retention-days: 14
+
+  wasm-size-check:
+    name: WASM Size Gate
+    runs-on: ubuntu-latest
+    needs: wasm-build
+    steps:
+      - name: Download WASM pkg artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: oxihuman-wasm-pkg
+          path: pkg/
+
+      - name: Check WASM binary size limits
+        run: |
+          FAIL=0
+          for WASM_FILE in pkg/*.wasm; do
+            if [ ! -f "$WASM_FILE" ]; then
+              echo "No .wasm files found under pkg/ — skipping size check."
+              break
+            fi
+            SIZE=$(wc -c < "$WASM_FILE")
+            SIZE_MB=$(echo "scale=2; $SIZE / 1048576" | bc)
+
+            echo "Checking $WASM_FILE: ${SIZE} bytes (${SIZE_MB} MB)"
+
+            # Lite threshold: 5 MB
+            if [ "$SIZE" -gt "$WASM_SIZE_LIMIT_LITE" ]; then
+              echo "  WARNING: exceeds lite threshold of 5 MB"
+            fi
+
+            # Hard limit: 15 MB
+            if [ "$SIZE" -gt "$WASM_SIZE_LIMIT_FULL" ]; then
+              echo "  FAIL: exceeds full threshold of 15 MB — this is unacceptable."
+              FAIL=1
+            else
+              echo "  PASS: within 15 MB hard limit."
+            fi
+          done
+
+          if [ "$FAIL" -eq 1 ]; then
+            exit 1
+          fi

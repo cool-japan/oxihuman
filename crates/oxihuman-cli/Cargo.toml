@@ -1,0 +1,32 @@
+[package]
+name        = "oxihuman-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage    = "https://github.com/cool-japan/oxihuman"
+documentation = "https://docs.rs/oxihuman-cli"
+description = "Command-line interface for OxiHuman body generation and export"
+readme      = "README.md"
+keywords    = ["cli", "human", "body", "export", "makehuman"]
+categories  = ["command-line-utilities", "science"]
+exclude     = ["target/", "tests/fixtures/", "*.wasm"]
+
+[[bin]]
+name = "oxihuman"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace         = true
+serde_json.workspace     = true
+oxihuman-core.workspace    = true
+oxihuman-morph.workspace   = true
+oxihuman-mesh.workspace    = true
+oxihuman-export.workspace  = true
+oxihuman-physics.workspace = true
+oxihuman-viewer.workspace  = true
+
+[[test]]
+name    = "e2e_tests"
+path    = "tests/e2e_tests.rs"

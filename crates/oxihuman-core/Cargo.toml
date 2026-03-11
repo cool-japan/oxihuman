@@ -1,0 +1,26 @@
+[package]
+name        = "oxihuman-core"
+version.workspace    = true
+edition.workspace    = true
+authors.workspace    = true
+license.workspace    = true
+repository.workspace = true
+homepage    = "https://github.com/cool-japan/oxihuman"
+documentation = "https://docs.rs/oxihuman-core"
+description = "Core data structures, algorithms, and asset management for OxiHuman"
+readme      = "README.md"
+keywords    = ["human", "body", "algorithms", "data-structures", "makehuman"]
+categories  = ["data-structures", "algorithms", "science"]
+exclude     = ["target/", "tests/fixtures/", "*.wasm", "benches/data/"]
+
+[dependencies]
+anyhow.workspace    = true
+thiserror.workspace = true
+serde               = { workspace = true }
+serde_json.workspace = true
+toml.workspace      = true
+sha2.workspace      = true
+hex.workspace       = true
+
+[dev-dependencies]
+proptest.workspace  = true

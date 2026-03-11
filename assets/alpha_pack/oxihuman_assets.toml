@@ -1,0 +1,28 @@
+# OxiHuman Alpha Asset Pack Manifest
+# Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+version = "0.1.0"
+base_mesh_path = "data/3dobjs/base.obj"
+policy_profile = "Standard"
+
+# Allowed target categories (all others are denied in Strict mode)
+allowed_targets = [
+    "height",
+    "weight",
+    "muscle",
+    "age",
+    "bodyshapes",
+    "armslegs",
+    "cheek",
+    "chin",
+    "ears",
+    "eyebrows",
+    "expression",
+]
+
+[pack_info]
+name = "OxiHuman Alpha Pack"
+author = "COOLJAPAN OU (Team KitaSan)"
+license = "CC0-1.0"
+description = "Safe morph target set for body customization (no explicit content)"

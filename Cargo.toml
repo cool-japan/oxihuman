@@ -1,0 +1,70 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/oxihuman",
+    "crates/oxihuman-core",
+    "crates/oxihuman-morph",
+    "crates/oxihuman-mesh",
+    "crates/oxihuman-export",
+    "crates/oxihuman-wasm",
+    "crates/oxihuman-viewer",
+    "crates/oxihuman-physics",
+    "crates/oxihuman-cli",
+    "crates/oxihuman-tests",
+]
+
+[workspace.package]
+version       = "0.1.0"
+edition       = "2021"
+authors       = ["COOLJAPAN OU (Team KitaSan)"]
+license       = "Apache-2.0"
+repository    = "https://github.com/cool-japan/oxihuman"
+homepage      = "https://github.com/cool-japan/oxihuman"
+documentation = "https://docs.rs/oxihuman-core"
+description   = "Privacy-first, client-side human body generator — pure Rust MakeHuman port"
+
+[workspace.dependencies]
+# Error handling
+anyhow      = "1.0"
+thiserror   = "2.0"
+
+# Serialization
+serde       = { version = "1.0", features = ["derive"] }
+serde_json  = "1.0"
+toml        = "0.8"
+
+# Crypto (asset integrity)
+sha2        = "0.10"
+hex         = "0.4"
+
+# Byte casting for GLB binary output
+bytemuck    = { version = "1.25", features = ["derive"] }
+
+# WASM / browser support (non-optional in workspace; mark optional per-crate)
+wasm-bindgen            = "0.2.114"
+js-sys                  = "0.3"
+console_error_panic_hook = "0.1.7"
+
+# Parallelism
+rayon       = "1.11"
+
+# Testing
+criterion   = { version = "0.5", features = ["html_reports"] }
+proptest    = "1.10"
+
+# Intra-workspace
+oxihuman         = { path = "crates/oxihuman",         version = "0.1" }
+oxihuman-core    = { path = "crates/oxihuman-core",    version = "0.1" }
+oxihuman-morph   = { path = "crates/oxihuman-morph",   version = "0.1" }
+oxihuman-mesh    = { path = "crates/oxihuman-mesh",    version = "0.1" }
+oxihuman-export  = { path = "crates/oxihuman-export",  version = "0.1" }
+oxihuman-physics = { path = "crates/oxihuman-physics", version = "0.1" }
+oxihuman-viewer  = { path = "crates/oxihuman-viewer",  version = "0.1" }
+oxihuman-wasm    = { path = "crates/oxihuman-wasm",    version = "0.1" }
+oxihuman-cli     = { path = "crates/oxihuman-cli",     version = "0.1" }
+
+[workspace.lints.rust]
+dead_code = "allow"
+
+[workspace.lints.clippy]
+too_many_arguments = "allow"

@@ -1,0 +1,32 @@
+[package]
+name        = "oxihuman-physics"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage    = "https://github.com/cool-japan/oxihuman"
+documentation = "https://docs.rs/oxihuman-physics"
+description = "Physics simulation for OxiHuman — soft body, capsule colliders, porous flow"
+readme      = "README.md"
+keywords    = ["physics", "simulation", "human", "collision", "soft-body"]
+categories  = ["science", "simulation", "mathematics"]
+exclude     = ["target/", "tests/fixtures/", "*.wasm"]
+
+[dependencies]
+anyhow.workspace        = true
+serde_json.workspace    = true
+oxihuman-core.workspace  = true
+oxihuman-mesh.workspace  = true
+oxihuman-morph.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name    = "physics_bench"
+harness = false
+
+[[bench]]
+name    = "accuracy_bench"
+harness = false

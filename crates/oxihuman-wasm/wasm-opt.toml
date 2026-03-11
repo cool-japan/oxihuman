@@ -1,0 +1,13 @@
+# WASM optimization settings for oxihuman-wasm
+[profile.release]
+opt-level = "z"          # Optimize for size
+lto = true               # Link-time optimization
+codegen-units = 1        # Single codegen unit for better optimization
+
+[wasm]
+# Target size budget: < 2MB gzipped for core functionality
+size_budget_bytes = 2_097_152
+# Features to include in minimal build
+minimal_features = ["core", "morph"]
+# Features for full build
+full_features = ["core", "morph", "mesh", "export", "physics"]

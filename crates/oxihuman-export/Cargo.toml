@@ -1,0 +1,35 @@
+[package]
+name        = "oxihuman-export"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage    = "https://github.com/cool-japan/oxihuman"
+documentation = "https://docs.rs/oxihuman-export"
+description = "Export pipeline for OxiHuman — glTF, COLLADA, STL, and streaming formats"
+readme      = "README.md"
+keywords    = ["gltf", "export", "human", "3d", "collada"]
+categories  = ["encoding", "filesystem", "science"]
+exclude     = ["target/", "tests/fixtures/", "*.wasm", "benches/data/"]
+
+[dependencies]
+anyhow.workspace        = true
+thiserror.workspace     = true
+serde.workspace         = true
+serde_json.workspace    = true
+toml.workspace          = true
+bytemuck.workspace      = true
+sha2.workspace          = true
+hex.workspace           = true
+oxihuman-core.workspace   = true
+oxihuman-morph.workspace  = true
+oxihuman-mesh.workspace   = true
+
+[dev-dependencies]
+proptest.workspace      = true
+criterion.workspace     = true
+
+[[bench]]
+name    = "export_bench"
+harness = false

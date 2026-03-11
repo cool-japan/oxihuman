@@ -1,0 +1,31 @@
+[package]
+name          = "oxihuman"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage      = "https://github.com/cool-japan/oxihuman"
+documentation = "https://docs.rs/oxihuman"
+description   = "Privacy-first, client-side human body generator — pure Rust MakeHuman port (facade crate)"
+readme        = "README.md"
+keywords      = ["human", "makehuman", "3d", "mesh", "pure-rust"]
+categories    = ["graphics", "game-development", "science", "rendering"]
+
+[dependencies]
+oxihuman-core.workspace    = true
+oxihuman-morph.workspace   = true
+oxihuman-mesh.workspace    = true
+oxihuman-export.workspace  = true
+oxihuman-physics.workspace = true
+oxihuman-viewer = { workspace = true, optional = true }
+oxihuman-wasm   = { workspace = true, optional = true }
+
+[features]
+default = ["viewer"]
+viewer  = ["dep:oxihuman-viewer"]
+wasm    = ["dep:oxihuman-wasm"]
+full    = ["viewer", "wasm"]
+
+[lints]
+workspace = true

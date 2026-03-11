@@ -1,0 +1,22 @@
+[package]
+name        = "oxihuman-tests"
+version.workspace     = true
+edition.workspace     = true
+authors.workspace     = true
+license.workspace     = true
+repository.workspace  = true
+description = "Cross-crate integration tests for OxiHuman"
+publish     = false
+
+[dependencies]
+anyhow.workspace         = true
+oxihuman-core.workspace  = true
+oxihuman-morph.workspace = true
+oxihuman-mesh.workspace  = true
+oxihuman-export.workspace = true
+oxihuman-physics.workspace = true
+oxihuman-viewer.workspace = true
+
+[[test]]
+name = "integration_tests"
+path = "tests/integration_tests.rs"
