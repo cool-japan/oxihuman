@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Alembic-like export stub (text/binary, no real HDF5/Ogawa dependency).
 
@@ -584,7 +584,7 @@ mod tests {
         let tris = tri_indices();
         let archive = build_single_mesh_archive(&pos, &tris, "cube");
         let bytes = archive_to_ogawa_stub(&archive);
-        let recovered = parse_ogawa_stub(&bytes).unwrap();
+        let recovered = parse_ogawa_stub(&bytes).expect("should succeed");
         assert_eq!(archive_vertex_count(&recovered), 8);
     }
 

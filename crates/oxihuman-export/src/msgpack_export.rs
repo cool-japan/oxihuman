@@ -187,7 +187,7 @@ mod tests {
     fn test_set_and_get() {
         let mut m = new_msgpack_map();
         msgpack_set(&mut m, "x", MsgpackValue::Int(42));
-        let v = msgpack_get(&m, "x").unwrap();
+        let v = msgpack_get(&m, "x").expect("should succeed");
         assert_eq!(msgpack_value_type_name(v), "int");
     }
 
@@ -197,7 +197,7 @@ mod tests {
         msgpack_set(&mut m, "k", MsgpackValue::Bool(true));
         msgpack_set(&mut m, "k", MsgpackValue::Bool(false));
         assert_eq!(msgpack_entry_count(&m), 1);
-        if let MsgpackValue::Bool(b) = msgpack_get(&m, "k").unwrap() {
+        if let MsgpackValue::Bool(b) = msgpack_get(&m, "k").expect("should succeed") {
             assert!(!b);
         }
     }
@@ -229,7 +229,7 @@ mod tests {
         let weights = [0.5_f32, 0.8];
         let m = msgpack_from_morph_weights(&names, &weights);
         assert_eq!(msgpack_entry_count(&m), 2);
-        let v = msgpack_get(&m, "jaw").unwrap();
+        let v = msgpack_get(&m, "jaw").expect("should succeed");
         assert_eq!(msgpack_value_type_name(v), "float");
     }
 

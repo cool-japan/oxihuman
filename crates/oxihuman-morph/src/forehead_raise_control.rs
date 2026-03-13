@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Forehead raise morph — controls how raised the forehead region is.

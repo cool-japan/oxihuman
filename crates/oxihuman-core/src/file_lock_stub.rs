@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! File advisory lock stub.
@@ -176,7 +176,7 @@ mod tests {
     fn test_get_lock() {
         let mut m = new_lock_manager();
         try_exclusive(&mut m, "/x", 42);
-        let rec = m.get_lock("/x").unwrap();
+        let rec = m.get_lock("/x").expect("should succeed");
         assert_eq!(rec.owner_id, 42);
     }
 

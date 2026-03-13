@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Infinite plane collision body and response.
 
@@ -162,7 +162,7 @@ mod tests {
         let p = ground();
         let contact = sphere_plane_contact(&p, [0.0, 0.5, 0.0], 1.0);
         assert!(contact.is_some());
-        let depth = contact.unwrap();
+        let depth = contact.expect("should succeed");
         assert!((depth - 0.5).abs() < 1e-5);
     }
 

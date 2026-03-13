@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Server-Sent Events export stub — formats mesh/animation data as SSE event streams.

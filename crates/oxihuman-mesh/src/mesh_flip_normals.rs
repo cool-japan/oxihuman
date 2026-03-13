@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Flip face normals.
@@ -170,7 +170,7 @@ mod tests {
         let nrm = vec![[0.0f32, 0.0, 1.0]];
         let res = flip_normals(&idx, Some(&nrm));
         assert_eq!(res.flipped_face_count, 1);
-        let n = res.normals.unwrap();
+        let n = res.normals.expect("should succeed");
         assert!(n[0][2] < 0.0);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Inverse Kinematics solvers: 2-bone analytical IK and multi-bone FABRIK.
 
@@ -394,7 +394,7 @@ mod tests {
         let joints = make_joints(&[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [1.0, 0.0, 0.0]], 0.5);
         let target = [0.6, 0.4, 0.0];
         let result = fabrik_solve(&joints, target, 30, 1e-4);
-        let end_dist = vec3_len(vec3_sub(*result.last().unwrap(), target));
+        let end_dist = vec3_len(vec3_sub(*result.last().expect("should succeed"), target));
         assert!(
             end_dist < 0.01,
             "2-segment FABRIK should reach target; dist={end_dist}"
@@ -406,7 +406,7 @@ mod tests {
         let joints = make_joints(&[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]], 1.0);
         let target = [1.5, 0.5, 0.0];
         let result = fabrik_solve(&joints, target, 20, 1e-4);
-        let end_dist = vec3_len(vec3_sub(*result.last().unwrap(), target));
+        let end_dist = vec3_len(vec3_sub(*result.last().expect("should succeed"), target));
         assert!(
             end_dist < 0.01,
             "3-joint FABRIK should reach target; dist={end_dist}"
@@ -420,7 +420,7 @@ mod tests {
         let target = [100.0, 0.0, 0.0];
         let result = fabrik_solve(&joints, target, 10, 1e-4);
         // End effector should be stretched toward target at total length
-        let end = result.last().unwrap();
+        let end = result.last().expect("should succeed");
         let d_from_root = vec3_len(vec3_sub(*end, result[0]));
         assert!(
             (d_from_root - 2.0).abs() < EPS,

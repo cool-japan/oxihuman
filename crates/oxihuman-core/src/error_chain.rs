@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Error cause chain tracking.
 
@@ -114,7 +114,7 @@ mod tests {
         ec_push(&mut chain, new_chained_error("err", 99));
         let popped = ec_pop(&mut chain);
         assert!(popped.is_some());
-        assert_eq!(popped.unwrap().code, 99);
+        assert_eq!(popped.expect("should succeed").code, 99);
         assert!(ec_is_empty(&chain));
     }
 
@@ -123,7 +123,7 @@ mod tests {
         let mut chain = new_error_chain();
         ec_push(&mut chain, new_chained_error("first", 1));
         ec_push(&mut chain, new_chained_error("last", 2));
-        assert_eq!(ec_last(&chain).unwrap().code, 2);
+        assert_eq!(ec_last(&chain).expect("should succeed").code, 2);
     }
 
     #[test]

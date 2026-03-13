@@ -2,7 +2,7 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 95 passing | **API:** 68 WasmEngine methods | **Version:** 0.1.0 | **Updated:** 2026-03-11
+**Status:** Stable | **Tests:** 168 passing | **API:** 68 WasmEngine methods | **Version:** 0.1.1 | **Updated:** 2026-03-13
 
 WebAssembly bindings for OxiHuman — full browser-ready API via wasm-bindgen. A single `WasmEngine` struct exposes the entire OxiHuman pipeline to JavaScript/TypeScript, enabling privacy-preserving, client-side human body generation with no server round-trips.
 
@@ -24,7 +24,7 @@ The `wasm` feature is optional. Enable it when targeting browser/Node.js environ
 
 ```toml
 [dependencies]
-oxihuman-wasm = { version = "0.1.0", features = ["wasm"] }
+oxihuman-wasm = { version = "0.1.1", features = ["wasm"] }
 ```
 
 ---
@@ -221,6 +221,19 @@ console.log(measurements);
 - `WasmEngine` is `!Send` and single-threaded by design. For parallel workloads, use multiple instances in separate Web Workers.
 - Physics methods (`step_physics`, `set_wind`) and `get_cloth_state` are currently stubs returning placeholder data; full simulation is implemented in `oxihuman-physics`.
 - The `wasm` feature gate keeps native builds free of wasm-bindgen overhead, allowing the crate to be used in test harnesses and CLI pipelines without a browser target.
+
+### v0.1.1 Internal Refactor
+
+`engine.rs` is now a thin re-export module (7 lines). The implementation has been split into four focused source files with no public API changes:
+
+| File | Contents |
+|------|----------|
+| `engine_core.rs` | `WasmEngine`, `ParticleSystem`, `Particle` struct definitions and initialization |
+| `engine_anim.rs` | Animation recording, playback, and frame management methods |
+| `engine_targets.rs` | Morph target loading, unloading, and weight management methods |
+| `engine_io.rs` | JSON import/export, mesh building, physics, query, and preset methods |
+
+Tests were moved to `wasm_tests.rs`. All public `#[wasm_bindgen]` method signatures are unchanged.
 
 ---
 

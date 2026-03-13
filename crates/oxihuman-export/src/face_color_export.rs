@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export per-face color data (RGBA).
@@ -131,7 +131,7 @@ mod tests {
     fn test_set_get_face_color() {
         let mut e = new_face_color_export(2, FaceColor::white());
         set_face_color(&mut e, 0, FaceColor::black());
-        let c = get_face_color(&e, 0).unwrap();
+        let c = get_face_color(&e, 0).expect("should succeed");
         assert!((c.r - 0.0).abs() < 1e-6);
     }
 
@@ -163,7 +163,7 @@ mod tests {
     #[test]
     fn test_average_color_white() {
         let e = new_face_color_export(4, FaceColor::white());
-        let avg = average_color(&e).unwrap();
+        let avg = average_color(&e).expect("should succeed");
         assert!((avg.r - 1.0).abs() < 1e-6);
     }
 

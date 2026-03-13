@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! PAD (Pleasure-Arousal-Dominance) emotion space mapping to facial expression weights.
 //!
@@ -660,7 +660,7 @@ mod tests {
         let space = EmotionSpace::default_space();
         let near = space.nearest_anchor(&PadPoint::happy());
         assert!(near.is_some());
-        assert_eq!(near.unwrap().name, "happy");
+        assert_eq!(near.expect("should succeed").name, "happy");
         write_tmp("test_nearest_anchor.txt", "ok");
     }
 

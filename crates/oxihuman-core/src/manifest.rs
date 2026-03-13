@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -60,7 +60,7 @@ mod tests {
             "/media/kitasan/Backup/oxihuman/assets/alpha_pack/oxihuman_assets.toml",
         );
         if path.exists() {
-            let m = AssetManifest::load(path).unwrap();
+            let m = AssetManifest::load(path).expect("should succeed");
             assert_eq!(m.version, "0.1.0");
             assert!(!m.allowed_targets.is_empty());
         }

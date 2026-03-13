@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! CommandBuffer — GPU command buffer abstraction (stub).
 
@@ -113,7 +113,7 @@ mod tests {
     fn test_command_at() {
         let mut buf = new_command_buffer();
         push_command(&mut buf, RenderCommand::Draw { vertex_count: 42 });
-        let cmd = command_at(&buf, 0).unwrap();
+        let cmd = command_at(&buf, 0).expect("should succeed");
         assert_eq!(cmd, &RenderCommand::Draw { vertex_count: 42 });
     }
 

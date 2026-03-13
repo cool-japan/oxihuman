@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Named camera viewpoint bookmarks (save/restore camera state).
 
@@ -168,7 +168,7 @@ mod tests {
         let mut store = new_bookmark_store(default_viewport_bookmark_config());
         let cam = default_cam();
         bookmark_save(&mut store, "front", cam.clone());
-        let restored = bookmark_restore(&store, "front").unwrap();
+        let restored = bookmark_restore(&store, "front").expect("should succeed");
         assert_eq!(restored, cam);
     }
 
@@ -180,7 +180,7 @@ mod tests {
         cam2.fov_deg = 90.0;
         bookmark_save(&mut store, "top", cam2.clone());
         assert_eq!(bookmark_count(&store), 1);
-        let r = bookmark_restore(&store, "top").unwrap();
+        let r = bookmark_restore(&store, "top").expect("should succeed");
         assert!((r.fov_deg - 90.0).abs() < 1e-5);
     }
 

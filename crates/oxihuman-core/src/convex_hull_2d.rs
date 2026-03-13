@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! 2D convex hull computation using the Graham scan algorithm.
 
@@ -210,7 +210,7 @@ mod tests {
     #[test]
     fn test_hull_centroid() {
         let hull = vec![[0.0f32, 0.0], [2.0, 0.0], [2.0, 2.0], [0.0, 2.0]];
-        let c = hull_centroid(&hull).unwrap();
+        let c = hull_centroid(&hull).expect("should succeed");
         assert!((c[0] - 1.0).abs() < 0.01);
         assert!((c[1] - 1.0).abs() < 0.01);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Body hair density and length parameters.
@@ -162,7 +162,7 @@ mod tests {
             .entries
             .iter()
             .find(|e| e.region == BodyHairRegion::Chest)
-            .unwrap();
+            .expect("should succeed");
         assert!((e.density - 1.0).abs() < 1e-6);
     }
 
@@ -174,7 +174,7 @@ mod tests {
             .entries
             .iter()
             .find(|e| e.region == BodyHairRegion::Arms)
-            .unwrap();
+            .expect("should succeed");
         assert!((e.length - 0.6).abs() < 1e-5);
     }
 

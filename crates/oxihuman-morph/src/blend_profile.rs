@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use crate::params::ParamState;
 use std::collections::HashMap;
@@ -391,7 +391,7 @@ mod tests {
         profile.add_entry("smile", 0.8);
         lib.add(profile);
         assert_eq!(lib.len(), 1);
-        let retrieved = lib.get("happy").unwrap();
+        let retrieved = lib.get("happy").expect("should succeed");
         assert_eq!(retrieved.name, "happy");
         assert!((retrieved.get_weight("smile") - 0.8).abs() < 1e-6);
         let removed = lib.remove("happy");

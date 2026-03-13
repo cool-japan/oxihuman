@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Streaming mesh export pipeline — write large meshes in chunks without
 //! holding everything in memory.
@@ -277,7 +277,7 @@ mod tests {
     fn encode_chunk_csv_correct_line_count() {
         let positions = sample_positions(7);
         let csv_bytes = encode_chunk_csv(&positions);
-        let text = std::str::from_utf8(&csv_bytes).unwrap();
+        let text = std::str::from_utf8(&csv_bytes).expect("should succeed");
         let line_count = text.lines().count();
         assert_eq!(line_count, 7);
     }

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Compass rose orientation indicator (N/S/E/W).
@@ -177,7 +177,7 @@ mod tests {
     fn test_north_direction_at_zero() {
         let c = CompassRoseConfig::default();
         let pts = generate_compass_points(&c);
-        let north = pts.iter().find(|p| p.label == "N").unwrap();
+        let north = pts.iter().find(|p| p.label == "N").expect("should succeed");
         assert!(north.direction[0].abs() < 1e-5);
         assert!((north.direction[1] - 1.0).abs() < 1e-5);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Facial Action Coding System (FACS) implementation.
 //!
@@ -637,28 +637,40 @@ mod tests {
     #[test]
     fn test_facs_intensity_from_letter() {
         assert_eq!(
-            FacsIntensity::from_letter('A').unwrap().to_normalized(),
+            FacsIntensity::from_letter('A')
+                .expect("should succeed")
+                .to_normalized(),
             0.10
         );
         assert_eq!(
-            FacsIntensity::from_letter('B').unwrap().to_normalized(),
+            FacsIntensity::from_letter('B')
+                .expect("should succeed")
+                .to_normalized(),
             0.30
         );
         assert_eq!(
-            FacsIntensity::from_letter('C').unwrap().to_normalized(),
+            FacsIntensity::from_letter('C')
+                .expect("should succeed")
+                .to_normalized(),
             0.50
         );
         assert_eq!(
-            FacsIntensity::from_letter('D').unwrap().to_normalized(),
+            FacsIntensity::from_letter('D')
+                .expect("should succeed")
+                .to_normalized(),
             0.75
         );
         assert_eq!(
-            FacsIntensity::from_letter('E').unwrap().to_normalized(),
+            FacsIntensity::from_letter('E')
+                .expect("should succeed")
+                .to_normalized(),
             1.00
         );
         // Lowercase should work too
         assert_eq!(
-            FacsIntensity::from_letter('e').unwrap().to_normalized(),
+            FacsIntensity::from_letter('e')
+                .expect("should succeed")
+                .to_normalized(),
             1.00
         );
         // Unknown letter

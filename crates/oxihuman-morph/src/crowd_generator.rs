@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
@@ -873,7 +873,7 @@ mod tests {
         let list = crowd.to_param_list();
         assert_eq!(list.len(), crowd.count());
         for (i, ch) in crowd.characters.iter().enumerate() {
-            let from_get = crowd.get(ch.id).unwrap();
+            let from_get = crowd.get(ch.id).expect("should succeed");
             // Params from get() and from to_param_list() should match
             for (k, v) in &from_get.params {
                 let lv = list[i][k];
@@ -901,8 +901,8 @@ mod tests {
         );
         // Write to /tmp/ for inspection
         let path = "/tmp/oxihuman_crowd_summary.txt";
-        let mut f = std::fs::File::create(path).unwrap();
-        f.write_all(s.as_bytes()).unwrap();
+        let mut f = std::fs::File::create(path).expect("should succeed");
+        f.write_all(s.as_bytes()).expect("should succeed");
     }
 
     // -----------------------------------------------------------------------
@@ -999,8 +999,8 @@ mod tests {
         let crowd = generate_crowd_halton(cfg);
         let list = crowd.to_param_list();
         let path = "/tmp/oxihuman_halton_crowd.csv";
-        let mut f = std::fs::File::create(path).unwrap();
-        writeln!(f, "id,height,weight,age,muscle").unwrap();
+        let mut f = std::fs::File::create(path).expect("should succeed");
+        writeln!(f, "id,height,weight,age,muscle").expect("should succeed");
         for (i, p) in list.iter().enumerate() {
             writeln!(
                 f,
@@ -1011,7 +1011,7 @@ mod tests {
                 p.get("age").copied().unwrap_or(0.0),
                 p.get("muscle").copied().unwrap_or(0.0),
             )
-            .unwrap();
+            .expect("should succeed");
         }
     }
 

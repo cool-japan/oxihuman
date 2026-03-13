@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Axis-aligned bounding box for a physics body.
@@ -219,7 +219,7 @@ mod tests {
     #[test]
     fn test_from_points() {
         let pts = [[1.0, 2.0, 3.0], [-1.0, 0.0, 5.0]];
-        let aabb = BodyAabb::from_points(&pts).unwrap();
+        let aabb = BodyAabb::from_points(&pts).expect("should succeed");
         assert_eq!(aabb.min, [-1.0, 0.0, 3.0]);
         assert_eq!(aabb.max, [1.0, 2.0, 5.0]);
     }

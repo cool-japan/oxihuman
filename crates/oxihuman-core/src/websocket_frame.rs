@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! WebSocket frame encode/decode stub (RFC 6455).
@@ -171,7 +171,7 @@ mod tests {
         let f = text_frame("hello");
         let mut buf = vec![];
         encode_frame(&f, &mut buf);
-        let decoded = decode_frame(&buf).unwrap();
+        let decoded = decode_frame(&buf).expect("should succeed");
         assert_eq!(decoded.opcode, WsOpcode::Text);
         assert_eq!(decoded.payload, b"hello");
     }
@@ -231,7 +231,7 @@ mod tests {
         let f = text_frame("x");
         let mut buf = vec![];
         encode_frame(&f, &mut buf);
-        let d = decode_frame(&buf).unwrap();
+        let d = decode_frame(&buf).expect("should succeed");
         assert!(d.fin);
     }
 
@@ -247,7 +247,7 @@ mod tests {
         };
         let mut buf = vec![];
         encode_frame(&f, &mut buf);
-        let d = decode_frame(&buf).unwrap();
+        let d = decode_frame(&buf).expect("should succeed");
         assert_eq!(d.opcode, WsOpcode::Binary);
     }
 }

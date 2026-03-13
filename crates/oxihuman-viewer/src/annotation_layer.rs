@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Annotation layer management for viewport markups.
 //!
@@ -396,7 +396,7 @@ mod tests {
     fn test_annotation_bounding_box_single() {
         let mut layer = make_layer();
         add_annotation(&mut layer, make_text_annotation(10.0, 20.0));
-        let bbox = annotation_bounding_box(&layer).unwrap();
+        let bbox = annotation_bounding_box(&layer).expect("should succeed");
         assert_eq!(bbox[0], 10.0);
         assert_eq!(bbox[1], 20.0);
         assert_eq!(bbox[2], 10.0);
@@ -408,7 +408,7 @@ mod tests {
         let mut layer = make_layer();
         add_annotation(&mut layer, make_text_annotation(0.0, 0.0));
         add_annotation(&mut layer, make_text_annotation(100.0, 200.0));
-        let bbox = annotation_bounding_box(&layer).unwrap();
+        let bbox = annotation_bounding_box(&layer).expect("should succeed");
         assert_eq!(bbox[0], 0.0);
         assert_eq!(bbox[1], 0.0);
         assert_eq!(bbox[2], 100.0);
@@ -420,7 +420,7 @@ mod tests {
         let mut layer = make_layer();
         let id = add_annotation(&mut layer, make_text_annotation(10.0, 20.0));
         assert!(move_annotation(&mut layer, id, [5.0, -5.0]).is_ok());
-        let a = layer.annotations.iter().find(|a| a.id == id).unwrap();
+        let a = layer.annotations.iter().find(|a| a.id == id).expect("should succeed");
         assert!((a.position[0] - 15.0).abs() < 1e-5);
         assert!((a.position[1] - 15.0).abs() < 1e-5);
     }
@@ -451,8 +451,8 @@ mod tests {
     fn test_move_annotation_also_moves_end_point() {
         let mut layer = make_layer();
         let id = add_annotation(&mut layer, make_arrow_annotation());
-        move_annotation(&mut layer, id, [10.0, 10.0]).unwrap();
-        let a = layer.annotations.iter().find(|a| a.id == id).unwrap();
+        move_annotation(&mut layer, id, [10.0, 10.0]).expect("should succeed");
+        let a = layer.annotations.iter().find(|a| a.id == id).expect("should succeed");
         if let Some(ep) = a.end_point {
             assert!((ep[0] - 110.0).abs() < 1e-5);
             assert!((ep[1] - 110.0).abs() < 1e-5);

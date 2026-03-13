@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Ray casting utilities.
 
@@ -118,7 +118,7 @@ mod tests {
         let r = new_ray([0.0, 0.0, -5.0], [0.0, 0.0, 1.0]);
         let t = ray_sphere_intersect(&r, [0.0, 0.0, 0.0], 1.0);
         assert!(t.is_some());
-        assert!((t.unwrap() - 4.0).abs() < 1e-5);
+        assert!((t.expect("should succeed") - 4.0).abs() < 1e-5);
     }
 
     #[test]
@@ -133,7 +133,7 @@ mod tests {
         let r = new_ray([0.0, 0.0, 5.0], [0.0, 0.0, -1.0]);
         let t = ray_plane_intersect(&r, [0.0, 0.0, 1.0], 0.0);
         assert!(t.is_some());
-        assert!((t.unwrap() - 5.0).abs() < 1e-5);
+        assert!((t.expect("should succeed") - 5.0).abs() < 1e-5);
     }
 
     #[test]

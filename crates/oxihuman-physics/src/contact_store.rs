@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A stored contact point for persistent contact tracking.
@@ -187,7 +187,7 @@ mod tests {
         let mut store = ContactStore::new(10);
         store.add(make_contact(0, 1, 0.1));
         store.add(StoredContact::new(2, 3, [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], 0.5));
-        let deepest = store.deepest_contact().unwrap();
+        let deepest = store.deepest_contact().expect("should succeed");
         assert!((deepest.depth - 0.5).abs() < f32::EPSILON);
     }
 

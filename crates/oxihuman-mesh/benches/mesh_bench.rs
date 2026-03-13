@@ -1,7 +1,7 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
-use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion};
+use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 use oxihuman_mesh::curvature::compute_curvature;
 use oxihuman_mesh::decimate::decimate_ratio;
 use oxihuman_mesh::lod::{generate_lod, LodLevel};
@@ -9,6 +9,7 @@ use oxihuman_mesh::mesh::MeshBuffers;
 use oxihuman_mesh::normals::{compute_normals, compute_tangents};
 use oxihuman_mesh::weld::weld_by_position;
 use oxihuman_morph::engine::MeshBuffers as MB;
+use std::hint::black_box;
 
 // ── mesh factories ─────────────────────────────────────────────────────────
 

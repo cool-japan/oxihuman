@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! ExpressionIO — serialise / deserialise expression presets.
 
@@ -133,7 +133,7 @@ mod tests {
     fn test_expression_from_json_roundtrip_name() {
         let s = make_save();
         let j = expression_to_json(&s);
-        let loaded = expression_from_json(&j).unwrap();
+        let loaded = expression_from_json(&j).expect("should succeed");
         assert_eq!(loaded.name, "smile");
     }
 
@@ -141,7 +141,7 @@ mod tests {
     fn test_expression_from_json_roundtrip_version() {
         let s = make_save();
         let j = expression_to_json(&s);
-        let loaded = expression_from_json(&j).unwrap();
+        let loaded = expression_from_json(&j).expect("should succeed");
         assert_eq!(loaded.version, 1);
     }
 
@@ -149,7 +149,7 @@ mod tests {
     fn test_save_load_stub_roundtrip() {
         let s = make_save();
         let bytes = save_expression_stub(&s);
-        let loaded = load_expression_stub(&bytes).unwrap();
+        let loaded = load_expression_stub(&bytes).expect("should succeed");
         assert_eq!(loaded.name, "smile");
     }
 
@@ -169,7 +169,7 @@ mod tests {
     fn test_expression_name_from_json() {
         let s = make_save();
         let j = expression_to_json(&s);
-        assert_eq!(expression_name_from_json(&j).unwrap(), "smile");
+        assert_eq!(expression_name_from_json(&j).expect("should succeed"), "smile");
     }
 
     #[test]

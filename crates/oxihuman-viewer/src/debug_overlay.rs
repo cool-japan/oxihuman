@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Debug information overlay showing FPS, vertex count, and timing info.
 //!
@@ -251,7 +251,7 @@ mod tests {
         set_metric(&mut o, "verts", "512");
         set_metric(&mut o, "verts", "1024");
         assert_eq!(metric_count(&o), 1);
-        assert_eq!(get_metric(&o, "verts").unwrap().value, "1024");
+        assert_eq!(get_metric(&o, "verts").expect("should succeed").value, "1024");
     }
 
     #[test]

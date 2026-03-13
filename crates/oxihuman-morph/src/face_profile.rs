@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -94,7 +94,7 @@ mod tests {
     fn set_and_get_param() {
         let mut p = new_face_profile("p");
         profile_set_param(&mut p, "jaw_width", 0.5);
-        assert!((profile_get_param(&p, "jaw_width").unwrap() - 0.5).abs() < 1e-6);
+        assert!((profile_get_param(&p, "jaw_width").expect("should succeed") - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -118,7 +118,7 @@ mod tests {
         let mut b = new_face_profile("b");
         profile_set_param(&mut b, "x", 1.0);
         let c = profile_blend(&a, &b, 0.5);
-        assert!((profile_get_param(&c, "x").unwrap() - 0.5).abs() < 1e-6);
+        assert!((profile_get_param(&c, "x").expect("should succeed") - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -150,7 +150,7 @@ mod tests {
         let mut b = new_face_profile("b");
         profile_set_param(&mut b, "x", 0.8);
         let c = profile_blend(&a, &b, 0.0);
-        assert!((profile_get_param(&c, "x").unwrap() - 0.2).abs() < 1e-6);
+        assert!((profile_get_param(&c, "x").expect("should succeed") - 0.2).abs() < 1e-6);
     }
 
     #[test]
@@ -160,6 +160,6 @@ mod tests {
         let mut b = new_face_profile("b");
         profile_set_param(&mut b, "x", 0.8);
         let c = profile_blend(&a, &b, 1.0);
-        assert!((profile_get_param(&c, "x").unwrap() - 0.8).abs() < 1e-6);
+        assert!((profile_get_param(&c, "x").expect("should succeed") - 0.8).abs() < 1e-6);
     }
 }

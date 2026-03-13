@@ -72,7 +72,7 @@ mod tests {
     fn test_add_get() {
         let mut a = new_expression_atlas();
         add_atlas_expression(&mut a, "smile", &[1.0, 0.5]);
-        let w = get_atlas_expression(&a, "smile").unwrap();
+        let w = get_atlas_expression(&a, "smile").expect("should succeed");
         assert!((w[0] - 1.0).abs() < 1e-6);
     }
 
@@ -130,7 +130,7 @@ mod tests {
         add_atlas_expression(&mut a, "x", &[1.0]);
         add_atlas_expression(&mut a, "x", &[2.0]);
         assert_eq!(atlas_count(&a), 1);
-        let w = get_atlas_expression(&a, "x").unwrap();
+        let w = get_atlas_expression(&a, "x").expect("should succeed");
         assert!((w[0] - 2.0).abs() < 1e-6);
     }
 

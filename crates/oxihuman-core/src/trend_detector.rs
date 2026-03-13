@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Linear trend slope detector using least-squares regression.
@@ -94,7 +94,7 @@ mod tests {
     fn test_perfect_line() {
         let xs = vec![0.0, 1.0, 2.0, 3.0];
         let ys = vec![1.0, 3.0, 5.0, 7.0];
-        let r = linear_regression(&xs, &ys).unwrap();
+        let r = linear_regression(&xs, &ys).expect("should succeed");
         assert!((r.slope - 2.0).abs() < 1e-10 /* slope = 2 */,);
         assert!((r.intercept - 1.0).abs() < 1e-10 /* intercept = 1 */,);
         assert!((r.r_squared - 1.0).abs() < 1e-10 /* perfect fit */,);
@@ -109,14 +109,14 @@ mod tests {
     #[test]
     fn test_detect_trend_upward() {
         let ys = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-        let r = detect_trend(&ys).unwrap();
+        let r = detect_trend(&ys).expect("should succeed");
         assert!(r.is_uptrend() /* increasing series is uptrend */,);
     }
 
     #[test]
     fn test_detect_trend_downward() {
         let ys = vec![5.0, 4.0, 3.0, 2.0, 1.0];
-        let r = detect_trend(&ys).unwrap();
+        let r = detect_trend(&ys).expect("should succeed");
         assert!(r.is_downtrend() /* decreasing series is downtrend */,);
     }
 
@@ -172,7 +172,7 @@ mod tests {
     fn test_r_squared_flat() {
         /* All same values: r² should be 1 since no residuals from mean */
         let ys = vec![3.0, 3.0, 3.0, 3.0];
-        let r = detect_trend(&ys).unwrap();
+        let r = detect_trend(&ys).expect("should succeed");
         assert!((r.r_squared - 1.0).abs() < 1e-6 /* constant series */,);
     }
 }

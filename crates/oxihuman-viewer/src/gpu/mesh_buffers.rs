@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! CPU-side mesh buffer ready to be uploaded to the GPU.
 
@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn mesh_upload_buffer_is_valid_true() {
         let bytes = make_valid_buffer_bytes();
-        let buf = MeshUploadBuffer::from_raw_bytes(&bytes).unwrap();
+        let buf = MeshUploadBuffer::from_raw_bytes(&bytes).expect("should succeed");
         assert!(buf.is_valid());
     }
 
@@ -177,7 +177,7 @@ mod tests {
     #[test]
     fn mesh_upload_buffer_is_valid_out_of_range_index() {
         let bytes = make_valid_buffer_bytes();
-        let mut buf = MeshUploadBuffer::from_raw_bytes(&bytes).unwrap();
+        let mut buf = MeshUploadBuffer::from_raw_bytes(&bytes).expect("should succeed");
         buf.indices.push(999);
         assert!(!buf.is_valid());
     }

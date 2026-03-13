@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Lightweight type tag for runtime type identification.
 
@@ -124,7 +124,7 @@ mod tests {
     fn test_from_str() {
         let t = new_type_tag("Obj");
         let s = type_tag_to_string(&t);
-        let parsed = type_tag_from_str(&s).unwrap();
+        let parsed = type_tag_from_str(&s).expect("should succeed");
         assert_eq!(type_tag_name(&parsed), "Obj");
     }
 

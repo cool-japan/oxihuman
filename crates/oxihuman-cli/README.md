@@ -2,7 +2,7 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 119 passing | **Commands:** 32 subcommands | **Version:** 0.1.0 | **Updated:** 2026-03-11
+**Status:** Stable | **Tests:** 134 passing | **Commands:** 34 subcommands | **Version:** 0.1.1 | **Updated:** 2026-03-13
 
 Command-line interface for OxiHuman body generation and export. Binary: `oxihuman`
 
@@ -31,7 +31,7 @@ oxihuman batch-chars --params params.json --output-dir ./variants/
 
 ---
 
-## Subcommands — 32 Total
+## Subcommands — 34 Total
 
 ### Mesh Generation
 
@@ -46,10 +46,13 @@ oxihuman batch-chars --params params.json --output-dir ./variants/
 | Command | Description |
 |---------|-------------|
 | `pack-build` | Scan a targets directory and build a verified manifest |
+| `pack-wizard` | Interactive 7-step wizard for building an asset pack from scratch |
 | `validate` | Validate a `.target` file or pack manifest |
 | `validate-pack` | Validate a full pack manifest including all referenced targets |
 | `sign-pack` | Sign a pack directory with a signature file |
 | `verify-sign` | Verify a pack directory's signature file |
+| `pack-dist-manifest` | Generate a distribution manifest for a signed pack |
+| `pack-verify-dist` | Verify a pack against a distribution manifest |
 
 ### Information & Reporting
 
@@ -134,6 +137,20 @@ Scan a directory of `.target` files, verify checksums, and write a manifest JSON
 
 ```bash
 oxihuman pack-build ./targets/ --output manifest.json
+```
+
+### `pack-wizard`
+
+Interactive 7-step wizard for building an asset pack. Prompts for pack name, output directory, base mesh path, targets directory, format options, signing key, and a final confirmation before writing output.
+
+```bash
+oxihuman pack-wizard
+```
+
+Equivalent non-interactive usage (all prompts answered via stdin):
+
+```bash
+echo -e "my_pack\n./out\nhuman_base.obj\n./targets\n\n\nyes" | oxihuman pack-wizard
 ```
 
 ### `validate` / `validate-pack`

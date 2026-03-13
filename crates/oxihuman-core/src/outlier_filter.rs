@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! IQR-based outlier filter.
@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn test_iqr_bounds_symmetric() {
         let data: Vec<f64> = (1..=100).map(|x| x as f64).collect();
-        let (lo, hi) = iqr_bounds(&data, 1.5).unwrap();
+        let (lo, hi) = iqr_bounds(&data, 1.5).expect("should succeed");
         assert!(lo < 1.0 /* lower fence below minimum */,);
         assert!(hi > 100.0 /* upper fence above maximum */,);
     }
@@ -118,7 +118,7 @@ mod tests {
         let mut data: Vec<f64> = (1..=20).map(|x| x as f64).collect();
         data.push(1000.0);
         let flags = flag_outliers(&data, 1.5);
-        assert!(*flags.last().unwrap() /* last value flagged */,);
+        assert!(*flags.last().expect("should succeed"), /* last value flagged */);
     }
 
     #[test]
@@ -134,7 +134,7 @@ mod tests {
     fn test_winsorize_clamps() {
         let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 1000.0];
         let w = winsorize(&data, 1.5);
-        assert!(*w.last().unwrap() < 1000.0 /* outlier clamped */,);
+        assert!(*w.last().expect("should succeed") < 1000.0, /* outlier clamped */);
     }
 
     #[test]

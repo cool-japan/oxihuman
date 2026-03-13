@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Pair adjacent triangles into quads (greedy pairing).
@@ -266,6 +266,6 @@ mod tests {
         let tb = [0u32, 2, 3];
         let q = merge_tris(ta, tb, (0, 2));
         assert!(q.is_some());
-        assert_eq!(q.unwrap().len(), 4);
+        assert_eq!(q.expect("should succeed").len(), 4);
     }
 }

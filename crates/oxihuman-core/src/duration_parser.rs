@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! ISO 8601 duration string parser.
@@ -146,7 +146,7 @@ mod tests {
 
     #[test]
     fn test_parse_full() {
-        let d = parse_duration("P1Y2M3DT4H5M6S").unwrap();
+        let d = parse_duration("P1Y2M3DT4H5M6S").expect("should succeed");
         assert_eq!(d.years, 1);
         assert_eq!(d.months, 2);
         assert_eq!(d.days, 3);
@@ -157,14 +157,14 @@ mod tests {
 
     #[test]
     fn test_parse_date_only() {
-        let d = parse_duration("P10D").unwrap();
+        let d = parse_duration("P10D").expect("should succeed");
         assert_eq!(d.days, 10);
         assert_eq!(d.hours, 0);
     }
 
     #[test]
     fn test_parse_time_only() {
-        let d = parse_duration("PT30M").unwrap();
+        let d = parse_duration("PT30M").expect("should succeed");
         assert_eq!(d.minutes, 30);
     }
 
@@ -175,7 +175,7 @@ mod tests {
 
     #[test]
     fn test_approx_seconds_one_day() {
-        let d = parse_duration("P1D").unwrap();
+        let d = parse_duration("P1D").expect("should succeed");
         assert_eq!(d.approx_seconds(), 86400);
     }
 
@@ -187,16 +187,16 @@ mod tests {
 
     #[test]
     fn test_to_string_roundtrip() {
-        let d = parse_duration("P1Y3DT2H").unwrap();
+        let d = parse_duration("P1Y3DT2H").expect("should succeed");
         let s = duration_to_string(&d);
-        let d2 = parse_duration(&s).unwrap();
+        let d2 = parse_duration(&s).expect("should succeed");
         assert_eq!(d, d2);
     }
 
     #[test]
     fn test_add_durations() {
-        let a = parse_duration("P1DT1H").unwrap();
-        let b = parse_duration("P2DT2H").unwrap();
+        let a = parse_duration("P1DT1H").expect("should succeed");
+        let b = parse_duration("P2DT2H").expect("should succeed");
         let c = add_durations(&a, &b);
         assert_eq!(c.days, 3);
         assert_eq!(c.hours, 3);
@@ -204,7 +204,7 @@ mod tests {
 
     #[test]
     fn test_parse_week() {
-        let d = parse_duration("P2W").unwrap();
+        let d = parse_duration("P2W").expect("should succeed");
         assert_eq!(d.weeks, 2);
         assert_eq!(d.approx_seconds(), 2 * 7 * 86400);
     }

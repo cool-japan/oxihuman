@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Command dispatcher: name → handler index mapping.
 
@@ -78,7 +78,7 @@ mod tests {
         register_command(&mut d, "save", 42, "Save the file");
         let entry = find_command(&d, "save");
         assert!(entry.is_some());
-        assert_eq!(entry.unwrap().handler_id, 42);
+        assert_eq!(entry.expect("should succeed").handler_id, 42);
     }
 
     #[test]
@@ -107,7 +107,7 @@ mod tests {
     fn test_command_description_stored() {
         let mut d = new_dispatcher();
         register_command(&mut d, "undo", 5, "Undo last action");
-        let e = find_command(&d, "undo").unwrap();
+        let e = find_command(&d, "undo").expect("should succeed");
         assert_eq!(e.description, "Undo last action");
     }
 
@@ -116,8 +116,8 @@ mod tests {
         let mut d = new_dispatcher();
         register_command(&mut d, "x", 10, "X");
         register_command(&mut d, "y", 20, "Y");
-        assert_eq!(find_command(&d, "x").unwrap().handler_id, 10);
-        assert_eq!(find_command(&d, "y").unwrap().handler_id, 20);
+        assert_eq!(find_command(&d, "x").expect("should succeed").handler_id, 10);
+        assert_eq!(find_command(&d, "y").expect("should succeed").handler_id, 20);
     }
 
     #[test]

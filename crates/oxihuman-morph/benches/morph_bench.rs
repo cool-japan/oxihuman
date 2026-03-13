@@ -1,7 +1,7 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
-use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion};
+use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 use oxihuman_core::parser::obj::ObjMesh;
 use oxihuman_core::parser::target::Delta;
 use oxihuman_core::policy::{Policy, PolicyProfile};
@@ -9,6 +9,7 @@ use oxihuman_morph::apply::apply_target;
 use oxihuman_morph::character_dna::{decode_dna, encode_dna};
 use oxihuman_morph::engine::HumanEngine;
 use oxihuman_morph::params::ParamState;
+use std::hint::black_box;
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 

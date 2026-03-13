@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Fixed-size object pool allocator.
@@ -148,14 +148,14 @@ mod tests {
     #[test]
     fn alloc_and_get() {
         let mut pool: PoolAllocator<i32> = new_pool(4);
-        let h = pool.alloc(42).unwrap();
-        assert_eq!(*pool.get(h).unwrap(), 42);
+        let h = pool.alloc(42).expect("should succeed");
+        assert_eq!(*pool.get(h).expect("should succeed"), 42);
     }
 
     #[test]
     fn free_invalidates_handle() {
         let mut pool: PoolAllocator<i32> = new_pool(4);
-        let h = pool.alloc(10).unwrap();
+        let h = pool.alloc(10).expect("should succeed");
         assert!(pool.free(h));
         assert!(pool.get(h).is_none());
     }
@@ -163,19 +163,19 @@ mod tests {
     #[test]
     fn generation_prevents_use_after_free() {
         let mut pool: PoolAllocator<i32> = new_pool(4);
-        let h = pool.alloc(1).unwrap();
+        let h = pool.alloc(1).expect("should succeed");
         pool.free(h);
-        let h2 = pool.alloc(2).unwrap();
+        let h2 = pool.alloc(2).expect("should succeed");
         assert_eq!(h2.index, h.index);
         assert!(pool.get(h).is_none());
-        assert_eq!(*pool.get(h2).unwrap(), 2);
+        assert_eq!(*pool.get(h2).expect("should succeed"), 2);
     }
 
     #[test]
     fn live_count_tracking() {
         let mut pool: PoolAllocator<u8> = new_pool(8);
-        let h1 = pool.alloc(1).unwrap();
-        let h2 = pool.alloc(2).unwrap();
+        let h1 = pool.alloc(1).expect("should succeed");
+        let h2 = pool.alloc(2).expect("should succeed");
         assert_eq!(pool.live_count(), 2);
         pool.free(h1);
         assert_eq!(pool.live_count(), 1);
@@ -186,16 +186,16 @@ mod tests {
     #[test]
     fn capacity_exhausted() {
         let mut pool: PoolAllocator<u8> = new_pool(2);
-        pool.alloc(1).unwrap();
-        pool.alloc(2).unwrap();
+        pool.alloc(1).expect("should succeed");
+        pool.alloc(2).expect("should succeed");
         assert!(pool.alloc(3).is_none());
     }
 
     #[test]
     fn reset_restores_capacity() {
         let mut pool: PoolAllocator<u8> = new_pool(2);
-        pool.alloc(1).unwrap();
-        pool.alloc(2).unwrap();
+        pool.alloc(1).expect("should succeed");
+        pool.alloc(2).expect("should succeed");
         pool.reset();
         assert_eq!(pool.free_count(), 2);
         assert!(pool.alloc(3).is_some());
@@ -204,16 +204,16 @@ mod tests {
     #[test]
     fn get_mut_modifies_value() {
         let mut pool: PoolAllocator<i32> = new_pool(4);
-        let h = pool.alloc(10).unwrap();
-        *pool.get_mut(h).unwrap() = 99;
-        assert_eq!(*pool.get(h).unwrap(), 99);
+        let h = pool.alloc(10).expect("should succeed");
+        *pool.get_mut(h).expect("should succeed") = 99;
+        assert_eq!(*pool.get(h).expect("should succeed"), 99);
     }
 
     #[test]
     fn iter_live_items() {
         let mut pool: PoolAllocator<i32> = new_pool(4);
-        let h1 = pool.alloc(1).unwrap();
-        let _h2 = pool.alloc(2).unwrap();
+        let h1 = pool.alloc(1).expect("should succeed");
+        let _h2 = pool.alloc(2).expect("should succeed");
         pool.free(h1);
         let vals: Vec<i32> = pool.iter().map(|(_, v)| *v).collect();
         assert_eq!(vals, vec![2]);
@@ -222,7 +222,7 @@ mod tests {
     #[test]
     fn is_valid_check() {
         let mut pool: PoolAllocator<i32> = new_pool(4);
-        let h = pool.alloc(5).unwrap();
+        let h = pool.alloc(5).expect("should succeed");
         assert!(pool.is_valid(h));
         pool.free(h);
         assert!(!pool.is_valid(h));

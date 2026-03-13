@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
@@ -688,10 +688,10 @@ mod tests {
         let result = tex.save_ppm(path);
         assert!(result.is_ok(), "save_ppm failed: {:?}", result.err());
         // Verify file exists and has non-zero size
-        let meta = std::fs::metadata(path).unwrap();
+        let meta = std::fs::metadata(path).expect("should succeed");
         assert!(meta.len() > 0);
         // Verify PPM header by reading first bytes
-        let data = std::fs::read(path).unwrap();
+        let data = std::fs::read(path).expect("should succeed");
         assert_eq!(&data[0..2], b"P6");
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Flex/bend sensor model.
@@ -196,7 +196,7 @@ mod tests {
                 resistance_ohm: cfg.resistance_max_ohm,
             },
         ];
-        let m = max_bend_sample(&samples, &cfg).unwrap();
+        let m = max_bend_sample(&samples, &cfg).expect("should succeed");
         assert_eq!(m.time, 0.1);
     }
 
@@ -220,6 +220,6 @@ mod tests {
             time: 0.5,
             resistance_ohm: 50_000.0,
         });
-        assert_eq!(s.latest().unwrap().time, 0.5);
+        assert_eq!(s.latest().expect("should succeed").time, 0.5);
     }
 }

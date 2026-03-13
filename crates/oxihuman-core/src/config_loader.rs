@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A single key-value configuration entry.
@@ -157,7 +157,7 @@ mod tests {
     #[test]
     fn get_float_parses_correctly() {
         let cfg = load_config("ratio=0.5");
-        let v = config_get_float(&cfg, "ratio").unwrap();
+        let v = config_get_float(&cfg, "ratio").expect("should succeed");
         assert!((v - 0.5).abs() < 1e-9);
     }
 

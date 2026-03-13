@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Mesh sequence (vertex animation cache) export.
@@ -140,7 +140,7 @@ mod tests {
     fn test_get_frame() {
         let mut e = new_mesh_sequence(1);
         add_frame(&mut e, 0.0, &[[5.0, 0.0, 0.0]]);
-        let p = get_frame_positions(&e, 0).unwrap();
+        let p = get_frame_positions(&e, 0).expect("should succeed");
         assert!((p[0][0] - 5.0).abs() < 1e-6);
     }
     #[test]

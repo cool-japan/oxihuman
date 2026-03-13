@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Curve keyframe export: animation curves with Bezier control points.
@@ -178,7 +178,7 @@ mod tests {
         let mut c = new_curve_key_export("t");
         add_linear_key(&mut c, 0.0, 0.0);
         add_linear_key(&mut c, 2.0, 2.0);
-        assert!((evaluate_curve_key(&c, 1.0).unwrap() - 1.0).abs() < 1e-5);
+        assert!((evaluate_curve_key(&c, 1.0).expect("should succeed") - 1.0).abs() < 1e-5);
     }
 
     #[test]
@@ -212,7 +212,7 @@ mod tests {
     fn test_evaluate_at_boundary() {
         let mut c = new_curve_key_export("t");
         add_linear_key(&mut c, 1.0, 5.0);
-        assert!((evaluate_curve_key(&c, 0.0).unwrap() - 5.0).abs() < 1e-5);
-        assert!((evaluate_curve_key(&c, 2.0).unwrap() - 5.0).abs() < 1e-5);
+        assert!((evaluate_curve_key(&c, 0.0).expect("should succeed") - 5.0).abs() < 1e-5);
+        assert!((evaluate_curve_key(&c, 2.0).expect("should succeed") - 5.0).abs() < 1e-5);
     }
 }

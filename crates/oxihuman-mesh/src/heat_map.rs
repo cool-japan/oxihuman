@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -486,7 +486,7 @@ mod tests {
         let mut mesh = make_mesh(3);
         assert!(mesh.colors.is_none());
         hm.apply_to_mesh(&mut mesh);
-        let colors = mesh.colors.as_ref().unwrap();
+        let colors = mesh.colors.as_ref().expect("should succeed");
         assert_eq!(colors.len(), 3);
         assert!((colors[0][3] - 1.0).abs() < 1e-5);
     }

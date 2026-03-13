@@ -115,7 +115,7 @@ mod tests {
     fn test_light_at() {
         let mut lm = new_light_manager();
         add_managed_light(&mut lm, "key", [1.0, 0.9, 0.8], 2.0, [1.0, 2.0, 3.0]);
-        let l = light_at(&lm, 0).unwrap();
+        let l = light_at(&lm, 0).expect("should succeed");
         assert_eq!(l.name, "key");
     }
 
@@ -124,7 +124,7 @@ mod tests {
         let mut lm = new_light_manager();
         add_managed_light(&mut lm, "fill", [1.0, 1.0, 1.0], 0.5, [0.0, 0.0, 0.0]);
         assert!(update_light(&mut lm, "fill", 2.0));
-        assert!((light_at(&lm, 0).unwrap().intensity - 2.0).abs() < 1e-6);
+        assert!((light_at(&lm, 0).expect("should succeed").intensity - 2.0).abs() < 1e-6);
     }
 
     #[test]

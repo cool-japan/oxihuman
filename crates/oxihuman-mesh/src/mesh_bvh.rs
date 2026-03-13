@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Bounding Volume Hierarchy (BVH) for ray/point queries over triangle meshes.
 
@@ -309,14 +309,14 @@ mod tests {
     #[test]
     fn test_node_count_at_least_one() {
         let (pos, idx) = two_tri_mesh();
-        let bvh = build_bvh(&pos, &idx, 1).unwrap();
+        let bvh = build_bvh(&pos, &idx, 1).expect("should succeed");
         assert!(bvh.node_count() >= 1);
     }
 
     #[test]
     fn test_triangle_count_matches() {
         let (pos, idx) = two_tri_mesh();
-        let bvh = build_bvh(&pos, &idx, 1).unwrap();
+        let bvh = build_bvh(&pos, &idx, 1).expect("should succeed");
         assert_eq!(bvh_triangle_count(&bvh), 2);
     }
 
@@ -360,7 +360,7 @@ mod tests {
     #[test]
     fn test_bvh_to_json() {
         let (pos, idx) = two_tri_mesh();
-        let bvh = build_bvh(&pos, &idx, 1).unwrap();
+        let bvh = build_bvh(&pos, &idx, 1).expect("should succeed");
         let json = bvh_to_json(&bvh);
         assert!(json.contains("triangles"));
     }
@@ -368,7 +368,7 @@ mod tests {
     #[test]
     fn test_leaf_count_ge_one() {
         let (pos, idx) = two_tri_mesh();
-        let bvh = build_bvh(&pos, &idx, 1).unwrap();
+        let bvh = build_bvh(&pos, &idx, 1).expect("should succeed");
         assert!(bvh.leaf_count() >= 1);
     }
 }

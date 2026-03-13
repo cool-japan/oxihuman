@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! HTTP cookie store — stores, retrieves, and expires cookies.
@@ -142,7 +142,7 @@ mod tests {
         set_cookie(&mut jar, make_cookie("sid", "abc", None, 0));
         let c = get_cookie(&jar, "sid", None, 0);
         assert!(c.is_some());
-        assert_eq!(c.unwrap().value, "abc");
+        assert_eq!(c.expect("should succeed").value, "abc");
     }
 
     #[test]
@@ -151,7 +151,12 @@ mod tests {
         set_cookie(&mut jar, make_cookie("sid", "v1", None, 0));
         set_cookie(&mut jar, make_cookie("sid", "v2", None, 0));
         assert_eq!(jar_size(&jar), 1);
-        assert_eq!(get_cookie(&jar, "sid", None, 0).unwrap().value, "v2");
+        assert_eq!(
+            get_cookie(&jar, "sid", None, 0)
+                .expect("should succeed")
+                .value,
+            "v2"
+        );
     }
 
     #[test]

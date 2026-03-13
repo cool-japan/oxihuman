@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Streaming mesh decode benchmarks and LitePack compression benchmarks
 //! for the `oxihuman-wasm` crate.
@@ -9,12 +9,13 @@
 //! cargo bench -p oxihuman-wasm
 //! ```
 
-use criterion::{black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
 use oxihuman_mesh::mesh::MeshBuffers;
 use oxihuman_morph::engine::MeshBuffers as MB;
 use oxihuman_wasm::buffer::parse_mesh_bytes_header;
 use oxihuman_wasm::compressed_target::LitePack;
 use oxihuman_wasm::engine::WasmEngine;
+use std::hint::black_box;
 
 // ---------------------------------------------------------------------------
 // Minimal synthetic OBJ that parses correctly at any vertex count

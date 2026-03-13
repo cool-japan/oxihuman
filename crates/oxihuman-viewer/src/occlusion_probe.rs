@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Occlusion probe — directional ambient occlusion probe sampling.
@@ -151,7 +151,7 @@ mod tests {
         let mut set = OcclusionProbeSet::default();
         ops_add(&mut set, new_occlusion_probe([0.0, 0.0, 0.0]));
         ops_add(&mut set, new_occlusion_probe([10.0, 0.0, 0.0]));
-        let nearest = ops_nearest_probe(&set, [0.5, 0.0, 0.0]).unwrap();
+        let nearest = ops_nearest_probe(&set, [0.5, 0.0, 0.0]).expect("should succeed");
         assert!((nearest.position[0]).abs() < 1e-6);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! WebGL/browser-optimized JSON mesh export.
 //!
@@ -911,7 +911,7 @@ mod tests {
         let manifest = web_bundle_to_manifest(&bundle);
         let found = web_manifest_find_asset(&manifest, "scene.json");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().size_bytes, 128);
+        assert_eq!(found.expect("should succeed").size_bytes, 128);
     }
 
     #[test]

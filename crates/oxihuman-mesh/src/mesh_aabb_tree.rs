@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! AABB tree (bounding volume hierarchy) for accelerated ray-triangle
 //! intersection queries on triangle meshes.
@@ -498,7 +498,7 @@ mod tests {
         let (verts, indices) = unit_quad_mesh();
         let cfg = default_aabb_tree_config();
         let tree = build_aabb_tree(&verts, &indices, cfg);
-        let b = aabb_tree_aabb(&tree).unwrap();
+        let b = aabb_tree_aabb(&tree).expect("should succeed");
         assert!(b.min[0] <= 0.0 && b.max[0] >= 1.0);
         assert!(b.min[1] <= 0.0 && b.max[1] >= 1.0);
     }
@@ -512,7 +512,7 @@ mod tests {
         let dir = [0.0, 0.0, -1.0];
         let hit = aabb_tree_ray_cast(&tree, &verts, &indices, origin, dir);
         assert!(hit.is_some(), "expected a hit");
-        let (_, t) = hit.unwrap();
+        let (_, t) = hit.expect("should succeed");
         assert!((t - 1.0).abs() < 1e-4);
     }
 
@@ -564,7 +564,7 @@ mod tests {
         let query = [0.5, 0.5, 2.0];
         let result = aabb_tree_closest_point(&tree, &verts, &indices, query);
         assert!(result.is_some());
-        let (_, cp, dist) = result.unwrap();
+        let (_, cp, dist) = result.expect("should succeed");
         // Closest point should be directly below at z=0.
         assert!((cp[2]).abs() < 1e-4);
         assert!((dist - 2.0).abs() < 1e-4);

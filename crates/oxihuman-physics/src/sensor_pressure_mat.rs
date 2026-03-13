@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Pressure mat grid sensor model.
@@ -187,7 +187,7 @@ mod tests {
             sample_rate_hz: 1.0,
         };
         let f = make_frame(2, 2, 1.0);
-        let cop = centre_of_pressure(&f, &cfg).unwrap();
+        let cop = centre_of_pressure(&f, &cfg).expect("should succeed");
         assert!((cop[0] - 0.5).abs() < 0.01);
     }
 
@@ -252,6 +252,6 @@ mod tests {
             time: 1.5,
             cells: vec![0.0],
         });
-        assert_eq!(s.latest().unwrap().time, 1.5);
+        assert_eq!(s.latest().expect("should succeed").time, 1.5);
     }
 }

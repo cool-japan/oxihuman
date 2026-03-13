@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Constraint types for XPBD cloth simulation.
 //!
@@ -650,7 +650,7 @@ mod tests {
     fn test_distance_constraint_at_rest() {
         let (mut positions, _) = make_quad();
         let inv_masses = vec![1.0; 4];
-        let mut c = DistanceConstraint::from_positions(0, 1, &positions).unwrap();
+        let mut c = DistanceConstraint::from_positions(0, 1, &positions).expect("should succeed");
 
         let error = c.project(&mut positions, &inv_masses, 0.0, 1.0 / 60.0);
         assert!(error < 1e-10, "At rest, error should be ~0");
@@ -690,7 +690,7 @@ mod tests {
     fn test_area_constraint_at_rest() {
         let (mut positions, _) = make_quad();
         let inv_masses = vec![1.0; 4];
-        let mut c = AreaConservationConstraint::from_positions(0, 1, 2, &positions).unwrap();
+        let mut c = AreaConservationConstraint::from_positions(0, 1, 2, &positions).expect("should succeed");
 
         let error = c.project(&mut positions, &inv_masses, 0.0, 1.0 / 60.0);
         assert!(error < 1e-10, "At rest, area error should be ~0");

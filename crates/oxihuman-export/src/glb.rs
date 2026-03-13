@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{bail, Result};
 use bytemuck::cast_slice;
@@ -268,11 +268,11 @@ mod tests {
     fn glb_header_magic() {
         let mesh = suited_mesh();
         let path = std::path::PathBuf::from("/tmp/test_magic.glb");
-        export_glb(&mesh, &path).unwrap();
+        export_glb(&mesh, &path).expect("should succeed");
         // Read raw bytes
-        let bytes = std::fs::read(&path).unwrap();
+        let bytes = std::fs::read(&path).expect("should succeed");
         assert!(bytes.len() >= 12, "GLB too short");
-        let magic = u32::from_le_bytes(bytes[0..4].try_into().unwrap());
+        let magic = u32::from_le_bytes(bytes[0..4].try_into().expect("should succeed"));
         assert_eq!(magic, 0x46546C67u32, "wrong magic");
         std::fs::remove_file(&path).ok();
     }
@@ -286,11 +286,11 @@ mod tests {
         let path_no = std::path::PathBuf::from("/tmp/test_no_color.glb");
         let path_col = std::path::PathBuf::from("/tmp/test_with_color.glb");
 
-        export_glb(&mesh_no_color, &path_no).unwrap();
-        export_glb(&mesh_with_color, &path_col).unwrap();
+        export_glb(&mesh_no_color, &path_no).expect("should succeed");
+        export_glb(&mesh_with_color, &path_col).expect("should succeed");
 
-        let size_no = std::fs::metadata(&path_no).unwrap().len();
-        let size_col = std::fs::metadata(&path_col).unwrap().len();
+        let size_no = std::fs::metadata(&path_no).expect("should succeed").len();
+        let size_col = std::fs::metadata(&path_col).expect("should succeed").len();
 
         assert!(
             size_col > size_no,
@@ -308,14 +308,14 @@ mod tests {
         let mut mesh = suited_mesh();
         set_uniform_color(&mut mesh, [0.5, 0.5, 0.5, 1.0]);
         let path = std::path::PathBuf::from("/tmp/test_color_header.glb");
-        export_glb(&mesh, &path).unwrap();
+        export_glb(&mesh, &path).expect("should succeed");
 
-        let bytes = std::fs::read(&path).unwrap();
+        let bytes = std::fs::read(&path).expect("should succeed");
         assert!(bytes.len() >= 12, "GLB too short");
-        let magic = u32::from_le_bytes(bytes[0..4].try_into().unwrap());
+        let magic = u32::from_le_bytes(bytes[0..4].try_into().expect("should succeed"));
         assert_eq!(magic, 0x46546C67u32, "wrong GLB magic in colored file");
 
-        verify_glb_header(&path).unwrap();
+        verify_glb_header(&path).expect("should succeed");
         std::fs::remove_file(&path).ok();
     }
 
@@ -335,11 +335,11 @@ mod tests {
         let path_no = std::path::PathBuf::from("/tmp/test_no_tangent.glb");
         let path_tang = std::path::PathBuf::from("/tmp/test_with_tangent.glb");
 
-        export_glb(&mesh_no_tang, &path_no).unwrap();
-        export_glb(&mesh_with_tang, &path_tang).unwrap();
+        export_glb(&mesh_no_tang, &path_no).expect("should succeed");
+        export_glb(&mesh_with_tang, &path_tang).expect("should succeed");
 
-        let size_no = std::fs::metadata(&path_no).unwrap().len();
-        let size_tang = std::fs::metadata(&path_tang).unwrap().len();
+        let size_no = std::fs::metadata(&path_no).expect("should succeed").len();
+        let size_tang = std::fs::metadata(&path_tang).expect("should succeed").len();
 
         assert!(
             size_tang > size_no,
@@ -358,14 +358,14 @@ mod tests {
         compute_tangents(&mut mesh);
 
         let path = std::path::PathBuf::from("/tmp/test_tangent_header.glb");
-        export_glb(&mesh, &path).unwrap();
+        export_glb(&mesh, &path).expect("should succeed");
 
-        let bytes = std::fs::read(&path).unwrap();
+        let bytes = std::fs::read(&path).expect("should succeed");
         assert!(bytes.len() >= 12, "GLB too short");
-        let magic = u32::from_le_bytes(bytes[0..4].try_into().unwrap());
+        let magic = u32::from_le_bytes(bytes[0..4].try_into().expect("should succeed"));
         assert_eq!(magic, 0x46546C67u32, "wrong GLB magic after tangent export");
 
-        verify_glb_header(&path).unwrap();
+        verify_glb_header(&path).expect("should succeed");
         std::fs::remove_file(&path).ok();
     }
 }
@@ -570,25 +570,25 @@ mod skeleton_glb_tests {
 
         // Read the file and parse the JSON chunk
         use std::io::Read;
-        let mut f = std::fs::File::open(path).unwrap();
+        let mut f = std::fs::File::open(path).expect("should succeed");
 
         // Skip 12-byte GLB header
         let mut buf12 = [0u8; 12];
-        f.read_exact(&mut buf12).unwrap();
+        f.read_exact(&mut buf12).expect("should succeed");
 
         // Read JSON chunk header (8 bytes: length + type)
         let mut chunk_hdr = [0u8; 8];
-        f.read_exact(&mut chunk_hdr).unwrap();
-        let json_len = u32::from_le_bytes(chunk_hdr[0..4].try_into().unwrap()) as usize;
+        f.read_exact(&mut chunk_hdr).expect("should succeed");
+        let json_len = u32::from_le_bytes(chunk_hdr[0..4].try_into().expect("should succeed")) as usize;
 
         // Read JSON bytes
         let mut json_buf = vec![0u8; json_len];
-        f.read_exact(&mut json_buf).unwrap();
+        f.read_exact(&mut json_buf).expect("should succeed");
 
         let json_str = std::str::from_utf8(&json_buf)
-            .unwrap()
+            .expect("should succeed")
             .trim_end_matches(' ');
-        let parsed: serde_json::Value = serde_json::from_str(json_str).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(json_str).expect("should succeed");
 
         let nodes = parsed["nodes"].as_array().expect("nodes must be an array");
         let expected_len = skeleton.joints.len() + 1; // joints + mesh node
@@ -742,25 +742,25 @@ mod material_glb_tests {
 
         // Parse the JSON chunk from the GLB
         use std::io::Read;
-        let mut f = std::fs::File::open(path).unwrap();
+        let mut f = std::fs::File::open(path).expect("should succeed");
 
         // Skip 12-byte GLB header
         let mut buf12 = [0u8; 12];
-        f.read_exact(&mut buf12).unwrap();
+        f.read_exact(&mut buf12).expect("should succeed");
 
         // Read JSON chunk header (8 bytes: length + type)
         let mut chunk_hdr = [0u8; 8];
-        f.read_exact(&mut chunk_hdr).unwrap();
-        let json_len = u32::from_le_bytes(chunk_hdr[0..4].try_into().unwrap()) as usize;
+        f.read_exact(&mut chunk_hdr).expect("should succeed");
+        let json_len = u32::from_le_bytes(chunk_hdr[0..4].try_into().expect("should succeed")) as usize;
 
         // Read JSON bytes
         let mut json_buf = vec![0u8; json_len];
-        f.read_exact(&mut json_buf).unwrap();
+        f.read_exact(&mut json_buf).expect("should succeed");
 
         let json_str = std::str::from_utf8(&json_buf)
-            .unwrap()
+            .expect("should succeed")
             .trim_end_matches(' ');
-        let parsed: serde_json::Value = serde_json::from_str(json_str).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(json_str).expect("should succeed");
 
         let material_idx = parsed["meshes"][0]["primitives"][0]["material"]
             .as_u64()
@@ -905,24 +905,24 @@ mod meta_glb_tests {
         export_glb_with_meta(&mesh, &meta, path).expect("export_glb_with_meta failed");
 
         use std::io::Read;
-        let mut f = std::fs::File::open(path).unwrap();
+        let mut f = std::fs::File::open(path).expect("should succeed");
 
         // Skip 12-byte GLB header
         let mut buf12 = [0u8; 12];
-        f.read_exact(&mut buf12).unwrap();
+        f.read_exact(&mut buf12).expect("should succeed");
 
         // Read JSON chunk header (8 bytes)
         let mut chunk_hdr = [0u8; 8];
-        f.read_exact(&mut chunk_hdr).unwrap();
-        let json_len = u32::from_le_bytes(chunk_hdr[0..4].try_into().unwrap()) as usize;
+        f.read_exact(&mut chunk_hdr).expect("should succeed");
+        let json_len = u32::from_le_bytes(chunk_hdr[0..4].try_into().expect("should succeed")) as usize;
 
         let mut json_buf = vec![0u8; json_len];
-        f.read_exact(&mut json_buf).unwrap();
+        f.read_exact(&mut json_buf).expect("should succeed");
 
         let json_str = std::str::from_utf8(&json_buf)
-            .unwrap()
+            .expect("should succeed")
             .trim_end_matches(' ');
-        let parsed: serde_json::Value = serde_json::from_str(json_str).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(json_str).expect("should succeed");
 
         let generator = parsed["asset"]["extras"]["generator"]
             .as_str()

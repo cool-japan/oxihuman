@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Clothing overlay pipeline.
 //!
@@ -151,7 +151,7 @@ mod tests {
         let base = base_positions();
         let obj = simple_clothing_obj();
         let binding = simple_binding();
-        let cloth = apply_clothing(&base, &obj, &binding).unwrap();
+        let cloth = apply_clothing(&base, &obj, &binding).expect("should succeed");
         // First vertex: weights=[1,0,0] → exactly base[0] = [0,0,0]
         assert!((cloth.positions[0][0] - 0.0).abs() < 1e-6);
         assert!((cloth.positions[0][1] - 0.0).abs() < 1e-6);
@@ -162,7 +162,7 @@ mod tests {
         let base = base_positions();
         let obj = simple_clothing_obj();
         let binding = simple_binding();
-        let cloth = apply_clothing(&base, &obj, &binding).unwrap();
+        let cloth = apply_clothing(&base, &obj, &binding).expect("should succeed");
         // Second vertex: 0.5*base[0] + 0.5*base[1] + offset[1]=0.1
         // = 0.5*[0,0,0] + 0.5*[1,0,0] + [0,0.1,0] = [0.5, 0.1, 0]
         assert!((cloth.positions[1][0] - 0.5).abs() < 1e-6);
@@ -174,7 +174,7 @@ mod tests {
         let base = base_positions();
         let obj = simple_clothing_obj();
         let binding = simple_binding();
-        let cloth = apply_clothing(&base, &obj, &binding).unwrap();
+        let cloth = apply_clothing(&base, &obj, &binding).expect("should succeed");
         assert_eq!(cloth.positions.len(), obj.positions.len());
     }
 
@@ -218,7 +218,7 @@ mod tests {
 
         let obj = simple_clothing_obj();
         let binding = simple_binding();
-        let cloth = apply_clothing(&base, &obj, &binding).unwrap();
+        let cloth = apply_clothing(&base, &obj, &binding).expect("should succeed");
         // Second clothing vert: 0.5*[0,0,0] + 0.5*[1.5,0,0] + [0,0.1,0] = [0.75, 0.1, 0]
         assert!((cloth.positions[1][0] - 0.75).abs() < 1e-6);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Transfer expression blend shapes between character topologies using
 //! nearest-vertex or barycentric projection.
@@ -345,7 +345,7 @@ mod tests {
         let b = [1.0, 0.0, 0.0];
         let c = [0.0, 1.0, 0.0];
         let centroid = [1.0 / 3.0, 1.0 / 3.0, 0.0];
-        let uvw = barycentric_coords(centroid, a, b, c).unwrap();
+        let uvw = barycentric_coords(centroid, a, b, c).expect("should succeed");
         assert!((uvw[0] - 1.0 / 3.0).abs() < 1e-5, "uvw[0]={}", uvw[0]);
         assert!((uvw[1] - 1.0 / 3.0).abs() < 1e-5, "uvw[1]={}", uvw[1]);
         assert!((uvw[2] - 1.0 / 3.0).abs() < 1e-5, "uvw[2]={}", uvw[2]);
@@ -357,7 +357,7 @@ mod tests {
         let a = [0.0f32, 0.0, 0.0];
         let b = [1.0, 0.0, 0.0];
         let c = [0.0, 1.0, 0.0];
-        let uvw = barycentric_coords(a, a, b, c).unwrap();
+        let uvw = barycentric_coords(a, a, b, c).expect("should succeed");
         assert!((uvw[0] - 1.0).abs() < 1e-5);
         assert!(uvw[1].abs() < 1e-5);
         assert!(uvw[2].abs() < 1e-5);
@@ -491,7 +491,7 @@ mod tests {
         let a = [0.0f32, 0.0, 0.0];
         let b = [1.0, 0.0, 0.0];
         let c = [0.0, 1.0, 0.0];
-        let uvw = barycentric_coords(b, a, b, c).unwrap();
+        let uvw = barycentric_coords(b, a, b, c).expect("should succeed");
         assert!(uvw[0].abs() < 1e-5);
         assert!((uvw[1] - 1.0).abs() < 1e-5);
         assert!(uvw[2].abs() < 1e-5);

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Leftist heap stub — min-heap with leftist property (rank of left >= right).
@@ -122,7 +122,7 @@ mod tests {
         let mut h: LeftistHeap<u32, u32> = LeftistHeap::new();
         h.insert(7, 70);
         h.insert(3, 30);
-        let (k, _) = h.peek_min().unwrap();
+        let (k, _) = h.peek_min().expect("should succeed");
         assert_eq!(*k, 3 /* minimum key */);
     }
 
@@ -131,7 +131,7 @@ mod tests {
         let mut h: LeftistHeap<u32, u32> = LeftistHeap::new();
         h.insert(9, 90);
         h.insert(4, 40);
-        let (k, v) = h.extract_min().unwrap();
+        let (k, v) = h.extract_min().expect("should succeed");
         assert_eq!(k, 4 /* min extracted */);
         assert_eq!(v, 40);
     }
@@ -170,7 +170,7 @@ mod tests {
         a.insert(10, 10);
         b.insert(3, 3);
         a.merge_with(b);
-        let (k, _) = a.peek_min().unwrap();
+        let (k, _) = a.peek_min().expect("should succeed");
         assert_eq!(*k, 3 /* min from merged */);
     }
 

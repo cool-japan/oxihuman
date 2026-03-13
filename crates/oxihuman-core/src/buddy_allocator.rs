@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Binary buddy allocator stub — manages a power-of-two address space by
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn test_alloc_max_order() {
         let mut b = BuddyAllocator::new(3);
-        let addr = b.allocate(3).unwrap();
+        let addr = b.allocate(3).expect("should succeed");
         assert_eq!(addr, 0); /* whole block starts at 0 */
         assert!(b.allocate(0).is_none()); /* pool exhausted */
     }
@@ -116,7 +116,7 @@ mod tests {
     #[test]
     fn test_free_and_realloc() {
         let mut b = BuddyAllocator::new(3);
-        let addr = b.allocate(3).unwrap();
+        let addr = b.allocate(3).expect("should succeed");
         b.free(addr, 3);
         assert!(b.allocate(3).is_some()); /* full block available again */
     }
@@ -125,8 +125,8 @@ mod tests {
     fn test_split_and_merge() {
         let mut b = BuddyAllocator::new(2);
         /* allocate two order-0 blocks, free both — they should merge */
-        let a0 = b.allocate(0).unwrap();
-        let a1 = b.allocate(0).unwrap();
+        let a0 = b.allocate(0).expect("should succeed");
+        let a1 = b.allocate(0).expect("should succeed");
         b.free(a0, 0);
         b.free(a1, 0);
         /* now order-1 buddy pair should be merged back, order-2 may coalesce */

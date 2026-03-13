@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Irradiance cache — stores pre-computed diffuse irradiance samples for GI.
@@ -150,7 +150,7 @@ mod tests {
         ic_add_sample(&mut c, [5.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
         let near = ic_nearest(&c, [0.1, 0.0, 0.0]);
         assert!(near.is_some());
-        assert!((near.unwrap().irradiance[0] - 1.0).abs() < 1e-6);
+        assert!((near.expect("should succeed").irradiance[0] - 1.0).abs() < 1e-6);
     }
 
     #[test]

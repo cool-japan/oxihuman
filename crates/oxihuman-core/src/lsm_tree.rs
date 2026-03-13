@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Log-Structured Merge tree (MemTable + SSTables stub).
 
@@ -212,7 +212,7 @@ mod tests {
     fn test_memtable_put_get() {
         let mut mt = MemTable::new();
         mt.put("foo", b"bar".to_vec());
-        let e = mt.get("foo").unwrap();
+        let e = mt.get("foo").expect("should succeed");
         assert_eq!(e.value.as_deref(), Some(b"bar".as_ref()));
     }
 
@@ -221,7 +221,7 @@ mod tests {
         let mut mt = MemTable::new();
         mt.put("x", b"hello".to_vec());
         mt.delete("x");
-        let e = mt.get("x").unwrap();
+        let e = mt.get("x").expect("should succeed");
         assert!(e.value.is_none());
     }
 
@@ -239,7 +239,7 @@ mod tests {
         let mut mt = MemTable::new();
         mt.put("alpha", b"v1".to_vec());
         mt.put("beta", b"v2".to_vec());
-        let sst = mt.flush_to_sstable(0).unwrap();
+        let sst = mt.flush_to_sstable(0).expect("should succeed");
         assert_eq!(sst.level, 0);
         assert_eq!(sst.entry_count(), 2);
         assert!(mt.is_empty());

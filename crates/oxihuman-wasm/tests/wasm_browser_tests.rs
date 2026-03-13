@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Headless WASM browser/node tests for oxihuman-wasm.
 //!
@@ -33,7 +33,8 @@ fn minimal_obj() -> &'static [u8] {
 
 #[wasm_bindgen_test]
 fn test_engine_lifecycle_create_set_get_reset() {
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).expect("should succeed");
 
     // Initial vertex count must be positive.
     assert!(
@@ -50,14 +51,14 @@ fn test_engine_lifecycle_create_set_get_reset() {
     // Params should be reflected in export_params_json.
     let json = engine.export_params_json();
     assert!(!json.is_empty(), "export_params_json must not be empty");
-    let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&json).expect("should succeed");
     assert!(
         parsed.is_object(),
         "export_params_json must return a JSON object"
     );
 
-    let height = parsed["height"].as_f64().unwrap();
-    let weight = parsed["weight"].as_f64().unwrap();
+    let height = parsed["height"].as_f64().expect("should succeed");
+    let weight = parsed["weight"].as_f64().expect("should succeed");
     assert!(
         (height - 0.7_f64).abs() < 1e-5,
         "height should be ~0.7, got {height}"
@@ -70,21 +71,25 @@ fn test_engine_lifecycle_create_set_get_reset() {
     // Reset must restore defaults.
     engine.reset_params();
     let json_after_reset = engine.export_params_json();
-    let parsed_reset: serde_json::Value = serde_json::from_str(&json_after_reset).unwrap();
+    let parsed_reset: serde_json::Value =
+        serde_json::from_str(&json_after_reset).expect("should succeed");
     assert!(
         parsed_reset.is_object(),
         "export_params_json after reset must be an object"
     );
 
     // After reset, import_params_json round-trip must work.
-    let mut engine2 = oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).unwrap();
+    let mut engine2 =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).expect("should succeed");
     engine2.set_height(0.8);
     let params_json = engine2.export_params_json();
     engine2.reset_params();
-    engine2.import_params_json(&params_json).unwrap();
+    engine2
+        .import_params_json(&params_json)
+        .expect("should succeed");
     let json_rt = engine2.export_params_json();
-    let parsed_rt: serde_json::Value = serde_json::from_str(&json_rt).unwrap();
-    let h_rt = parsed_rt["height"].as_f64().unwrap();
+    let parsed_rt: serde_json::Value = serde_json::from_str(&json_rt).expect("should succeed");
+    let h_rt = parsed_rt["height"].as_f64().expect("should succeed");
     assert!(
         (h_rt - 0.8_f64).abs() < 1e-5,
         "round-trip height should be ~0.8, got {h_rt}"
@@ -99,7 +104,8 @@ fn test_engine_lifecycle_create_set_get_reset() {
 
 #[wasm_bindgen_test]
 fn test_mesh_build_returns_non_empty_with_header() {
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).expect("should succeed");
     let bytes = engine.build_mesh_bytes();
 
     assert!(
@@ -111,7 +117,7 @@ fn test_mesh_build_returns_non_empty_with_header() {
     // Parse header: [version u32 LE][n_verts u32 LE][n_idx u32 LE]
     let header = oxihuman_wasm::parse_mesh_bytes_header(&bytes);
     assert!(header.is_some(), "header parse must succeed");
-    let (version, n_verts, n_idx) = header.unwrap();
+    let (version, n_verts, n_idx) = header.expect("should succeed");
 
     assert_eq!(
         version,
@@ -159,14 +165,14 @@ fn test_buffer_transfer_round_trip() {
     let capacity = src.len() * 4;
     let mut buf = WasmBuffer::new(capacity);
 
-    buf.write_f32_slice(&src).unwrap();
+    buf.write_f32_slice(&src).expect("should succeed");
     assert_eq!(
         buf.len(),
         capacity,
         "buffer length must equal slice byte count"
     );
 
-    let out = buf.read_f32_slice().unwrap();
+    let out = buf.read_f32_slice().expect("should succeed");
     assert_eq!(
         out.len(),
         src.len(),
@@ -180,8 +186,10 @@ fn test_buffer_transfer_round_trip() {
     let positions: Vec<[f64; 3]> = vec![[1.0, 2.0, 3.0], [-0.5, 0.0, 100.0]];
     let pos_cap = positions.len() * 3 * 8;
     let mut pos_buf = WasmBuffer::new(pos_cap);
-    pos_buf.write_mesh_positions(&positions).unwrap();
-    let floats = pos_buf.read_f64_slice().unwrap();
+    pos_buf
+        .write_mesh_positions(&positions)
+        .expect("should succeed");
+    let floats = pos_buf.read_f64_slice().expect("should succeed");
     assert_eq!(floats.len(), 6, "must have 6 f64 values for 2 positions");
     assert!((floats[0] - 1.0).abs() < f64::EPSILON);
     assert!((floats[3] - (-0.5)).abs() < f64::EPSILON);
@@ -202,9 +210,9 @@ fn test_compressed_targets_lite_pack_round_trip() {
     deltas[99] = [0.01, 0.0, -0.01];
 
     // Verify CompressedTarget round-trip.
-    let ct = CompressedTarget::compress(&deltas).unwrap();
+    let ct = CompressedTarget::compress(&deltas).expect("should succeed");
     assert!(ct.vertex_count() == 100, "vertex_count must be 100");
-    let out = ct.decompress().unwrap();
+    let out = ct.decompress().expect("should succeed");
     assert_eq!(out.len(), 100);
     for i in [10usize, 50, 99] {
         for c in 0..3 {
@@ -220,20 +228,22 @@ fn test_compressed_targets_lite_pack_round_trip() {
     // LitePack round-trip.
     let mut pack = LitePack::new();
     pack.set_metadata("version".to_string(), "test-1".to_string());
-    pack.add_target("morph_a".to_string(), &deltas).unwrap();
+    pack.add_target("morph_a".to_string(), &deltas)
+        .expect("should succeed");
 
     let mut deltas_b = vec![[0.0f64; 3]; 100];
     deltas_b[5] = [0.02, 0.03, 0.04];
-    pack.add_target("morph_b".to_string(), &deltas_b).unwrap();
+    pack.add_target("morph_b".to_string(), &deltas_b)
+        .expect("should succeed");
 
-    let packed_bytes = pack.serialize().unwrap();
+    let packed_bytes = pack.serialize().expect("should succeed");
     assert!(
         !packed_bytes.is_empty(),
         "serialized LitePack must not be empty"
     );
 
     // Deserialize and verify.
-    let pack2 = LitePack::deserialize(&packed_bytes).unwrap();
+    let pack2 = LitePack::deserialize(&packed_bytes).expect("should succeed");
     assert_eq!(pack2.len(), 2, "deserialized pack must have 2 targets");
     let names = pack2.target_names();
     assert!(names.contains(&"morph_a"), "must contain morph_a");
@@ -242,7 +252,7 @@ fn test_compressed_targets_lite_pack_round_trip() {
     let meta = pack2.metadata();
     assert_eq!(meta.get("version").map(String::as_str), Some("test-1"));
 
-    let out_a = pack2.get_target("morph_a").unwrap();
+    let out_a = pack2.get_target("morph_a").expect("should succeed");
     assert!((out_a[10][0] - 0.001_f64).abs() < 1e-6);
     assert!((out_a[50][1] - 0.004_f64).abs() < 1e-6);
 }
@@ -253,7 +263,8 @@ fn test_compressed_targets_lite_pack_round_trip() {
 fn test_error_handling_invalid_json() {
     use oxihuman_wasm::error::WasmError;
 
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).expect("should succeed");
 
     // import_params_json with invalid JSON must return Err, not panic.
     let result = engine.import_params_json("{{{{ not valid JSON at all }}}}}");
@@ -298,7 +309,8 @@ fn test_error_handling_invalid_json() {
 
 #[wasm_bindgen_test]
 fn test_param_clamping_extreme_values() {
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).expect("should succeed");
 
     // Set params well outside [0,1].
     engine.set_height(99.0);
@@ -315,7 +327,7 @@ fn test_param_clamping_extreme_values() {
 
     // Params JSON must still be valid JSON.
     let json = engine.export_params_json();
-    let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&json).expect("should succeed");
     assert!(parsed.is_object());
 
     // The engine itself clamps on set_params; verify mesh header is still valid.
@@ -324,7 +336,7 @@ fn test_param_clamping_extreme_values() {
         header.is_some(),
         "mesh header must still parse with extreme params"
     );
-    let (_, n_verts, _) = header.unwrap();
+    let (_, n_verts, _) = header.expect("should succeed");
     assert!(n_verts > 0, "must still have vertices after clamping");
 
     // Setting boundary values exactly should also work.
@@ -338,7 +350,8 @@ fn test_param_clamping_extreme_values() {
 
 #[wasm_bindgen_test]
 fn test_animation_frames_record_and_export() {
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).expect("should succeed");
 
     assert_eq!(engine.anim_frame_count(), 0, "initially no frames");
 
@@ -362,13 +375,13 @@ fn test_animation_frames_record_and_export() {
     // export_anim_json must return a valid JSON array with exactly 3 entries.
     let anim_json = engine.export_anim_json();
     assert!(!anim_json.is_empty(), "export_anim_json must not be empty");
-    let parsed: serde_json::Value = serde_json::from_str(&anim_json).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&anim_json).expect("should succeed");
     assert!(
         parsed.is_array(),
         "export_anim_json must return a JSON array"
     );
 
-    let frames = parsed.as_array().unwrap();
+    let frames = parsed.as_array().expect("should succeed");
     assert_eq!(
         frames.len(),
         3,
@@ -405,7 +418,8 @@ fn test_animation_frames_record_and_export() {
 
 #[wasm_bindgen_test]
 fn test_target_loading_and_unloading() {
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).expect("should succeed");
 
     // No JSON targets initially.
     assert_eq!(engine.loaded_target_count(), 0, "no json targets initially");
@@ -496,17 +510,18 @@ fn test_target_loading_and_unloading() {
 
 #[wasm_bindgen_test]
 fn test_export_glb_magic_bytes() {
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(minimal_obj()).expect("should succeed");
 
     // build_mesh_prepared returns a fully-prepared MeshBuffers with suit flag applied.
     let mesh = engine.build_mesh_prepared();
 
     // Write to a temp GLB file.
     let tmp_path = std::env::temp_dir().join("oxihuman_wasm_browser_test.glb");
-    oxihuman_export::glb::export_glb(&mesh, &tmp_path).unwrap();
+    oxihuman_export::glb::export_glb(&mesh, &tmp_path).expect("should succeed");
 
     // Read back and verify GLB magic.
-    let glb_bytes = std::fs::read(&tmp_path).unwrap();
+    let glb_bytes = std::fs::read(&tmp_path).expect("should succeed");
     assert!(glb_bytes.len() >= 4, "GLB must be at least 4 bytes");
 
     // GLB magic: 0x46546C67 in little-endian = bytes [0x67, 0x6C, 0x54, 0x46] = "glTF"

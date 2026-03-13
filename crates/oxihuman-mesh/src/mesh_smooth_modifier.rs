@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 pub fn smooth_vertex_laplacian(center: [f32; 3], neighbors: &[[f32; 3]], factor: f32) -> [f32; 3] {

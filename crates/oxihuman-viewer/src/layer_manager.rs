@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Scene layer visibility/lock manager (similar to Photoshop layers).
 
@@ -188,7 +188,7 @@ mod tests {
         let id = layer_add(&mut m, "Test");
         let ok = layer_set_locked(&mut m, id, true);
         assert!(ok);
-        assert!(m.layers.iter().find(|l| l.id == id).unwrap().locked);
+        assert!(m.layers.iter().find(|l| l.id == id).expect("should succeed").locked);
     }
 
     #[test]

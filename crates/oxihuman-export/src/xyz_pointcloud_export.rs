@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! XYZ point cloud text format export.
@@ -151,7 +151,7 @@ mod tests {
         let mut exp = new_xyz_export(false);
         add_xyz_point(&mut exp, -1.0, -2.0, -3.0);
         add_xyz_point(&mut exp, 1.0, 2.0, 3.0);
-        let (mn, mx) = xyz_bbox(&exp).unwrap();
+        let (mn, mx) = xyz_bbox(&exp).expect("should succeed");
         assert!((mn[0] - (-1.0)).abs() < 1e-9);
         assert!((mx[0] - 1.0).abs() < 1e-9);
     }

@@ -1,7 +1,7 @@
 //! Retarget solver — maps morph target weights from a source rig to a different target rig.
 
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// Configuration for the retarget solver.
 #[allow(dead_code)]

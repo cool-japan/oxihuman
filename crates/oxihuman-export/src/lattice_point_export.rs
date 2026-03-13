@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Lattice point export: FFD (Free Form Deformation) lattice control points.
@@ -142,7 +142,7 @@ mod tests {
     fn displace_changes_position() {
         let mut exp = new_lattice_point_export(2, 2, 2);
         displace_lattice_point(&mut exp, 0, 0, 0, [0.5, 0.0, 0.0]);
-        let p = find_lattice_point(&exp, 0, 0, 0).unwrap();
+        let p = find_lattice_point(&exp, 0, 0, 0).expect("should succeed");
         assert!((p.deformed_position[0] - 0.5).abs() < 1e-5);
     }
 

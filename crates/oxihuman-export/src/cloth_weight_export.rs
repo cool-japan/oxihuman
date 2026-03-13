@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Cloth simulation weight export for per-vertex pin weights.
@@ -90,19 +90,19 @@ mod tests {
     #[test]
     fn test_default_value() {
         let e = new_cloth_weight_export(1);
-        assert!((cw_get(&e, 0).unwrap() - 1.0).abs() < 1e-6);
+        assert!((cw_get(&e, 0).expect("should succeed") - 1.0).abs() < 1e-6);
     }
     #[test]
     fn test_set_get() {
         let mut e = new_cloth_weight_export(3);
         cw_set(&mut e, 1, 0.5);
-        assert!((cw_get(&e, 1).unwrap() - 0.5).abs() < 1e-6);
+        assert!((cw_get(&e, 1).expect("should succeed") - 0.5).abs() < 1e-6);
     }
     #[test]
     fn test_clamp() {
         let mut e = new_cloth_weight_export(1);
         cw_set(&mut e, 0, 2.0);
-        assert!((cw_get(&e, 0).unwrap() - 1.0).abs() < 1e-6);
+        assert!((cw_get(&e, 0).expect("should succeed") - 1.0).abs() < 1e-6);
     }
     #[test]
     fn test_average() {

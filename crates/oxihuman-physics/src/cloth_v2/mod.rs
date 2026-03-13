@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Advanced cloth simulation v2 using Position Based Dynamics (PBD/XPBD).
 //!
@@ -107,7 +107,7 @@ mod tests {
     fn test_build_rectangular_cloth() {
         let result = build_rectangular_cloth(5, 5, 1.0, 1.0);
         assert!(result.is_ok());
-        let (mesh, solver) = result.unwrap();
+        let (mesh, solver) = result.expect("should succeed");
         assert_eq!(mesh.vertices().len(), 25);
         assert_eq!(mesh.triangles().len(), 32);
         assert!(!solver.distance_constraints().is_empty());
@@ -121,19 +121,19 @@ mod tests {
 
     #[test]
     fn test_step_cloth_v2() {
-        let (mut mesh, mut solver) = build_rectangular_cloth(4, 4, 1.0, 1.0).unwrap();
+        let (mut mesh, mut solver) = build_rectangular_cloth(4, 4, 1.0, 1.0).expect("should succeed");
         let config = ClothConfigV2::default();
         let collision_config = CollisionConfig::default();
 
         let result = step_cloth_v2(&mut mesh, &config, &mut solver, &[], &collision_config);
         assert!(result.is_ok());
-        let stats = result.unwrap();
+        let stats = result.expect("should succeed");
         assert!(stats.constraint_iterations > 0);
     }
 
     #[test]
     fn test_gravity_pulls_down() {
-        let (mut mesh, mut solver) = build_rectangular_cloth(3, 3, 1.0, 1.0).unwrap();
+        let (mut mesh, mut solver) = build_rectangular_cloth(3, 3, 1.0, 1.0).expect("should succeed");
         let config = ClothConfigV2 {
             gravity: [0.0, -9.81, 0.0],
             dt: 0.01,
@@ -146,7 +146,7 @@ mod tests {
         mesh.set_inv_mass(0, 0.0);
 
         let initial_y = mesh.vertices()[4][1];
-        step_cloth_v2(&mut mesh, &config, &mut solver, &[], &collision_config).unwrap();
+        step_cloth_v2(&mut mesh, &config, &mut solver, &[], &collision_config).expect("should succeed");
         let final_y = mesh.vertices()[4][1];
         assert!(final_y < initial_y, "Gravity should pull vertices down");
     }

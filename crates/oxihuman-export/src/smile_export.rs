@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! SMILE (Streaming JSON) binary encoding stub.
@@ -109,14 +109,14 @@ mod tests {
     fn push_token_null() {
         let mut doc = SmileDocument::new();
         doc.push_token(SmileToken::Null);
-        assert_eq!(*doc.bytes.last().unwrap(), SmileToken::Null as u8);
+        assert_eq!(*doc.bytes.last().expect("should succeed"), SmileToken::Null as u8);
     }
 
     #[test]
     fn push_token_true() {
         let mut doc = SmileDocument::new();
         doc.push_token(SmileToken::True);
-        assert_eq!(*doc.bytes.last().unwrap(), 0x22);
+        assert_eq!(*doc.bytes.last().expect("should succeed"), 0x22);
     }
 
     #[test]
@@ -158,6 +158,6 @@ mod tests {
     fn start_object_token() {
         let mut doc = SmileDocument::new();
         doc.push_token(SmileToken::StartObject);
-        assert_eq!(*doc.bytes.last().unwrap(), 0xFA);
+        assert_eq!(*doc.bytes.last().expect("should succeed"), 0xFA);
     }
 }

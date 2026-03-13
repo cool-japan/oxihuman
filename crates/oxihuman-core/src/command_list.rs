@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Ordered list of named commands with priority and enabled flag.
@@ -134,8 +134,8 @@ mod tests {
         let mut cl = CommandList::new();
         cl.push("draw", CmdPriority::Normal);
         assert_eq!(cl.len(), 1);
-        assert_eq!(cl.get(0).unwrap().name, "draw");
-        assert!(cl.get(0).unwrap().enabled);
+        assert_eq!(cl.get(0).expect("should succeed").name, "draw");
+        assert!(cl.get(0).expect("should succeed").enabled);
     }
 
     #[test]
@@ -151,9 +151,9 @@ mod tests {
         let mut cl = CommandList::new();
         cl.push("tick", CmdPriority::Normal);
         cl.disable("tick");
-        assert!(!cl.get(0).unwrap().enabled);
+        assert!(!cl.get(0).expect("should succeed").enabled);
         cl.enable("tick");
-        assert!(cl.get(0).unwrap().enabled);
+        assert!(cl.get(0).expect("should succeed").enabled);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! COLLADA (`.dae`) 3D format export — ISO/IEC 17506.
 //!
@@ -568,7 +568,7 @@ mod tests {
         let stats = export_collada(&mesh, path, &opts).expect("export_collada failed");
         assert!(path.exists(), "file should exist");
         assert!(stats.byte_size > 0);
-        let content = std::fs::read_to_string(path).unwrap();
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(validate_collada(&content).is_ok());
     }
 
@@ -595,7 +595,7 @@ mod tests {
         let path = std::path::Path::new("/tmp/oxihuman_test_collada_scene.dae");
         export_collada_scene(&meshes, path, &opts).expect("export_collada_scene failed");
         assert!(path.exists());
-        let content = std::fs::read_to_string(path).unwrap();
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(validate_collada(&content).is_ok());
     }
 

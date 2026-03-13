@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A single FACS Action Unit definition.
 #[derive(Debug, Clone)]
@@ -78,7 +78,7 @@ mod tests {
     fn test_get_au_found() {
         let mut fs = new_facs_def_set();
         add_facs_action_unit(&mut fs, 6, "AU6", "Cheek raiser", 2);
-        let au = get_facs_au(&fs, 6).unwrap();
+        let au = get_facs_au(&fs, 6).expect("should succeed");
         assert_eq!(au.name, "AU6");
     }
 
@@ -120,7 +120,7 @@ mod tests {
     fn test_au_description_stored() {
         let mut fs = new_facs_def_set();
         add_facs_action_unit(&mut fs, 4, "AU4", "Brow lowerer", 1);
-        let au = get_facs_au(&fs, 4).unwrap();
+        let au = get_facs_au(&fs, 4).expect("should succeed");
         assert_eq!(au.description, "Brow lowerer");
     }
 
@@ -128,7 +128,7 @@ mod tests {
     fn test_au_morph_index_stored() {
         let mut fs = new_facs_def_set();
         add_facs_action_unit(&mut fs, 5, "AU5", "desc", 3);
-        let au = get_facs_au(&fs, 5).unwrap();
+        let au = get_facs_au(&fs, 5).expect("should succeed");
         assert_eq!(au.morph_index, 3);
     }
 

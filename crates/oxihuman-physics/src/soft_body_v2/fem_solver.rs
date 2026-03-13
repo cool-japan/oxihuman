@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(clippy::needless_range_loop)]
 
@@ -339,7 +339,7 @@ mod tests {
             [0.0, 0.0, 1.0],
         ];
         let tets = vec![[0, 1, 2, 3]];
-        let mesh = TetMesh::new(&tets, &positions, positions.len()).unwrap();
+        let mesh = TetMesh::new(&tets, &positions, positions.len()).expect("should succeed");
         (positions, tets, mesh)
     }
 
@@ -352,7 +352,7 @@ mod tests {
 
         let forces = solver
             .compute_forces(&positions, &positions, &mesh)
-            .unwrap();
+            .expect("should succeed");
 
         // At rest configuration, forces should be (near) zero
         for (i, f) in forces.iter().enumerate() {
@@ -376,7 +376,7 @@ mod tests {
         ];
         let rest = positions.clone();
         let tets = vec![[0, 1, 2, 3]];
-        let mesh = TetMesh::new(&tets, &rest, rest.len()).unwrap();
+        let mesh = TetMesh::new(&tets, &rest, rest.len()).expect("should succeed");
         let mat = SoftBodyMaterial::default();
         let model = NeoHookeanModel::from_material(&mat);
         let mut solver = FemSolver::new(&mesh, &model);
@@ -388,7 +388,9 @@ mod tests {
             [0.0, 1.0, 0.0],
             [0.0, 0.0, 1.0],
         ];
-        let forces = solver.compute_forces(&stretched, &rest, &mesh).unwrap();
+        let forces = solver
+            .compute_forces(&stretched, &rest, &mesh)
+            .expect("should succeed");
 
         // Forces should be non-zero under deformation
         let total_force_mag: f64 = forces
@@ -408,7 +410,9 @@ mod tests {
         let model = NeoHookeanModel::from_material(&mat);
         let solver = FemSolver::new(&mesh, &model);
 
-        let energy = solver.compute_elastic_energy(&positions).unwrap();
+        let energy = solver
+            .compute_elastic_energy(&positions)
+            .expect("should succeed");
         assert!(energy.abs() < 1e-10, "Energy at rest = {energy}");
     }
 
@@ -420,7 +424,7 @@ mod tests {
             [0.0, 1.0, 0.0],
             [0.0, 0.0, 1.0],
         ];
-        let mesh = TetMesh::new(&[[0, 1, 2, 3]], &rest, rest.len()).unwrap();
+        let mesh = TetMesh::new(&[[0, 1, 2, 3]], &rest, rest.len()).expect("should succeed");
         let mat = SoftBodyMaterial::default();
         let model = NeoHookeanModel::from_material(&mat);
         let solver = FemSolver::new(&mesh, &model);
@@ -431,7 +435,9 @@ mod tests {
             [0.0, 1.2, 0.0],
             [0.0, 0.0, 1.2],
         ];
-        let energy = solver.compute_elastic_energy(&deformed).unwrap();
+        let energy = solver
+            .compute_elastic_energy(&deformed)
+            .expect("should succeed");
         assert!(energy > 0.0, "Energy should be positive under deformation");
     }
 
@@ -442,7 +448,9 @@ mod tests {
         let model = NeoHookeanModel::from_material(&mat);
         let solver = FemSolver::new(&mesh, &model);
 
-        let state = solver.compute_element_states(&positions).unwrap();
+        let state = solver
+            .compute_element_states(&positions)
+            .expect("should succeed");
         assert_eq!(state.element_states.len(), 1);
 
         // At rest, rotation should be identity
@@ -505,7 +513,9 @@ mod tests {
         let model = NeoHookeanModel::from_material(&mat);
         let solver = FemSolver::new(&mesh, &model);
 
-        let count = solver.count_inverted_elements(&positions).unwrap();
+        let count = solver
+            .count_inverted_elements(&positions)
+            .expect("should succeed");
         assert_eq!(count, 0);
     }
 }

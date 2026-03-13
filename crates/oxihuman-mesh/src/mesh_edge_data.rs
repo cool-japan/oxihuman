@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashMap;
 
@@ -103,7 +103,7 @@ mod tests {
         let mut d = default_edge_data();
         d.crease = 0.5;
         ed_set(&mut m, 0, 1, d);
-        let g = ed_get(&m, 0, 1).unwrap();
+        let g = ed_get(&m, 0, 1).expect("should succeed");
         assert!((g.crease - 0.5).abs() < 1e-6);
     }
 
@@ -113,7 +113,7 @@ mod tests {
         let mut d = default_edge_data();
         d.is_sharp = true;
         ed_set(&mut m, 5, 2, d);
-        let g = ed_get(&m, 2, 5).unwrap();
+        let g = ed_get(&m, 2, 5).expect("should succeed");
         assert!(g.is_sharp);
     }
 
@@ -121,7 +121,7 @@ mod tests {
     fn test_set_crease() {
         let mut m = new_edge_data_map();
         ed_set_crease(&mut m, 1, 2, 0.8);
-        let g = ed_get(&m, 1, 2).unwrap();
+        let g = ed_get(&m, 1, 2).expect("should succeed");
         assert!((g.crease - 0.8).abs() < 1e-5);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Floyd-Warshall all-pairs shortest paths.
@@ -124,7 +124,7 @@ mod tests {
     #[test]
     fn test_path_reconstruction() {
         let fw = fw_solve(3, &[(0, 1, 1.0), (1, 2, 1.0)]);
-        let path = fw.path(0, 2).unwrap();
+        let path = fw.path(0, 2).expect("should succeed");
         assert_eq!(path, vec![0, 1, 2]);
     }
 

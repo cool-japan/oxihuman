@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Topological map: directed graph with topological sort utilities.
@@ -154,17 +154,17 @@ mod tests {
         let c = tm_add_node(&mut tm, "c");
         tm_add_edge(&mut tm, a, b);
         tm_add_edge(&mut tm, b, c);
-        let sorted = tm_topo_sort(&tm).unwrap();
-        let pos_a = sorted.iter().position(|&x| x == a).unwrap();
-        let pos_b = sorted.iter().position(|&x| x == b).unwrap();
-        let pos_c = sorted.iter().position(|&x| x == c).unwrap();
+        let sorted = tm_topo_sort(&tm).expect("should succeed");
+        let pos_a = sorted.iter().position(|&x| x == a).expect("should succeed");
+        let pos_b = sorted.iter().position(|&x| x == b).expect("should succeed");
+        let pos_c = sorted.iter().position(|&x| x == c).expect("should succeed");
         assert!(pos_a < pos_b && pos_b < pos_c);
     }
 
     #[test]
     fn test_topo_sort_empty() {
         let tm = new_topo_map();
-        let sorted = tm_topo_sort(&tm).unwrap();
+        let sorted = tm_topo_sort(&tm).expect("should succeed");
         assert!(sorted.is_empty());
     }
 
@@ -208,9 +208,9 @@ mod tests {
         tm_add_edge(&mut tm, a, c);
         tm_add_edge(&mut tm, b, d);
         tm_add_edge(&mut tm, c, d);
-        let sorted = tm_topo_sort(&tm).unwrap();
-        let pos_a = sorted.iter().position(|&x| x == a).unwrap();
-        let pos_d = sorted.iter().position(|&x| x == d).unwrap();
+        let sorted = tm_topo_sort(&tm).expect("should succeed");
+        let pos_a = sorted.iter().position(|&x| x == a).expect("should succeed");
+        let pos_d = sorted.iter().position(|&x| x == d).expect("should succeed");
         assert!(pos_a < pos_d);
     }
 

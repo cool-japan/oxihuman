@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Transfer scalar/vector attributes from a source mesh to a target mesh
@@ -191,7 +191,7 @@ mod tests {
         let b = [1.0, 0.0, 0.0];
         let c = [0.0, 1.0, 0.0];
         let p = [1.0 / 3.0, 1.0 / 3.0, 0.0];
-        let bary = barycentric(p, a, b, c).unwrap();
+        let bary = barycentric(p, a, b, c).expect("should succeed");
         assert!((bary[0] - 1.0 / 3.0).abs() < 1e-5);
         assert!((bary[1] - 1.0 / 3.0).abs() < 1e-5);
         assert!((bary[2] - 1.0 / 3.0).abs() < 1e-5);

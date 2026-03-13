@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! SVG wireframe and silhouette export for OxiHuman meshes.
 //!
@@ -583,9 +583,9 @@ mod tests {
     fn test_export_svg_to_file() {
         let mesh = two_tri_mesh();
         let path = Path::new("/tmp/test_oxihuman_export.svg");
-        let stats = export_svg(&mesh, path, &SvgExportOptions::default()).unwrap();
+        let stats = export_svg(&mesh, path, &SvgExportOptions::default()).expect("should succeed");
         assert!(path.exists());
-        let content = std::fs::read_to_string(path).unwrap();
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.contains("<svg"));
         assert_eq!(stats.vertex_count, 4);
         assert_eq!(stats.face_count, 2);
@@ -597,9 +597,9 @@ mod tests {
     fn test_export_uv_svg_to_file() {
         let mesh = two_tri_mesh();
         let path = Path::new("/tmp/test_oxihuman_uv_export.svg");
-        export_uv_svg(&mesh, path).unwrap();
+        export_uv_svg(&mesh, path).expect("should succeed");
         assert!(path.exists());
-        let content = std::fs::read_to_string(path).unwrap();
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.contains("<svg"));
         assert!(content.contains("<polygon"));
     }

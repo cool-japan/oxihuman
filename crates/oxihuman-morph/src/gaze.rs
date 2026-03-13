@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -639,7 +639,7 @@ mod tests {
             "blink weight should be present at t=0.5"
         );
         assert!(approx_eq(
-            *r_mid.morph_weights.get("blink").unwrap(),
+            *r_mid.morph_weights.get("blink").expect("should succeed"),
             1.0,
             1e-5
         ));

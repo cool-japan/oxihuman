@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Particle system state export.
 
@@ -116,7 +116,7 @@ mod tests {
     fn test_get_particle() {
         let mut exp = new_particles_export(default_particle_export_config());
         pe_add_particle(&mut exp, make_particle(2.0));
-        assert!((pe_get_particle(&exp, 0).unwrap().age - 2.0).abs() < 1e-6);
+        assert!((pe_get_particle(&exp, 0).expect("should succeed").age - 2.0).abs() < 1e-6);
     }
 
     #[test]

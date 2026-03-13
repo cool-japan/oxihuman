@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Unified diff patch applier.
@@ -178,54 +178,54 @@ mod tests {
 
     #[test]
     fn test_parse_creates_hunk() {
-        let patch = parse_unified_diff(SAMPLE_PATCH).unwrap();
+        let patch = parse_unified_diff(SAMPLE_PATCH).expect("should succeed");
         assert_eq!(patch.hunk_count(), 1);
     }
 
     #[test]
     fn test_parse_counts_removed() {
-        let patch = parse_unified_diff(SAMPLE_PATCH).unwrap();
+        let patch = parse_unified_diff(SAMPLE_PATCH).expect("should succeed");
         assert_eq!(patch.total_removed(), 1);
     }
 
     #[test]
     fn test_parse_counts_added() {
-        let patch = parse_unified_diff(SAMPLE_PATCH).unwrap();
+        let patch = parse_unified_diff(SAMPLE_PATCH).expect("should succeed");
         assert_eq!(patch.total_added(), 1);
     }
 
     #[test]
     fn test_apply_produces_new_line() {
-        let patch = parse_unified_diff(SAMPLE_PATCH).unwrap();
+        let patch = parse_unified_diff(SAMPLE_PATCH).expect("should succeed");
         let orig = ["old line", "context"];
-        let result = apply_patch(&orig, &patch).unwrap();
+        let result = apply_patch(&orig, &patch).expect("should succeed");
         assert!(result.contains(&"new line".to_string()));
     }
 
     #[test]
     fn test_can_apply_cleanly_true() {
-        let patch = parse_unified_diff(SAMPLE_PATCH).unwrap();
+        let patch = parse_unified_diff(SAMPLE_PATCH).expect("should succeed");
         let orig = ["old line", "context"];
         assert!(can_apply_cleanly(&orig, &patch));
     }
 
     #[test]
     fn test_no_overlapping_hunks_in_simple() {
-        let patch = parse_unified_diff(SAMPLE_PATCH).unwrap();
+        let patch = parse_unified_diff(SAMPLE_PATCH).expect("should succeed");
         assert_eq!(count_overlapping_hunks(&patch), 0);
     }
 
     #[test]
     fn test_empty_patch() {
-        let patch = parse_unified_diff("").unwrap();
+        let patch = parse_unified_diff("").expect("should succeed");
         assert_eq!(patch.hunk_count(), 0);
     }
 
     #[test]
     fn test_apply_empty_patch_unchanged() {
-        let patch = parse_unified_diff("").unwrap();
+        let patch = parse_unified_diff("").expect("should succeed");
         let orig = ["line1", "line2"];
-        let result = apply_patch(&orig, &patch).unwrap();
+        let result = apply_patch(&orig, &patch).expect("should succeed");
         assert_eq!(result, vec!["line1", "line2"]);
     }
 

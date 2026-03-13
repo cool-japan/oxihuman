@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! High-level expression composition from action units and morph sliders.
 
@@ -294,7 +294,7 @@ mod tests {
         add_layer(&mut c, "angry", simple_morphs(1.0));
         let ok = set_layer_weight(&mut c, "angry", 0.3);
         assert!(ok);
-        assert!((get_layer_weight(&c, "angry").unwrap() - 0.3).abs() < 1e-6);
+        assert!((get_layer_weight(&c, "angry").expect("should succeed") - 0.3).abs() < 1e-6);
     }
 
     #[test]

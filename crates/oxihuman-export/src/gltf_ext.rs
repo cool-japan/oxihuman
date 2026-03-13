@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GLTF 2.0 material extension support (KHR extensions as JSON).
 //!
@@ -510,7 +510,7 @@ mod tests {
     fn test_unlit_is_empty_object() {
         let v = khr_materials_unlit();
         assert!(v.is_object());
-        assert_eq!(v.as_object().unwrap().len(), 0);
+        assert_eq!(v.as_object().expect("should succeed").len(), 0);
     }
 
     // -----------------------------------------------------------------------
@@ -519,7 +519,7 @@ mod tests {
     #[test]
     fn test_emissive_strength_value() {
         let v = khr_materials_emissive_strength(3.5);
-        assert!((v["emissiveStrength"].as_f64().unwrap() - 3.5).abs() < 1e-6);
+        assert!((v["emissiveStrength"].as_f64().expect("should succeed") - 3.5).abs() < 1e-6);
     }
 
     // -----------------------------------------------------------------------
@@ -532,8 +532,8 @@ mod tests {
             clearcoat_roughness_factor: 0.3,
         };
         let v = khr_materials_clearcoat(&p);
-        assert!((v["clearcoatFactor"].as_f64().unwrap() - 0.8).abs() < 1e-6);
-        assert!((v["clearcoatRoughnessFactor"].as_f64().unwrap() - 0.3).abs() < 1e-6);
+        assert!((v["clearcoatFactor"].as_f64().expect("should succeed") - 0.8).abs() < 1e-6);
+        assert!((v["clearcoatRoughnessFactor"].as_f64().expect("should succeed") - 0.3).abs() < 1e-6);
     }
 
     // -----------------------------------------------------------------------
@@ -546,7 +546,7 @@ mod tests {
             sheen_roughness_factor: 0.6,
         };
         let v = khr_materials_sheen(&p);
-        assert_eq!(v["sheenColorFactor"].as_array().unwrap().len(), 3);
+        assert_eq!(v["sheenColorFactor"].as_array().expect("should succeed").len(), 3);
     }
 
     // -----------------------------------------------------------------------
@@ -555,7 +555,7 @@ mod tests {
     #[test]
     fn test_transmission_round_trip() {
         let v = khr_materials_transmission(0.75);
-        assert!((v["transmissionFactor"].as_f64().unwrap() - 0.75).abs() < 1e-6);
+        assert!((v["transmissionFactor"].as_f64().expect("should succeed") - 0.75).abs() < 1e-6);
     }
 
     // -----------------------------------------------------------------------
@@ -565,7 +565,7 @@ mod tests {
     fn test_volume_infinity_becomes_large_number() {
         let p = VolumeExt::default(); // attenuation_distance = INFINITY
         let v = khr_materials_volume(&p);
-        let dist = v["attenuationDistance"].as_f64().unwrap();
+        let dist = v["attenuationDistance"].as_f64().expect("should succeed");
         assert!(dist > 1e300, "expected very large number, got {dist}");
     }
 
@@ -575,7 +575,7 @@ mod tests {
     #[test]
     fn test_ior_default() {
         let v = khr_materials_ior(1.5);
-        assert!((v["ior"].as_f64().unwrap() - 1.5).abs() < 1e-6);
+        assert!((v["ior"].as_f64().expect("should succeed") - 1.5).abs() < 1e-6);
     }
 
     // -----------------------------------------------------------------------
@@ -585,9 +585,9 @@ mod tests {
     fn test_specular_color_components() {
         let p = SpecularExt::default();
         let v = khr_materials_specular(&p);
-        let arr = v["specularColorFactor"].as_array().unwrap();
+        let arr = v["specularColorFactor"].as_array().expect("should succeed");
         assert_eq!(arr.len(), 3);
-        assert!((arr[0].as_f64().unwrap() - 1.0).abs() < 1e-6);
+        assert!((arr[0].as_f64().expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     // -----------------------------------------------------------------------
@@ -597,10 +597,10 @@ mod tests {
     fn test_skin_preset_to_json() {
         let mat = GltfMaterialDef::skin();
         let j = mat.to_json();
-        assert_eq!(j["name"].as_str().unwrap(), "skin");
+        assert_eq!(j["name"].as_str().expect("should succeed"), "skin");
         assert!(j["pbrMetallicRoughness"].is_object());
-        assert!(j["doubleSided"].as_bool().unwrap());
-        assert_eq!(j["alphaMode"].as_str().unwrap(), "OPAQUE");
+        assert!(j["doubleSided"].as_bool().expect("should succeed"));
+        assert_eq!(j["alphaMode"].as_str().expect("should succeed"), "OPAQUE");
     }
 
     // -----------------------------------------------------------------------
@@ -627,8 +627,8 @@ mod tests {
             ..Default::default()
         };
         let j = mat.to_json();
-        assert_eq!(j["alphaMode"].as_str().unwrap(), "MASK");
-        assert!((j["alphaCutoff"].as_f64().unwrap() - 0.5).abs() < 1e-6);
+        assert_eq!(j["alphaMode"].as_str().expect("should succeed"), "MASK");
+        assert!((j["alphaCutoff"].as_f64().expect("should succeed") - 0.5).abs() < 1e-6);
     }
 
     // -----------------------------------------------------------------------
@@ -643,7 +643,7 @@ mod tests {
             GltfMaterialDef::metallic(),
         ];
         let j = build_materials_json(&mats);
-        assert_eq!(j.as_array().unwrap().len(), 4);
+        assert_eq!(j.as_array().expect("should succeed").len(), 4);
     }
 
     // -----------------------------------------------------------------------
@@ -702,8 +702,8 @@ mod tests {
             .extensions
             .iter()
             .find(|(n, _)| n == "KHR_materials_ior")
-            .map(|(_, v)| v["ior"].as_f64().unwrap())
-            .unwrap();
+            .map(|(_, v)| v["ior"].as_f64().expect("should succeed"))
+            .expect("should succeed");
         assert!((ior_val - 1.8).abs() < 1e-6);
     }
 
@@ -715,11 +715,11 @@ mod tests {
         let mats = vec![GltfMaterialDef::skin(), GltfMaterialDef::glass()];
         let j = build_materials_json(&mats);
         let path = "/tmp/oxihuman_gltf_ext_test_materials.json";
-        let s = serde_json::to_string_pretty(&j).unwrap();
-        fs::write(path, &s).unwrap();
-        let raw = fs::read_to_string(path).unwrap();
-        let parsed: Value = serde_json::from_str(&raw).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 2);
+        let s = serde_json::to_string_pretty(&j).expect("should succeed");
+        fs::write(path, &s).expect("should succeed");
+        let raw = fs::read_to_string(path).expect("should succeed");
+        let parsed: Value = serde_json::from_str(&raw).expect("should succeed");
+        assert_eq!(parsed.as_array().expect("should succeed").len(), 2);
     }
 
     // -----------------------------------------------------------------------

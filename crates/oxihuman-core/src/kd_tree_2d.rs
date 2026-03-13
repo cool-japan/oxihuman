@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! 2D k-d tree for nearest-neighbor queries.
@@ -179,14 +179,14 @@ mod tests {
     #[test]
     fn single_point_is_nearest() {
         let t = kd2_build(&[[2.0, 3.0]]);
-        let (p, _) = t.nearest([0.0, 0.0]).unwrap();
+        let (p, _) = t.nearest([0.0, 0.0]).expect("should succeed");
         assert_eq!(p.id, 0);
     }
 
     #[test]
     fn nearest_to_origin() {
         let t = sample_tree();
-        let (p, d) = t.nearest([0.0, 0.0]).unwrap();
+        let (p, d) = t.nearest([0.0, 0.0]).expect("should succeed");
         assert_eq!(p.id, 0);
         assert!(d < 1e-5);
     }
@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn nearest_to_far_point() {
         let t = sample_tree();
-        let (p, _) = t.nearest([5.0, 5.0]).unwrap();
+        let (p, _) = t.nearest([5.0, 5.0]).expect("should succeed");
         assert_eq!(p.id, 3);
     }
 
@@ -219,14 +219,14 @@ mod tests {
     #[test]
     fn nn_dist_sq_is_zero_for_exact_match() {
         let t = kd2_build(&[[1.0, 1.0], [2.0, 2.0]]);
-        let d = kd2_nn_dist_sq(&t, [1.0, 1.0]).unwrap();
+        let d = kd2_nn_dist_sq(&t, [1.0, 1.0]).expect("should succeed");
         assert!(d < 1e-6);
     }
 
     #[test]
     fn nearest_among_two_picks_closer() {
         let t = kd2_build(&[[0.0, 0.0], [10.0, 0.0]]);
-        let (p, _) = t.nearest([3.0, 0.0]).unwrap();
+        let (p, _) = t.nearest([3.0, 0.0]).expect("should succeed");
         assert_eq!(p.id, 0);
     }
 

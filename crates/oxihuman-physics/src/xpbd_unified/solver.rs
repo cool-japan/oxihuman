@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! XPBD unified solver: predict → project constraints → update velocities.
 
@@ -319,7 +319,7 @@ mod tests {
             substeps: 1,
         });
         solver.add_particle([0.0, 10.0, 0.0], 1.0);
-        solver.step().unwrap();
+        solver.step().expect("should succeed");
         // Should have moved downward
         assert!(solver.positions()[0][1] < 10.0);
     }
@@ -328,7 +328,7 @@ mod tests {
     fn test_fixed_particle_does_not_move() {
         let mut solver = XpbdSolver::new(XpbdConfig::default());
         solver.add_particle([0.0, 5.0, 0.0], 0.0); // fixed
-        solver.step().unwrap();
+        solver.step().expect("should succeed");
         assert!((solver.positions()[0][1] - 5.0).abs() < f64::EPSILON);
     }
 
@@ -345,7 +345,7 @@ mod tests {
         solver.add_particle([3.0, 0.0, 0.0], 1.0);
         let dc = DistanceConstraint::new(0, 1, 1.0, 0.0);
         solver.add_constraint(Box::new(dc));
-        solver.step().unwrap();
+        solver.step().expect("should succeed");
         let dx = solver.positions()[1][0] - solver.positions()[0][0];
         let dy = solver.positions()[1][1] - solver.positions()[0][1];
         let dz = solver.positions()[1][2] - solver.positions()[0][2];
@@ -372,7 +372,7 @@ mod tests {
     fn test_kinetic_energy() {
         let mut solver = XpbdSolver::new(XpbdConfig::default());
         let idx = solver.add_particle([0.0, 0.0, 0.0], 2.0);
-        solver.set_velocity(idx, [1.0, 0.0, 0.0]).unwrap();
+        solver.set_velocity(idx, [1.0, 0.0, 0.0]).expect("should succeed");
         // KE = 0.5 * 2.0 * 1.0^2 = 1.0
         assert!((solver.kinetic_energy() - 1.0).abs() < 1e-10);
     }
@@ -387,7 +387,7 @@ mod tests {
             substeps: 4,
         });
         solver.add_particle([0.0, 10.0, 0.0], 1.0);
-        solver.step().unwrap();
+        solver.step().expect("should succeed");
         assert!(solver.positions()[0][1] < 10.0);
     }
 
@@ -401,7 +401,7 @@ mod tests {
             substeps: 1,
         });
         solver.add_particle([0.0, 100.0, 0.0], 1.0);
-        solver.step_n(100).unwrap();
+        solver.step_n(100).expect("should succeed");
         // Should have fallen significantly
         assert!(solver.positions()[0][1] < 100.0);
     }
@@ -425,8 +425,8 @@ mod tests {
             substeps: 1,
         });
         let idx = solver.add_particle([0.0, 0.0, 0.0], 1.0);
-        solver.set_velocity(idx, [10.0, 0.0, 0.0]).unwrap();
-        solver.step().unwrap();
+        solver.set_velocity(idx, [10.0, 0.0, 0.0]).expect("should succeed");
+        solver.step().expect("should succeed");
         // Velocity should be damped
         assert!(solver.velocities()[0][0].abs() < 10.0);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Variable store: named f32 variables with change tracking.
@@ -118,14 +118,14 @@ mod tests {
     fn test_declare_and_get() {
         let mut vs = new_var_store();
         vs_declare(&mut vs, "mass", 1.0);
-        assert!((vs_get(&vs, "mass").unwrap() - 1.0).abs() < 1e-6);
+        assert!((vs_get(&vs, "mass").expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]
     fn test_set_and_get() {
         let mut vs = new_var_store();
         vs_set(&mut vs, "speed", 5.0);
-        assert!((vs_get(&vs, "speed").unwrap() - 5.0).abs() < 1e-6);
+        assert!((vs_get(&vs, "speed").expect("should succeed") - 5.0).abs() < 1e-6);
     }
 
     #[test]
@@ -150,7 +150,7 @@ mod tests {
         vs_declare(&mut vs, "z", 10.0);
         vs_set(&mut vs, "z", 99.0);
         vs_reset(&mut vs, "z");
-        assert!((vs_get(&vs, "z").unwrap() - 10.0).abs() < 1e-6);
+        assert!((vs_get(&vs, "z").expect("should succeed") - 10.0).abs() < 1e-6);
     }
 
     #[test]

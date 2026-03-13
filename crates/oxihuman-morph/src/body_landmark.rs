@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
@@ -1059,8 +1059,9 @@ mod tests {
             .collect();
         lines.sort();
         let content = lines.join("\n");
-        std::fs::write("/tmp/oxihuman_body_landmarks.txt", &content).unwrap();
-        let read_back = std::fs::read_to_string("/tmp/oxihuman_body_landmarks.txt").unwrap();
+        std::fs::write("/tmp/oxihuman_body_landmarks.txt", &content).expect("should succeed");
+        let read_back =
+            std::fs::read_to_string("/tmp/oxihuman_body_landmarks.txt").expect("should succeed");
         assert!(
             read_back.contains("Top of Head") || read_back.contains("Neck"),
             "landmark names missing"

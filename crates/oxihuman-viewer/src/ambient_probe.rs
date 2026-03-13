@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Ambient light probe that samples environment colour from 6 face directions.
 
@@ -176,7 +176,7 @@ mod tests {
     fn get_face_color_roundtrip() {
         let mut probe = new_ambient_probe(default_ambient_probe_config());
         probe_set_face_color(&mut probe, 2, FaceColor { rgb: [0.5, 0.5, 0.5] });
-        let got = probe_get_face_color(&probe, 2).unwrap();
+        let got = probe_get_face_color(&probe, 2).expect("should succeed");
         assert_eq!(got.rgb, [0.5, 0.5, 0.5]);
     }
 

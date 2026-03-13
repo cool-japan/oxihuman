@@ -114,9 +114,9 @@ mod tests {
         assert!(ring_push(&mut buf, 1.0));
         assert!(ring_push(&mut buf, 2.0));
         assert_eq!(ring_len(&buf), 2);
-        let v = ring_pop(&mut buf).unwrap();
+        let v = ring_pop(&mut buf).expect("should succeed");
         assert!((v - 1.0).abs() < 1e-6);
-        let v = ring_pop(&mut buf).unwrap();
+        let v = ring_pop(&mut buf).expect("should succeed");
         assert!((v - 2.0).abs() < 1e-6);
         assert!(ring_is_empty(&buf));
     }
@@ -141,7 +141,7 @@ mod tests {
         let mut buf: RingBuffer<f32> = new_ring_buffer(4);
         ring_push(&mut buf, 42.0);
         ring_push(&mut buf, 99.0);
-        let peeked = ring_peek(&buf).copied().unwrap();
+        let peeked = ring_peek(&buf).copied().expect("should succeed");
         assert!((peeked - 42.0).abs() < 1e-6);
         assert_eq!(ring_len(&buf), 2);
     }
@@ -165,7 +165,7 @@ mod tests {
         // Buffer full; overwrite oldest (1)
         ring_push_overwrite(&mut buf, 4);
         assert_eq!(ring_len(&buf), 3);
-        let v = ring_pop(&mut buf).unwrap();
+        let v = ring_pop(&mut buf).expect("should succeed");
         assert_eq!(v, 2);
     }
 
@@ -175,7 +175,7 @@ mod tests {
         ring_push_overwrite(&mut buf, 10);
         ring_push_overwrite(&mut buf, 20);
         assert_eq!(ring_len(&buf), 2);
-        let v = ring_pop(&mut buf).unwrap();
+        let v = ring_pop(&mut buf).expect("should succeed");
         assert_eq!(v, 10);
     }
 
@@ -186,7 +186,7 @@ mod tests {
             ring_push(&mut buf, i);
         }
         for i in 0u8..5 {
-            let v = ring_pop(&mut buf).unwrap();
+            let v = ring_pop(&mut buf).expect("should succeed");
             assert_eq!(v, i);
         }
     }
@@ -201,8 +201,8 @@ mod tests {
         ring_push(&mut buf, 4);
         // Should contain 2, 3, 4
         assert_eq!(ring_len(&buf), 3);
-        assert_eq!(ring_pop(&mut buf).unwrap(), 2);
-        assert_eq!(ring_pop(&mut buf).unwrap(), 3);
-        assert_eq!(ring_pop(&mut buf).unwrap(), 4);
+        assert_eq!(ring_pop(&mut buf).expect("should succeed"), 2);
+        assert_eq!(ring_pop(&mut buf).expect("should succeed"), 3);
+        assert_eq!(ring_pop(&mut buf).expect("should succeed"), 4);
     }
 }

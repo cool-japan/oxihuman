@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! STL (stereolithography) format export — ASCII and binary variants.
 //!
@@ -302,7 +302,7 @@ mod tests {
     #[test]
     fn test_stl_header_bytes_content() {
         let hdr = stl_header_bytes("mysolid");
-        let text = std::str::from_utf8(&hdr[..22]).unwrap();
+        let text = std::str::from_utf8(&hdr[..22]).expect("should succeed");
         assert!(text.contains("mysolid"));
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -150,7 +150,7 @@ mod tests {
     #[test]
     fn test_get_float() {
         let r = ConfigReader::parse("f=2.75");
-        let v = r.get_float("f").unwrap();
+        let v = r.get_float("f").expect("should succeed");
         assert!((v - 2.75).abs() < 1e-6);
     }
 

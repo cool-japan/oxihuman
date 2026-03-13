@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Arithmetic coding stub (encode/decode with probability model).
 
@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn test_model_range_covers_zero_one() {
         let m = make_model(b"aabb");
-        let (lo, hi) = m.range(b'a').unwrap();
+        let (lo, hi) = m.range(b'a').expect("should succeed");
         assert!(lo >= 0.0 && hi <= 1.0);
     }
 
@@ -232,6 +232,6 @@ mod tests {
     #[test]
     fn test_cumulative_ends_at_one() {
         let m = make_model(b"abc");
-        assert!((*m.cumulative.last().unwrap() - 1.0).abs() < 1e-9);
+        assert!((*m.cumulative.last().expect("should succeed") - 1.0).abs() < 1e-9);
     }
 }

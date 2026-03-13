@@ -145,7 +145,7 @@ mod tests {
     fn test_set_and_get_param() {
         let mut p = make_profile("char1");
         profile_set_param(&mut p, "jaw_open", 0.5);
-        assert!((profile_get_param(&p, "jaw_open").unwrap() - 0.5).abs() < 1e-6);
+        assert!((profile_get_param(&p, "jaw_open").expect("should succeed") - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -178,7 +178,7 @@ mod tests {
         let mut dst = make_profile("dst");
         profile_set_param(&mut dst, "smile", 0.0);
         profile_apply_to(&src, &mut dst);
-        assert!((profile_get_param(&dst, "smile").unwrap() - 1.0).abs() < 1e-6);
+        assert!((profile_get_param(&dst, "smile").expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]

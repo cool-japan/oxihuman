@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use std::io::Write;
 use std::path::Path;
@@ -611,7 +611,7 @@ mod tests {
             .add_child(SceneNode::new("body").with_mesh(tri_mesh(0.0)));
         export_scene_graph_glb(&graph, path).expect("export must succeed");
 
-        let bytes = std::fs::read(path).unwrap();
+        let bytes = std::fs::read(path).expect("should succeed");
         assert!(bytes.len() >= 12, "GLB must have at least 12 bytes");
         // Magic "glTF" in LE = [0x67, 0x6C, 0x54, 0x46]
         assert_eq!(
@@ -633,7 +633,7 @@ mod tests {
         graph.root.add_child(SceneNode::new("no_mesh_child"));
         export_scene_graph_glb(&graph, path).expect("export must succeed even without meshes");
         assert!(path.exists(), "GLB file must be created");
-        let bytes = std::fs::read(path).unwrap();
+        let bytes = std::fs::read(path).expect("should succeed");
         assert!(bytes.len() >= 12);
         std::fs::remove_file(path).ok();
     }
@@ -654,7 +654,7 @@ mod tests {
         );
         export_scene_graph_glb(&graph, path).expect("export must succeed");
         assert!(path.exists());
-        let bytes = std::fs::read(path).unwrap();
+        let bytes = std::fs::read(path).expect("should succeed");
         // Should be bigger than a single-mesh export since there are two meshes.
         assert!(bytes.len() > 12);
         std::fs::remove_file(path).ok();

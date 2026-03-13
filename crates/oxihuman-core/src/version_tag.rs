@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Semantic version tag.
 
@@ -140,7 +140,7 @@ mod tests {
 
     #[test]
     fn test_from_str() {
-        let v = version_from_str("3.1.4").unwrap();
+        let v = version_from_str("3.1.4").expect("should succeed");
         assert_eq!(v.major, 3);
         assert_eq!(v.minor, 1);
         assert_eq!(v.patch, 4);

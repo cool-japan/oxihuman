@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Integration tests for oxihuman-wasm
 //! These tests verify the WASM API surface works correctly in native mode.
@@ -26,7 +26,8 @@ fn test_buffer_roundtrip() {
     use oxihuman_wasm::BUFFER_FORMAT_VERSION;
 
     let obj_bytes = minimal_obj().as_bytes();
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).expect("should succeed");
 
     let mesh_bytes = engine.build_mesh_bytes();
     assert!(!mesh_bytes.is_empty(), "mesh bytes should not be empty");
@@ -35,7 +36,7 @@ fn test_buffer_roundtrip() {
     let header = oxihuman_wasm::parse_mesh_bytes_header(&mesh_bytes);
     assert!(header.is_some(), "header should parse successfully");
 
-    let (version, n_verts, n_idx) = header.unwrap();
+    let (version, n_verts, n_idx) = header.expect("should succeed");
     assert_eq!(version, BUFFER_FORMAT_VERSION, "version mismatch");
     assert!(n_verts > 0, "should have at least one vertex");
     assert!(n_idx > 0, "should have at least one index");
@@ -69,7 +70,7 @@ fn test_buffer_header_exactly_12_bytes() {
 
     let header = oxihuman_wasm::parse_mesh_bytes_header(&buf);
     assert!(header.is_some());
-    let (v, nv, ni) = header.unwrap();
+    let (v, nv, ni) = header.expect("should succeed");
     assert_eq!(v, 42);
     assert_eq!(nv, 10);
     assert_eq!(ni, 36);
@@ -80,7 +81,8 @@ fn test_buffer_header_exactly_12_bytes() {
 #[test]
 fn test_compressed_target_roundtrip() {
     let obj_bytes = minimal_obj().as_bytes();
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).expect("should succeed");
 
     // Export quantized bytes from the base mesh
     let q_bytes = engine.export_quantized_bytes();
@@ -90,12 +92,12 @@ fn test_compressed_target_roundtrip() {
     assert_eq!(&q_bytes[0..4], b"QMSH", "should start with QMSH magic");
 
     // Verify version field
-    let version = u32::from_le_bytes(q_bytes[4..8].try_into().unwrap());
+    let version = u32::from_le_bytes(q_bytes[4..8].try_into().expect("should succeed"));
     assert_eq!(version, 1, "quantized mesh version should be 1");
 
     // Verify vertex/index counts are sensible
-    let vc = u32::from_le_bytes(q_bytes[8..12].try_into().unwrap());
-    let ic = u32::from_le_bytes(q_bytes[12..16].try_into().unwrap());
+    let vc = u32::from_le_bytes(q_bytes[8..12].try_into().expect("should succeed"));
+    let ic = u32::from_le_bytes(q_bytes[12..16].try_into().expect("should succeed"));
     assert!(vc > 0, "vertex count should be positive");
     assert!(ic > 0, "index count should be positive");
     assert_eq!(
@@ -143,7 +145,7 @@ fn test_lite_pack_serialize_deserialize() {
     zip_bytes.extend_from_slice(content);
 
     // Use the pack scanner to read back entries
-    let entries = oxihuman_wasm::pack::scan_zip_local_entries(&zip_bytes).unwrap();
+    let entries = oxihuman_wasm::pack::scan_zip_local_entries(&zip_bytes).expect("should succeed");
     assert_eq!(entries.len(), 1, "should find exactly one entry");
     assert_eq!(entries[0].0, "hello.txt");
     assert_eq!(entries[0].1, b"world");
@@ -152,7 +154,7 @@ fn test_lite_pack_serialize_deserialize() {
 #[test]
 fn test_lite_pack_empty_zip() {
     // An empty byte slice should yield zero entries
-    let entries = oxihuman_wasm::pack::scan_zip_local_entries(&[]).unwrap();
+    let entries = oxihuman_wasm::pack::scan_zip_local_entries(&[]).expect("should succeed");
     assert!(entries.is_empty());
 }
 
@@ -165,7 +167,7 @@ fn test_lite_pack_truncated_entry() {
     data.extend_from_slice(&[0u8; 10]);
 
     // Should not panic, just return empty or partial results
-    let entries = oxihuman_wasm::pack::scan_zip_local_entries(&data).unwrap();
+    let entries = oxihuman_wasm::pack::scan_zip_local_entries(&data).expect("should succeed");
     assert!(entries.is_empty(), "truncated entry should be skipped");
 }
 
@@ -174,7 +176,8 @@ fn test_lite_pack_truncated_entry() {
 #[test]
 fn test_engine_creation_and_basic_ops() {
     let obj_bytes = minimal_obj().as_bytes();
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).expect("should succeed");
 
     // Set some parameters
     engine.set_height(0.5);
@@ -200,7 +203,8 @@ fn test_engine_strict_mode() {
 #[test]
 fn test_engine_params_json_roundtrip() {
     let obj_bytes = minimal_obj().as_bytes();
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).expect("should succeed");
 
     engine.set_height(0.8);
     engine.set_weight(0.4);
@@ -209,28 +213,30 @@ fn test_engine_params_json_roundtrip() {
     assert!(!json.is_empty());
 
     // Parse as JSON to verify it's valid
-    let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&json).expect("should succeed");
     assert!(parsed.is_object(), "params JSON should be an object");
 }
 
 #[test]
 fn test_engine_reset_params() {
     let obj_bytes = minimal_obj().as_bytes();
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).expect("should succeed");
 
     engine.set_height(0.9);
     engine.reset_params();
 
     // After reset, export should still produce valid JSON
     let json = engine.export_params_json();
-    let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&json).expect("should succeed");
     assert!(parsed.is_object());
 }
 
 #[test]
 fn test_engine_target_operations() {
     let obj_bytes = minimal_obj().as_bytes();
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).expect("should succeed");
 
     // Initially no targets loaded
     assert_eq!(engine.target_count(), 0);
@@ -254,7 +260,8 @@ fn test_engine_target_operations() {
 #[test]
 fn test_engine_animation_basics() {
     let obj_bytes = minimal_obj().as_bytes();
-    let mut engine = oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).unwrap();
+    let mut engine =
+        oxihuman_wasm::WasmEngine::new_from_obj_bytes(obj_bytes).expect("should succeed");
 
     // Record a frame
     engine.set_height(0.3);
@@ -268,7 +275,7 @@ fn test_engine_animation_basics() {
 
     // Export animation JSON (returns a JSON array of frame objects)
     let anim_json = engine.export_anim_json();
-    let parsed: serde_json::Value = serde_json::from_str(&anim_json).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&anim_json).expect("should succeed");
     assert!(parsed.is_array());
 
     // Clear

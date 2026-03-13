@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Pose retargeting between different body shapes.
 //!
@@ -557,7 +557,7 @@ mod tests {
         snap.add_joint(JointPoseData::new("A").with_translation([1.0, 0.0, 0.0]));
         snap.add_joint(JointPoseData::new("A").with_translation([2.0, 0.0, 0.0]));
         assert_eq!(snap.joint_count(), 1);
-        assert_eq!(snap.joint("A").unwrap().translation[0], 2.0);
+        assert_eq!(snap.joint("A").expect("should succeed").translation[0], 2.0);
     }
 
     #[test]
@@ -614,8 +614,8 @@ mod tests {
         let source = simple_pose(); // 180 cm
         let cfg = RetargetConfig::proportional(180.0, 90.0); // half height
         let retargeted = PoseRetargeter::retarget_pose(&source, &cfg);
-        let hips_src = source.joint("Hips").unwrap();
-        let hips_dst = retargeted.joint("Hips").unwrap();
+        let hips_src = source.joint("Hips").expect("should succeed");
+        let hips_dst = retargeted.joint("Hips").expect("should succeed");
         assert!((hips_dst.translation[1] - hips_src.translation[1] * 0.5).abs() < 1e-10);
     }
 
@@ -626,8 +626,8 @@ mod tests {
         pose.joints[1].rotation = [0.1, 0.2, 0.3, 0.9];
         let cfg = RetargetConfig::proportional(180.0, 160.0);
         let retargeted = PoseRetargeter::retarget_pose(&pose, &cfg);
-        let spine_src = pose.joint("Spine").unwrap();
-        let spine_dst = retargeted.joint("Spine").unwrap();
+        let spine_src = pose.joint("Spine").expect("should succeed");
+        let spine_dst = retargeted.joint("Spine").expect("should succeed");
         assert_eq!(spine_src.rotation, spine_dst.rotation);
     }
 
@@ -744,7 +744,7 @@ mod tests {
         let pose = simple_pose();
         let normalised = PoseRetargeter::normalize_pose(&pose);
         // Hips y should be 90/180 = 0.5
-        let hips = normalised.joint("Hips").unwrap();
+        let hips = normalised.joint("Hips").expect("should succeed");
         assert!((hips.translation[1] - 0.5).abs() < 1e-9);
     }
 
@@ -755,7 +755,7 @@ mod tests {
         pose.add_joint(JointPoseData::new("A").with_translation([0.0, 100.0, 0.0]));
         pose.add_joint(JointPoseData::new("B").with_translation([0.0, 50.0, 0.0]));
         let normalised = PoseRetargeter::normalize_pose(&pose);
-        let a = normalised.joint("A").unwrap();
+        let a = normalised.joint("A").expect("should succeed");
         assert!(
             (a.translation[1] - 1.0).abs() < 1e-9,
             "A.y should be 1.0 (max = 100)"
@@ -768,7 +768,7 @@ mod tests {
         pose.body_height_cm = 0.0;
         pose.add_joint(JointPoseData::new("Z"));
         let normalised = PoseRetargeter::normalize_pose(&pose);
-        let z = normalised.joint("Z").unwrap();
+        let z = normalised.joint("Z").expect("should succeed");
         assert_eq!(z.translation, [0.0, 0.0, 0.0]);
     }
 

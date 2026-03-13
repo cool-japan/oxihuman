@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! IMU (accelerometer + gyroscope) sensor model.
@@ -134,7 +134,7 @@ mod tests {
             accel: [0.0, 0.0, 9.8],
             gyro: [0.0; 3],
         });
-        assert_eq!(imu.latest().unwrap().time, 1.0);
+        assert_eq!(imu.latest().expect("should succeed").time, 1.0);
     }
 
     #[test]

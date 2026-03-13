@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Named byte buffer registry — store and retrieve byte buffers by name.
@@ -110,7 +110,7 @@ mod tests {
     fn test_remove() {
         let mut r = new_named_buffer_registry();
         nb_store(&mut r, "x", vec![42]);
-        let removed = nb_remove(&mut r, "x").unwrap();
+        let removed = nb_remove(&mut r, "x").expect("should succeed");
         assert_eq!(removed, vec![42u8] /* removed data */);
         assert!(r.is_empty());
     }

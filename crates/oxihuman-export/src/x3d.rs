@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! X3D (XML-based 3D) mesh export — ISO/IEC 19775.
 //!
@@ -599,7 +599,7 @@ mod tests {
         let path = std::path::Path::new("/tmp/oxihuman_x3d_test_single.x3d");
         let stats = export_x3d(&mesh, path, &opts).expect("export_x3d failed");
         assert!(path.exists(), "Output file not created");
-        let content = std::fs::read_to_string(path).unwrap();
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(
             validate_x3d(&content).is_ok(),
             "Exported file failed validation"
@@ -633,7 +633,7 @@ mod tests {
         let path = std::path::Path::new("/tmp/oxihuman_x3d_test_scene.x3d");
         export_x3d_scene(&meshes, path, &opts).expect("export_x3d_scene failed");
         assert!(path.exists(), "Scene output file not created");
-        let content = std::fs::read_to_string(path).unwrap();
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(
             validate_x3d(&content).is_ok(),
             "Scene file failed validation"

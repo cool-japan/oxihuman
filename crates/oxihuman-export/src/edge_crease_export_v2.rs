@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Edge crease export v2: per-edge crease sharpness for subdivision.
@@ -125,7 +125,7 @@ mod tests {
         add_crease_v2(&mut exp, 0, 1, 2.0);
         add_crease_v2(&mut exp, 1, 0, 8.0);
         assert_eq!(crease_count_v2(&exp), 1);
-        assert!((get_sharpness_v2(&exp, 0, 1).unwrap() - 8.0).abs() < 1e-5);
+        assert!((get_sharpness_v2(&exp, 0, 1).expect("should succeed") - 8.0).abs() < 1e-5);
     }
 
     #[test]
@@ -138,7 +138,7 @@ mod tests {
     fn get_existing() {
         let mut exp = new_edge_crease_export_v2();
         add_crease_v2(&mut exp, 3, 7, 4.5);
-        assert!((get_sharpness_v2(&exp, 3, 7).unwrap() - 4.5).abs() < 1e-5);
+        assert!((get_sharpness_v2(&exp, 3, 7).expect("should succeed") - 4.5).abs() < 1e-5);
     }
 
     #[test]
@@ -173,6 +173,6 @@ mod tests {
     fn sharpness_clamped() {
         let mut exp = new_edge_crease_export_v2();
         add_crease_v2(&mut exp, 0, 1, 999.0);
-        assert!((get_sharpness_v2(&exp, 0, 1).unwrap() - 10.0).abs() < 1e-5);
+        assert!((get_sharpness_v2(&exp, 0, 1).expect("should succeed") - 10.0).abs() < 1e-5);
     }
 }

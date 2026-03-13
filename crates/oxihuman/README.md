@@ -2,6 +2,8 @@
 
 > Privacy-first, client-side human body generator — pure Rust MakeHuman port.
 
+**Version:** 0.1.1 | **Updated:** 2026-03-13
+
 This is the **facade crate** that re-exports all OxiHuman sub-crates under a single, ergonomic namespace.
 
 ## Usage
@@ -10,7 +12,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-oxihuman = "0.1"
+oxihuman = "0.1.1"
 ```
 
 Then in your code:

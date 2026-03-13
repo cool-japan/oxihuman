@@ -266,7 +266,7 @@ mod tests {
         let cfg = default_hdr_config();
         let path = "/tmp/oxihuman_hdr_export_test.hdr";
         assert!(hdr_write_to_file(&img, path, &cfg).is_ok());
-        let meta = std::fs::metadata(path).unwrap();
+        let meta = std::fs::metadata(path).expect("should succeed");
         assert!(meta.len() > 0);
         let _ = std::fs::remove_file(path);
     }

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A zero-copy cursor for reading bytes sequentially from a slice.
@@ -131,7 +131,7 @@ mod tests {
     fn test_read_f32_le() {
         let bits = 1.0f32.to_bits().to_le_bytes();
         let mut c = CursorReader::new(&bits);
-        let v = c.read_f32_le().unwrap();
+        let v = c.read_f32_le().expect("should succeed");
         assert!((v - 1.0).abs() < f32::EPSILON);
     }
 

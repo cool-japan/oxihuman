@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Skeleton/rig export for animation pipelines.
 //!
@@ -367,7 +367,7 @@ mod tests {
         add_bone(&mut rig, make_bone(1, "spine", Some(0)));
         let bone = find_bone_by_name(&rig, "spine");
         assert!(bone.is_some());
-        assert_eq!(bone.unwrap().id, 1);
+        assert_eq!(bone.expect("should succeed").id, 1);
     }
 
     #[test]

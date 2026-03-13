@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Ear-clipping polygon triangulation.
@@ -238,7 +238,7 @@ mod tests {
     #[test]
     fn test_polygon_bbox() {
         let pts = vec![EcPoint::new(-1.0, -2.0), EcPoint::new(3.0, 4.0)];
-        let (mn, mx) = polygon_bbox(&pts).unwrap();
+        let (mn, mx) = polygon_bbox(&pts).expect("should succeed");
         assert!((mn[0] - (-1.0)).abs() < 1e-5);
         assert!((mx[1] - 4.0).abs() < 1e-5);
     }

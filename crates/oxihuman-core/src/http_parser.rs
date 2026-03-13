@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! HTTP/1.1 request/response parser stub.
@@ -180,7 +180,7 @@ mod tests {
     fn test_parse_get_request() {
         /* basic GET request parsed */
         let raw = b"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n";
-        let req = parse_request(raw).unwrap();
+        let req = parse_request(raw).expect("should succeed");
         assert_eq!(req.method, HttpMethod::Get);
         assert_eq!(req.path, "/");
     }
@@ -189,7 +189,7 @@ mod tests {
     fn test_parse_response_200() {
         /* 200 OK response parsed */
         let raw = b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n";
-        let resp = parse_response(raw).unwrap();
+        let resp = parse_response(raw).expect("should succeed");
         assert_eq!(resp.status_code, 200);
     }
 
@@ -207,7 +207,7 @@ mod tests {
     fn test_is_http11_true() {
         /* HTTP/1.1 version detected */
         let raw = b"GET / HTTP/1.1\r\n\r\n";
-        let req = parse_request(raw).unwrap();
+        let req = parse_request(raw).expect("should succeed");
         assert!(is_http11(&req));
     }
 
@@ -225,7 +225,7 @@ mod tests {
     fn test_method_post() {
         /* POST method parsed */
         let raw = b"POST /data HTTP/1.1\r\n\r\n";
-        let req = parse_request(raw).unwrap();
+        let req = parse_request(raw).expect("should succeed");
         assert_eq!(req.method, HttpMethod::Post);
     }
 
@@ -240,7 +240,7 @@ mod tests {
     fn test_multiple_headers() {
         /* multiple headers parsed */
         let raw = b"GET / HTTP/1.1\r\nHost: x\r\nAccept: */*\r\n\r\n";
-        let req = parse_request(raw).unwrap();
+        let req = parse_request(raw).expect("should succeed");
         assert_eq!(req.headers.len(), 2);
     }
 
@@ -255,7 +255,7 @@ mod tests {
     fn test_parse_response_404() {
         /* 404 status code parsed */
         let raw = b"HTTP/1.1 404 Not Found\r\n\r\n";
-        let resp = parse_response(raw).unwrap();
+        let resp = parse_response(raw).expect("should succeed");
         assert_eq!(resp.status_code, 404);
         assert_eq!(resp.reason, "Not Found");
     }

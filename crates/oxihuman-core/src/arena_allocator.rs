@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Bump/arena allocator stub.
 
@@ -121,8 +121,8 @@ mod tests {
     fn test_alloc_sequential() {
         let cfg = ArenaConfig { chunk_size: 256 };
         let mut arena = new_arena(&cfg);
-        let off1 = arena_alloc_bytes(&mut arena, 32).unwrap();
-        let off2 = arena_alloc_bytes(&mut arena, 32).unwrap();
+        let off1 = arena_alloc_bytes(&mut arena, 32).expect("should succeed");
+        let off2 = arena_alloc_bytes(&mut arena, 32).expect("should succeed");
         assert_eq!(off1, 0);
         assert_eq!(off2, 32);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -375,8 +375,8 @@ mod tests {
     fn test_export_tga_rgb() {
         let path = tmp("test_export_tga_rgb.tga");
         let img = TgaImage::solid_color(16, 16, [255, 128, 64, 255]);
-        export_tga_rgb(&img, &path).unwrap();
-        let data = fs::read(&path).unwrap();
+        export_tga_rgb(&img, &path).expect("should succeed");
+        let data = fs::read(&path).expect("should succeed");
         assert_eq!(data.len(), 18 + 16 * 16 * 3);
         assert_eq!(data[2], 2);
         assert_eq!(data[16], 24);
@@ -386,8 +386,8 @@ mod tests {
     fn test_export_tga_rgba() {
         let path = tmp("test_export_tga_rgba.tga");
         let img = TgaImage::solid_color(8, 8, [0, 255, 0, 128]);
-        export_tga_rgba(&img, &path).unwrap();
-        let data = fs::read(&path).unwrap();
+        export_tga_rgba(&img, &path).expect("should succeed");
+        let data = fs::read(&path).expect("should succeed");
         assert_eq!(data.len(), 18 + 8 * 8 * 4);
         assert_eq!(data[16], 32);
     }
@@ -396,8 +396,8 @@ mod tests {
     fn test_validate_tga() {
         let path = tmp("test_validate_tga.tga");
         let img = TgaImage::solid_color(4, 4, [255, 0, 0, 255]);
-        export_tga_rgb(&img, &path).unwrap();
-        let ok = validate_tga(&path).unwrap();
+        export_tga_rgb(&img, &path).expect("should succeed");
+        let ok = validate_tga(&path).expect("should succeed");
         assert!(ok);
     }
 
@@ -405,8 +405,8 @@ mod tests {
     fn test_read_tga_header() {
         let path = tmp("test_read_tga_header.tga");
         let img = TgaImage::solid_color(32, 64, [0, 0, 255, 255]);
-        export_tga_rgb(&img, &path).unwrap();
-        let (w, h, bpp) = read_tga_header(&path).unwrap();
+        export_tga_rgb(&img, &path).expect("should succeed");
+        let (w, h, bpp) = read_tga_header(&path).expect("should succeed");
         assert_eq!(w, 32);
         assert_eq!(h, 64);
         assert_eq!(bpp, 24);

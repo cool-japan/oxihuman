@@ -387,7 +387,7 @@ mod tests {
     fn test_set_get_layer_weight() {
         let mut layers = vec![make_layer(5, 1, 0.5)];
         set_layer_weight(&mut layers[..], 5, 0.8);
-        assert!((get_layer_weight(&layers, 5).unwrap() - 0.8).abs() < 1e-6);
+        assert!((get_layer_weight(&layers, 5).expect("should succeed") - 0.8).abs() < 1e-6);
     }
 
     #[test]

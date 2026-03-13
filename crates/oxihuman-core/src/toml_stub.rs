@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -1086,7 +1086,7 @@ mod tests {
     #[test]
     fn parse_float() {
         let doc = parse_toml_simple("ratio = 1.5");
-        assert!((toml_get_float(&doc, "ratio").unwrap() - 1.5).abs() < 1e-9);
+        assert!((toml_get_float(&doc, "ratio").expect("should succeed") - 1.5).abs() < 1e-9);
     }
 
     #[test]
@@ -1147,7 +1147,7 @@ mod tests {
     #[test]
     fn test_section_header() {
         let input = "[server]\nport = 8080\nhost = \"localhost\"\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         let server = doc.get("server");
         assert!(server.is_some());
         if let Some(TomlValue::Table(t)) = server {
@@ -1164,7 +1164,7 @@ mod tests {
     #[test]
     fn test_nested_section() {
         let input = "[database.connection]\ntimeout = 30\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         let val = doc.get("database.connection.timeout");
         assert_eq!(val, Some(&TomlValue::Int(30)));
     }
@@ -1172,7 +1172,7 @@ mod tests {
     #[test]
     fn test_inline_table() {
         let input = "point = { x = 1, y = 2 }\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         if let Some(TomlValue::Table(t)) = doc.get("point") {
             assert_eq!(t.get("x"), Some(&TomlValue::Int(1)));
             assert_eq!(t.get("y"), Some(&TomlValue::Int(2)));
@@ -1184,7 +1184,7 @@ mod tests {
     #[test]
     fn test_array_of_tables() {
         let input = "[[products]]\nname = \"Hammer\"\n\n[[products]]\nname = \"Nail\"\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         if let Some(TomlValue::Array(arr)) = doc.get("products") {
             assert_eq!(arr.len(), 2);
             if let TomlValue::Table(t) = &arr[0] {
@@ -1201,7 +1201,7 @@ mod tests {
     #[test]
     fn test_multiline_basic_string() {
         let input = "bio = \"\"\"\nRoses are red\nViolets are blue\"\"\"\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(
             doc.get("bio"),
             Some(&TomlValue::Str("Roses are red\nViolets are blue".to_string()))
@@ -1211,7 +1211,7 @@ mod tests {
     #[test]
     fn test_multiline_literal_string() {
         let input = "regex = '''\n\\d{2,3}\n'''\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(
             doc.get("regex"),
             Some(&TomlValue::Str("\\d{2,3}\n".to_string()))
@@ -1221,7 +1221,7 @@ mod tests {
     #[test]
     fn test_literal_string() {
         let input = "path = 'C:\\Users\\admin'\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(
             doc.get("path"),
             Some(&TomlValue::Str("C:\\Users\\admin".to_string()))
@@ -1231,35 +1231,35 @@ mod tests {
     #[test]
     fn test_hex_integer() {
         let input = "color = 0xFF00FF\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(doc.get("color"), Some(&TomlValue::Int(0xFF00FF)));
     }
 
     #[test]
     fn test_octal_integer() {
         let input = "perm = 0o755\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(doc.get("perm"), Some(&TomlValue::Int(0o755)));
     }
 
     #[test]
     fn test_binary_integer() {
         let input = "mask = 0b11010110\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(doc.get("mask"), Some(&TomlValue::Int(0b11010110)));
     }
 
     #[test]
     fn test_underscore_integer() {
         let input = "big = 1_000_000\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(doc.get("big"), Some(&TomlValue::Int(1_000_000)));
     }
 
     #[test]
     fn test_float_exponent() {
         let input = "sci = 5e+22\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         if let Some(TomlValue::Float(f)) = doc.get("sci") {
             assert!((f - 5e22).abs() < 1e16);
         } else {
@@ -1270,7 +1270,7 @@ mod tests {
     #[test]
     fn test_inf_nan() {
         let input = "a = inf\nb = -inf\nc = nan\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         if let Some(TomlValue::Float(f)) = doc.get("a") {
             assert!(f.is_infinite() && f.is_sign_positive());
         } else {
@@ -1291,7 +1291,7 @@ mod tests {
     #[test]
     fn test_datetime() {
         let input = "created = 2024-01-15T10:30:00Z\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(
             doc.get("created"),
             Some(&TomlValue::DateTime("2024-01-15T10:30:00Z".to_string()))
@@ -1301,7 +1301,7 @@ mod tests {
     #[test]
     fn test_dotted_key() {
         let input = "fruit.apple.color = \"red\"\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         let val = doc.get("fruit.apple.color");
         assert_eq!(val, Some(&TomlValue::Str("red".to_string())));
     }
@@ -1309,7 +1309,7 @@ mod tests {
     #[test]
     fn test_nested_array() {
         let input = "data = [[1, 2], [3, 4]]\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         if let Some(TomlValue::Array(outer)) = doc.get("data") {
             assert_eq!(outer.len(), 2);
             if let TomlValue::Array(inner) = &outer[0] {
@@ -1333,7 +1333,7 @@ mod tests {
     #[test]
     fn test_escape_sequences() {
         let input = r#"msg = "hello\nworld\t!""#;
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(
             doc.get("msg"),
             Some(&TomlValue::Str("hello\nworld\t!".to_string()))
@@ -1343,7 +1343,7 @@ mod tests {
     #[test]
     fn test_empty_inline_table() {
         let input = "empty = {}\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         if let Some(TomlValue::Table(t)) = doc.get("empty") {
             assert!(t.is_empty());
         } else {
@@ -1364,7 +1364,7 @@ age = 30
 ports = [8001, 8001, 8002]
 enabled = true
 "#;
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(doc.get("title"), Some(&TomlValue::Str("Test".to_string())));
         assert_eq!(
             doc.get("owner.name"),
@@ -1391,14 +1391,14 @@ enabled = true
     #[test]
     fn test_negative_integer() {
         let input = "temp = -40\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(doc.get("temp"), Some(&TomlValue::Int(-40)));
     }
 
     #[test]
     fn test_positive_float() {
         let input = "val = +3.14\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         if let Some(TomlValue::Float(f)) = doc.get("val") {
             assert!((f - 3.14).abs() < 1e-9);
         } else {
@@ -1409,7 +1409,7 @@ enabled = true
     #[test]
     fn test_date_only() {
         let input = "day = 2024-06-15\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(
             doc.get("day"),
             Some(&TomlValue::DateTime("2024-06-15".to_string()))
@@ -1419,14 +1419,14 @@ enabled = true
     #[test]
     fn test_quoted_key() {
         let input = r#""weird key" = 1"#;
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(doc.get("weird key"), Some(&TomlValue::Int(1)));
     }
 
     #[test]
     fn test_inline_comment_after_value() {
         let input = "x = 42 # this is a comment\n";
-        let doc = parse_toml_full(input).unwrap();
+        let doc = parse_toml_full(input).expect("should succeed");
         assert_eq!(doc.get("x"), Some(&TomlValue::Int(42)));
     }
 }

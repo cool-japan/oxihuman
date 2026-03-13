@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Spatial hash grid for 2D/3D neighbor queries.
@@ -190,7 +190,9 @@ mod tests {
         let mut g = new_hash_grid(1.0);
         g.insert(HgPoint3::new(0.0, 0.0, 0.0));
         g.insert(HgPoint3::new(10.0, 0.0, 0.0));
-        let (id, dist) = g.nearest(&HgPoint3::new(0.1, 0.0, 0.0)).unwrap();
+        let (id, dist) = g
+            .nearest(&HgPoint3::new(0.1, 0.0, 0.0))
+            .expect("should succeed");
         assert_eq!(id, 0);
         assert!(dist < 1.0);
     }
@@ -209,7 +211,7 @@ mod tests {
     fn test_get_point() {
         let mut g = new_hash_grid(1.0);
         let id = g.insert(HgPoint3::new(3.0, 4.0, 5.0));
-        let p = g.get(id).unwrap();
+        let p = g.get(id).expect("should succeed");
         assert!((p.x - 3.0).abs() < 1e-5);
     }
 

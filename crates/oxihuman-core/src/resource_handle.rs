@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Generational resource handles with a handle pool.
 
@@ -99,7 +99,7 @@ mod tests {
     #[test]
     fn test_allocate() {
         let mut pool = new_handle_pool(10);
-        let h = allocate_handle(&mut pool).unwrap();
+        let h = allocate_handle(&mut pool).expect("should succeed");
         assert_eq!(handle_index(h), 0);
         assert_eq!(handle_generation(h), 1);
     }
@@ -107,14 +107,14 @@ mod tests {
     #[test]
     fn test_valid() {
         let mut pool = new_handle_pool(10);
-        let h = allocate_handle(&mut pool).unwrap();
+        let h = allocate_handle(&mut pool).expect("should succeed");
         assert!(handle_is_valid(&pool, h));
     }
 
     #[test]
     fn test_release_invalidates() {
         let mut pool = new_handle_pool(10);
-        let h = allocate_handle(&mut pool).unwrap();
+        let h = allocate_handle(&mut pool).expect("should succeed");
         release_handle(&mut pool, h);
         assert!(!handle_is_valid(&pool, h));
     }
@@ -122,9 +122,9 @@ mod tests {
     #[test]
     fn test_reuse_slot() {
         let mut pool = new_handle_pool(10);
-        let h1 = allocate_handle(&mut pool).unwrap();
+        let h1 = allocate_handle(&mut pool).expect("should succeed");
         release_handle(&mut pool, h1);
-        let h2 = allocate_handle(&mut pool).unwrap();
+        let h2 = allocate_handle(&mut pool).expect("should succeed");
         assert_eq!(handle_index(h2), 0);
         assert_eq!(handle_generation(h2), 3); // gen bumped on release and alloc
     }
@@ -140,14 +140,14 @@ mod tests {
     #[test]
     fn test_capacity_limit() {
         let mut pool = new_handle_pool(1);
-        let _ = allocate_handle(&mut pool).unwrap();
+        let _ = allocate_handle(&mut pool).expect("should succeed");
         assert!(allocate_handle(&mut pool).is_none());
     }
 
     #[test]
     fn test_double_release() {
         let mut pool = new_handle_pool(10);
-        let h = allocate_handle(&mut pool).unwrap();
+        let h = allocate_handle(&mut pool).expect("should succeed");
         release_handle(&mut pool, h);
         release_handle(&mut pool, h); // no-op, generation mismatch
         assert_eq!(handle_count(&pool), 0);

@@ -1,6 +1,6 @@
 # OxiHuman Alpha Asset Pack Manifest
 # Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 
 version = "0.1.0"
 base_mesh_path = "data/3dobjs/base.obj"

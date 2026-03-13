@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Isotropic remeshing via iterative edge operations:
 //! split long edges, collapse short edges, flip edges for valence, tangential smoothing.

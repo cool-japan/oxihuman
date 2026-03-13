@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Render scope — hierarchical named render sections with timing budgets.
@@ -158,7 +158,7 @@ mod tests {
         let mut r = new_render_scope_registry();
         rs_add(&mut r, make_scope(1, 0));
         rs_record_time(&mut r, 1, 500);
-        assert_eq!(rs_get(&r, 1).unwrap().last_us, 500);
+        assert_eq!(rs_get(&r, 1).expect("should succeed").last_us, 500);
     }
 
     #[test]

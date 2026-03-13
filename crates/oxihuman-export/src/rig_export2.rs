@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export rig/armature data (new module to avoid conflict with existing rig_export).
 

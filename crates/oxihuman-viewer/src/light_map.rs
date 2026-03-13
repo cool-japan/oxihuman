@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Light-map atlas management (baked GI atlas).
@@ -178,7 +178,7 @@ mod tests {
     fn uv_scale_stored() {
         let mut a = new_lightmap_atlas();
         lm_add_entry(&mut a, 5, [0.1, 0.2], [0.3, 0.4], 0);
-        let e = lm_get_entry(&a, 5).unwrap();
+        let e = lm_get_entry(&a, 5).expect("should succeed");
         assert!((e.uv_scale[0] - 0.3).abs() < 1e-5);
     }
 }

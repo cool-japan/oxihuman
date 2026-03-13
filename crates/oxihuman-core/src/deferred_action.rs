@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A deferred action that can be scheduled for later execution.
 #[allow(dead_code)]
@@ -135,6 +135,6 @@ mod tests {
     fn test_execute_returns_payload() {
         let mut a = new_deferred("act", "payload_val");
         let r = execute_deferred(&mut a);
-        assert_eq!(r.unwrap(), "payload_val");
+        assert_eq!(r.expect("should succeed"), "payload_val");
     }
 }

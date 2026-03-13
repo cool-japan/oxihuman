@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Follow-path curve constraint for mesh — projects mesh origin along a 3-D curve.
@@ -133,7 +133,7 @@ mod tests {
         let mut f = new_follow_path("r");
         add_path_point(&mut f, [1.0, 2.0, 3.0]);
         add_path_point(&mut f, [4.0, 5.0, 6.0]);
-        let p = evaluate_path(&f, 0.0).unwrap();
+        let p = evaluate_path(&f, 0.0).expect("should succeed");
         assert!((p[0] - 1.0).abs() < 1e-5);
     }
 
@@ -143,7 +143,7 @@ mod tests {
         let mut f = new_follow_path("r");
         add_path_point(&mut f, [0.0, 0.0, 0.0]);
         add_path_point(&mut f, [10.0, 0.0, 0.0]);
-        let p = evaluate_path(&f, 1.0).unwrap();
+        let p = evaluate_path(&f, 1.0).expect("should succeed");
         assert!((p[0] - 10.0).abs() < 1e-4);
     }
 

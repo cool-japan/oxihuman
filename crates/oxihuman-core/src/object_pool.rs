@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Fixed-size object pool allocator for frequent allocation/deallocation patterns.
 
@@ -196,8 +196,8 @@ mod tests {
     fn test_pool_full_returns_none() {
         let cfg = default_pool_config(2);
         let mut pool = new_object_pool(cfg);
-        let _h1 = pool_alloc(&mut pool).unwrap();
-        let _h2 = pool_alloc(&mut pool).unwrap();
+        let _h1 = pool_alloc(&mut pool).expect("should succeed");
+        let _h2 = pool_alloc(&mut pool).expect("should succeed");
         let h3 = pool_alloc(&mut pool);
         assert!(h3.is_none());
     }
@@ -206,7 +206,7 @@ mod tests {
     fn test_pool_handle_invalidated_after_free() {
         let cfg = default_pool_config(4);
         let mut pool = new_object_pool(cfg);
-        let h = pool_alloc(&mut pool).unwrap();
+        let h = pool_alloc(&mut pool).expect("should succeed");
         let h_clone = h.clone();
         pool_free(&mut pool, h);
         assert!(!pool_is_valid(&pool, &h_clone));
@@ -226,7 +226,7 @@ mod tests {
     fn test_pool_reset() {
         let cfg = default_pool_config(4);
         let mut pool = new_object_pool(cfg);
-        let h = pool_alloc(&mut pool).unwrap();
+        let h = pool_alloc(&mut pool).expect("should succeed");
         pool_reset(&mut pool);
         assert_eq!(pool_used_count(&pool), 0);
         assert_eq!(pool_free_count(&pool), 4);
@@ -247,8 +247,8 @@ mod tests {
         let mut cfg = default_pool_config(2);
         cfg.auto_grow = true;
         let mut pool = new_object_pool(cfg);
-        let _h1 = pool_alloc(&mut pool).unwrap();
-        let _h2 = pool_alloc(&mut pool).unwrap();
+        let _h1 = pool_alloc(&mut pool).expect("should succeed");
+        let _h2 = pool_alloc(&mut pool).expect("should succeed");
         let h3 = pool_alloc(&mut pool);
         assert!(h3.is_some(), "should grow and allocate");
         assert!(pool_capacity(&pool) > 2);
@@ -258,7 +258,7 @@ mod tests {
     fn test_pool_double_free_fails() {
         let cfg = default_pool_config(4);
         let mut pool = new_object_pool(cfg);
-        let h = pool_alloc(&mut pool).unwrap();
+        let h = pool_alloc(&mut pool).expect("should succeed");
         let h2 = PoolHandle {
             index: h.index,
             generation: h.generation,

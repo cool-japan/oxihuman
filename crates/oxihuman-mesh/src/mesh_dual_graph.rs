@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Dual graph of a triangle mesh.
 //!
@@ -333,7 +333,7 @@ mod tests {
         let g = build_dual_graph(&verts, &indices, cfg);
         let path = dual_path_between(&g, 0, 1);
         assert!(path.is_some());
-        let p = path.unwrap();
+        let p = path.expect("should succeed");
         assert_eq!(p.first(), Some(&0));
         assert_eq!(p.last(), Some(&1));
     }

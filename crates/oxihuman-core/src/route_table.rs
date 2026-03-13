@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Simple string-pattern route table with parameter extraction.
@@ -125,7 +125,7 @@ mod tests {
     fn exact_match() {
         let mut t = new_route_table();
         t.add_route("/health", "health_handler", 0);
-        let m = t.dispatch("/health").unwrap();
+        let m = t.dispatch("/health").expect("should succeed");
         assert_eq!(m.handler, "health_handler");
         assert!(m.params.is_empty());
     }
@@ -134,7 +134,7 @@ mod tests {
     fn param_extraction() {
         let mut t = new_route_table();
         t.add_route("/user/:id", "user_handler", 0);
-        let m = t.dispatch("/user/42").unwrap();
+        let m = t.dispatch("/user/42").expect("should succeed");
         assert_eq!(m.handler, "user_handler");
         assert_eq!(m.params[0], ("id".to_string(), "42".to_string()));
     }
@@ -151,7 +151,7 @@ mod tests {
         let mut t = new_route_table();
         t.add_route("/item/:id", "generic", 0);
         t.add_route("/item/special", "specific", 10);
-        let m = t.dispatch("/item/special").unwrap();
+        let m = t.dispatch("/item/special").expect("should succeed");
         assert_eq!(m.handler, "specific");
     }
 
@@ -185,7 +185,7 @@ mod tests {
     fn multiple_params() {
         let mut t = new_route_table();
         t.add_route("/a/:x/b/:y", "h", 0);
-        let m = t.dispatch("/a/1/b/2").unwrap();
+        let m = t.dispatch("/a/1/b/2").expect("should succeed");
         assert_eq!(m.params.len(), 2);
     }
 

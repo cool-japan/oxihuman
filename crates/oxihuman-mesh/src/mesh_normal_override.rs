@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Per-vertex normal override layer.
@@ -85,7 +85,7 @@ mod tests {
     fn set_and_get() {
         let mut l = new_normal_override_layer();
         set_override_normal(&mut l, 0, [0.0, 1.0, 0.0]);
-        let n = get_override_normal(&l, 0).unwrap();
+        let n = get_override_normal(&l, 0).expect("should succeed");
         assert!((n[1] - 1.0).abs() < 1e-6 /* Y up */);
     }
 
@@ -121,7 +121,7 @@ mod tests {
     fn normals_are_normalised() {
         let mut l = new_normal_override_layer();
         set_override_normal(&mut l, 0, [5.0, 0.0, 0.0]);
-        let n = get_override_normal(&l, 0).unwrap();
+        let n = get_override_normal(&l, 0).expect("should succeed");
         let len = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2]).sqrt();
         assert!((len - 1.0).abs() < 1e-6 /* unit length */);
     }

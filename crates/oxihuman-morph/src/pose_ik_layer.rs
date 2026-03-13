@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! IkLayer — IK target collection with convergence tracking.
 
@@ -108,7 +108,7 @@ mod tests {
     fn test_ik_target_at_some() {
         let mut l = new_ik_layer(50, 1e-4);
         add_ik_target(&mut l, "foot", [0.0, 0.0, 0.0], 0.8);
-        let t = ik_target_at(&l, 0).unwrap();
+        let t = ik_target_at(&l, 0).expect("should succeed");
         assert_eq!(t.name, "foot");
     }
 

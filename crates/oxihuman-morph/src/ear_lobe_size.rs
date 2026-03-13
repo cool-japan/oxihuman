@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Ear lobe size control — volume and pendulousness of the ear lobe.

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Protobuf varint encode/decode stub.
@@ -113,7 +113,7 @@ mod tests {
     #[test]
     fn test_decode_single_byte() {
         /* single-byte varint */
-        let (v, n) = decode_varint(&[0x05]).unwrap();
+        let (v, n) = decode_varint(&[0x05]).expect("should succeed");
         assert_eq!(v, 5);
         assert_eq!(n, 1);
     }
@@ -147,7 +147,7 @@ mod tests {
         /* positive zigzag roundtrip */
         let mut buf = vec![];
         encode_zigzag(100, &mut buf);
-        let (v, _) = decode_zigzag(&buf).unwrap();
+        let (v, _) = decode_zigzag(&buf).expect("should succeed");
         assert_eq!(v, 100);
     }
 
@@ -156,7 +156,7 @@ mod tests {
         /* negative zigzag roundtrip */
         let mut buf = vec![];
         encode_zigzag(-50, &mut buf);
-        let (v, _) = decode_zigzag(&buf).unwrap();
+        let (v, _) = decode_zigzag(&buf).expect("should succeed");
         assert_eq!(v, -50);
     }
 

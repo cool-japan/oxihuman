@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Minimap / overview panel showing top-down scene thumbnail.
 
@@ -192,7 +192,7 @@ mod tests {
         let v = default_view();
         let px = minimap_world_to_screen(&v, [0.0, 0.0]);
         assert!(px.is_some());
-        let px = px.unwrap();
+        let px = px.expect("should succeed");
         assert!((px[0] - 100.0).abs() < 1.0);
         assert!((px[1] - 100.0).abs() < 1.0);
     }

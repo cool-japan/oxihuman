@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -872,8 +872,8 @@ mod tests {
     #[test]
     fn sdf_smooth_union_le_hard_union() {
         let (a, b) = two_matching_sphere_sdfs();
-        let hard = sdf_union(&a, &b).unwrap();
-        let soft = sdf_smooth_union(&a, &b, 0.3).unwrap();
+        let hard = sdf_union(&a, &b).expect("should succeed");
+        let soft = sdf_smooth_union(&a, &b, 0.3).expect("should succeed");
         // smooth_min ≤ min, so every cell should satisfy soft ≤ hard.
         for i in 0..soft.data.len() {
             assert!(

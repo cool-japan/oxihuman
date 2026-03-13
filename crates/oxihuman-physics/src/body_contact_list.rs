@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Per-body contact list tracking active contacts with other bodies.
@@ -152,7 +152,7 @@ mod tests {
         cl.add(make_contact(0, 1, 0.1));
         cl.add(make_contact(0, 2, 0.5));
         cl.add(make_contact(0, 3, 0.3));
-        assert!((cl.deepest_contact().unwrap().depth - 0.5).abs() < f32::EPSILON);
+        assert!((cl.deepest_contact().expect("should succeed").depth - 0.5).abs() < f32::EPSILON);
     }
 
     #[test]

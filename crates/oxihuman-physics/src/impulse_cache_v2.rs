@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Caches impulse values from the previous solver iteration for warm-starting.
@@ -123,7 +123,7 @@ mod tests {
         let mut e = CacheEntry::new(42);
         e.normal_impulse = 5.0;
         cache.store(e);
-        let found = cache.lookup(42).unwrap();
+        let found = cache.lookup(42).expect("should succeed");
         assert!((found.normal_impulse - 5.0).abs() < 1e-6);
     }
 
@@ -137,7 +137,7 @@ mod tests {
         e2.normal_impulse = 2.0;
         cache.store(e2);
         assert_eq!(cache.len(), 1);
-        assert!((cache.lookup(1).unwrap().normal_impulse - 2.0).abs() < 1e-6);
+        assert!((cache.lookup(1).expect("should succeed").normal_impulse - 2.0).abs() < 1e-6);
     }
 
     #[test]
@@ -145,7 +145,7 @@ mod tests {
         let mut cache = ImpulseCacheV2::new(64);
         cache.store(CacheEntry::new(1));
         cache.age_all();
-        assert_eq!(cache.lookup(1).unwrap().age, 1);
+        assert_eq!(cache.lookup(1).expect("should succeed").age, 1);
     }
 
     #[test]

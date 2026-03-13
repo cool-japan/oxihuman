@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Fixed-window time series ring buffer.
@@ -129,7 +129,7 @@ mod tests {
         buf.push(1.0, 2.0);
         buf.push(2.0, 4.0);
         buf.push(3.0, 6.0);
-        let m = buf.mean().unwrap();
+        let m = buf.mean().expect("should succeed");
         assert!((m - 4.0).abs() < 1e-10 /* mean of 2,4,6 = 4 */,);
     }
 
@@ -145,7 +145,7 @@ mod tests {
         buf.push(0.0, 2.0);
         buf.push(1.0, 4.0);
         buf.push(2.0, 6.0);
-        let var = buffer_variance(&buf).unwrap();
+        let var = buffer_variance(&buf).expect("should succeed");
         assert!(var > 0.0 /* non-zero variance */,);
     }
 
@@ -155,7 +155,7 @@ mod tests {
         buf.push(0.0, 5.0);
         buf.push(1.0, 1.0);
         buf.push(2.0, 9.0);
-        let (mn, mx) = buffer_min_max(&buf).unwrap();
+        let (mn, mx) = buffer_min_max(&buf).expect("should succeed");
         assert_eq!(mn, 1.0);
         assert_eq!(mx, 9.0);
     }
@@ -179,7 +179,7 @@ mod tests {
         buf.push(2.0, 20.0);
         buf.push(3.0, 30.0);
         buf.push(4.0, 40.0);
-        let latest = buf.latest().unwrap();
+        let latest = buf.latest().expect("should succeed");
         assert!((latest.value - 40.0).abs() < 1e-10, /* latest should be 40 */);
     }
 }

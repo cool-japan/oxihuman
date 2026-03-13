@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Encoding utilities: hex, base64 (simple), URL encoding stubs.
 
@@ -166,7 +166,7 @@ mod tests {
     #[test]
     fn test_hex_roundtrip() {
         let data = vec![0u8, 1, 127, 255];
-        assert_eq!(hex_decode(&hex_encode(&data)).unwrap(), data);
+        assert_eq!(hex_decode(&hex_encode(&data)).expect("should succeed"), data);
     }
 
     #[test]
@@ -178,7 +178,7 @@ mod tests {
     #[test]
     fn test_base64_decode() {
         let enc = base64_encode_simple(b"hello");
-        let dec = base64_decode_simple(&enc).unwrap();
+        let dec = base64_decode_simple(&enc).expect("should succeed");
         assert_eq!(dec, b"hello");
     }
 

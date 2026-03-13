@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Topological sorting of mesh faces and vertices based on dependency graphs.
@@ -186,7 +186,7 @@ mod tests {
         let res = topo_sort(4, &[(0, 1), (0, 2), (1, 3), (2, 3)]);
         assert!(!res.has_cycle);
         let pos: Vec<usize> = res.order.to_vec();
-        let idx = |x: usize| pos.iter().position(|&v| v == x).unwrap();
+        let idx = |x: usize| pos.iter().position(|&v| v == x).expect("should succeed");
         assert!(idx(0) < idx(1));
         assert!(idx(0) < idx(2));
         assert!(idx(1) < idx(3));

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Render command queue.
 
@@ -115,8 +115,8 @@ mod tests {
         rq_push(&mut rq, make_call(2, 1));
         rq_push(&mut rq, make_call(3, 3));
         rq_sort_by_layer(&mut rq);
-        assert_eq!(rq_get(&rq, 0).unwrap().layer, 1);
-        assert_eq!(rq_get(&rq, 2).unwrap().layer, 5);
+        assert_eq!(rq_get(&rq, 0).expect("should succeed").layer, 1);
+        assert_eq!(rq_get(&rq, 2).expect("should succeed").layer, 5);
     }
 
     #[test]
@@ -131,7 +131,7 @@ mod tests {
     fn test_get_valid_index() {
         let mut rq = new_render_queue();
         rq_push(&mut rq, make_call(42, 0));
-        assert_eq!(rq_get(&rq, 0).unwrap().mesh_id, 42);
+        assert_eq!(rq_get(&rq, 0).expect("should succeed").mesh_id, 42);
     }
 
     #[test]

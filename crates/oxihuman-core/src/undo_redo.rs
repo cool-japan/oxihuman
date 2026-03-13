@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Generic undo/redo command history stack.
 
@@ -119,7 +119,7 @@ mod tests {
         push_command(&mut stack, "move", vec![1], vec![2]);
         let cmd = undo(&mut stack);
         assert!(cmd.is_some());
-        assert_eq!(cmd.unwrap().name, "move");
+        assert_eq!(cmd.expect("should succeed").name, "move");
     }
 
     #[test]
@@ -129,7 +129,7 @@ mod tests {
         undo(&mut stack);
         let redone = redo(&mut stack);
         assert!(redone.is_some());
-        assert_eq!(redone.unwrap().name, "action");
+        assert_eq!(redone.expect("should succeed").name, "action");
     }
 
     #[test]

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -148,10 +148,10 @@ mod tests {
         let mut g = DepGraph::new();
         g.add_edge("a", "b");
         g.add_edge("b", "c");
-        let order = g.topological_order().unwrap();
-        let ia = order.iter().position(|x| x == "a").unwrap();
-        let ib = order.iter().position(|x| x == "b").unwrap();
-        let ic = order.iter().position(|x| x == "c").unwrap();
+        let order = g.topological_order().expect("should succeed");
+        let ia = order.iter().position(|x| x == "a").expect("should succeed");
+        let ib = order.iter().position(|x| x == "b").expect("should succeed");
+        let ic = order.iter().position(|x| x == "c").expect("should succeed");
         assert!(ia < ib);
         assert!(ib < ic);
     }

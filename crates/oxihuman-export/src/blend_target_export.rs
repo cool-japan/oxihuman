@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Blend target (shape key target) export utilities.
@@ -106,7 +106,7 @@ mod tests {
     fn test_set_get_delta() {
         let mut t = new_blend_target("test", 3);
         set_delta(&mut t, 1, [1.0, 2.0, 3.0]);
-        let d = get_delta(&t, 1).unwrap();
+        let d = get_delta(&t, 1).expect("should succeed");
         assert!((d[0] - 1.0).abs() < 1e-6);
     }
 

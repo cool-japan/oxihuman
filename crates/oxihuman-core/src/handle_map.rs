@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A generational handle map: stable handles survive removal of other entries.
@@ -132,7 +132,7 @@ mod tests {
     fn test_get_mut() {
         let mut m = HandleMap::new();
         let h = m.insert(5);
-        *m.get_mut(h).unwrap() = 10;
+        *m.get_mut(h).expect("should succeed") = 10;
         assert_eq!(m.get(h), Some(&10));
     }
 

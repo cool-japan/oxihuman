@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Pose/skeleton symmetry enforcement and mirror analysis.
 //! Note: body_symmetry.rs handles mesh vertex symmetry; this module covers joint pose symmetry.
@@ -389,7 +389,7 @@ mod tests {
         let skel = make_simple_skeleton();
         let joint = find_joint_by_name(&skel, "Spine");
         assert!(joint.is_some());
-        assert_eq!(joint.unwrap().name, "Spine");
+        assert_eq!(joint.expect("should succeed").name, "Spine");
     }
 
     #[test]
@@ -473,7 +473,7 @@ mod tests {
         let delta = [0.0, 0.0, (0.1_f32).sin(), (0.1_f32).cos()];
         apply_pose_offset(&mut skel, "LeftArm", delta);
         // Should not remain identity
-        let joint = find_joint_by_name(&skel, "LeftArm").unwrap();
+        let joint = find_joint_by_name(&skel, "LeftArm").expect("should succeed");
         let still_identity = joint.rotation[3].abs() > 0.9999;
         // With a non-trivial delta, rotation should change
         assert!(!still_identity || delta[3] > 0.9999);

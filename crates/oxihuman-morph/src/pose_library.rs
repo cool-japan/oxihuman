@@ -135,7 +135,7 @@ mod tests {
         p.insert("arm_l".to_string(), 0.3);
         p.insert("arm_r".to_string(), 0.7);
         add_pose(&mut lib, "arms", p);
-        let pose = get_pose(&lib, "arms").unwrap();
+        let pose = get_pose(&lib, "arms").expect("should succeed");
         assert_eq!(pose.params.len(), 2);
     }
 

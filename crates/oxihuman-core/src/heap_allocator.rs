@@ -176,8 +176,8 @@ mod tests {
     fn test_heap_reset() {
         let cfg = default_heap_config();
         let mut alloc = new_heap_allocator(&cfg);
-        heap_alloc(&mut alloc, 128, 4).unwrap();
-        heap_alloc(&mut alloc, 256, 4).unwrap();
+        heap_alloc(&mut alloc, 128, 4).expect("should succeed");
+        heap_alloc(&mut alloc, 256, 4).expect("should succeed");
         heap_reset(&mut alloc);
         assert_eq!(heap_used_bytes(&alloc), 0);
         assert_eq!(heap_block_count(&alloc), 0);
@@ -187,7 +187,7 @@ mod tests {
     fn test_heap_stats() {
         let cfg = HeapAllocatorConfig { heap_size: 1000 };
         let mut alloc = new_heap_allocator(&cfg);
-        heap_alloc(&mut alloc, 200, 8).unwrap();
+        heap_alloc(&mut alloc, 200, 8).expect("should succeed");
         let stats = heap_stats(&alloc);
         assert_eq!(stats.used_bytes, 200);
         assert_eq!(stats.free_bytes, 800);

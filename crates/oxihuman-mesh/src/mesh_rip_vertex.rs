@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Rip-vertex operation: duplicate a vertex and separate connected faces.
@@ -176,14 +176,14 @@ mod tests {
     #[test]
     fn rip_vertex_creates_new_vertex() {
         let (pos, idx) = two_tris();
-        let res = rip_vertex(&pos, &idx, 0, &[0]).unwrap();
+        let res = rip_vertex(&pos, &idx, 0, &[0]).expect("should succeed");
         assert_eq!(res.new_positions.len(), pos.len() + 1);
     }
 
     #[test]
     fn rip_all_faces_separates_vertex() {
         let (pos, idx) = two_tris();
-        let res = rip_all_faces(&pos, &idx, 0).unwrap();
+        let res = rip_all_faces(&pos, &idx, 0).expect("should succeed");
         /* new vertex duplicated */
         assert_eq!(res.new_vertex_index, 4);
     }
@@ -213,7 +213,7 @@ mod tests {
     #[test]
     fn rip_vertex_affected_faces() {
         let (pos, idx) = two_tris();
-        let res = rip_vertex(&pos, &idx, 0, &[0]).unwrap();
+        let res = rip_vertex(&pos, &idx, 0, &[0]).expect("should succeed");
         assert!(res.affected_faces > 0);
     }
 

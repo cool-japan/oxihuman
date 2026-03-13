@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! USDA (Universal Scene Description ASCII) text format writer.
 //!
@@ -627,6 +627,165 @@ fn sanitise_name(path: &str) -> String {
         .collect()
 }
 
+// ── Blend shape animation ────────────────────────────────────────────────────
+
+/// Time-sampled weight data for a single blend shape used in a `SkelAnimation` prim.
+///
+/// Each entry pairs a time code (in USD time units, typically frames) with the
+/// normalised blend weight (0.0 = no effect, 1.0 = full effect) for the named
+/// shape at that moment.  The `time_weight_pairs` slice does not need to be
+/// pre-sorted — [`UsdaWriter::write_blend_shape_animation`] will sort by time
+/// internally before emitting the `timeSamples` block.
+pub struct BlendShapeTimeSamples {
+    /// Name of this blend shape (e.g. `"smile"`, `"frown"`).
+    pub shape_name: String,
+    /// `(time_code, weight)` pairs — will be sorted ascending by time code.
+    pub time_weight_pairs: Vec<(f64, f32)>,
+}
+
+impl UsdaWriter {
+    /// Write a `SkelAnimation` prim with `blendShapeWeights.timeSamples`.
+    ///
+    /// The prim is named `"BodyAnim"` and contains:
+    ///
+    /// * `uniform token purpose = "default"`
+    /// * `uniform token[] blendShapes` — ordered by first appearance across all
+    ///   `BlendShapeTimeSamples` entries.
+    /// * `float[] blendShapeWeights.timeSamples` — every unique time code from
+    ///   all samples, sorted ascending; shapes absent at a given time emit `0.0`.
+    /// * `rel skelTargets = <{mesh_path}>` — where `mesh_path` is the USD scene
+    ///   path passed as the second argument (e.g. `"/Root/Body"`).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if formatting the output buffer fails (highly unlikely
+    /// in practice because [`String::write_fmt`] is infallible for in-memory
+    /// buffers, but the method signature is `anyhow::Result<()>` for
+    /// consistency with the rest of the writer API).
+    pub fn write_blend_shape_animation(
+        &mut self,
+        mesh_path: &str,
+        samples: &[BlendShapeTimeSamples],
+    ) -> anyhow::Result<()> {
+        // ── Step 1: collect unique shape names in first-appearance order ──────
+        let mut shape_names: Vec<&str> = Vec::new();
+        for s in samples {
+            let name = s.shape_name.as_str();
+            if !shape_names.contains(&name) {
+                shape_names.push(name);
+            }
+        }
+
+        // ── Step 2: collect all unique time codes, sorted ascending ───────────
+        let mut time_codes: Vec<f64> = Vec::new();
+        for s in samples {
+            for &(t, _) in &s.time_weight_pairs {
+                // Use integer-comparison tolerance: treat times equal when their
+                // bit representation agrees (exact f64 equality is fine here
+                // because time codes are typically integers cast to f64).
+                if !time_codes.contains(&t) {
+                    time_codes.push(t);
+                }
+            }
+        }
+        time_codes.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+        // ── Step 3: build a lookup: shape_name → time → weight ───────────────
+        // Using a Vec of Vec rather than HashMap to stay allocation-light and
+        // maintain insertion order without extra dependencies.
+        // shape_weights[shape_idx][time_idx] = weight (defaulting to 0.0)
+        let n_shapes = shape_names.len();
+        let n_times = time_codes.len();
+
+        // Allocate a flat matrix (n_shapes × n_times) initialised to 0.0.
+        let mut weight_matrix: Vec<f32> = vec![0.0_f32; n_shapes * n_times];
+
+        for s in samples {
+            let shape_idx = shape_names
+                .iter()
+                .position(|&n| n == s.shape_name.as_str())
+                .ok_or_else(|| anyhow::anyhow!("shape '{}' not in name list", s.shape_name))?;
+
+            for &(t, w) in &s.time_weight_pairs {
+                let time_idx = time_codes
+                    .iter()
+                    .position(|&tc| tc == t)
+                    .ok_or_else(|| anyhow::anyhow!("time code {} not in time list", t))?;
+                weight_matrix[shape_idx * n_times + time_idx] = w;
+            }
+        }
+
+        // ── Step 4: write the SkelAnimation prim ─────────────────────────────
+        self.begin_def("SkelAnimation", "BodyAnim");
+
+        // purpose
+        self.write_indent();
+        self.output
+            .push_str("uniform token purpose = \"default\"\n");
+
+        // blendShapes array
+        self.write_indent();
+        self.output.push_str("uniform token[] blendShapes = [");
+        for (i, name) in shape_names.iter().enumerate() {
+            if i > 0 {
+                self.output.push_str(", ");
+            }
+            let _ = write!(self.output, "\"{}\"", name);
+        }
+        self.output.push_str("]\n");
+
+        // blendShapeWeights.timeSamples
+        self.write_indent();
+        self.output
+            .push_str("float[] blendShapeWeights.timeSamples = {\n");
+
+        for (ti, &tc) in time_codes.iter().enumerate() {
+            self.write_indent();
+            // Format time code: drop the decimal point when it is a whole number.
+            let tc_str = if tc.fract() == 0.0 {
+                format!("{}", tc as i64)
+            } else {
+                format!("{}", tc)
+            };
+            let _ = write!(self.output, "    {}: [", tc_str);
+            for si in 0..n_shapes {
+                if si > 0 {
+                    self.output.push_str(", ");
+                }
+                let w = weight_matrix[si * n_times + ti];
+                // Emit as single decimal (e.g. "0.0", "1.0", "0.5").
+                let _ = write!(self.output, "{}", format_weight(w));
+            }
+            self.output.push_str("]\n");
+        }
+
+        self.write_indent();
+        self.output.push_str("}\n");
+
+        // skelTargets relationship
+        self.write_indent();
+        let _ = writeln!(self.output, "rel skelTargets = <{}>", mesh_path);
+
+        self.end_def(); // SkelAnimation
+        Ok(())
+    }
+}
+
+/// Format a blend weight value compactly: strip trailing zeros after the
+/// decimal point but always keep at least one decimal digit so the value
+/// is unambiguously a float in USDA syntax.
+fn format_weight(w: f32) -> String {
+    // Round to 6 decimal places to avoid floating-point noise.
+    let s = format!("{:.6}", w);
+    let s = s.trim_end_matches('0');
+    // Ensure at least one digit after the decimal point.
+    if s.ends_with('.') {
+        format!("{}0", s)
+    } else {
+        s.to_string()
+    }
+}
+
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -1211,5 +1370,90 @@ mod tests {
         assert!(read_back.starts_with("#usda 1.0"));
 
         let _ = std::fs::remove_file(&path);
+    }
+
+    // ── BlendShapeTimeSamples / write_blend_shape_animation tests ────────────
+
+    /// Test 1: Single shape, single time code → output contains `timeSamples`.
+    #[test]
+    fn test_blend_shape_animation_single_frame() {
+        let samples = vec![BlendShapeTimeSamples {
+            shape_name: "smile".to_string(),
+            time_weight_pairs: vec![(0.0, 1.0)],
+        }];
+        let mut w = UsdaWriter::new();
+        w.write_blend_shape_animation("/Root/Body", &samples)
+            .expect("write_blend_shape_animation");
+        let out = w.finish();
+        assert!(
+            out.contains("timeSamples"),
+            "output must contain 'timeSamples'"
+        );
+        assert!(
+            out.contains("\"smile\""),
+            "output must include shape name 'smile'"
+        );
+        assert!(
+            out.contains("0: ["),
+            "output must include time code 0"
+        );
+    }
+
+    /// Test 2: Two shapes, multiple time codes → time codes are sorted ascending.
+    #[test]
+    fn test_blend_shape_animation_multi_frame_sorted() {
+        let samples = vec![
+            BlendShapeTimeSamples {
+                shape_name: "smile".to_string(),
+                // Intentionally un-sorted to verify sorting behaviour.
+                time_weight_pairs: vec![(24.0, 1.0), (0.0, 0.0), (12.0, 0.5)],
+            },
+            BlendShapeTimeSamples {
+                shape_name: "frown".to_string(),
+                time_weight_pairs: vec![(0.0, 0.0), (12.0, 0.0), (24.0, 0.0)],
+            },
+        ];
+        let mut w = UsdaWriter::new();
+        w.write_blend_shape_animation("/Root/Body", &samples)
+            .expect("write_blend_shape_animation");
+        let out = w.finish();
+
+        // All three time codes must appear.
+        assert!(out.contains("0: ["), "time 0 must be present");
+        assert!(out.contains("12: ["), "time 12 must be present");
+        assert!(out.contains("24: ["), "time 24 must be present");
+
+        // Both shape names must appear in the blendShapes array.
+        assert!(out.contains("\"smile\""), "shape 'smile' must be in output");
+        assert!(out.contains("\"frown\""), "shape 'frown' must be in output");
+
+        // Verify order: the position of "0:" must come before "12:" and "24:".
+        let pos0 = out.find("0: [").expect("pos of time 0");
+        let pos12 = out.find("12: [").expect("pos of time 12");
+        let pos24 = out.find("24: [").expect("pos of time 24");
+        assert!(pos0 < pos12, "time 0 must appear before time 12");
+        assert!(pos12 < pos24, "time 12 must appear before time 24");
+    }
+
+    /// Test 3: Output contains `uniform token purpose = "default"`.
+    #[test]
+    fn test_blend_shape_animation_contains_purpose_default() {
+        let samples = vec![BlendShapeTimeSamples {
+            shape_name: "blink".to_string(),
+            time_weight_pairs: vec![(1.0, 0.5)],
+        }];
+        let mut w = UsdaWriter::new();
+        w.write_blend_shape_animation("/Root/Face", &samples)
+            .expect("write_blend_shape_animation");
+        let out = w.finish();
+        assert!(
+            out.contains("uniform token purpose = \"default\""),
+            "output must contain purpose = \"default\""
+        );
+        // Also verify the skelTargets relationship is wired to the mesh path.
+        assert!(
+            out.contains("rel skelTargets = </Root/Face>"),
+            "output must contain rel skelTargets = </Root/Face>"
+        );
     }
 }

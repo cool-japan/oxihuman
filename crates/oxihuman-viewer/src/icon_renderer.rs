@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Icon/glyph rendering data for UI.
 
@@ -316,7 +316,7 @@ mod tests {
         let atlas = build_icon_atlas(32.0);
         let glyph = get_icon_glyph(&atlas, IconType::Circle);
         assert!(glyph.is_some());
-        assert_eq!(glyph.unwrap().icon_type, IconType::Circle);
+        assert_eq!(glyph.expect("should succeed").icon_type, IconType::Circle);
     }
 
     #[test]

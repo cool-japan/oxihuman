@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! URL percent-encoding utilities.
@@ -107,13 +107,16 @@ mod tests {
     #[test]
     fn test_decode_percent() {
         /* percent sequence decoded */
-        assert_eq!(url_decode("%41%42%43").unwrap(), "ABC");
+        assert_eq!(url_decode("%41%42%43").expect("should succeed"), "ABC");
     }
 
     #[test]
     fn test_decode_plus() {
         /* plus decoded to space */
-        assert_eq!(url_decode("hello+world").unwrap(), "hello world");
+        assert_eq!(
+            url_decode("hello+world").expect("should succeed"),
+            "hello world"
+        );
     }
 
     #[test]

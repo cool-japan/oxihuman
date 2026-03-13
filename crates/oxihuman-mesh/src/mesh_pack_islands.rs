@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! UV island packing.
@@ -182,7 +182,7 @@ mod tests {
     fn test_largest_island() {
         /* largest island index is correct */
         let islands = sample_islands();
-        let idx = largest_island(&islands).unwrap();
+        let idx = largest_island(&islands).expect("should succeed");
         /* island 2 has height 0.5 width 0.1 = 0.05; island 0 = 0.09; island 1 = 0.1 */
         /* island 1 (0.5*0.2=0.10) should be largest */
         assert_eq!(islands[idx].id, 1);

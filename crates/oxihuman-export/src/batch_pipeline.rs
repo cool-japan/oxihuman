@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Parallel batch character export — generate and export multiple character
 //! variants from a parameter grid.
@@ -357,10 +357,10 @@ mod tests {
         use std::time::{SystemTime, UNIX_EPOCH};
         let nanos = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .unwrap()
+            .expect("should succeed")
             .subsec_nanos();
         let p = PathBuf::from(format!("/tmp/oxihuman_batch_{}_{}", suffix, nanos));
-        std::fs::create_dir_all(&p).unwrap();
+        std::fs::create_dir_all(&p).expect("should succeed");
         p
     }
 
@@ -478,7 +478,7 @@ mod tests {
         let out_dir = tmpdir("batch_skip");
         let path = out_dir.join("char_0000.json");
         // Pre-create the file
-        std::fs::write(&path, "{}").unwrap();
+        std::fs::write(&path, "{}").expect("should succeed");
 
         let specs = vec![BatchCharacterSpec {
             id: "char_0000".to_string(),
@@ -502,7 +502,7 @@ mod tests {
         // file path where the "parent dir" is an existing regular file.
         let out_dir = tmpdir("batch_fail");
         let blocker = out_dir.join("blocker");
-        std::fs::write(&blocker, b"I am a file, not a dir").unwrap();
+        std::fs::write(&blocker, b"I am a file, not a dir").expect("should succeed");
         // Try to write into blocker/char.json — parent is a file, not a dir
         let bad_path = blocker.join("char.json");
         let specs = vec![BatchCharacterSpec {
@@ -546,7 +546,7 @@ mod tests {
         let cfg = BatchConfig::default();
         let result = run_batch(&specs, &cfg);
         assert_eq!(result.succeeded, 1);
-        let content = std::fs::read_to_string(out_dir.join("csv_char.csv")).unwrap();
+        let content = std::fs::read_to_string(out_dir.join("csv_char.csv")).expect("should succeed");
         assert!(content.contains(','), "CSV should contain commas");
     }
 

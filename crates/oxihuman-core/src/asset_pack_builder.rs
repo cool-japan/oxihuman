@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Alpha asset pack builder for OxiHuman.
 //!
@@ -628,6 +628,106 @@ fn build_alpha_pack_inner() -> Result<Vec<u8>> {
     builder.build()
 }
 
+// ── Distribution manifest ─────────────────────────────────────────────────────
+
+/// Recursively collect all file paths within a directory.
+///
+/// Returns a sorted list of `(relative_path_string, absolute_path)` pairs.
+fn collect_files_recursive(
+    base: &std::path::Path,
+    dir: &std::path::Path,
+    out: &mut Vec<(String, std::path::PathBuf)>,
+) -> Result<()> {
+    for entry in
+        std::fs::read_dir(dir).with_context(|| format!("reading dir: {}", dir.display()))?
+    {
+        let entry = entry.with_context(|| format!("iterating dir: {}", dir.display()))?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_files_recursive(base, &path, out)?;
+        } else if path.is_file() {
+            let rel = path
+                .strip_prefix(base)
+                .map_err(|e| anyhow::anyhow!("strip prefix {}: {e}", path.display()))?
+                .to_string_lossy()
+                .into_owned();
+            out.push((rel, path));
+        }
+    }
+    Ok(())
+}
+
+/// Generate a distribution manifest JSON for an asset pack directory.
+///
+/// Walks `pack_dir` recursively and records the SHA-256 hash of every file.
+/// Returns a pretty-printed JSON string suitable for saving as
+/// `<pack-name>.dist-manifest.json`.
+///
+/// # Errors
+///
+/// Returns an error if any file cannot be read or if JSON serialization fails.
+pub fn generate_distribution_manifest(pack_dir: &std::path::Path) -> Result<String> {
+    use sha2::{Digest, Sha256};
+
+    let mut pairs: Vec<(String, std::path::PathBuf)> = Vec::new();
+    collect_files_recursive(pack_dir, pack_dir, &mut pairs)?;
+    // Sort for deterministic output.
+    pairs.sort_by(|a, b| a.0.cmp(&b.0));
+
+    let mut entries: HashMap<String, String> = HashMap::new();
+    for (rel, abs) in pairs {
+        let data =
+            std::fs::read(&abs).with_context(|| format!("reading file: {}", abs.display()))?;
+        let hash = hex::encode(Sha256::digest(&data));
+        entries.insert(rel, hash);
+    }
+
+    let manifest = serde_json::json!({
+        "schema_version": "0.1.1",
+        "files": entries,
+    });
+    serde_json::to_string_pretty(&manifest).context("serializing distribution manifest")
+}
+
+/// Verify a distribution manifest against the actual files in `pack_dir`.
+///
+/// Returns `true` if every file listed in the manifest exists on disk and
+/// its SHA-256 hash matches the recorded value.  Returns `false` (not an
+/// error) when a file is missing or its hash differs.
+///
+/// # Errors
+///
+/// Returns an error only for I/O failures or malformed manifest JSON.
+pub fn verify_distribution_manifest(
+    manifest_json: &str,
+    pack_dir: &std::path::Path,
+) -> Result<bool> {
+    use sha2::{Digest, Sha256};
+
+    let manifest: serde_json::Value =
+        serde_json::from_str(manifest_json).context("parsing distribution manifest JSON")?;
+    let files = manifest["files"]
+        .as_object()
+        .ok_or_else(|| anyhow::anyhow!("manifest missing 'files' object"))?;
+
+    for (rel_path, expected_value) in files {
+        let expected = expected_value
+            .as_str()
+            .ok_or_else(|| anyhow::anyhow!("hash not a string for '{}'", rel_path))?;
+        let full_path = pack_dir.join(rel_path);
+        if !full_path.exists() {
+            return Ok(false);
+        }
+        let data = std::fs::read(&full_path)
+            .with_context(|| format!("reading file for verification: {}", full_path.display()))?;
+        let actual = hex::encode(Sha256::digest(&data));
+        if actual != expected {
+            return Ok(false);
+        }
+    }
+    Ok(true)
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -674,10 +774,10 @@ mod tests {
     #[test]
     fn empty_builder_produces_valid_oxp() {
         let builder = AssetPackBuilder::new("empty-pack");
-        let bytes = builder.build().unwrap();
+        let bytes = builder.build().expect("should succeed");
         assert!(!bytes.is_empty());
         // Integrity must pass
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.name, "empty-pack");
     }
 
@@ -685,9 +785,11 @@ mod tests {
     #[test]
     fn single_preset_round_trip() {
         let mut builder = AssetPackBuilder::new("preset-pack");
-        builder.add_preset(make_simple_preset("Alpha")).unwrap();
-        let bytes = builder.build().unwrap();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        builder
+            .add_preset(make_simple_preset("Alpha"))
+            .expect("should succeed");
+        let bytes = builder.build().expect("should succeed");
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.presets.len(), 1);
         assert_eq!(index.presets[0].name, "Alpha");
     }
@@ -697,10 +799,12 @@ mod tests {
     fn multiple_presets_round_trip() {
         let mut builder = AssetPackBuilder::new("multi-preset");
         for name in &["A", "B", "C"] {
-            builder.add_preset(make_simple_preset(name)).unwrap();
+            builder
+                .add_preset(make_simple_preset(name))
+                .expect("should succeed");
         }
-        let bytes = builder.build().unwrap();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let bytes = builder.build().expect("should succeed");
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.presets.len(), 3);
         let names: Vec<&str> = index.presets.iter().map(|p| p.name.as_str()).collect();
         assert!(names.contains(&"A"));
@@ -712,9 +816,11 @@ mod tests {
     #[test]
     fn texture_round_trip() {
         let mut builder = AssetPackBuilder::new("tex-pack");
-        builder.add_texture(make_1x1_texture("red")).unwrap();
-        let bytes = builder.build().unwrap();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        builder
+            .add_texture(make_1x1_texture("red"))
+            .expect("should succeed");
+        let bytes = builder.build().expect("should succeed");
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.textures.len(), 1);
         assert_eq!(index.textures[0].name, "red");
         assert_eq!(index.textures[0].width, 1);
@@ -727,9 +833,9 @@ mod tests {
         let mut builder = AssetPackBuilder::new("mat-pack");
         builder
             .add_material(make_simple_material("chrome"))
-            .unwrap();
-        let bytes = builder.build().unwrap();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+            .expect("should succeed");
+        let bytes = builder.build().expect("should succeed");
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.materials.len(), 1);
         assert_eq!(index.materials[0].name, "chrome");
         assert!((index.materials[0].roughness - 0.5).abs() < 1e-6);
@@ -739,11 +845,17 @@ mod tests {
     #[test]
     fn mixed_entries_round_trip() {
         let mut builder = AssetPackBuilder::new("mixed-pack");
-        builder.add_preset(make_simple_preset("P1")).unwrap();
-        builder.add_texture(make_1x1_texture("T1")).unwrap();
-        builder.add_material(make_simple_material("M1")).unwrap();
-        let bytes = builder.build().unwrap();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        builder
+            .add_preset(make_simple_preset("P1"))
+            .expect("should succeed");
+        builder
+            .add_texture(make_1x1_texture("T1"))
+            .expect("should succeed");
+        builder
+            .add_material(make_simple_material("M1"))
+            .expect("should succeed");
+        let bytes = builder.build().expect("should succeed");
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.presets.len(), 1);
         assert_eq!(index.textures.len(), 1);
         assert_eq!(index.materials.len(), 1);
@@ -757,8 +869,8 @@ mod tests {
             name: "head_big.target".to_string(),
             data: vec![1, 2, 3, 4, 5],
         });
-        let bytes = builder.build().unwrap();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let bytes = builder.build().expect("should succeed");
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.target_names.len(), 1);
         assert_eq!(index.target_names[0], "head_big.target");
     }
@@ -774,7 +886,7 @@ mod tests {
     #[test]
     fn alpha_pack_has_five_presets() {
         let bytes = build_alpha_pack();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.presets.len(), 5);
     }
 
@@ -782,7 +894,7 @@ mod tests {
     #[test]
     fn alpha_pack_has_three_materials() {
         let bytes = build_alpha_pack();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.materials.len(), 3);
     }
 
@@ -790,7 +902,7 @@ mod tests {
     #[test]
     fn alpha_pack_preset_names() {
         let bytes = build_alpha_pack();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         let names: Vec<&str> = index.presets.iter().map(|p| p.name.as_str()).collect();
         for expected in &["Athletic", "Slim", "Heavy", "Tall", "Short"] {
             assert!(names.contains(expected), "missing preset: {}", expected);
@@ -801,7 +913,7 @@ mod tests {
     #[test]
     fn alpha_pack_material_names() {
         let bytes = build_alpha_pack();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         let names: Vec<&str> = index.materials.iter().map(|m| m.name.as_str()).collect();
         for expected in &["Skin", "Cloth", "Metal"] {
             assert!(names.contains(expected), "missing material: {}", expected);
@@ -812,7 +924,7 @@ mod tests {
     #[test]
     fn alpha_pack_manifest_author() {
         let bytes = build_alpha_pack();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert!(
             index.author.contains("COOLJAPAN"),
             "unexpected author: {}",
@@ -824,7 +936,7 @@ mod tests {
     #[test]
     fn alpha_pack_manifest_license() {
         let bytes = build_alpha_pack();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert!(!index.license.is_empty());
     }
 
@@ -939,10 +1051,12 @@ mod tests {
     #[test]
     fn index_total_bytes() {
         let mut builder = AssetPackBuilder::new("size-pack");
-        builder.add_preset(make_simple_preset("X")).unwrap();
-        let bytes = builder.build().unwrap();
+        builder
+            .add_preset(make_simple_preset("X"))
+            .expect("should succeed");
+        let bytes = builder.build().expect("should succeed");
         let expected_len = bytes.len();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.total_bytes, expected_len);
     }
 
@@ -955,8 +1069,8 @@ mod tests {
             .set_version("2.0.0")
             .set_license("MIT")
             .set_description("A test pack");
-        let bytes = builder.build().unwrap();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let bytes = builder.build().expect("should succeed");
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         assert_eq!(index.author, "Alice");
         assert_eq!(index.version, "2.0.0");
         assert_eq!(index.license, "MIT");
@@ -967,8 +1081,10 @@ mod tests {
     #[test]
     fn corrupted_bytes_rejected() {
         let mut builder = AssetPackBuilder::new("pack");
-        builder.add_preset(make_simple_preset("P")).unwrap();
-        let mut bytes = builder.build().unwrap();
+        builder
+            .add_preset(make_simple_preset("P"))
+            .expect("should succeed");
+        let mut bytes = builder.build().expect("should succeed");
         // Flip a byte near the middle to corrupt the pack
         let mid = bytes.len() / 2;
         bytes[mid] ^= 0xFF;
@@ -996,7 +1112,7 @@ mod tests {
     #[test]
     fn alpha_pack_athletic_params() {
         let bytes = build_alpha_pack();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         let athletic = index
             .presets
             .iter()
@@ -1014,7 +1130,7 @@ mod tests {
     #[test]
     fn alpha_pack_metal_material_metallic() {
         let bytes = build_alpha_pack();
-        let index = load_pack_from_bytes(&bytes).unwrap();
+        let index = load_pack_from_bytes(&bytes).expect("should succeed");
         let metal = index
             .materials
             .iter()
@@ -1034,5 +1150,102 @@ mod tests {
         assert_eq!(meta.version, "0.1.0");
         assert_eq!(meta.license, "Apache-2.0");
         assert_eq!(meta.created_at, 0);
+    }
+
+    // 31–35. Distribution manifest tests
+
+    #[test]
+    fn test_generate_and_verify_manifest() {
+        let dir = std::env::temp_dir().join("oxihuman_dist_test_basic");
+        std::fs::create_dir_all(&dir).expect("create dir");
+        std::fs::write(dir.join("test.bin"), b"hello world").expect("write test.bin");
+
+        let manifest = generate_distribution_manifest(&dir).expect("generate manifest");
+        assert!(
+            manifest.contains("test.bin"),
+            "manifest should reference test.bin"
+        );
+        assert!(
+            manifest.contains("schema_version"),
+            "manifest should have schema_version"
+        );
+
+        let ok = verify_distribution_manifest(&manifest, &dir).expect("verify manifest");
+        assert!(ok, "fresh manifest must verify successfully");
+
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn test_manifest_detects_tampered_file() {
+        let dir = std::env::temp_dir().join("oxihuman_dist_test_tamper");
+        std::fs::create_dir_all(&dir).expect("create dir");
+        std::fs::write(dir.join("data.bin"), b"original").expect("write data.bin");
+
+        let manifest = generate_distribution_manifest(&dir).expect("generate manifest");
+
+        // Tamper with the file contents
+        std::fs::write(dir.join("data.bin"), b"tampered!").expect("overwrite data.bin");
+
+        let ok = verify_distribution_manifest(&manifest, &dir).expect("verify call should not err");
+        assert!(!ok, "tampered file must cause verification failure");
+
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn test_manifest_detects_missing_file() {
+        let dir = std::env::temp_dir().join("oxihuman_dist_test_missing");
+        std::fs::create_dir_all(&dir).expect("create dir");
+        std::fs::write(dir.join("present.bin"), b"data").expect("write present.bin");
+
+        let manifest = generate_distribution_manifest(&dir).expect("generate manifest");
+
+        // Delete the file to simulate a missing-file scenario
+        std::fs::remove_file(dir.join("present.bin")).ok();
+
+        let ok = verify_distribution_manifest(&manifest, &dir).expect("verify call should not err");
+        assert!(!ok, "missing file must cause verification failure");
+
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn test_manifest_schema_version() {
+        let dir = std::env::temp_dir().join("oxihuman_dist_test_schema");
+        std::fs::create_dir_all(&dir).expect("create dir");
+        std::fs::write(dir.join("x.bin"), b"x").expect("write x.bin");
+
+        let manifest = generate_distribution_manifest(&dir).expect("generate manifest");
+        let v: serde_json::Value =
+            serde_json::from_str(&manifest).expect("manifest must be valid JSON");
+        assert_eq!(
+            v["schema_version"]
+                .as_str()
+                .expect("schema_version must be string"),
+            "0.1.1"
+        );
+
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn test_manifest_multiple_files() {
+        let dir = std::env::temp_dir().join("oxihuman_dist_test_multi");
+        std::fs::create_dir_all(&dir).expect("create dir");
+        std::fs::write(dir.join("a.bin"), b"alpha").expect("write a.bin");
+        std::fs::write(dir.join("b.bin"), b"beta").expect("write b.bin");
+        std::fs::write(dir.join("c.bin"), b"gamma").expect("write c.bin");
+
+        let manifest = generate_distribution_manifest(&dir).expect("generate manifest");
+        let v: serde_json::Value =
+            serde_json::from_str(&manifest).expect("manifest must be valid JSON");
+        let files = v["files"].as_object().expect("files must be object");
+        assert_eq!(files.len(), 3, "should have exactly 3 entries");
+
+        let ok = verify_distribution_manifest(&manifest, &dir).expect("verify");
+        assert!(ok);
+
+        std::fs::remove_dir_all(&dir).ok();
     }
 }

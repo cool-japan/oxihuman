@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Decal projection — projects decal quads onto surfaces using a projection matrix.
@@ -166,7 +166,7 @@ mod tests {
     fn project_center_returns_half_uv() {
         let inst = new_decal_instance([0.0; 3], [0.0, 1.0, 0.0], [2.0, 2.0], 0);
         let uv = dp_project_point(&inst, [0.0, 0.0, 0.0]);
-        let uv = uv.unwrap();
+        let uv = uv.expect("should succeed");
         assert!((uv[0] - 0.5).abs() < 1e-5);
         assert!((uv[1] - 0.5).abs() < 1e-5);
     }

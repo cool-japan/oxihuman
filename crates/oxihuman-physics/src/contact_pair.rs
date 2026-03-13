@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A pair of body IDs in contact, plus associated contact data.
@@ -202,7 +202,7 @@ mod tests {
         let mut set = ContactPairSet::new();
         set.add(ContactPair::new(0, 1).with_depth(0.1));
         set.add(ContactPair::new(1, 2).with_depth(0.5));
-        assert!((set.deepest().unwrap().depth - 0.5).abs() < f32::EPSILON);
+        assert!((set.deepest().expect("should succeed").depth - 0.5).abs() < f32::EPSILON);
     }
 
     #[test]

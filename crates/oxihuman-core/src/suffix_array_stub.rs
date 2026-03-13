@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Suffix array construction via SA-IS (Suffix Array Induced Sorting) in O(n),
@@ -442,7 +442,7 @@ mod tests {
         let sa = build_suffix_array_stub(s);
         let pos = sa_stub_search(s, &sa, "ana");
         assert!(pos.is_some());
-        assert!(s[pos.unwrap()..].starts_with("ana"));
+        assert!(s[pos.expect("should succeed")..].starts_with("ana"));
     }
 
     #[test]

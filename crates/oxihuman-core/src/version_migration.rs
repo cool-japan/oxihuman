@@ -195,7 +195,7 @@ mod tests {
 
     #[test]
     fn test_semver_parse_valid() {
-        let sv = semver_parse("1.2.3").unwrap();
+        let sv = semver_parse("1.2.3").expect("should succeed");
         assert_eq!(sv.major, 1);
         assert_eq!(sv.minor, 2);
         assert_eq!(sv.patch, 3);
@@ -277,7 +277,7 @@ mod tests {
             &mut registry,
             make_step(v(1, 0, 0), v(1, 1, 0), "bump minor", false),
         );
-        let plan = plan_migration(&registry, &v(1, 0, 0), &v(1, 1, 0)).unwrap();
+        let plan = plan_migration(&registry, &v(1, 0, 0), &v(1, 1, 0)).expect("should succeed");
         assert_eq!(migration_step_count(&plan), 1);
     }
 
@@ -292,7 +292,7 @@ mod tests {
             &mut registry,
             make_step(v(1, 1, 0), v(2, 0, 0), "step2", true),
         );
-        let plan = plan_migration(&registry, &v(1, 0, 0), &v(2, 0, 0)).unwrap();
+        let plan = plan_migration(&registry, &v(1, 0, 0), &v(2, 0, 0)).expect("should succeed");
         assert_eq!(migration_step_count(&plan), 2);
     }
 
@@ -331,7 +331,7 @@ mod tests {
             &mut registry,
             make_step(v(1, 1, 0), v(1, 2, 0), "s2", false),
         );
-        let plan = plan_migration(&registry, &v(1, 0, 0), &v(1, 2, 0)).unwrap();
+        let plan = plan_migration(&registry, &v(1, 0, 0), &v(1, 2, 0)).expect("should succeed");
         assert_eq!(migration_step_count(&plan), 2);
     }
 
@@ -342,7 +342,7 @@ mod tests {
             &mut registry,
             make_step(v(1, 0, 0), v(2, 0, 0), "major", true),
         );
-        let plan = plan_migration(&registry, &v(1, 0, 0), &v(2, 0, 0)).unwrap();
+        let plan = plan_migration(&registry, &v(1, 0, 0), &v(2, 0, 0)).expect("should succeed");
         assert!(plan_has_breaking(&plan));
     }
 
@@ -353,7 +353,7 @@ mod tests {
             &mut registry,
             make_step(v(1, 0, 0), v(1, 1, 0), "minor", false),
         );
-        let plan = plan_migration(&registry, &v(1, 0, 0), &v(1, 1, 0)).unwrap();
+        let plan = plan_migration(&registry, &v(1, 0, 0), &v(1, 1, 0)).expect("should succeed");
         assert!(!plan_has_breaking(&plan));
     }
 
@@ -365,7 +365,7 @@ mod tests {
             make_step(v(1, 0, 0), v(1, 1, 0), "s1", false),
         );
         register_migration(&mut registry, make_step(v(1, 1, 0), v(2, 0, 0), "s2", true));
-        let latest = latest_version(&registry).unwrap();
+        let latest = latest_version(&registry).expect("should succeed");
         assert_eq!(latest, v(2, 0, 0));
     }
 
@@ -382,7 +382,7 @@ mod tests {
             &mut registry,
             make_step(v(1, 0, 0), v(1, 1, 0), "add feature", false),
         );
-        let plan = plan_migration(&registry, &v(1, 0, 0), &v(1, 1, 0)).unwrap();
+        let plan = plan_migration(&registry, &v(1, 0, 0), &v(1, 1, 0)).expect("should succeed");
         let desc = migration_description(&plan);
         assert_eq!(desc, vec!["add feature"]);
     }

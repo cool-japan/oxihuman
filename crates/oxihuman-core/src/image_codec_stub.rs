@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Image encode/decode stub providing format detection, header construction, and byte-size utilities.
 
@@ -170,7 +170,7 @@ mod tests {
     fn test_decode_stub_nonempty_returns_some() {
         let result = decode_stub(&[0x89, 0x50]);
         assert!(result.is_some());
-        let dr = result.unwrap();
+        let dr = result.expect("should succeed");
         assert!(dr.pixel_count > 0);
         assert!(dr.byte_size > 0);
     }

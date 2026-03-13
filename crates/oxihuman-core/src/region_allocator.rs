@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Region/zone allocator stub — divides a fixed address space into named
@@ -134,7 +134,7 @@ mod tests {
         let mut ra = RegionAllocator::new(1024);
         ra.add_region("heap", 0, 512);
         ra.alloc_in("heap", 64);
-        let addr = ra.alloc_in("heap", 128).unwrap();
+        let addr = ra.alloc_in("heap", 128).expect("should succeed");
         assert_eq!(addr, 64); /* second alloc after first */
     }
 

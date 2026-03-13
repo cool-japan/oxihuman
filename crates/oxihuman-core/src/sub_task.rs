@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Sub-task tracking: decompose a parent task into named sub-tasks with progress.
@@ -195,7 +195,10 @@ mod tests {
         let mut s = new_sub_task_set();
         sts_add(&mut s, "load", 1.0);
         assert!(s.get("load").is_some());
-        assert_eq!(s.get("load").unwrap().status, SubTaskStatus::Pending);
+        assert_eq!(
+            s.get("load").expect("should succeed").status,
+            SubTaskStatus::Pending
+        );
     }
 
     #[test]
@@ -203,7 +206,10 @@ mod tests {
         let mut s = new_sub_task_set();
         sts_add(&mut s, "process", 1.0);
         assert!(s.set_running("process"));
-        assert_eq!(s.get("process").unwrap().status, SubTaskStatus::Running);
+        assert_eq!(
+            s.get("process").expect("should succeed").status,
+            SubTaskStatus::Running
+        );
     }
 
     #[test]
@@ -255,7 +261,7 @@ mod tests {
         let mut s = new_sub_task_set();
         sts_add(&mut s, "t", 1.0);
         s.set_progress("t", 2.0);
-        assert!((s.get("t").unwrap().progress - 1.0).abs() < 1e-6);
+        assert!((s.get("t").expect("should succeed").progress - 1.0).abs() < 1e-6);
     }
 
     #[test]

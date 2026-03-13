@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Contact queue for deferred contact processing.
 
@@ -89,7 +89,7 @@ mod tests {
     fn test_enqueue_dequeue() {
         let mut q = new_contact_queue();
         enqueue_contact(&mut q, make_contact(0, 1));
-        let c = dequeue_contact(&mut q).unwrap();
+        let c = dequeue_contact(&mut q).expect("should succeed");
         assert_eq!(c.body_a, 0);
         assert_eq!(c.body_b, 1);
     }
@@ -122,7 +122,7 @@ mod tests {
     fn test_peek_contact() {
         let mut q = new_contact_queue();
         enqueue_contact(&mut q, make_contact(5, 6));
-        let p = peek_contact(&q).unwrap();
+        let p = peek_contact(&q).expect("should succeed");
         assert_eq!(p.body_a, 5);
         assert_eq!(queue_len(&q), 1); // not removed
     }
@@ -132,8 +132,8 @@ mod tests {
         let mut q = new_contact_queue();
         enqueue_contact(&mut q, make_contact(1, 2));
         enqueue_contact(&mut q, make_contact(3, 4));
-        assert_eq!(dequeue_contact(&mut q).unwrap().body_a, 1);
-        assert_eq!(dequeue_contact(&mut q).unwrap().body_a, 3);
+        assert_eq!(dequeue_contact(&mut q).expect("should succeed").body_a, 1);
+        assert_eq!(dequeue_contact(&mut q).expect("should succeed").body_a, 3);
     }
 
     #[test]

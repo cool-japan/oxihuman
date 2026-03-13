@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Cap'n Proto stub.
@@ -199,6 +199,6 @@ mod tests {
         let mut s = CapnSegment::new();
         s.push_word(99);
         m.add_segment(s);
-        assert_eq!(m.segment(0).unwrap().read_word(0), Some(99));
+        assert_eq!(m.segment(0).expect("should succeed").read_word(0), Some(99));
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export scene/mesh data as TOML text.
 
@@ -128,7 +128,7 @@ mod tests {
     fn test_add_integer() {
         let mut doc = new_toml_export("mesh");
         add_integer(&mut doc, "vertices", 512);
-        let val = find_record(&doc, "vertices").unwrap();
+        let val = find_record(&doc, "vertices").expect("should succeed");
         assert_eq!(val, "512");
     }
 

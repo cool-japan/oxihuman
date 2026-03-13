@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Date range iterator and overlap check.
@@ -108,7 +108,7 @@ mod tests {
     fn test_intersection() {
         let a = DateRange::from_ymd(2026, 1, 1, 2026, 6, 30);
         let b = DateRange::from_ymd(2026, 3, 1, 2026, 9, 30);
-        let inter = range_intersection(&a, &b).unwrap();
+        let inter = range_intersection(&a, &b).expect("should succeed");
         assert_eq!(inter.start_jdn, ymd_to_jdn(2026, 3, 1));
         assert_eq!(inter.end_jdn, ymd_to_jdn(2026, 6, 30));
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Lattice deform export.
@@ -108,7 +108,7 @@ mod tests {
     fn test_set_get_point() {
         let mut l = new_lattice_deform(2, 2, 2);
         lattice_set_point(&mut l, 0, [1.0, 2.0, 3.0]);
-        let p = lattice_get_point(&l, 0).unwrap();
+        let p = lattice_get_point(&l, 0).expect("should succeed");
         assert!((p[0] - 1.0).abs() < 1e-6);
     }
 

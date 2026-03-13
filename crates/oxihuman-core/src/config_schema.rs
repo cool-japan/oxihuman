@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Typed config schema with validation.
 
@@ -547,7 +547,7 @@ mod tests {
     #[test]
     fn test_config_value_get_float() {
         let val = make_value(&[("f", "2.71")]);
-        let result = config_value_get_float(&val, "f").unwrap();
+        let result = config_value_get_float(&val, "f").expect("should succeed");
         assert!((result - 2.71).abs() < 1e-4);
     }
 

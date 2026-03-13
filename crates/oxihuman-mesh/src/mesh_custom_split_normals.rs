@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Custom split normals per face-corner.
@@ -95,7 +95,7 @@ mod tests {
         set_split_normal(&mut layer, 0, 0, [0.0, 1.0, 0.0]);
         let n = get_split_normal(&layer, 0, 0);
         assert!(n.is_some() /* found */);
-        assert!((n.unwrap()[1] - 1.0).abs() < 1e-6 /* Y up */);
+        assert!((n.expect("should succeed")[1] - 1.0).abs() < 1e-6 /* Y up */);
     }
 
     #[test]
@@ -108,7 +108,7 @@ mod tests {
     fn set_normalises_input() {
         let mut layer = new_split_normal_layer();
         set_split_normal(&mut layer, 0, 0, [3.0, 0.0, 0.0]);
-        let n = get_split_normal(&layer, 0, 0).unwrap();
+        let n = get_split_normal(&layer, 0, 0).expect("should succeed");
         let len = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2]).sqrt();
         assert!((len - 1.0).abs() < 1e-6 /* normalised */);
     }
@@ -119,7 +119,7 @@ mod tests {
         set_split_normal(&mut layer, 1, 2, [1.0, 0.0, 0.0]);
         set_split_normal(&mut layer, 1, 2, [0.0, 0.0, 1.0]);
         assert_eq!(split_normal_count(&layer), 1 /* not duplicated */);
-        let n = get_split_normal(&layer, 1, 2).unwrap();
+        let n = get_split_normal(&layer, 1, 2).expect("should succeed");
         assert!((n[2] - 1.0).abs() < 1e-6 /* updated to Z */);
     }
 

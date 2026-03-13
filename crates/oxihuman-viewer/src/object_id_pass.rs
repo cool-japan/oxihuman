@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -124,7 +124,7 @@ mod tests {
     fn test_lookup_object() {
         let mut p = new_object_id_pass();
         let id = register_object(&mut p, "head");
-        let entry = lookup_object(&p, id).unwrap();
+        let entry = lookup_object(&p, id).expect("should succeed");
         assert_eq!(entry.name, "head");
     }
 
@@ -132,7 +132,7 @@ mod tests {
     fn test_lookup_by_name() {
         let mut p = new_object_id_pass();
         register_object(&mut p, "arm");
-        let entry = lookup_by_name(&p, "arm").unwrap();
+        let entry = lookup_by_name(&p, "arm").expect("should succeed");
         assert_eq!(entry.id, 1);
     }
 
@@ -147,7 +147,7 @@ mod tests {
         let mut p = new_object_id_pass();
         let id = register_object(&mut p, "leg");
         set_object_visible(&mut p, id, false);
-        assert!(!lookup_object(&p, id).unwrap().visible);
+        assert!(!lookup_object(&p, id).expect("should succeed").visible);
     }
 
     #[test]

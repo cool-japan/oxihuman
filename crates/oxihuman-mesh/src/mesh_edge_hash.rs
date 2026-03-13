@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Edge hashing utilities for fast edge lookups.
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn test_faces_for_edge() {
         let ehm = build_edge_hash_map(&two_tris());
-        let faces = faces_for_edge(&ehm, 1, 2).unwrap();
+        let faces = faces_for_edge(&ehm, 1, 2).expect("should succeed");
         assert_eq!(faces.len(), 2);
     }
 

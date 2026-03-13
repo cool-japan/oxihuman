@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Scene query system for spatial overlap tests.
 
@@ -150,7 +150,7 @@ mod tests {
     #[test]
     fn test_query_closest() {
         let sq = make_scene();
-        let r = query_closest(&sq, [0.5, 0.0, 0.0]).unwrap();
+        let r = query_closest(&sq, [0.5, 0.0, 0.0]).expect("should succeed");
         assert_eq!(r.body_id, 1);
     }
 
@@ -173,7 +173,7 @@ mod tests {
     #[test]
     fn test_query_first() {
         let r = vec![QueryResult { body_id: 5, distance: 0.0 }];
-        assert_eq!(query_first(&r).unwrap().body_id, 5);
+        assert_eq!(query_first(&r).expect("should succeed").body_id, 5);
     }
 
     #[test]

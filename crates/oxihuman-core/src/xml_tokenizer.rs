@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! XML SAX-style tokenizer stub.
@@ -210,14 +210,14 @@ mod tests {
     fn test_empty_input() {
         /* empty input produces no tokens */
         let mut tok = XmlTokenizer::new("");
-        assert!(tok.tokenize().unwrap().is_empty());
+        assert!(tok.tokenize().expect("should succeed").is_empty());
     }
 
     #[test]
     fn test_simple_element() {
         /* start + text + end */
         let mut tok = XmlTokenizer::new("<root>hello</root>");
-        let tokens = tok.tokenize().unwrap();
+        let tokens = tok.tokenize().expect("should succeed");
         assert!(count_start_tags(&tokens) > 0);
         assert!(count_end_tags(&tokens) > 0);
     }
@@ -226,7 +226,7 @@ mod tests {
     fn test_balanced() {
         /* balanced tag check */
         let mut tok = XmlTokenizer::new("<a>text</a>");
-        let tokens = tok.tokenize().unwrap();
+        let tokens = tok.tokenize().expect("should succeed");
         assert!(is_balanced(&tokens));
     }
 
@@ -234,7 +234,7 @@ mod tests {
     fn test_comment_token() {
         /* comment produces Comment token */
         let mut tok = XmlTokenizer::new("<!-- hi -->");
-        let tokens = tok.tokenize().unwrap();
+        let tokens = tok.tokenize().expect("should succeed");
         assert!(matches!(tokens.first(), Some(XmlToken::Comment(_))));
     }
 
@@ -242,7 +242,7 @@ mod tests {
     fn test_empty_tag() {
         /* self-closing tag */
         let mut tok = XmlTokenizer::new("<br/>");
-        let tokens = tok.tokenize().unwrap();
+        let tokens = tok.tokenize().expect("should succeed");
         assert!(matches!(tokens.first(), Some(XmlToken::EmptyTag { .. })));
     }
 
@@ -250,7 +250,7 @@ mod tests {
     fn test_text_collection() {
         /* collect_text extracts text nodes */
         let mut tok = XmlTokenizer::new("<x>world</x>");
-        let tokens = tok.tokenize().unwrap();
+        let tokens = tok.tokenize().expect("should succeed");
         let texts = collect_text(&tokens);
         assert!(!texts.is_empty());
     }
@@ -259,7 +259,7 @@ mod tests {
     fn test_declaration_token() {
         /* XML declaration */
         let mut tok = XmlTokenizer::new("<?xml version=\"1.0\"?>");
-        let tokens = tok.tokenize().unwrap();
+        let tokens = tok.tokenize().expect("should succeed");
         assert!(matches!(tokens.first(), Some(XmlToken::Declaration(_))));
     }
 
@@ -267,7 +267,7 @@ mod tests {
     fn test_count_start_end_symmetry() {
         /* nested tags counted correctly */
         let mut tok = XmlTokenizer::new("<a><b></b></a>");
-        let tokens = tok.tokenize().unwrap();
+        let tokens = tok.tokenize().expect("should succeed");
         assert_eq!(count_start_tags(&tokens), count_end_tags(&tokens));
     }
 
@@ -275,7 +275,7 @@ mod tests {
     fn test_position_advances() {
         /* position moves forward as tokens are consumed */
         let mut tok = XmlTokenizer::new("<tag/>");
-        tok.tokenize().unwrap();
+        tok.tokenize().expect("should succeed");
         assert!(tok.position() > 0);
     }
 
@@ -283,7 +283,7 @@ mod tests {
     fn test_is_done_after_all_input() {
         /* is_done returns true after tokenizing */
         let mut tok = XmlTokenizer::new("<x/>");
-        tok.tokenize().unwrap();
+        tok.tokenize().expect("should succeed");
         assert!(tok.is_done());
     }
 }

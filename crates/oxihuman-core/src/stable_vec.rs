@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A stable vector where indices remain valid after removal (slots become holes).
@@ -179,7 +179,7 @@ mod tests {
     fn test_get_mut() {
         let mut sv = StableVec::new();
         let i = sv.insert(5);
-        *sv.get_mut(i).unwrap() = 10;
+        *sv.get_mut(i).expect("should succeed") = 10;
         assert_eq!(sv.get(i), Some(&10));
     }
 

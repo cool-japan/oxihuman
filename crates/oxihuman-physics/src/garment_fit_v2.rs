@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Garment fitting pipeline v2.
 //!
@@ -1179,7 +1179,7 @@ mod tests {
         };
 
         let fitter = GarmentFitterV2::new(cfg);
-        let result = fitter.fit(&garment, &bv, &bt, &bn).unwrap();
+        let result = fitter.fit(&garment, &bv, &bt, &bn).expect("should succeed");
 
         assert_eq!(result.draped_positions.len(), garment.positions.len());
         assert!(result.steps_taken > 0);
@@ -1210,7 +1210,7 @@ mod tests {
         };
 
         let fitter = GarmentFitterV2::new(cfg);
-        let result = fitter.fit(&garment, &bv, &bt, &bn).unwrap();
+        let result = fitter.fit(&garment, &bv, &bt, &bn).expect("should succeed");
 
         // Pinned vertices should remain at original y
         for &pi in &garment.pinned_vertices {
@@ -1238,13 +1238,13 @@ mod tests {
         };
 
         let fitter = GarmentFitterV2::new(cfg);
-        let first = fitter.fit(&garment, &bv, &bt, &bn).unwrap();
+        let first = fitter.fit(&garment, &bv, &bt, &bn).expect("should succeed");
 
         // Refit with a slightly different body (translate up)
         let shifted_bv: Vec<[f64; 3]> = bv.iter().map(|v| [v[0], v[1] + 0.05, v[2]]).collect();
         let result = fitter
             .refit(&garment, &first.draped_positions, &shifted_bv, &bt, &bn)
-            .unwrap();
+            .expect("should succeed");
 
         assert_eq!(result.draped_positions.len(), garment.positions.len());
     }
@@ -1265,7 +1265,7 @@ mod tests {
             resolution: [16, 16, 16],
             padding: 0.15,
         };
-        let sdf = SdfGrid::from_mesh(&bv, &bt, &bn, &sdf_config).unwrap();
+        let sdf = SdfGrid::from_mesh(&bv, &bt, &bn, &sdf_config).expect("should succeed");
 
         // Place a point inside the cube
         let mut positions = vec![[0.0, 0.0, 0.0]];
@@ -1335,7 +1335,7 @@ mod tests {
         };
 
         let fitter = GarmentFitterV2::new(cfg);
-        let result = fitter.fit(&garment, &bv, &bt, &bn).unwrap();
+        let result = fitter.fit(&garment, &bv, &bt, &bn).expect("should succeed");
         assert_eq!(result.draped_positions.len(), garment.positions.len());
         // Self-collision count can be 0 if garment doesn't self-intersect
         assert!(result.steps_taken > 0);
@@ -1374,7 +1374,7 @@ mod tests {
         };
 
         let fitter = GarmentFitterV2::new(cfg);
-        let result = fitter.fit(&garment, &bv, &bt, &bn).unwrap();
+        let result = fitter.fit(&garment, &bv, &bt, &bn).expect("should succeed");
         // Seam pair should be closer together than in the rest mesh
         let rest_dist = v3_len(&v3_sub(&garment.positions[0], &garment.positions[8]));
         let draped_dist = v3_len(&v3_sub(
@@ -1406,7 +1406,7 @@ mod tests {
         };
 
         let fitter = GarmentFitterV2::new(cfg.clone());
-        let result = fitter.fit(&garment, &bv, &bt, &bn).unwrap();
+        let result = fitter.fit(&garment, &bv, &bt, &bn).expect("should succeed");
         // With enough steps and high convergence threshold, it should converge
         // (or at least complete without error)
         assert!(result.steps_taken <= cfg.simulation_steps);

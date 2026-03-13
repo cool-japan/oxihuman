@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Compressed morph target loading — pure Rust, no C/Fortran dependencies.
 //!
@@ -473,7 +473,7 @@ mod tests {
         for &v in &values {
             let mut buf = Vec::new();
             encode_varint(&mut buf, v);
-            let (decoded, consumed) = decode_varint(&buf).unwrap();
+            let (decoded, consumed) = decode_varint(&buf).expect("should succeed");
             assert_eq!(v, decoded, "varint round-trip failed for {v}");
             assert_eq!(consumed, buf.len());
         }
@@ -482,14 +482,14 @@ mod tests {
     #[test]
     fn compress_all_zeros() {
         let deltas = vec![[0.0; 3]; 1000];
-        let ct = CompressedTarget::compress(&deltas).unwrap();
+        let ct = CompressedTarget::compress(&deltas).expect("should succeed");
         // Should compress very well.
         assert!(
             ct.compression_ratio() < 0.01,
             "ratio = {}",
             ct.compression_ratio()
         );
-        let out = ct.decompress().unwrap();
+        let out = ct.decompress().expect("should succeed");
         assert_eq!(out.len(), 1000);
         for d in &out {
             assert_close(*d, [0.0; 3], 1e-6);
@@ -503,9 +503,9 @@ mod tests {
         deltas[5] = [0.001, -0.002, 0.003];
         deltas[50] = [-0.005, 0.004, 0.001];
 
-        let ct = CompressedTarget::compress(&deltas).unwrap();
+        let ct = CompressedTarget::compress(&deltas).expect("should succeed");
         assert!(ct.compression_ratio() < 0.1);
-        let out = ct.decompress().unwrap();
+        let out = ct.decompress().expect("should succeed");
         assert_eq!(out.len(), 100);
         assert_close(out[5], deltas[5], 1e-6);
         assert_close(out[50], deltas[50], 1e-6);
@@ -523,11 +523,13 @@ mod tests {
         let mut deltas_b = vec![[0.0; 3]; 50];
         deltas_b[10] = [0.01, 0.02, 0.03];
 
-        pack.add_target("smile".into(), &deltas_a).unwrap();
-        pack.add_target("blink".into(), &deltas_b).unwrap();
+        pack.add_target("smile".into(), &deltas_a)
+            .expect("should succeed");
+        pack.add_target("blink".into(), &deltas_b)
+            .expect("should succeed");
 
-        let bytes = pack.serialize().unwrap();
-        let pack2 = LitePack::deserialize(&bytes).unwrap();
+        let bytes = pack.serialize().expect("should succeed");
+        let pack2 = LitePack::deserialize(&bytes).expect("should succeed");
 
         assert_eq!(pack2.target_names(), vec!["smile", "blink"]);
         assert_eq!(
@@ -535,15 +537,15 @@ mod tests {
             Some("test")
         );
 
-        let out_b = pack2.get_target("blink").unwrap();
+        let out_b = pack2.get_target("blink").expect("should succeed");
         assert_close(out_b[10], [0.01, 0.02, 0.03], 1e-6);
     }
 
     #[test]
     fn empty_deltas() {
-        let ct = CompressedTarget::compress(&[]).unwrap();
+        let ct = CompressedTarget::compress(&[]).expect("should succeed");
         assert_eq!(ct.vertex_count(), 0);
-        let out = ct.decompress().unwrap();
+        let out = ct.decompress().expect("should succeed");
         assert!(out.is_empty());
     }
 
@@ -556,8 +558,8 @@ mod tests {
     #[test]
     fn lite_pack_empty() {
         let pack = LitePack::new();
-        let bytes = pack.serialize().unwrap();
-        let pack2 = LitePack::deserialize(&bytes).unwrap();
+        let bytes = pack.serialize().expect("should succeed");
+        let pack2 = LitePack::deserialize(&bytes).expect("should succeed");
         assert!(pack2.is_empty());
     }
 }

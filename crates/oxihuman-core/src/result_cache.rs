@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Memoized result cache (key → value with hit/miss counters).
 
@@ -123,7 +123,7 @@ mod tests {
         cache_insert(&mut cache, "pi".to_string(), std::f32::consts::PI);
         let val = cache_get(&mut cache, "pi");
         assert!(val.is_some());
-        assert!((val.unwrap() - std::f32::consts::PI).abs() < 1e-6);
+        assert!((val.expect("should succeed") - std::f32::consts::PI).abs() < 1e-6);
     }
 
     #[test]

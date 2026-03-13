@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Z-score anomaly detector.
@@ -140,7 +140,7 @@ mod tests {
         let mut data = vec![0.0f64; 99];
         data.push(1000.0);
         let scores = z_score_batch(&data);
-        let last = *scores.last().unwrap();
+        let last = *scores.last().expect("should succeed");
         assert!(last > 3.0 /* 1000 is extreme outlier */,);
     }
 
@@ -149,7 +149,7 @@ mod tests {
         let mut data = vec![0.0f64; 99];
         data.push(1000.0);
         let flags = flag_anomalies(&data, 3.0);
-        assert!(*flags.last().unwrap() /* last value is flagged */,);
+        assert!(*flags.last().expect("should succeed"), /* last value is flagged */);
     }
 
     #[test]

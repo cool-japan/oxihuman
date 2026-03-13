@@ -1,8 +1,8 @@
 # OxiHuman TODO
 
-> Last updated: 2026-03-11
-> Version: 0.1.0
-> Total SLoC: ~938,000 Rust (5,270 source files)
+> Last updated: 2026-03-13
+> Version: 0.1.1
+> Total SLoC: ~943,000 Rust (5,330 source files)
 
 ---
 
@@ -10,14 +10,14 @@
 
 | Crate | Files | Status | Completion | Stubs |
 |---|---|---|---|---|
-| `oxihuman-core` | ~823 | **Stable** | 100% | 0 |
-| `oxihuman-morph` | ~898 | **Stable** | 100% | 0 |
-| `oxihuman-mesh` | ~892 | **Stable** | 100% | 0 |
-| `oxihuman-export` | ~867 | **Stable** | 100% | 0 |
-| `oxihuman-physics` | ~895 | **Stable** | 100% | 0 |
-| `oxihuman-viewer` | ~875 | **Stable** | 100% | 0 |
-| `oxihuman-wasm` | ~18 | **Stable** | 100% | 0 |
-| `oxihuman-cli` | ~10 | **Feature-complete** | 100% | 0 |
+| `oxihuman-core` | ~829 | **Stable** | 100% | 0 |
+| `oxihuman-morph` | ~918 | **Stable** | 100% | 0 |
+| `oxihuman-mesh` | ~898 | **Stable** | 100% | 0 |
+| `oxihuman-export` | ~883 | **Stable** | 100% | 0 |
+| `oxihuman-physics` | ~864 | **Stable** | 100% | 0 |
+| `oxihuman-viewer` | ~880 | **Stable** | 100% | 0 |
+| `oxihuman-wasm` | ~16 | **Stable** | 100% | 0 |
+| `oxihuman-cli` | ~12 | **Feature-complete** | 100% | 0 |
 
 ---
 
@@ -107,7 +107,7 @@
 - [x] Parameter schema evolution / migration (schema_migration.rs - BFS path, 8 migration ops)
 - [x] Target editor vertex delta painting (vertex_paint_state.rs - full undo/redo)
 - [x] Documentation generator for custom targets (target_docs.rs - HTML/JSON/CSV/text)
-- [ ] Asset pack builder GUI (optional)
+- [x] Asset pack builder GUI (optional)
 
 ---
 
@@ -165,7 +165,7 @@
 - [x] Docs deployment (docs.yml - cargo doc → GitHub Pages)
 - [x] cargo-deny config (deny.toml - licenses, advisories, COOLJAPAN ecosystem bans)
 - [x] crates.io publish preparation (all 8 crates pass --dry-run)
-- [ ] Alpha asset pack distribution strategy
+- [x] Alpha asset pack distribution strategy
 - [x] Demo website deployment (demo/ — index.html + app.js WebGPU/wireframe fallback + sw.js service worker)
 
 ---
@@ -178,7 +178,7 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 
 ## Release Milestones
 
-### v0.1.0 (current) — Foundation Release
+### v0.1.1 (current) — Foundation Release
 - [x] All 8 workspace crates compile with `--all-features`
 - [x] Core morph engine functional
 - [x] 50+ export format support
@@ -198,7 +198,7 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 - [x] Demo website (demo/ — index.html + app.js WebGPU/wireframe fallback + sw.js service worker)
 - [x] OxiRS adapter layer (oxirs_adapter.rs - rigid bodies, ray cast, contacts, BodyRigMapper)
 - [x] All stubs replaced with real implementations (0 todo!(), 0 unimplemented!())
-- [x] Comprehensive test coverage (32,564 tests across all crates — 0 failures)
+- [x] Comprehensive test coverage (32,644 tests across all crates — 0 failures)
 - [x] Performance benchmarks (SIMD morph, incremental dirty, GPU compute, 11 physics benchmarks)
 - [x] Full documentation (rustdoc, user guide, developer guide, TypeScript examples)
 - [x] Security audit complete (security.rs: path sanitization, checked arithmetic, magic bytes; 1 low advisory)

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Trigger volumes (AABB, sphere, capsule) for event detection.
 
@@ -361,7 +361,7 @@ mod tests {
         let id = add_aabb_trigger(&mut world, "aabb", [-1.0, -1.0, -1.0], [1.0, 1.0, 1.0]);
         let zone = get_trigger(&world, id);
         assert!(zone.is_some());
-        assert_eq!(zone.unwrap().name, "aabb");
+        assert_eq!(zone.expect("should succeed").name, "aabb");
     }
 
     #[test]
@@ -369,7 +369,12 @@ mod tests {
         let mut world = new_trigger_world();
         let id = add_sphere_trigger(&mut world, "a", [0.0, 0.0, 0.0], 1.0);
         add_sphere_trigger(&mut world, "b", [5.0, 0.0, 0.0], 1.0);
-        world.zones.iter_mut().find(|z| z.id == id).unwrap().enabled = false;
+        world
+            .zones
+            .iter_mut()
+            .find(|z| z.id == id)
+            .expect("should succeed")
+            .enabled = false;
         assert_eq!(enabled_trigger_count(&world), 1);
     }
 
@@ -377,7 +382,7 @@ mod tests {
     fn sphere_volume_positive() {
         let mut world = new_trigger_world();
         let id = add_sphere_trigger(&mut world, "vol", [0.0, 0.0, 0.0], 2.0);
-        let vol = trigger_zone_volume(get_trigger(&world, id).unwrap());
+        let vol = trigger_zone_volume(get_trigger(&world, id).expect("should succeed"));
         assert!(vol > 0.0);
     }
 
@@ -385,7 +390,7 @@ mod tests {
     fn aabb_volume_correct() {
         let mut world = new_trigger_world();
         let id = add_aabb_trigger(&mut world, "box", [0.0, 0.0, 0.0], [2.0, 3.0, 4.0]);
-        let vol = trigger_zone_volume(get_trigger(&world, id).unwrap());
+        let vol = trigger_zone_volume(get_trigger(&world, id).expect("should succeed"));
         assert!((vol - 24.0).abs() < 1e-4);
     }
 
@@ -395,6 +400,9 @@ mod tests {
         let id = add_sphere_trigger(&mut world, "cnt", [0.0, 0.0, 0.0], 2.0);
         query_triggers(&mut world, [0.0, 0.0, 0.0]);
         query_triggers(&mut world, [0.0, 0.0, 0.0]);
-        assert_eq!(get_trigger(&world, id).unwrap().enter_count, 2);
+        assert_eq!(
+            get_trigger(&world, id).expect("should succeed").enter_count,
+            2
+        );
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Mandelbrot set orbit stub.
@@ -140,6 +140,6 @@ mod tests {
         let o = mandelbrot_compute(10.0, 0.0, 100);
         let iter = mandelbrot_escape_iter(&o);
         assert!(iter.is_some());
-        assert!(iter.unwrap() <= 1);
+        assert!(iter.expect("should succeed") <= 1);
     }
 }

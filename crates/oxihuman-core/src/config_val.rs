@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A typed configuration value that can hold different data types.
@@ -187,7 +187,7 @@ mod tests {
     fn test_config_val_list() {
         let v = ConfigVal::List(vec![ConfigVal::Int(1), ConfigVal::Int(2)]);
         assert!(v.is_list());
-        assert_eq!(v.as_list().unwrap().len(), 2);
+        assert_eq!(v.as_list().expect("should succeed").len(), 2);
     }
 
     #[test]

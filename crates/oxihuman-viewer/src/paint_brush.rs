@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Paint brush tool for vertex color and weight painting.
 //!
@@ -270,7 +270,7 @@ mod tests {
         let mut brush = new_paint_brush(default_brush_config());
         begin_stroke(&mut brush, [0.0, 0.0, 0.0]);
         assert!(brush.active_stroke.is_some());
-        let pts = &brush.active_stroke.as_ref().unwrap().points;
+        let pts = &brush.active_stroke.as_ref().expect("should succeed").points;
         assert_eq!(pts.len(), 1);
     }
 
@@ -280,7 +280,7 @@ mod tests {
         begin_stroke(&mut brush, [0.0, 0.0, 0.0]);
         continue_stroke(&mut brush, [1.0, 0.0, 0.0]);
         continue_stroke(&mut brush, [2.0, 0.0, 0.0]);
-        assert_eq!(brush.active_stroke.as_ref().unwrap().points.len(), 3);
+        assert_eq!(brush.active_stroke.as_ref().expect("should succeed").points.len(), 3);
     }
 
     #[test]

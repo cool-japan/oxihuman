@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Texture data export to PPM and raw byte formats.
 //!
@@ -376,7 +376,7 @@ mod tests {
         let mut buf = new_texture_buffer(4, 4, PixelFormat::Rgb8);
         set_pixel_rgb(&mut buf, 1, 1, 50, 100, 150);
         let raw = texture_to_raw_bytes(&buf);
-        let restored = raw_bytes_to_texture(&raw, 4, 4, PixelFormat::Rgb8).unwrap();
+        let restored = raw_bytes_to_texture(&raw, 4, 4, PixelFormat::Rgb8).expect("should succeed");
         let (r, g, b) = get_pixel_rgb(&restored, 1, 1);
         assert_eq!((r, g, b), (50, 100, 150));
     }

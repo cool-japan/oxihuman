@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A map from string field names to typed field values, for lightweight struct-like storage.
@@ -161,7 +161,7 @@ mod tests {
     fn set_and_get_float() {
         let mut m = new_struct_map();
         stm_set(&mut m, "x", FieldVal::Float(std::f32::consts::PI));
-        assert!((m.get_float("x").unwrap() - std::f32::consts::PI).abs() < 1e-5);
+        assert!((m.get_float("x").expect("should succeed") - std::f32::consts::PI).abs() < 1e-5);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! NURBS surface stub.
@@ -148,7 +148,7 @@ mod tests {
     fn test_uniform_knots_clamped() {
         let k = uniform_knots(5, 2);
         assert_eq!(k[0], 0.0);
-        assert_eq!(*k.last().unwrap(), 1.0);
+        assert_eq!(*k.last().expect("should succeed"), 1.0);
     }
 
     #[test]

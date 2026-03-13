@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A table mapping levels (0..N) to threshold values and labels.
@@ -131,7 +131,7 @@ mod tests {
     fn test_threshold_for_level() {
         let mut t = LevelTable::new();
         t.add_level(1, 42.0, "answer");
-        assert!((t.threshold_for_level(1).unwrap() - 42.0).abs() < 1e-9);
+        assert!((t.threshold_for_level(1).expect("should succeed") - 42.0).abs() < 1e-9);
     }
 
     #[test]

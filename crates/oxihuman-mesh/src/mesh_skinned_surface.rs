@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Skin surface through profile curves.
@@ -187,7 +187,7 @@ mod tests {
         ];
         let params = chord_length_params(&profiles);
         assert!((params[0]).abs() < 1e-6);
-        assert!((params.last().unwrap() - 1.0).abs() < 1e-6);
+        assert!((params.last().expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]

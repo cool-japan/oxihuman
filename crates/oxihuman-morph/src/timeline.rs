@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -471,7 +471,7 @@ mod tests {
         let mut tl = Timeline::new("sk");
         tl.set_key("eye_blink", 0.0, 0.0);
         tl.set_key("eye_blink", 0.5, 1.0);
-        let track = tl.get_track("eye_blink").unwrap();
+        let track = tl.get_track("eye_blink").expect("should succeed");
         assert_eq!(track.keyframe_count(), 2);
         assert_eq!(track.interp, TrackInterp::Linear);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Anthropometric constraint enforcement for realistic body proportions.
 
@@ -432,7 +432,7 @@ mod tests {
         let cs = standard_anthropometric_constraints();
         let count = enforce_constraints(&mut params, &cs);
         assert!(count >= 1);
-        let bmi = bmi_from_params(1.75, *params.get("weight").unwrap());
+        let bmi = bmi_from_params(1.75, *params.get("weight").expect("should succeed"));
         assert!(bmi <= 45.0 + 0.001);
     }
 

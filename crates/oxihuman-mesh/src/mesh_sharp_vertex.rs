@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Sharp vertex (corner) marking for subdivision surfaces.
@@ -118,7 +118,7 @@ mod tests {
         let mut s = new_sharp_vertex_set();
         mark_sharp_vertex(&mut s, 2, 4.5);
         let sh = get_vertex_sharpness(&s, 2);
-        assert!((sh.unwrap() - 4.5).abs() < 1e-6 /* correct sharpness */);
+        assert!((sh.expect("should succeed") - 4.5).abs() < 1e-6 /* correct sharpness */);
     }
 
     #[test]
@@ -133,6 +133,6 @@ mod tests {
         mark_sharp_vertex(&mut s, 0, 1.0);
         mark_sharp_vertex(&mut s, 1, 5.0);
         mark_sharp_vertex(&mut s, 2, 3.0);
-        assert!((max_sharpness(&s).unwrap() - 5.0).abs() < 1e-6 /* max is 5 */);
+        assert!((max_sharpness(&s).expect("should succeed") - 5.0).abs() < 1e-6 /* max is 5 */);
     }
 }

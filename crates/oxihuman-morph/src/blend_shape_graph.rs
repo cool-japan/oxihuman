@@ -329,7 +329,7 @@ mod tests {
         let mut g = new_blend_graph();
         let id = add_blend_node(&mut g, "n", BlendOp::Add, 0.0);
         set_node_weight(&mut g, id, 0.9);
-        assert!((get_node(&g, id).unwrap().weight - 0.9).abs() < 1e-6);
+        assert!((get_node(&g, id).expect("should succeed").weight - 0.9).abs() < 1e-6);
     }
 
     #[test]
@@ -338,7 +338,7 @@ mod tests {
         let id = add_leaf_node(&mut g, "target", 0.3);
         let node = get_node(&g, id);
         assert!(node.is_some());
-        assert_eq!(node.unwrap().id, id);
+        assert_eq!(node.expect("should succeed").id, id);
     }
 
     #[test]
@@ -372,8 +372,14 @@ mod tests {
         let order = topological_sort_graph(&g);
         assert_eq!(order.len(), 3);
         // root should appear before children
-        let root_pos = order.iter().position(|&id| id == p).unwrap();
-        let c1_pos = order.iter().position(|&id| id == c1).unwrap();
+        let root_pos = order
+            .iter()
+            .position(|&id| id == p)
+            .expect("should succeed");
+        let c1_pos = order
+            .iter()
+            .position(|&id| id == c1)
+            .expect("should succeed");
         assert!(root_pos < c1_pos);
     }
 

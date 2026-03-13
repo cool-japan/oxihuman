@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Cron expression parser and next-fire-time calculator stub.
@@ -108,33 +108,33 @@ mod tests {
 
     #[test]
     fn test_parse_wildcard_all() {
-        let expr = parse_cron("* * * * *").unwrap();
+        let expr = parse_cron("* * * * *").expect("should succeed");
         assert!(cron_is_wildcard_all(&expr) /* all wildcards */,);
     }
 
     #[test]
     fn test_parse_specific() {
-        let expr = parse_cron("30 8 * * 1").unwrap();
+        let expr = parse_cron("30 8 * * 1").expect("should succeed");
         assert_eq!(expr.minute, CronField::Value(30));
         assert_eq!(expr.hour, CronField::Value(8));
     }
 
     #[test]
     fn test_matches_wildcard() {
-        let expr = parse_cron("* * * * *").unwrap();
+        let expr = parse_cron("* * * * *").expect("should succeed");
         assert!(cron_matches(&expr, 0, 0, 1, 1, 0), /* wildcard matches anything */);
     }
 
     #[test]
     fn test_matches_value() {
-        let expr = parse_cron("30 8 * * *").unwrap();
+        let expr = parse_cron("30 8 * * *").expect("should succeed");
         assert!(cron_matches(&expr, 30, 8, 1, 1, 0));
         assert!(!cron_matches(&expr, 31, 8, 1, 1, 0));
     }
 
     #[test]
     fn test_parse_range() {
-        let expr = parse_cron("0 9-17 * * *").unwrap();
+        let expr = parse_cron("0 9-17 * * *").expect("should succeed");
         assert_eq!(expr.hour, CronField::Range(9, 17));
         assert!(expr.hour.matches(12) /* 12 is in 9-17 */,);
         assert!(!expr.hour.matches(8) /* 8 not in 9-17 */,);
@@ -142,7 +142,7 @@ mod tests {
 
     #[test]
     fn test_parse_step() {
-        let expr = parse_cron("*/15 * * * *").unwrap();
+        let expr = parse_cron("*/15 * * * *").expect("should succeed");
         assert_eq!(expr.minute, CronField::Step(15));
         assert!(expr.minute.matches(0));
         assert!(expr.minute.matches(15));
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn test_parse_list() {
-        let expr = parse_cron("0 8,12,18 * * *").unwrap();
+        let expr = parse_cron("0 8,12,18 * * *").expect("should succeed");
         assert!(expr.hour.matches(8));
         assert!(expr.hour.matches(12));
         assert!(!expr.hour.matches(10));
@@ -164,7 +164,7 @@ mod tests {
 
     #[test]
     fn test_describe_cron() {
-        let expr = parse_cron("* * * * *").unwrap();
+        let expr = parse_cron("* * * * *").expect("should succeed");
         let desc = describe_cron(&expr);
         assert!(desc.contains("Wildcard"), /* description includes Wildcard */);
     }

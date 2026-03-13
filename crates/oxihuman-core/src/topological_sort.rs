@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Topological sort (Kahn's algorithm) for DAGs.
 
@@ -262,7 +262,7 @@ mod tests {
         let res = topo_sort(&g);
         assert!(!res.has_cycle);
         assert_eq!(res.order[0], 1);
-        assert_eq!(*res.order.last().unwrap(), 4);
+        assert_eq!(*res.order.last().expect("should succeed"), 4);
     }
 
     #[test]

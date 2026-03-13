@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// An event sink that collects events for later processing.
@@ -121,7 +121,7 @@ mod tests {
         let mut sink = EventSink::new(10);
         sink.emit("first", 0.0, "");
         sink.emit("second", 1.0, "");
-        assert_eq!(sink.peek().unwrap().name, "second");
+        assert_eq!(sink.peek().expect("should succeed").name, "second");
     }
 
     #[test]
@@ -147,7 +147,7 @@ mod tests {
         let mut sink = EventSink::new(10);
         sink.emit("tick", 1.0, "first");
         sink.emit("tick", 2.0, "second");
-        let latest = sink.latest_by_name("tick").unwrap();
+        let latest = sink.latest_by_name("tick").expect("should succeed");
         assert_eq!(latest.data, "second");
     }
 
@@ -161,7 +161,7 @@ mod tests {
     fn test_event_record_fields() {
         let mut sink = EventSink::new(10);
         sink.emit("test", 2.78, "payload");
-        let e = sink.peek().unwrap();
+        let e = sink.peek().expect("should succeed");
         assert_eq!(e.name, "test");
         assert!((e.timestamp - 2.78).abs() < 1e-12);
         assert_eq!(e.data, "payload");

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Texture atlas pipeline for export.
 //!
@@ -353,7 +353,7 @@ mod tests {
         let inp = red_input(42, 16, 16);
         let result = add_region(&mut atlas, &inp);
         assert!(result.is_some());
-        assert_eq!(result.unwrap().id, 42);
+        assert_eq!(result.expect("should succeed").id, 42);
     }
 
     #[test]

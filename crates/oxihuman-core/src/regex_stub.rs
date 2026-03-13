@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Regex engine with NFA-based matching (Thompson's construction).
@@ -1076,7 +1076,7 @@ mod tests {
 
     #[test]
     fn test_regex_literal() {
-        let re = Regex::new("abc").unwrap();
+        let re = Regex::new("abc").expect("should succeed");
         assert!(re.is_match("abc"));
         assert!(!re.is_match("ab"));
         assert!(!re.is_match("abcd"));
@@ -1084,7 +1084,7 @@ mod tests {
 
     #[test]
     fn test_regex_dot() {
-        let re = Regex::new("a.c").unwrap();
+        let re = Regex::new("a.c").expect("should succeed");
         assert!(re.is_match("abc"));
         assert!(re.is_match("axc"));
         assert!(!re.is_match("ac"));
@@ -1092,7 +1092,7 @@ mod tests {
 
     #[test]
     fn test_regex_star() {
-        let re = Regex::new("ab*c").unwrap();
+        let re = Regex::new("ab*c").expect("should succeed");
         assert!(re.is_match("ac"));
         assert!(re.is_match("abc"));
         assert!(re.is_match("abbbc"));
@@ -1101,7 +1101,7 @@ mod tests {
 
     #[test]
     fn test_regex_plus() {
-        let re = Regex::new("ab+c").unwrap();
+        let re = Regex::new("ab+c").expect("should succeed");
         assert!(!re.is_match("ac"));
         assert!(re.is_match("abc"));
         assert!(re.is_match("abbbc"));
@@ -1109,7 +1109,7 @@ mod tests {
 
     #[test]
     fn test_regex_optional() {
-        let re = Regex::new("ab?c").unwrap();
+        let re = Regex::new("ab?c").expect("should succeed");
         assert!(re.is_match("ac"));
         assert!(re.is_match("abc"));
         assert!(!re.is_match("abbc"));
@@ -1117,7 +1117,7 @@ mod tests {
 
     #[test]
     fn test_regex_alternation() {
-        let re = Regex::new("cat|dog").unwrap();
+        let re = Regex::new("cat|dog").expect("should succeed");
         assert!(re.is_match("cat"));
         assert!(re.is_match("dog"));
         assert!(!re.is_match("bird"));
@@ -1125,7 +1125,7 @@ mod tests {
 
     #[test]
     fn test_regex_grouping() {
-        let re = Regex::new("(ab)+").unwrap();
+        let re = Regex::new("(ab)+").expect("should succeed");
         assert!(re.is_match("ab"));
         assert!(re.is_match("abab"));
         assert!(!re.is_match(""));
@@ -1133,7 +1133,7 @@ mod tests {
 
     #[test]
     fn test_regex_char_class() {
-        let re = Regex::new("[abc]").unwrap();
+        let re = Regex::new("[abc]").expect("should succeed");
         assert!(re.is_match("a"));
         assert!(re.is_match("b"));
         assert!(!re.is_match("d"));
@@ -1141,7 +1141,7 @@ mod tests {
 
     #[test]
     fn test_regex_char_class_range() {
-        let re = Regex::new("[a-z]+").unwrap();
+        let re = Regex::new("[a-z]+").expect("should succeed");
         assert!(re.is_match("hello"));
         assert!(!re.is_match("HELLO"));
         assert!(!re.is_match(""));
@@ -1149,28 +1149,28 @@ mod tests {
 
     #[test]
     fn test_regex_negated_class() {
-        let re = Regex::new("[^0-9]+").unwrap();
+        let re = Regex::new("[^0-9]+").expect("should succeed");
         assert!(re.is_match("abc"));
         assert!(!re.is_match("123"));
     }
 
     #[test]
     fn test_regex_digit_shorthand() {
-        let re = Regex::new("\\d+").unwrap();
+        let re = Regex::new("\\d+").expect("should succeed");
         assert!(re.is_match("42"));
         assert!(!re.is_match("abc"));
     }
 
     #[test]
     fn test_regex_word_shorthand() {
-        let re = Regex::new("\\w+").unwrap();
+        let re = Regex::new("\\w+").expect("should succeed");
         assert!(re.is_match("hello_123"));
         assert!(!re.is_match("!!!"));
     }
 
     #[test]
     fn test_regex_space_shorthand() {
-        let re = Regex::new("a\\sb").unwrap();
+        let re = Regex::new("a\\sb").expect("should succeed");
         assert!(re.is_match("a b"));
         assert!(re.is_match("a\tb"));
         assert!(!re.is_match("ab"));
@@ -1178,22 +1178,22 @@ mod tests {
 
     #[test]
     fn test_regex_negated_shorthands() {
-        let re = Regex::new("\\D+").unwrap();
+        let re = Regex::new("\\D+").expect("should succeed");
         assert!(re.is_match("abc"));
         assert!(!re.is_match("42"));
 
-        let re2 = Regex::new("\\W").unwrap();
+        let re2 = Regex::new("\\W").expect("should succeed");
         assert!(re2.is_match("!"));
         assert!(!re2.is_match("a"));
 
-        let re3 = Regex::new("\\S+").unwrap();
+        let re3 = Regex::new("\\S+").expect("should succeed");
         assert!(re3.is_match("abc"));
         assert!(!re3.is_match(" "));
     }
 
     #[test]
     fn test_regex_anchors() {
-        let re = Regex::new("^abc$").unwrap();
+        let re = Regex::new("^abc$").expect("should succeed");
         assert!(re.is_match("abc"));
         assert!(!re.is_match("xabc"));
         assert!(!re.is_match("abcx"));
@@ -1201,19 +1201,19 @@ mod tests {
 
     #[test]
     fn test_regex_start_anchor_only() {
-        let re = Regex::new("^abc").unwrap();
+        let re = Regex::new("^abc").expect("should succeed");
         assert!(re.is_match("abc"));
         assert!(!re.is_match("abcdef"));
         let m = re.find("abcdef");
         assert!(m.is_some());
-        let m = m.unwrap();
+        let m = m.expect("should succeed");
         assert_eq!(m.start, 0);
         assert_eq!(m.end, 3);
     }
 
     #[test]
     fn test_regex_range_quantifier() {
-        let re = Regex::new("a{2,4}").unwrap();
+        let re = Regex::new("a{2,4}").expect("should succeed");
         assert!(!re.is_match("a"));
         assert!(re.is_match("aa"));
         assert!(re.is_match("aaa"));
@@ -1223,7 +1223,7 @@ mod tests {
 
     #[test]
     fn test_regex_exact_quantifier() {
-        let re = Regex::new("a{3}").unwrap();
+        let re = Regex::new("a{3}").expect("should succeed");
         assert!(!re.is_match("aa"));
         assert!(re.is_match("aaa"));
         assert!(!re.is_match("aaaa"));
@@ -1231,7 +1231,7 @@ mod tests {
 
     #[test]
     fn test_regex_min_quantifier() {
-        let re = Regex::new("a{2,}").unwrap();
+        let re = Regex::new("a{2,}").expect("should succeed");
         assert!(!re.is_match("a"));
         assert!(re.is_match("aa"));
         assert!(re.is_match("aaaaaaa"));
@@ -1239,16 +1239,16 @@ mod tests {
 
     #[test]
     fn test_regex_find() {
-        let re = Regex::new("\\d+").unwrap();
+        let re = Regex::new("\\d+").expect("should succeed");
         let m = re.find("abc 123 def");
         assert!(m.is_some());
-        let m = m.unwrap();
+        let m = m.expect("should succeed");
         assert_eq!(m.as_str("abc 123 def"), "123");
     }
 
     #[test]
     fn test_regex_find_all() {
-        let re = Regex::new("\\d+").unwrap();
+        let re = Regex::new("\\d+").expect("should succeed");
         let text = "12 ab 34 cd 56";
         let matches = re.find_all(text);
         assert_eq!(matches.len(), 3);
@@ -1259,33 +1259,33 @@ mod tests {
 
     #[test]
     fn test_regex_find_no_match() {
-        let re = Regex::new("xyz").unwrap();
+        let re = Regex::new("xyz").expect("should succeed");
         assert!(re.find("abc def").is_none());
     }
 
     #[test]
     fn test_regex_is_match_anywhere() {
-        let re = Regex::new("world").unwrap();
+        let re = Regex::new("world").expect("should succeed");
         assert!(re.is_match_anywhere("hello world"));
         assert!(!re.is_match_anywhere("hello earth"));
     }
 
     #[test]
     fn test_regex_escaped_metachar() {
-        let re = Regex::new("a\\.b").unwrap();
+        let re = Regex::new("a\\.b").expect("should succeed");
         assert!(re.is_match("a.b"));
         assert!(!re.is_match("axb"));
     }
 
     #[test]
     fn test_regex_empty_pattern() {
-        let re = Regex::new("").unwrap();
+        let re = Regex::new("").expect("should succeed");
         assert!(re.is_match(""));
     }
 
     #[test]
     fn test_regex_complex_pattern() {
-        let re = Regex::new("(a|b)*c").unwrap();
+        let re = Regex::new("(a|b)*c").expect("should succeed");
         assert!(re.is_match("c"));
         assert!(re.is_match("ac"));
         assert!(re.is_match("bc"));
@@ -1295,7 +1295,7 @@ mod tests {
 
     #[test]
     fn test_regex_email_like() {
-        let re = Regex::new("\\w+@\\w+\\.\\w+").unwrap();
+        let re = Regex::new("\\w+@\\w+\\.\\w+").expect("should succeed");
         assert!(re.is_match("user@host.com"));
         assert!(!re.is_match("user@"));
     }
@@ -1310,7 +1310,7 @@ mod tests {
 
     #[test]
     fn test_regex_find_all_words() {
-        let re = Regex::new("[a-zA-Z]+").unwrap();
+        let re = Regex::new("[a-zA-Z]+").expect("should succeed");
         let text = "hello, world! foo";
         let matches = re.find_all(text);
         assert_eq!(matches.len(), 3);
@@ -1321,7 +1321,7 @@ mod tests {
 
     #[test]
     fn test_regex_nested_groups() {
-        let re = Regex::new("((ab)+c)+").unwrap();
+        let re = Regex::new("((ab)+c)+").expect("should succeed");
         assert!(re.is_match("abc"));
         assert!(re.is_match("ababc"));
         assert!(re.is_match("abcababc"));
@@ -1330,28 +1330,28 @@ mod tests {
 
     #[test]
     fn test_regex_end_anchor_find() {
-        let re = Regex::new("\\d+$").unwrap();
+        let re = Regex::new("\\d+$").expect("should succeed");
         let m = re.find("abc123");
         assert!(m.is_some());
-        assert_eq!(m.unwrap().as_str("abc123"), "123");
+        assert_eq!(m.expect("should succeed").as_str("abc123"), "123");
     }
 
     #[test]
     fn test_regex_unicode() {
-        let re = Regex::new("..").unwrap();
+        let re = Regex::new("..").expect("should succeed");
         assert!(re.is_match("\u{00e9}\u{00e9}"));
         let m = re.find("a\u{00e9}b");
         assert!(m.is_some());
-        let m = m.unwrap();
+        let m = m.expect("should succeed");
         assert_eq!(m.as_str("a\u{00e9}b"), "a\u{00e9}");
     }
 
     #[test]
     fn test_regex_match_len() {
-        let re = Regex::new("[a-z]+").unwrap();
+        let re = Regex::new("[a-z]+").expect("should succeed");
         let m = re.find("123abc456");
         assert!(m.is_some());
-        let m = m.unwrap();
+        let m = m.expect("should succeed");
         assert_eq!(m.len(), 3);
         assert!(!m.is_empty());
     }

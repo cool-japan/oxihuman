@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use std::collections::BTreeMap;
 
@@ -100,7 +100,7 @@ mod tests {
         let mut m = new_priority_map();
         insert_priority(&mut m, "low", "1", 1);
         insert_priority(&mut m, "high", "2", 100);
-        let (k, _) = get_highest(&m).unwrap();
+        let (k, _) = get_highest(&m).expect("should succeed");
         assert_eq!(k, "high");
     }
 
@@ -109,7 +109,7 @@ mod tests {
         let mut m = new_priority_map();
         insert_priority(&mut m, "a", "1", 5);
         insert_priority(&mut m, "b", "2", 10);
-        let (k, _) = remove_highest(&mut m).unwrap();
+        let (k, _) = remove_highest(&mut m).expect("should succeed");
         assert_eq!(k, "b");
         assert_eq!(priority_count(&m), 1);
     }

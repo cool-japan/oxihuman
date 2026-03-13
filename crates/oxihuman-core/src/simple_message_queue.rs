@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::VecDeque;
@@ -72,8 +72,8 @@ mod tests {
         let mut q = new_message_queue_simple(5);
         smq_push(&mut q, "hello");
         smq_push(&mut q, "world");
-        assert_eq!(smq_pop(&mut q).unwrap(), "hello");
-        assert_eq!(smq_pop(&mut q).unwrap(), "world");
+        assert_eq!(smq_pop(&mut q).expect("should succeed"), "hello");
+        assert_eq!(smq_pop(&mut q).expect("should succeed"), "world");
     }
 
     #[test]

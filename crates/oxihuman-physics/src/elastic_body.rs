@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::f32::consts::PI;
@@ -171,7 +171,7 @@ mod tests {
         for _ in 0..1000 {
             b.step(0.01);
         }
-        let p = b.position(0).unwrap();
+        let p = b.position(0).expect("should succeed");
         assert!(p[0].abs() < 0.5);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Export camera depth-of-field parameters.
@@ -232,7 +232,7 @@ mod tests {
         );
         let s = sample_dof_at(&a, 1.0);
         assert!(s.is_some());
-        let (fd, fs) = s.unwrap();
+        let (fd, fs) = s.expect("should succeed");
         assert!((fd - 5.0).abs() < 0.1);
         assert!((fs - 3.0).abs() < 0.1);
     }

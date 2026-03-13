@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -237,7 +237,7 @@ mod tests {
         let id = cache.insert(rgba8_desc("tex", 8, 8), None);
         let entry = cache.get(id);
         assert!(entry.is_some());
-        assert_eq!(entry.unwrap().id, id);
+        assert_eq!(entry.expect("should succeed").id, id);
     }
 
     #[test]
@@ -277,7 +277,7 @@ mod tests {
         let ok = cache.mark_loaded(id, vec![0u8; 64]);
         assert!(ok);
         assert_eq!(cache.loaded_count(), 1);
-        assert!(cache.get(id).unwrap().data.is_some());
+        assert!(cache.get(id).expect("should succeed").data.is_some());
     }
 
     #[test]
@@ -353,7 +353,7 @@ mod tests {
     fn default_placeholder_texture_non_null() {
         let entry = default_placeholder_texture();
         assert!(entry.data.is_some());
-        let data = entry.data.unwrap();
+        let data = entry.data.expect("should succeed");
         assert_eq!(data.len(), 4);
         // Pink: R=255, G=105, B=180, A=255
         assert_eq!(data[0], 255);

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! OAuth2 token stub — PKCE flow and token exchange helpers.
@@ -164,7 +164,7 @@ mod tests {
             auth_endpoint: "".into(),
             token_endpoint: "".into(),
         };
-        let tok = exchange_code_for_token(&cfg, "code123", "verifier").unwrap();
+        let tok = exchange_code_for_token(&cfg, "code123", "verifier").expect("should succeed");
         assert!(tok.access_token.contains("code123"));
     }
 
@@ -187,7 +187,7 @@ mod tests {
             auth_endpoint: "".into(),
             token_endpoint: "".into(),
         };
-        let tok = refresh_token(&cfg, "rt_old").unwrap();
+        let tok = refresh_token(&cfg, "rt_old").expect("should succeed");
         assert!(tok.access_token.contains("myclient"));
     }
 
@@ -202,7 +202,7 @@ mod tests {
         let mut client = OAuth2Client::new(cfg);
         let url = client.start_pkce_flow("verifier-xyz", "s1");
         assert!(url.contains("c1"));
-        let tok = client.complete_flow("authcode").unwrap();
+        let tok = client.complete_flow("authcode").expect("should succeed");
         assert!(!tok.access_token.is_empty());
     }
 

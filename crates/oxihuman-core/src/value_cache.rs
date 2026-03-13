@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Value cache: memoizes computed f32 values by string key with invalidation.
@@ -106,7 +106,7 @@ mod tests {
     fn test_store_and_get() {
         let mut vc = new_value_cache();
         vc_store(&mut vc, "x", PI);
-        assert!((vc_get(&vc, "x").unwrap() - PI).abs() < 1e-5);
+        assert!((vc_get(&vc, "x").expect("should succeed") - PI).abs() < 1e-5);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Hair strand representation as a discrete Cosserat rod.
 //!
@@ -560,7 +560,7 @@ mod tests {
             [0.0, 0.6, 0.0],
             [0.0, 0.4, 0.0],
         ];
-        let strand = HairStrand::from_positions(&positions, 0.001).unwrap();
+        let strand = HairStrand::from_positions(&positions, 0.001).expect("should succeed");
         assert_eq!(strand.node_count(), 4);
         assert_eq!(strand.segment_count(), 3);
     }
@@ -599,7 +599,7 @@ mod tests {
         // Move a node.
         strand.nodes[3].position = [0.1, 0.5, 0.0];
         strand.snapshot_rest_pose();
-        let rp = strand.rest_position(3).unwrap();
+        let rp = strand.rest_position(3).expect("should succeed");
         assert!((rp[0] - 0.1).abs() < 1e-12);
     }
 }

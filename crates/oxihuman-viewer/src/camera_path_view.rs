@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0 / #![allow(dead_code)]
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0 / #![allow(dead_code)]
 #![allow(dead_code)]
 
 //! Camera path visualization for the 3D viewer.
@@ -173,7 +173,7 @@ mod tests {
         w2.position = [1.0, 1.0, -3.0];
         add_waypoint(&mut p, w1);
         add_waypoint(&mut p, w2);
-        let r = interpolate_path(&p, 0.5).unwrap();
+        let r = interpolate_path(&p, 0.5).expect("should succeed");
         assert!((r.position[0] - 0.5).abs() < 1e-6);
     }
 

@@ -61,7 +61,7 @@ mod tests {
     #[test] fn test_at() {
         let mut b = new_delta_buffer();
         add_delta_db(&mut b, 1.0, 0.0, 0.0);
-        let d = delta_at_db(&b, 0).unwrap();
+        let d = delta_at_db(&b, 0).expect("should succeed");
         assert!((d[0] - 1.0).abs() < 1e-6);
     }
     #[test] fn test_at_oob() { assert!(delta_at_db(&new_delta_buffer(), 0).is_none()); }

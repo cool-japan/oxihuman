@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Physics accuracy benchmarks — verifies that simulated outcomes stay within
 //! acceptable bounds of analytical predictions.
@@ -16,7 +16,8 @@
 //! 3. **Spring-mass equilibrium** — a damped spring-mass system settles to the
 //!    correct equilibrium extension within 100 steps.
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
+use std::hint::black_box;
 
 use oxihuman_physics::{add_xpbd_particle, new_xpbd_world, xpbd_add_distance, xpbd_step};
 

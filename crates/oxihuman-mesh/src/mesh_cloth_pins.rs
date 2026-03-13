@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Cloth pinning vertex groups.
@@ -162,7 +162,7 @@ mod tests {
             .pins
             .iter()
             .find(|e| e.vertex_index == 0)
-            .unwrap()
+            .expect("should succeed")
             .strength;
         assert!((pin0_strength - 0.5).abs() < 1e-6);
     }
@@ -176,7 +176,7 @@ mod tests {
             .pins
             .iter()
             .find(|e| e.vertex_index == 0)
-            .unwrap()
+            .expect("should succeed")
             .strength;
         assert!((s - 0.3).abs() < 1e-6);
         assert_eq!(g.pin_count(), 3);

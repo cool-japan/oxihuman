@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export lightmap UV channel and baked irradiance samples as JSON or compact binary.
 
@@ -245,7 +245,7 @@ mod tests {
         }
         let cfg = default_lightmap_uv_config();
         let bin = lmuv_export_binary(&mut r, &cfg);
-        let count = u32::from_le_bytes(bin[0..4].try_into().unwrap());
+        let count = u32::from_le_bytes(bin[0..4].try_into().expect("should succeed"));
         assert_eq!(count, 3);
     }
 

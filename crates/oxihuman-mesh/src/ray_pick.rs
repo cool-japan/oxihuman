@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
@@ -499,7 +499,7 @@ mod tests {
         let params = PickParams::default();
         let result = pick_face(&mesh, &ray, &params);
         assert!(result.is_some(), "expected a hit");
-        let r = result.unwrap();
+        let r = result.expect("should succeed");
         assert_eq!(r.face_index, 0);
         assert!(
             (r.distance - 5.0).abs() < 1e-4,
@@ -577,7 +577,7 @@ mod tests {
         };
         let result = pick_vertex(&mesh, &ray, &params);
         assert!(result.is_some(), "expected vertex 0 to be selected");
-        let (vi, _d) = result.unwrap();
+        let (vi, _d) = result.expect("should succeed");
         assert_eq!(vi, 0, "expected vertex index 0, got {vi}");
     }
 

@@ -233,7 +233,7 @@ mod tests {
         add_preset(&mut lib, default_glb_preset());
         let found = get_preset_by_name(&lib, "Default GLB");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().target, ExportTarget::Glb);
+        assert_eq!(found.expect("should succeed").target, ExportTarget::Glb);
     }
 
     #[test]

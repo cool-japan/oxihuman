@@ -152,7 +152,7 @@ mod tests {
         let mut c = make_console();
         console_log(&mut c, ConsoleSeverity::Info, "hello");
         assert_eq!(console_entry_count(&c), 1);
-        let last = console_last_entry(&c).unwrap();
+        let last = console_last_entry(&c).expect("should succeed");
         assert_eq!(last.message, "hello");
         assert_eq!(last.severity, ConsoleSeverity::Info);
     }
@@ -214,7 +214,10 @@ mod tests {
         }
         assert_eq!(console_entry_count(&c), 3);
         // Oldest entries dropped — last entry should be msg 4
-        assert_eq!(console_last_entry(&c).unwrap().message, "msg 4");
+        assert_eq!(
+            console_last_entry(&c).expect("should succeed").message,
+            "msg 4"
+        );
     }
 
     #[test]
@@ -222,7 +225,7 @@ mod tests {
         let mut c = make_console();
         console_log(&mut c, ConsoleSeverity::Info, "first");
         console_log(&mut c, ConsoleSeverity::Error, "last");
-        let last = console_last_entry(&c).unwrap();
+        let last = console_last_entry(&c).expect("should succeed");
         assert_eq!(last.message, "last");
         assert_eq!(last.severity, ConsoleSeverity::Error);
     }

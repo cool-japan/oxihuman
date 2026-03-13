@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Camera animation tracks with keyframes and interpolation.
 
@@ -364,7 +364,7 @@ mod tests {
     fn sample_track_single_keyframe() {
         let mut track = new_camera_track("t");
         add_keyframe(&mut track, make_keyframe(0.0, 5.0));
-        let kf = sample_track(&track, 0.5).unwrap();
+        let kf = sample_track(&track, 0.5).expect("should succeed");
         assert!((kf.position[0] - 5.0).abs() < 1e-6);
     }
 
@@ -373,7 +373,7 @@ mod tests {
         let mut track = new_camera_track("t");
         add_keyframe(&mut track, make_keyframe(0.0, 0.0));
         add_keyframe(&mut track, make_keyframe(2.0, 10.0));
-        let kf = sample_track(&track, 1.0).unwrap();
+        let kf = sample_track(&track, 1.0).expect("should succeed");
         assert!((kf.position[0] - 5.0).abs() < 1e-4);
     }
 
@@ -382,7 +382,7 @@ mod tests {
         let mut track = new_camera_track("t");
         add_keyframe(&mut track, make_keyframe(1.0, 3.0));
         add_keyframe(&mut track, make_keyframe(2.0, 6.0));
-        let kf = sample_track(&track, 0.0).unwrap();
+        let kf = sample_track(&track, 0.0).expect("should succeed");
         assert!((kf.position[0] - 3.0).abs() < 1e-6);
     }
 
@@ -422,8 +422,8 @@ mod tests {
         let mut track = new_camera_track("t");
         add_keyframe(&mut track, make_keyframe(0.0, 1.0));
         add_keyframe(&mut track, make_keyframe(5.0, 9.0));
-        let start = camera_at_start(&track).unwrap();
-        let end = camera_at_end(&track).unwrap();
+        let start = camera_at_start(&track).expect("should succeed");
+        let end = camera_at_end(&track).expect("should succeed");
         assert!((start.position[0] - 1.0).abs() < 1e-6);
         assert!((end.position[0] - 9.0).abs() < 1e-6);
     }
@@ -467,7 +467,7 @@ mod tests {
         let mut b = new_camera_track("b");
         add_keyframe(&mut a, make_keyframe(0.0, 0.0));
         add_keyframe(&mut b, make_keyframe(0.0, 10.0));
-        let result = blend_tracks(&a, &b, 0.0).unwrap();
+        let result = blend_tracks(&a, &b, 0.0).expect("should succeed");
         assert!((result.keyframes[0].position[0] - 0.0).abs() < 1e-6);
     }
 

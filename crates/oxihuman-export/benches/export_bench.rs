@@ -1,7 +1,7 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
-use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion};
+use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 use oxihuman_export::glb::export_glb;
 use oxihuman_export::mesh_quantize::{quantize_mesh, write_quantized_bin};
 use oxihuman_export::morph_delta_bin::{
@@ -10,6 +10,7 @@ use oxihuman_export::morph_delta_bin::{
 use oxihuman_export::zip_pack::{zip_bytes, ZipEntry};
 use oxihuman_mesh::mesh::MeshBuffers;
 use oxihuman_morph::engine::MeshBuffers as MB;
+use std::hint::black_box;
 
 // ── mesh factory ─────────────────────────────────────────────────────────────
 
@@ -67,7 +68,7 @@ fn bench_export_glb(c: &mut Criterion) {
     let path = std::path::PathBuf::from("/tmp/bench_oxihuman.glb");
     c.bench_function("export_glb_19k_verts", |b| {
         b.iter(|| {
-            export_glb(black_box(&mesh), black_box(&path)).unwrap();
+            export_glb(black_box(&mesh), black_box(&path)).expect("export_glb failed");
         })
     });
     std::fs::remove_file(&path).ok();
@@ -83,7 +84,8 @@ fn bench_write_quantized_bin(c: &mut Criterion) {
     c.bench_function("write_quantized_bin_19k_verts", |b| {
         b.iter(|| {
             let q = quantize_mesh(black_box(&mesh));
-            write_quantized_bin(black_box(&q), black_box(path)).unwrap();
+            write_quantized_bin(black_box(&q), black_box(path))
+                .expect("write_quantized_bin failed");
         })
     });
 
@@ -157,7 +159,8 @@ fn bench_write_morph_delta_bin(c: &mut Criterion) {
 
     c.bench_function("write_morph_delta_bin_10x500", |b| {
         b.iter(|| {
-            write_morph_delta_bin(black_box(&bin), black_box(path)).unwrap();
+            write_morph_delta_bin(black_box(&bin), black_box(path))
+                .expect("write_morph_delta_bin failed");
         })
     });
 
@@ -189,7 +192,8 @@ fn bench_morph_delta_bin_scaling(c: &mut Criterion) {
 
         group.bench_function(format!("{target_count}_targets"), |b| {
             b.iter(|| {
-                write_morph_delta_bin(black_box(&bin), black_box(&path)).unwrap();
+                write_morph_delta_bin(black_box(&bin), black_box(&path))
+                    .expect("write_morph_delta_bin failed");
             })
         });
 

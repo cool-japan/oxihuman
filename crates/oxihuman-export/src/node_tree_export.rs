@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -124,7 +124,7 @@ mod tests {
     fn test_get_node() {
         let mut e = new_node_tree_export("Compositor");
         nt_add_node(&mut e, make_node(5, "Blur"));
-        let n = nt_get_node(&e, 5).unwrap();
+        let n = nt_get_node(&e, 5).expect("should succeed");
         assert_eq!(n.node_type, "Blur");
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Color palette management.
 
@@ -87,7 +87,7 @@ mod tests {
     fn test_get_color_found() {
         let mut p = new_color_palette("pal");
         add_color(&mut p, "blue", [0.0, 0.0, 1.0, 1.0]);
-        let c = get_color(&p, "blue").unwrap();
+        let c = get_color(&p, "blue").expect("should succeed");
         assert!((c[2] - 1.0).abs() < EPS);
     }
 

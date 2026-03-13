@@ -155,7 +155,7 @@ mod tests {
     fn test_insert_and_get() {
         let mut m = new_slot_map();
         let k = slot_insert(&mut m, std::f32::consts::PI);
-        assert!((slot_get(&m, k).unwrap() - std::f32::consts::PI).abs() < 1e-5);
+        assert!((slot_get(&m, k).expect("should succeed") - std::f32::consts::PI).abs() < 1e-5);
     }
 
     #[test]
@@ -170,7 +170,7 @@ mod tests {
     fn test_remove_returns_value() {
         let mut m = new_slot_map();
         let k = slot_insert(&mut m, 7.0);
-        let v = slot_remove(&mut m, k).unwrap();
+        let v = slot_remove(&mut m, k).expect("should succeed");
         assert!((v - 7.0).abs() < 1e-5);
         assert_eq!(slot_len(&m), 0);
     }

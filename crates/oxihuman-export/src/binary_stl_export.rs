@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Binary STL with attribute bytes.
@@ -176,14 +176,14 @@ mod tests {
         let idx = vec![0u32, 1, 2];
         let m = mesh_to_binary_stl(&pos, &idx);
         let bytes = encode_binary_stl(&m);
-        let count = parse_binary_stl_header(&bytes).unwrap();
+        let count = parse_binary_stl_header(&bytes).expect("should succeed");
         assert_eq!(count, 1);
     }
 
     #[test]
     fn test_header_contains_marker() {
         let m = new_binary_stl_mesh();
-        let s = std::str::from_utf8(&m.header[..19]).unwrap();
+        let s = std::str::from_utf8(&m.header[..19]).expect("should succeed");
         assert!(s.contains("OxiHuman"));
     }
 }

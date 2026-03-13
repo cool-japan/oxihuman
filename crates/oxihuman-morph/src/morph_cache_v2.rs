@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Morph result cache to avoid recomputing unchanged weights.
@@ -54,7 +54,7 @@ mod tests {
     fn test_insert_and_get() {
         let mut c = new_morph_cache_v2();
         mc2_insert(&mut c, 42, 0.75);
-        assert!((mc2_get(&c, 42).unwrap() - 0.75).abs() < 1e-6);
+        assert!((mc2_get(&c, 42).expect("should succeed") - 0.75).abs() < 1e-6);
     }
 
     #[test]
@@ -93,7 +93,7 @@ mod tests {
         let mut c = new_morph_cache_v2();
         mc2_insert(&mut c, 5, 0.1);
         mc2_insert(&mut c, 5, 0.9);
-        assert!((mc2_get(&c, 5).unwrap() - 0.9).abs() < 1e-6);
+        assert!((mc2_get(&c, 5).expect("should succeed") - 0.9).abs() < 1e-6);
         assert_eq!(mc2_size(&c), 1);
     }
 

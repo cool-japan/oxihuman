@@ -214,9 +214,9 @@ mod tests {
     fn make_graph() -> (BlendPoseGraph, u32, u32, u32) {
         let cfg = default_blend_pose_graph_config();
         let mut g = new_blend_pose_graph(cfg);
-        let idle = bpg_add_node(&mut g, "idle").unwrap();
-        let walk = bpg_add_node(&mut g, "walk").unwrap();
-        let run = bpg_add_node(&mut g, "run").unwrap();
+        let idle = bpg_add_node(&mut g, "idle").expect("should succeed");
+        let walk = bpg_add_node(&mut g, "walk").expect("should succeed");
+        let run = bpg_add_node(&mut g, "run").expect("should succeed");
         bpg_add_edge(&mut g, idle, walk, 0.8);
         bpg_add_edge(&mut g, walk, run, 0.9);
         (g, idle, walk, run)
@@ -264,8 +264,8 @@ mod tests {
             transition_threshold: 0.95,
         };
         let mut g = new_blend_pose_graph(cfg);
-        let a = bpg_add_node(&mut g, "a").unwrap();
-        let b = bpg_add_node(&mut g, "b").unwrap();
+        let a = bpg_add_node(&mut g, "a").expect("should succeed");
+        let b = bpg_add_node(&mut g, "b").expect("should succeed");
         bpg_add_edge(&mut g, a, b, 0.5);
         let cur = bpg_evaluate(&mut g);
         // Weight 0.5 < threshold 0.95, no transition.

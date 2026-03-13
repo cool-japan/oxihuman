@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Simple synchronous event bus for plugin notifications.
 
@@ -151,7 +151,7 @@ mod tests {
         bus.subscribe(
             EventKind::TargetLoaded,
             Box::new(move |_| {
-                *c.lock().unwrap() += 1;
+                *c.lock().expect("should succeed") += 1;
             }),
         );
         bus.publish(Event {
@@ -159,7 +159,7 @@ mod tests {
             payload: "null".to_string(),
             timestamp_ms: ts(),
         });
-        assert_eq!(*counter.lock().unwrap(), 1);
+        assert_eq!(*counter.lock().expect("should succeed"), 1);
     }
 
     #[test]
@@ -170,7 +170,7 @@ mod tests {
         bus.subscribe(
             EventKind::ExportFinished,
             Box::new(move |_| {
-                *c.lock().unwrap() += 1;
+                *c.lock().expect("should succeed") += 1;
             }),
         );
         bus.publish(Event {
@@ -178,7 +178,7 @@ mod tests {
             payload: "null".to_string(),
             timestamp_ms: ts(),
         });
-        assert_eq!(*counter.lock().unwrap(), 0);
+        assert_eq!(*counter.lock().expect("should succeed"), 0);
     }
 
     #[test]
@@ -239,18 +239,18 @@ mod tests {
         let mut bus = EventBus::new();
         bus.subscribe(
             EventKind::Error,
-            Box::new(move |_| *c1.lock().unwrap() += 1),
+            Box::new(move |_| *c1.lock().expect("should succeed") += 1),
         );
         bus.subscribe(
             EventKind::Error,
-            Box::new(move |_| *c2.lock().unwrap() += 1),
+            Box::new(move |_| *c2.lock().expect("should succeed") += 1),
         );
         bus.publish(Event {
             kind: EventKind::Error,
             payload: "null".to_string(),
             timestamp_ms: ts(),
         });
-        assert_eq!(*counter.lock().unwrap(), 2);
+        assert_eq!(*counter.lock().expect("should succeed"), 2);
     }
 
     #[test]
@@ -260,7 +260,7 @@ mod tests {
         let mut bus = EventBus::new();
         bus.subscribe(
             EventKind::Custom("my_event".to_string()),
-            Box::new(move |_| *c.lock().unwrap() += 1),
+            Box::new(move |_| *c.lock().expect("should succeed") += 1),
         );
         bus.publish(Event {
             kind: EventKind::Custom("my_event".to_string()),
@@ -272,7 +272,7 @@ mod tests {
             payload: "null".to_string(),
             timestamp_ms: ts(),
         });
-        assert_eq!(*counter.lock().unwrap(), 1);
+        assert_eq!(*counter.lock().expect("should succeed"), 1);
     }
 
     #[test]
@@ -310,14 +310,14 @@ mod tests {
         let h = Arc::clone(&hit);
         bus.subscribe(
             EventKind::PluginRegistered,
-            Box::new(move |_| *h.lock().unwrap() = true),
+            Box::new(move |_| *h.lock().expect("should succeed") = true),
         );
         bus.publish(Event {
             kind: EventKind::PluginRegistered,
             payload: r#"{"name":"my-plugin"}"#.to_string(),
             timestamp_ms: ts(),
         });
-        assert!(*hit.lock().unwrap());
+        assert!(*hit.lock().expect("should succeed"));
     }
 
     #[test]

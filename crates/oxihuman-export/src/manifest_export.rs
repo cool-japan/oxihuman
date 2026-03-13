@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Software manifest (name, version, deps) export.
@@ -162,7 +162,7 @@ mod tests {
 
     fn sample_manifest() -> SoftwareManifest {
         let mut m = SoftwareManifest::new("oxihuman", "1.0.0");
-        set_license(&mut m, "MIT OR Apache-2.0");
+        set_license(&mut m, "Apache-2.0");
         set_description(&mut m, "Human body mesh toolkit");
         add_author(&mut m, "Team KitaSan");
         add_dependency(&mut m, "glam", "0.27", false);

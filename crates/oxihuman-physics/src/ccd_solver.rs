@@ -224,7 +224,7 @@ mod tests {
         // B moves left at speed 4; should reach A well within dt = 1.
         let result = ccd_sweep(&a, [0.0; 3], &b, [-4.0, 0.0, 0.0], 1.0, &cfg());
         assert!(ccd_hit_time(&result).is_some());
-        let t = ccd_hit_time(&result).unwrap();
+        let t = ccd_hit_time(&result).expect("should succeed");
         assert!((0.0..=1.0).contains(&t), "TOI out of range: {t}");
     }
 

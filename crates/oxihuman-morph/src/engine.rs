@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! The core morph engine: [`HumanEngine`].
 //!
@@ -489,7 +489,7 @@ mod tests {
         if dir.exists() {
             let count = engine
                 .load_targets_from_dir(dir, |_name| Box::new(|_p: &ParamState| 0.5f32))
-                .unwrap();
+                .expect("should succeed");
             assert!(count > 0, "should load at least one target");
         }
     }
@@ -502,7 +502,9 @@ mod tests {
             "/media/kitasan/Backup/resource/makehuman/makehuman/data/targets/bodyshapes",
         );
         if dir.exists() {
-            let count = engine.load_targets_from_dir_auto(dir).unwrap();
+            let count = engine
+                .load_targets_from_dir_auto(dir)
+                .expect("should succeed");
             assert!(count > 0);
             // Build with different params — should work without panic
             engine.set_params(ParamState::new(0.3, 0.8, 0.2, 0.6));

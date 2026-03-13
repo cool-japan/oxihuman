@@ -168,10 +168,10 @@ mod tests {
         push_history(&mut h, "op2", 2000, 128);
         assert!(can_undo(&h));
         assert!(!can_redo(&h));
-        let e = undo(&mut h).unwrap();
+        let e = undo(&mut h).expect("should succeed");
         assert_eq!(e.description, "op2");
         assert!(can_redo(&h));
-        let e2 = redo(&mut h).unwrap();
+        let e2 = redo(&mut h).expect("should succeed");
         assert_eq!(e2.description, "op2");
     }
 
@@ -193,7 +193,7 @@ mod tests {
         let mut h = new_undo_history(cfg);
         assert!(current_entry(&h).is_none());
         push_history(&mut h, "a", 1, 4);
-        let e = current_entry(&h).unwrap();
+        let e = current_entry(&h).expect("should succeed");
         assert_eq!(e.description, "a");
     }
 

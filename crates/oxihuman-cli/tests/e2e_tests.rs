@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! End-to-end integration tests for the OxiHuman CLI.
 //!
@@ -20,7 +20,11 @@ fn cli_bin() -> PathBuf {
     let var = std::env::var("CARGO_BIN_EXE_oxihuman").unwrap_or_else(|_| {
         // Fallback: use the workspace target/debug directory
         let manifest = env!("CARGO_MANIFEST_DIR");
-        let root = Path::new(manifest).parent().unwrap().parent().unwrap();
+        let root = Path::new(manifest)
+            .parent()
+            .expect("should succeed")
+            .parent()
+            .expect("should succeed");
         root.join("target")
             .join("debug")
             .join("oxihuman")
@@ -117,9 +121,9 @@ fn test_generate_basic() {
     let (_stdout, _stderr, status) = run_cli(&[
         "generate",
         "--base",
-        base.to_str().unwrap(),
+        base.to_str().expect("should succeed"),
         "--output",
-        out.to_str().unwrap(),
+        out.to_str().expect("should succeed"),
     ]);
 
     assert!(
@@ -149,11 +153,11 @@ fn test_generate_with_params() {
     let (_stdout, _stderr, status) = run_cli(&[
         "generate",
         "--base",
-        base.to_str().unwrap(),
+        base.to_str().expect("should succeed"),
         "--params",
         params,
         "--output",
-        out.to_str().unwrap(),
+        out.to_str().expect("should succeed"),
     ]);
 
     assert!(
@@ -164,7 +168,7 @@ fn test_generate_with_params() {
     assert!(out.exists(), "output GLB not found: {}", out.display());
 
     // Verify the output is a valid GLB (magic bytes "glTF")
-    let bytes = fs::read(&out).unwrap();
+    let bytes = fs::read(&out).expect("should succeed");
     assert!(bytes.len() >= 4, "GLB output too small");
     // GLB header: bytes [0..4] = b"glTF"
     assert_eq!(&bytes[0..4], b"glTF", "GLB magic bytes mismatch");
@@ -185,11 +189,11 @@ fn test_export_obj() {
     let (_so, _se, st) = run_cli(&[
         "generate",
         "--base",
-        base.to_str().unwrap(),
+        base.to_str().expect("should succeed"),
         "--output",
-        glb.to_str().unwrap(),
+        glb.to_str().expect("should succeed"),
         "--output-obj",
-        obj.to_str().unwrap(),
+        obj.to_str().expect("should succeed"),
     ]);
     assert!(
         st.success(),
@@ -199,7 +203,7 @@ fn test_export_obj() {
     assert!(obj.exists(), "OBJ output not found: {}", obj.display());
 
     // Verify the OBJ contains vertex lines
-    let content = fs::read_to_string(&obj).unwrap();
+    let content = fs::read_to_string(&obj).expect("should succeed");
     assert!(content.contains("v "), "OBJ output has no vertex lines");
     assert!(content.contains("f "), "OBJ output has no face lines");
 
@@ -218,13 +222,13 @@ fn test_export_glb() {
     let (_so, _se, status) = run_cli(&[
         "generate",
         "--base",
-        base.to_str().unwrap(),
+        base.to_str().expect("should succeed"),
         "--output",
-        out.to_str().unwrap(),
+        out.to_str().expect("should succeed"),
     ]);
     assert!(status.success(), "generate (GLB) failed; stderr: {}", _se);
 
-    let bytes = fs::read(&out).unwrap();
+    let bytes = fs::read(&out).expect("should succeed");
     assert!(bytes.len() >= 12, "GLB too small ({} bytes)", bytes.len());
 
     // GLB 2.0 magic: "glTF" = 0x67 0x6C 0x54 0x46
@@ -248,14 +252,14 @@ fn test_export_stl() {
     let (_so, _se, status) = run_cli(&[
         "stl",
         "--base",
-        base.to_str().unwrap(),
+        base.to_str().expect("should succeed"),
         "--output",
-        out.to_str().unwrap(),
+        out.to_str().expect("should succeed"),
     ]);
     assert!(status.success(), "stl export failed; stderr: {}", _se);
     assert!(out.exists(), "STL not found: {}", out.display());
 
-    let content = fs::read_to_string(&out).unwrap();
+    let content = fs::read_to_string(&out).expect("should succeed");
     // ASCII STL starts with "solid"
     assert!(
         content.trim_start().starts_with("solid"),
@@ -289,14 +293,18 @@ estimated_memory_bytes = 0
 #[test]
 fn test_pack_load() {
     let dir = std::env::temp_dir().join(format!("oxihuman_e2e_pack_{}", std::process::id()));
-    fs::create_dir_all(&dir).unwrap();
+    fs::create_dir_all(&dir).expect("should succeed");
 
     // Write a minimal pack manifest (PackManifest TOML schema)
     let manifest_path = dir.join("pack.toml");
-    fs::write(&manifest_path, EMPTY_PACK_MANIFEST_TOML).unwrap();
+    fs::write(&manifest_path, EMPTY_PACK_MANIFEST_TOML).expect("should succeed");
 
     // Validate the pack manifest — an empty pack should validate successfully
-    let (_so, _se, status) = run_cli(&["validate", "--pack", manifest_path.to_str().unwrap()]);
+    let (_so, _se, status) = run_cli(&[
+        "validate",
+        "--pack",
+        manifest_path.to_str().expect("should succeed"),
+    ]);
 
     assert!(status.success(), "pack validate failed; stderr: {}", _se);
 
@@ -314,9 +322,9 @@ fn test_info_command() {
     let (_so, _se, st) = run_cli(&[
         "generate",
         "--base",
-        base.to_str().unwrap(),
+        base.to_str().expect("should succeed"),
         "--output",
-        glb.to_str().unwrap(),
+        glb.to_str().expect("should succeed"),
     ]);
     assert!(
         st.success(),
@@ -325,7 +333,7 @@ fn test_info_command() {
     );
 
     // Run info on the generated GLB
-    let (stdout, _se, status) = run_cli(&["info", glb.to_str().unwrap()]);
+    let (stdout, _se, status) = run_cli(&["info", glb.to_str().expect("should succeed")]);
     assert!(status.success(), "info command failed; stderr: {}", _se);
 
     // The info output should mention the file path and GLB format
@@ -350,11 +358,11 @@ fn test_invalid_params() {
     let (_so, _se, status) = run_cli(&[
         "generate",
         "--base",
-        base.to_str().unwrap(),
+        base.to_str().expect("should succeed"),
         "--params",
         "not-valid-json!!!",
         "--output",
-        out.to_str().unwrap(),
+        out.to_str().expect("should succeed"),
     ]);
 
     // Must exit non-zero but must NOT crash with a panic message
@@ -385,18 +393,18 @@ fn test_pipeline_generate_export() {
     let (_so, _se, st) = run_cli(&[
         "generate",
         "--base",
-        base.to_str().unwrap(),
+        base.to_str().expect("should succeed"),
         "--output",
-        glb.to_str().unwrap(),
+        glb.to_str().expect("should succeed"),
         "--output-obj",
-        obj.to_str().unwrap(),
+        obj.to_str().expect("should succeed"),
     ]);
     assert!(st.success(), "pipeline generate failed; stderr: {}", _se);
     assert!(glb.exists(), "pipeline GLB not found");
     assert!(obj.exists(), "pipeline OBJ not found");
 
     // Step 2: get stats on the OBJ to verify it parses and has vertices
-    let (stdout, _se, st2) = run_cli(&["info", obj.to_str().unwrap()]);
+    let (stdout, _se, st2) = run_cli(&["info", obj.to_str().expect("should succeed")]);
     assert!(st2.success(), "info (OBJ) failed; stderr: {}", _se);
 
     // Should report vertices
@@ -411,9 +419,9 @@ fn test_pipeline_generate_export() {
     let (_so3, _se3, st3) = run_cli(&[
         "generate",
         "--base",
-        obj.to_str().unwrap(),
+        obj.to_str().expect("should succeed"),
         "--output",
-        glb2.to_str().unwrap(),
+        glb2.to_str().expect("should succeed"),
     ]);
     assert!(
         st3.success(),
@@ -423,8 +431,8 @@ fn test_pipeline_generate_export() {
     assert!(glb2.exists(), "re-generated GLB not found");
 
     // Both GLBs should have the same vertex count (stable mesh)
-    let bytes1 = fs::read(&glb).unwrap();
-    let bytes2 = fs::read(&glb2).unwrap();
+    let bytes1 = fs::read(&glb).expect("should succeed");
+    let bytes2 = fs::read(&glb2).expect("should succeed");
     // Both must be valid GLBs
     assert_eq!(&bytes1[0..4], b"glTF", "GLB1 magic bytes wrong");
     assert_eq!(&bytes2[0..4], b"glTF", "GLB2 magic bytes wrong");

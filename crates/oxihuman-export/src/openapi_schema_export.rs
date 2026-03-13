@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! OpenAPI 3.0 spec export stub.
@@ -176,7 +176,7 @@ mod tests {
     #[test]
     fn operation_count() {
         let spec = sample_spec();
-        let p = spec.find_path("/things").unwrap();
+        let p = spec.find_path("/things").expect("should succeed");
         assert_eq!(p.operation_count(), 1);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Sequential job queue for managing and executing multiple export operations,
 //! with progress tracking and error collection.
@@ -359,7 +359,7 @@ mod tests {
     fn job_status_starts_pending() {
         let mut q = ExportJobQueue::new();
         let id = q.add_glb("pending", PathBuf::from("/tmp/test_job_queue_p.glb"));
-        let job = q.get_job(id).unwrap();
+        let job = q.get_job(id).expect("should succeed");
         assert_eq!(job.status, JobStatus::Pending);
         assert!(!job.is_done());
         assert!(!job.is_failed());

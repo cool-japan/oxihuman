@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Named facial expression preset library.
 //!
@@ -748,7 +748,7 @@ mod tests {
         let blended = lib
             .blend("smile", "frown", 0.0)
             .expect("blend must succeed");
-        let smile = lib.get("smile").unwrap();
+        let smile = lib.get("smile").expect("should succeed");
         for (k, &va) in &smile.weights {
             let bv = blended.get(k).copied().unwrap_or(0.0);
             assert!(
@@ -770,7 +770,7 @@ mod tests {
         let blended = lib
             .blend("smile", "frown", 1.0)
             .expect("blend must succeed");
-        let frown = lib.get("frown").unwrap();
+        let frown = lib.get("frown").expect("should succeed");
         for (k, &vb) in &frown.weights {
             let bv = blended.get(k).copied().unwrap_or(0.0);
             assert!(
@@ -815,8 +815,8 @@ mod tests {
     #[test]
     fn combine_clamps_to_unit() {
         let lib = ExpressionLibrary::default_library();
-        let smile = lib.get("smile").unwrap();
-        let blink = lib.get("blink").unwrap();
+        let smile = lib.get("smile").expect("should succeed");
+        let blink = lib.get("blink").expect("should succeed");
         let combined = ExpressionLibrary::combine(&[smile, smile, blink]);
         for &v in combined.values() {
             assert!(
@@ -949,8 +949,8 @@ mod tests {
         let names = lib.list_names().join("\n");
         std::fs::write("/tmp/oxihuman_expression_library_names.txt", &names)
             .expect("write to /tmp/ must succeed");
-        let read_back =
-            std::fs::read_to_string("/tmp/oxihuman_expression_library_names.txt").unwrap();
+        let read_back = std::fs::read_to_string("/tmp/oxihuman_expression_library_names.txt")
+            .expect("should succeed");
         assert_eq!(read_back, names);
     }
 
@@ -996,7 +996,7 @@ mod tests {
         let lib = ExpressionLibrary::default_library();
         let p = get_preset(&lib, "smile");
         assert!(p.is_some());
-        assert_eq!(p.unwrap().name, "smile");
+        assert_eq!(p.expect("should succeed").name, "smile");
     }
 
     // -----------------------------------------------------------------------
@@ -1007,7 +1007,7 @@ mod tests {
         let lib = ExpressionLibrary::default_library();
         let p = find_preset_by_name(&lib, "wink");
         assert!(p.is_some());
-        assert!(p.unwrap().name.contains("wink"));
+        assert!(p.expect("should succeed").name.contains("wink"));
     }
 
     // -----------------------------------------------------------------------
@@ -1068,7 +1068,7 @@ mod tests {
         let mut p = ExpressionPreset::new("x", "d", wmap(&[("k", 0.8)]));
         p.intensity = 0.5;
         add_preset(&mut lib, p);
-        let weights = preset_morph_weights(&lib, "x").unwrap();
+        let weights = preset_morph_weights(&lib, "x").expect("should succeed");
         assert!((weights["k"] - 0.4).abs() < 1e-5);
     }
 

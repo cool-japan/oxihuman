@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Tracks changes (diffs) to named properties over time.
@@ -122,7 +122,7 @@ mod tests {
         let mut dt = DiffTracker::new(100);
         dt.record("a", "1", "2");
         dt.record("b", "3", "4");
-        assert_eq!(dt.latest().unwrap().property, "b");
+        assert_eq!(dt.latest().expect("should succeed").property, "b");
     }
 
     #[test]
@@ -167,7 +167,7 @@ mod tests {
     fn test_revert_latest() {
         let mut dt = DiffTracker::new(100);
         dt.record("x", "old", "new");
-        let reverted = dt.revert_latest().unwrap();
+        let reverted = dt.revert_latest().expect("should succeed");
         assert_eq!(reverted.property, "x");
         assert!(dt.is_empty());
     }

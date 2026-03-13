@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A bounded MPSC channel implemented with a ring buffer for fixed-capacity message passing.
@@ -114,17 +114,17 @@ mod tests {
     #[test]
     fn test_send_receive() {
         let mut ch = BoundedChannel::new(4);
-        ch.send(1).unwrap();
-        ch.send(2).unwrap();
-        assert_eq!(ch.receive().unwrap(), 1);
-        assert_eq!(ch.receive().unwrap(), 2);
+        ch.send(1).expect("should succeed");
+        ch.send(2).expect("should succeed");
+        assert_eq!(ch.receive().expect("should succeed"), 1);
+        assert_eq!(ch.receive().expect("should succeed"), 2);
     }
 
     #[test]
     fn test_full() {
         let mut ch = BoundedChannel::new(2);
-        ch.send(1).unwrap();
-        ch.send(2).unwrap();
+        ch.send(1).expect("should succeed");
+        ch.send(2).expect("should succeed");
         assert_eq!(ch.send(3), Err(ChannelError::Full));
         assert!(ch.is_full());
     }
@@ -138,10 +138,10 @@ mod tests {
     #[test]
     fn test_close() {
         let mut ch = BoundedChannel::new(4);
-        ch.send(10).unwrap();
+        ch.send(10).expect("should succeed");
         ch.close();
         assert_eq!(ch.send(20), Err(ChannelError::Closed));
-        assert_eq!(ch.receive().unwrap(), 10);
+        assert_eq!(ch.receive().expect("should succeed"), 10);
         assert_eq!(ch.receive(), Err(ChannelError::Closed));
     }
 
@@ -149,16 +149,16 @@ mod tests {
     fn test_peek() {
         let mut ch = BoundedChannel::new(4);
         assert_eq!(ch.peek(), None);
-        ch.send(42).unwrap();
+        ch.send(42).expect("should succeed");
         assert_eq!(ch.peek(), Some(&42));
     }
 
     #[test]
     fn test_stats() {
         let mut ch = BoundedChannel::new(4);
-        ch.send(1).unwrap();
-        ch.send(2).unwrap();
-        ch.receive().unwrap();
+        ch.send(1).expect("should succeed");
+        ch.send(2).expect("should succeed");
+        ch.receive().expect("should succeed");
         assert_eq!(ch.total_sent(), 2);
         assert_eq!(ch.total_received(), 1);
     }
@@ -166,9 +166,9 @@ mod tests {
     #[test]
     fn test_drain() {
         let mut ch = BoundedChannel::new(4);
-        ch.send(1).unwrap();
-        ch.send(2).unwrap();
-        ch.send(3).unwrap();
+        ch.send(1).expect("should succeed");
+        ch.send(2).expect("should succeed");
+        ch.send(3).expect("should succeed");
         let all = ch.drain_all();
         assert_eq!(all, vec![1, 2, 3]);
         assert!(ch.is_empty());
@@ -185,23 +185,23 @@ mod tests {
     fn test_fifo_order() {
         let mut ch = BoundedChannel::new(10);
         for i in 0..5 {
-            ch.send(i).unwrap();
+            ch.send(i).expect("should succeed");
         }
         for i in 0..5 {
-            assert_eq!(ch.receive().unwrap(), i);
+            assert_eq!(ch.receive().expect("should succeed"), i);
         }
     }
 
     #[test]
     fn test_wrap_around() {
         let mut ch = BoundedChannel::new(3);
-        ch.send(1).unwrap();
-        ch.send(2).unwrap();
-        ch.receive().unwrap();
-        ch.send(3).unwrap();
-        ch.send(4).unwrap();
-        assert_eq!(ch.receive().unwrap(), 2);
-        assert_eq!(ch.receive().unwrap(), 3);
-        assert_eq!(ch.receive().unwrap(), 4);
+        ch.send(1).expect("should succeed");
+        ch.send(2).expect("should succeed");
+        ch.receive().expect("should succeed");
+        ch.send(3).expect("should succeed");
+        ch.send(4).expect("should succeed");
+        assert_eq!(ch.receive().expect("should succeed"), 2);
+        assert_eq!(ch.receive().expect("should succeed"), 3);
+        assert_eq!(ch.receive().expect("should succeed"), 4);
     }
 }

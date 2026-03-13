@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Surface of revolution: revolve a 2-D profile curve around the Y axis.
@@ -145,7 +145,7 @@ mod tests {
     #[test]
     fn cone_profile_tip_radius_zero() {
         let prof = cone_profile(1.0, 2.0, 4);
-        assert!((prof.last().unwrap()[0]).abs() < 1e-6);
+        assert!((prof.last().expect("should succeed")[0]).abs() < 1e-6);
     }
 
     #[test]

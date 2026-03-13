@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Resource pool with borrowing semantics.
@@ -120,14 +120,14 @@ mod tests {
     #[test]
     fn acquire_available() {
         let mut pool = new_resource_pool(vec![10i32, 20, 30]);
-        let idx = pool.acquire().unwrap();
+        let idx = pool.acquire().expect("should succeed");
         assert!(pool.is_in_use(idx));
     }
 
     #[test]
     fn release_makes_available() {
         let mut pool = new_resource_pool(vec![1i32]);
-        let idx = pool.acquire().unwrap();
+        let idx = pool.acquire().expect("should succeed");
         assert!(pool.release(idx));
         assert!(!pool.is_in_use(idx));
     }
@@ -135,8 +135,8 @@ mod tests {
     #[test]
     fn acquire_all_then_none() {
         let mut pool = new_resource_pool(vec![1i32, 2]);
-        pool.acquire().unwrap();
-        pool.acquire().unwrap();
+        pool.acquire().expect("should succeed");
+        pool.acquire().expect("should succeed");
         assert!(pool.acquire().is_none());
     }
 
@@ -151,7 +151,7 @@ mod tests {
     #[test]
     fn get_resource() {
         let pool = new_resource_pool(vec![42i32]);
-        assert_eq!(*pool.get(0).unwrap(), 42);
+        assert_eq!(*pool.get(0).expect("should succeed"), 42);
     }
 
     #[test]

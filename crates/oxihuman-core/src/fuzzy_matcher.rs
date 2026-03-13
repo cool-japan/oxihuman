@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Fuzzy string matching with score-based ranking.
@@ -108,7 +108,7 @@ mod tests {
         let candidates = &["hello", "world", "help"];
         let best = fuzzy_best_match("hel", candidates);
         assert!(best.is_some());
-        let b = best.unwrap();
+        let b = best.expect("should succeed");
         assert!(b == "hello" || b == "help");
     }
 

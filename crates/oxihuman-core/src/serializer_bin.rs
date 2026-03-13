@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Binary serialization helpers using little-endian byte encoding.
 
@@ -248,7 +248,7 @@ mod tests {
         let mut w = new_writer();
         write_u8(&mut w, 0xAB);
         let mut r = new_reader(writer_to_bytes(&w));
-        assert_eq!(read_u8(&mut r).unwrap(), 0xAB);
+        assert_eq!(read_u8(&mut r).expect("should succeed"), 0xAB);
     }
 
     // 2. write/read u32 roundtrip
@@ -257,7 +257,7 @@ mod tests {
         let mut w = new_writer();
         write_u32(&mut w, 0xDEAD_BEEF);
         let mut r = new_reader(writer_to_bytes(&w));
-        assert_eq!(read_u32(&mut r).unwrap(), 0xDEAD_BEEF);
+        assert_eq!(read_u32(&mut r).expect("should succeed"), 0xDEAD_BEEF);
     }
 
     // 3. write/read u64 roundtrip
@@ -266,7 +266,7 @@ mod tests {
         let mut w = new_writer();
         write_u64(&mut w, u64::MAX);
         let mut r = new_reader(writer_to_bytes(&w));
-        assert_eq!(read_u64(&mut r).unwrap(), u64::MAX);
+        assert_eq!(read_u64(&mut r).expect("should succeed"), u64::MAX);
     }
 
     // 4. write/read f32 roundtrip
@@ -275,7 +275,7 @@ mod tests {
         let mut w = new_writer();
         write_f32(&mut w, std::f32::consts::PI);
         let mut r = new_reader(writer_to_bytes(&w));
-        let v = read_f32(&mut r).unwrap();
+        let v = read_f32(&mut r).expect("should succeed");
         assert!((v - std::f32::consts::PI).abs() < 1e-6);
     }
 
@@ -285,7 +285,7 @@ mod tests {
         let mut w = new_writer();
         write_f64(&mut w, std::f64::consts::E);
         let mut r = new_reader(writer_to_bytes(&w));
-        let v = read_f64(&mut r).unwrap();
+        let v = read_f64(&mut r).expect("should succeed");
         assert!((v - std::f64::consts::E).abs() < 1e-12);
     }
 
@@ -296,7 +296,7 @@ mod tests {
         let mut w = new_writer();
         write_bytes(&mut w, &data);
         let mut r = new_reader(writer_to_bytes(&w));
-        let out = read_bytes(&mut r, data.len()).unwrap();
+        let out = read_bytes(&mut r, data.len()).expect("should succeed");
         assert_eq!(out, data);
     }
 
@@ -306,7 +306,7 @@ mod tests {
         let mut w = new_writer();
         write_string(&mut w, "hello, world!");
         let mut r = new_reader(writer_to_bytes(&w));
-        assert_eq!(read_string(&mut r).unwrap(), "hello, world!");
+        assert_eq!(read_string(&mut r).expect("should succeed"), "hello, world!");
     }
 
     // 8. multiple values in sequence
@@ -320,10 +320,10 @@ mod tests {
 
         let bytes = writer_to_bytes(&w).to_vec();
         let mut r = new_reader(&bytes);
-        assert_eq!(read_u8(&mut r).unwrap(), 7);
-        assert_eq!(read_u32(&mut r).unwrap(), 1234);
-        assert_eq!(read_string(&mut r).unwrap(), "test");
-        assert!((read_f32(&mut r).unwrap() - 1.5).abs() < 1e-6);
+        assert_eq!(read_u8(&mut r).expect("should succeed"), 7);
+        assert_eq!(read_u32(&mut r).expect("should succeed"), 1234);
+        assert_eq!(read_string(&mut r).expect("should succeed"), "test");
+        assert!((read_f32(&mut r).expect("should succeed") - 1.5).abs() < 1e-6);
         assert_eq!(reader_remaining(&r), 0);
     }
 
@@ -347,7 +347,7 @@ mod tests {
         let data = vec![1u8, 2, 3, 4];
         let mut r = new_reader(&data);
         assert_eq!(reader_remaining(&r), 4);
-        read_u8(&mut r).unwrap();
+        read_u8(&mut r).expect("should succeed");
         assert_eq!(reader_remaining(&r), 3);
         assert!(read_u32(&mut r).is_err()); // only 3 left — error, pos unchanged
         // After failed read, pos should still be at 1
@@ -360,7 +360,7 @@ mod tests {
         let mut w = new_writer();
         write_string(&mut w, "");
         let mut r = new_reader(writer_to_bytes(&w));
-        assert_eq!(read_string(&mut r).unwrap(), "");
+        assert_eq!(read_string(&mut r).expect("should succeed"), "");
     }
 
     // 13. writer_to_bytes slice has correct length
@@ -378,7 +378,7 @@ mod tests {
     fn read_bytes_zero() {
         let data = vec![1u8, 2, 3];
         let mut r = new_reader(&data);
-        let out = read_bytes(&mut r, 0).unwrap();
+        let out = read_bytes(&mut r, 0).expect("should succeed");
         assert!(out.is_empty());
         assert_eq!(reader_remaining(&r), 3);
     }
@@ -420,9 +420,9 @@ mod tests {
         let bytes = writer_to_bytes(&w).to_vec();
         let mut r = new_reader(&bytes);
         assert_eq!(reader_position(&r), 0);
-        read_u8(&mut r).unwrap();
+        read_u8(&mut r).expect("should succeed");
         assert_eq!(reader_position(&r), 1);
-        read_u32(&mut r).unwrap();
+        read_u32(&mut r).expect("should succeed");
         assert_eq!(reader_position(&r), 5);
     }
 
@@ -434,7 +434,7 @@ mod tests {
         write_f32(&mut w, std::f32::consts::E);
         let data = writer_to_bytes(&w).to_vec();
         let mut r = new_bin_reader(&cfg, &data);
-        let v = read_f32(&mut r).unwrap();
+        let v = read_f32(&mut r).expect("should succeed");
         assert!((v - std::f32::consts::E).abs() < 1e-5);
     }
 

@@ -92,14 +92,14 @@ mod tests {
     #[test]
     fn test_nearest_point() {
         let s = sample_set();
-        let idx = nearest_point(&s, [0.9, 0.0, 0.0]).unwrap();
+        let idx = nearest_point(&s, [0.9, 0.0, 0.0]).expect("should succeed");
         assert_eq!(idx, 1);
     }
 
     #[test]
     fn test_nearest_point_origin() {
         let s = sample_set();
-        let idx = nearest_point(&s, [0.0,0.0,0.0]).unwrap();
+        let idx = nearest_point(&s, [0.0,0.0,0.0]).expect("should succeed");
         assert_eq!(idx, 0);
     }
 

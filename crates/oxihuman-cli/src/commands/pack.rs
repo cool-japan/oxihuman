@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Pack/bundle subcommands: pack-build, zip-pack, quantize, morph-export,
 //! asset-bundle, validate-pack, sign-pack, verify-sign.
@@ -602,6 +602,112 @@ pub fn cmd_verify_sign(args: &[String]) -> Result<()> {
         println!("VALID");
     } else {
         println!("INVALID");
+    }
+    Ok(())
+}
+
+// ── pack-dist-manifest ────────────────────────────────────────────────────────
+
+/// Generate a SHA-256 distribution manifest for all files in a pack directory.
+///
+/// Usage: `oxihuman pack-dist-manifest --pack-dir <DIR>`
+///
+/// Prints the manifest JSON to stdout.
+#[allow(dead_code)]
+pub fn cmd_pack_dist_manifest(args: &[String]) -> Result<()> {
+    let mut pack_dir: Option<PathBuf> = None;
+
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--pack-dir" => {
+                i += 1;
+                if i >= args.len() {
+                    bail!("pack-dist-manifest: --pack-dir requires an argument");
+                }
+                pack_dir = Some(PathBuf::from(&args[i]));
+            }
+            other => bail!("pack-dist-manifest: unknown option: {}", other),
+        }
+        i += 1;
+    }
+
+    let pack_dir = pack_dir.context("--pack-dir is required for pack-dist-manifest")?;
+    if !pack_dir.exists() {
+        bail!("pack-dir not found: {}", pack_dir.display());
+    }
+
+    let manifest = oxihuman_core::asset_pack_builder::generate_distribution_manifest(&pack_dir)
+        .with_context(|| {
+            format!(
+                "generating distribution manifest for: {}",
+                pack_dir.display()
+            )
+        })?;
+    println!("{manifest}");
+    Ok(())
+}
+
+// ── pack-verify-dist ──────────────────────────────────────────────────────────
+
+/// Verify all files in a pack directory against a distribution manifest.
+///
+/// Usage: `oxihuman pack-verify-dist --manifest <FILE> --pack-dir <DIR>`
+///
+/// Exits with code 0 on success, 1 on verification failure.
+#[allow(dead_code)]
+pub fn cmd_pack_verify_dist(args: &[String]) -> Result<()> {
+    let mut manifest_path: Option<PathBuf> = None;
+    let mut pack_dir: Option<PathBuf> = None;
+
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--manifest" => {
+                i += 1;
+                if i >= args.len() {
+                    bail!("pack-verify-dist: --manifest requires an argument");
+                }
+                manifest_path = Some(PathBuf::from(&args[i]));
+            }
+            "--pack-dir" => {
+                i += 1;
+                if i >= args.len() {
+                    bail!("pack-verify-dist: --pack-dir requires an argument");
+                }
+                pack_dir = Some(PathBuf::from(&args[i]));
+            }
+            other => bail!("pack-verify-dist: unknown option: {}", other),
+        }
+        i += 1;
+    }
+
+    let manifest_path = manifest_path.context("--manifest is required for pack-verify-dist")?;
+    let pack_dir = pack_dir.context("--pack-dir is required for pack-verify-dist")?;
+
+    if !manifest_path.exists() {
+        bail!("manifest file not found: {}", manifest_path.display());
+    }
+    if !pack_dir.exists() {
+        bail!("pack-dir not found: {}", pack_dir.display());
+    }
+
+    let json = std::fs::read_to_string(&manifest_path)
+        .with_context(|| format!("reading manifest: {}", manifest_path.display()))?;
+
+    let ok = oxihuman_core::asset_pack_builder::verify_distribution_manifest(&json, &pack_dir)
+        .with_context(|| {
+            format!(
+                "verifying distribution manifest against: {}",
+                pack_dir.display()
+            )
+        })?;
+
+    if ok {
+        println!("Manifest verification: OK");
+    } else {
+        eprintln!("Manifest verification: FAILED");
+        std::process::exit(1);
     }
     Ok(())
 }

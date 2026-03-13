@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Physics simulation cache export.
 
@@ -93,7 +93,7 @@ mod tests {
     fn get_frame_by_index() {
         let mut exp = new_physics_cache_export("cloth");
         pce_add_frame(&mut exp, make_frame(5, 4));
-        let f = pce_get_frame(&exp, 0).unwrap();
+        let f = pce_get_frame(&exp, 0).expect("should succeed");
         assert_eq!(f.frame, 5);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Polygon clipping using the Sutherland-Hodgman algorithm.
 
@@ -199,7 +199,7 @@ mod tests {
     #[test]
     fn test_centroid() {
         let sq = unit_square();
-        let c = polygon_centroid(&sq).unwrap();
+        let c = polygon_centroid(&sq).expect("should succeed");
         assert!((c[0] - 0.5).abs() < 1e-5);
         assert!((c[1] - 0.5).abs() < 1e-5);
     }

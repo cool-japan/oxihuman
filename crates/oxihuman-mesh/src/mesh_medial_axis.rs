@@ -452,7 +452,7 @@ mod tests {
                 .iter()
                 .map(|p| p.radius)
                 .fold(f32::NEG_INFINITY, f32::max);
-            assert!((tp.unwrap().radius - max_r).abs() < 1e-5);
+            assert!((tp.expect("should succeed").radius - max_r).abs() < 1e-5);
         }
     }
 

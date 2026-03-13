@@ -106,7 +106,7 @@ mod tests {
     fn test_muscle_at() {
         let mut m = new_body_muscle_map();
         add_muscle_entry(&mut m, "tricep", 80.0);
-        let entry = muscle_at(&m, 0).unwrap();
+        let entry = muscle_at(&m, 0).expect("should succeed");
         assert_eq!(entry.name, "tricep");
     }
 
@@ -121,7 +121,7 @@ mod tests {
         let mut m = new_body_muscle_map();
         add_muscle_entry(&mut m, "quad", 200.0);
         activate_muscle_bmm(&mut m, 0, 0.5);
-        assert!((muscle_at(&m, 0).unwrap().activation - 0.5).abs() < 1e-6);
+        assert!((muscle_at(&m, 0).expect("should succeed").activation - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -129,7 +129,7 @@ mod tests {
         let mut m = new_body_muscle_map();
         add_muscle_entry(&mut m, "glute", 150.0);
         activate_muscle_bmm(&mut m, 0, 2.0);
-        assert!((muscle_at(&m, 0).unwrap().activation - 1.0).abs() < 1e-6);
+        assert!((muscle_at(&m, 0).expect("should succeed").activation - 1.0).abs() < 1e-6);
     }
 
     #[test]

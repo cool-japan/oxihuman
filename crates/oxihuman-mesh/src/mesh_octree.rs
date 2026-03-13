@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Octree spatial index for mesh queries (nearest point, sphere, AABB, ray).
 //!
@@ -614,14 +614,14 @@ mod tests {
     #[test]
     fn test_query_nearest_origin() {
         let oq = build_simple();
-        let idx = query_nearest_point(&oq, [0.0, 0.0, 0.0]).unwrap();
+        let idx = query_nearest_point(&oq, [0.0, 0.0, 0.0]).expect("should succeed");
         assert_eq!(idx, 0);
     }
 
     #[test]
     fn test_query_nearest_far_corner() {
         let oq = build_simple();
-        let idx = query_nearest_point(&oq, [1.0, 1.0, 0.0]).unwrap();
+        let idx = query_nearest_point(&oq, [1.0, 1.0, 0.0]).expect("should succeed");
         assert_eq!(oq.positions[idx], [1.0, 1.0, 0.0]);
     }
 
@@ -661,7 +661,7 @@ mod tests {
         let dir = [0.0, 0.0, -1.0];
         let hit = ray_intersect_octree(&oq, origin, dir);
         assert!(hit.is_some(), "expected a hit");
-        assert!(hit.unwrap().t > 0.0);
+        assert!(hit.expect("should succeed").t > 0.0);
     }
 
     #[test]

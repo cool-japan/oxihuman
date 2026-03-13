@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Collision contact cache for frame-to-frame persistence.
 
@@ -152,7 +152,7 @@ mod tests {
         cache_contact(&mut c, make_contact(2, 3));
         let evicted = cache_evict_oldest(&mut c);
         assert!(evicted.is_some());
-        assert_eq!(evicted.unwrap().body_a, 0);
+        assert_eq!(evicted.expect("should succeed").body_a, 0);
     }
 
     #[test]

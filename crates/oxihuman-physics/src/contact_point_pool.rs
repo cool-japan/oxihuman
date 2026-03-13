@@ -87,7 +87,7 @@ mod tests {
     fn test_get() {
         let mut p = new_contact_pool(10);
         pool_add_contact(&mut p, [1.0, 2.0, 3.0], [0.0, 1.0, 0.0], 0.5);
-        let c = pool_get_contact(&p, 0).unwrap();
+        let c = pool_get_contact(&p, 0).expect("should succeed");
         assert_eq!(c.position, [1.0, 2.0, 3.0]);
     }
 

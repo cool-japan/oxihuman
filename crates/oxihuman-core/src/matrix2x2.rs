@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! 2x2 matrix math utilities.
@@ -156,7 +156,7 @@ mod tests {
     fn test_inv_identity() {
         /* inverse of identity is identity */
         let id = mat2_identity();
-        let inv = mat2_inverse(&id).unwrap();
+        let inv = mat2_inverse(&id).expect("should succeed");
         assert!((inv.m[0][0] - 1.0).abs() < EPS);
         assert!((inv.m[1][1] - 1.0).abs() < EPS);
     }

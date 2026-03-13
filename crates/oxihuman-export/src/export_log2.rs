@@ -97,7 +97,7 @@ mod tests {
     fn test_log_finish() {
         let mut l = new_export_log2();
         log2_finish(&mut l, "/out/a.glb");
-        let e = log2_entry_at(&l, 0).unwrap();
+        let e = log2_entry_at(&l, 0).expect("should succeed");
         assert!(e.message.contains("Finish"));
     }
 
@@ -105,7 +105,7 @@ mod tests {
     fn test_log_error() {
         let mut l = new_export_log2();
         log2_error(&mut l, "file not found");
-        let e = log2_entry_at(&l, 0).unwrap();
+        let e = log2_entry_at(&l, 0).expect("should succeed");
         assert!(e.is_error);
     }
 

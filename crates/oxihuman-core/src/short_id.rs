@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Short, compact identifier type.
 
@@ -108,7 +108,7 @@ mod tests {
     fn test_to_string_roundtrip() {
         let id = ShortId(12345);
         let s = short_id_to_string(id);
-        let parsed = short_id_from_str(&s).unwrap();
+        let parsed = short_id_from_str(&s).expect("should succeed");
         assert_eq!(parsed, id);
     }
 

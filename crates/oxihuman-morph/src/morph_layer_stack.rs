@@ -107,7 +107,7 @@ mod tests {
     fn test_layer_at() {
         let mut s = new_morph_layer_stack();
         push_morph_layer(&mut s, "layer0", 1.0, &[0.0]);
-        let entry = morph_layer_at(&s, 0).unwrap();
+        let entry = morph_layer_at(&s, 0).expect("should succeed");
         assert_eq!(entry.name, "layer0");
     }
 
@@ -153,7 +153,7 @@ mod tests {
         let mut s = new_morph_layer_stack();
         push_morph_layer(&mut s, "first", 1.0, &[10.0]);
         push_morph_layer(&mut s, "second", 1.0, &[20.0]);
-        assert_eq!(morph_layer_at(&s, 0).unwrap().name, "first");
-        assert_eq!(morph_layer_at(&s, 1).unwrap().name, "second");
+        assert_eq!(morph_layer_at(&s, 0).expect("should succeed").name, "first");
+        assert_eq!(morph_layer_at(&s, 1).expect("should succeed").name, "second");
     }
 }

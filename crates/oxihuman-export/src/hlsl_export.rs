@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! HLSL shader source export stub.
@@ -147,7 +147,7 @@ mod tests {
         let mut exp = new_hlsl_export("N");
         add_hlsl_shader(&mut exp, HlslProfile::Ps50, "PSMain", "void PSMain(){}");
         add_hlsl_define(&mut exp, "USE_HDR", "1");
-        let s = find_hlsl_shader(&exp, &HlslProfile::Ps50).unwrap();
+        let s = find_hlsl_shader(&exp, &HlslProfile::Ps50).expect("should succeed");
         let src = render_hlsl_shader(s);
         assert!(src.contains("USE_HDR") /* define in output */);
     }

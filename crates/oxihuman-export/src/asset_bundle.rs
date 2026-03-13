@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -399,7 +399,7 @@ mod tests {
 
     #[test]
     fn test_bundle_entry_new() {
-        let entry = BundleEntry::new("mesh.bin", vec![1, 2, 3]).unwrap();
+        let entry = BundleEntry::new("mesh.bin", vec![1, 2, 3]).expect("should succeed");
         assert_eq!(entry.name, "mesh.bin");
         assert_eq!(entry.data, vec![1, 2, 3]);
         assert_eq!(entry.size(), 3);
@@ -424,8 +424,8 @@ mod tests {
     #[test]
     fn test_add_bytes() {
         let mut bundle = AssetBundle::new();
-        bundle.add_bytes("alpha", vec![0xFF, 0x00]).unwrap();
-        bundle.add_bytes("beta", vec![1, 2, 3, 4]).unwrap();
+        bundle.add_bytes("alpha", vec![0xFF, 0x00]).expect("should succeed");
+        bundle.add_bytes("beta", vec![1, 2, 3, 4]).expect("should succeed");
         assert_eq!(bundle.entry_count(), 2);
         assert_eq!(bundle.total_size(), 6);
     }
@@ -433,26 +433,26 @@ mod tests {
     #[test]
     fn test_add_str() {
         let mut bundle = AssetBundle::new();
-        bundle.add_str("readme.txt", "Hello, world!").unwrap();
-        let entry = bundle.get("readme.txt").unwrap();
+        bundle.add_str("readme.txt", "Hello, world!").expect("should succeed");
+        let entry = bundle.get("readme.txt").expect("should succeed");
         assert_eq!(entry.data, b"Hello, world!");
     }
 
     #[test]
     fn test_contains_and_get() {
         let mut bundle = AssetBundle::new();
-        bundle.add_bytes("x", vec![42]).unwrap();
+        bundle.add_bytes("x", vec![42]).expect("should succeed");
         assert!(bundle.contains("x"));
         assert!(!bundle.contains("y"));
-        assert_eq!(bundle.get("x").unwrap().data, vec![42]);
+        assert_eq!(bundle.get("x").expect("should succeed").data, vec![42]);
         assert!(bundle.get("y").is_none());
     }
 
     #[test]
     fn test_remove_entry() {
         let mut bundle = AssetBundle::new();
-        bundle.add_bytes("keep", vec![1]).unwrap();
-        bundle.add_bytes("drop", vec![2]).unwrap();
+        bundle.add_bytes("keep", vec![1]).expect("should succeed");
+        bundle.add_bytes("drop", vec![2]).expect("should succeed");
         assert!(bundle.remove("drop"));
         assert!(!bundle.contains("drop"));
         assert_eq!(bundle.entry_count(), 1);
@@ -462,8 +462,8 @@ mod tests {
     #[test]
     fn test_total_size() {
         let mut bundle = AssetBundle::new();
-        bundle.add_bytes("a", vec![0u8; 100]).unwrap();
-        bundle.add_bytes("b", vec![0u8; 200]).unwrap();
+        bundle.add_bytes("a", vec![0u8; 100]).expect("should succeed");
+        bundle.add_bytes("b", vec![0u8; 200]).expect("should succeed");
         assert_eq!(bundle.total_size(), 300);
     }
 
@@ -474,21 +474,21 @@ mod tests {
         let path = tmp_path("oxihuman_test_roundtrip.oxb");
 
         let mut bundle = AssetBundle::new();
-        bundle.add_str("hello.txt", "Hello OXB").unwrap();
+        bundle.add_str("hello.txt", "Hello OXB").expect("should succeed");
         bundle
             .add_bytes("data.bin", vec![0xDE, 0xAD, 0xBE, 0xEF])
-            .unwrap();
-        bundle.add_bytes("empty.bin", vec![]).unwrap();
-        export_bundle(&bundle, &path).unwrap();
+            .expect("should succeed");
+        bundle.add_bytes("empty.bin", vec![]).expect("should succeed");
+        export_bundle(&bundle, &path).expect("should succeed");
 
-        let loaded = load_bundle(&path).unwrap();
+        let loaded = load_bundle(&path).expect("should succeed");
         assert_eq!(loaded.entry_count(), 3);
-        assert_eq!(loaded.get("hello.txt").unwrap().data, b"Hello OXB");
+        assert_eq!(loaded.get("hello.txt").expect("should succeed").data, b"Hello OXB");
         assert_eq!(
-            loaded.get("data.bin").unwrap().data,
+            loaded.get("data.bin").expect("should succeed").data,
             vec![0xDE, 0xAD, 0xBE, 0xEF]
         );
-        assert_eq!(loaded.get("empty.bin").unwrap().data, Vec::<u8>::new());
+        assert_eq!(loaded.get("empty.bin").expect("should succeed").data, Vec::<u8>::new());
     }
 
     #[test]
@@ -496,18 +496,18 @@ mod tests {
         let path = tmp_path("oxihuman_test_validate.oxb");
 
         let mut bundle = AssetBundle::new();
-        bundle.add_bytes("a", vec![1, 2]).unwrap();
-        bundle.add_bytes("b", vec![3, 4, 5]).unwrap();
-        export_bundle(&bundle, &path).unwrap();
+        bundle.add_bytes("a", vec![1, 2]).expect("should succeed");
+        bundle.add_bytes("b", vec![3, 4, 5]).expect("should succeed");
+        export_bundle(&bundle, &path).expect("should succeed");
 
-        let count = validate_bundle(&path).unwrap();
+        let count = validate_bundle(&path).expect("should succeed");
         assert_eq!(count, 2);
     }
 
     #[test]
     fn test_validate_bad_magic() {
         let path = tmp_path("oxihuman_test_bad_magic.oxb");
-        fs::write(&path, b"NOTOXB1\x00\x00\x00\x00\x00\x00\x00\x00\x00").unwrap();
+        fs::write(&path, b"NOTOXB1\x00\x00\x00\x00\x00\x00\x00\x00\x00").expect("should succeed");
         let result = validate_bundle(&path);
         assert!(result.is_err());
         let msg = result.unwrap_err().to_string();
@@ -520,15 +520,15 @@ mod tests {
         let out_dir = PathBuf::from("/tmp/oxihuman_test_extract_out");
 
         let mut bundle = AssetBundle::new();
-        bundle.add_str("file1.txt", "content one").unwrap();
-        bundle.add_str("file2.txt", "content two").unwrap();
-        export_bundle(&bundle, &bundle_path).unwrap();
+        bundle.add_str("file1.txt", "content one").expect("should succeed");
+        bundle.add_str("file2.txt", "content two").expect("should succeed");
+        export_bundle(&bundle, &bundle_path).expect("should succeed");
 
-        let names = extract_bundle(&bundle_path, &out_dir).unwrap();
+        let names = extract_bundle(&bundle_path, &out_dir).expect("should succeed");
         assert_eq!(names.len(), 2);
 
-        let f1 = fs::read_to_string(out_dir.join("file1.txt")).unwrap();
-        let f2 = fs::read_to_string(out_dir.join("file2.txt")).unwrap();
+        let f1 = fs::read_to_string(out_dir.join("file1.txt")).expect("should succeed");
+        let f2 = fs::read_to_string(out_dir.join("file2.txt")).expect("should succeed");
         assert_eq!(f1, "content one");
         assert_eq!(f2, "content two");
     }
@@ -536,14 +536,14 @@ mod tests {
     #[test]
     fn test_bundle_from_dir() {
         let dir = PathBuf::from("/tmp/oxihuman_test_bundle_from_dir");
-        fs::create_dir_all(&dir).unwrap();
-        fs::write(dir.join("asset_a.bin"), b"aaa").unwrap();
-        fs::write(dir.join("asset_b.bin"), b"bbbb").unwrap();
+        fs::create_dir_all(&dir).expect("should succeed");
+        fs::write(dir.join("asset_a.bin"), b"aaa").expect("should succeed");
+        fs::write(dir.join("asset_b.bin"), b"bbbb").expect("should succeed");
 
-        let bundle = bundle_from_dir(&dir).unwrap();
+        let bundle = bundle_from_dir(&dir).expect("should succeed");
         assert_eq!(bundle.entry_count(), 2);
         assert!(bundle.contains("asset_a.bin"));
         assert!(bundle.contains("asset_b.bin"));
-        assert_eq!(bundle.get("asset_a.bin").unwrap().data, b"aaa");
+        assert_eq!(bundle.get("asset_a.bin").expect("should succeed").data, b"aaa");
     }
 }

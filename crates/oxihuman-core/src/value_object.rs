@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 pub struct Money {
@@ -66,7 +66,7 @@ mod tests {
         /* add same currency gives sum */
         let a = new_money(100, "EUR");
         let b = new_money(250, "EUR");
-        let r = money_add(&a, &b).unwrap();
+        let r = money_add(&a, &b).expect("should succeed");
         assert_eq!(r.amount_cents, 350);
     }
 

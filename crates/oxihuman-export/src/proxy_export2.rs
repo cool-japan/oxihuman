@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn test_proxy_bounds() {
         let p = sample_proxy();
-        let b = proxy2_bounds(&p).unwrap();
+        let b = proxy2_bounds(&p).expect("should succeed");
         assert!((b[0][0]).abs() < 1e-5);
     }
 

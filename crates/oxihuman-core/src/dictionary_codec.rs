@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.parameter>
+// SPDX-License-Identifier: Apache-2.0
 
 //! Dictionary encoding for repeated string values.
 

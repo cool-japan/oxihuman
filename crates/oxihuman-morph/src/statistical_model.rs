@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Statistical body model built from PCA of body shape variations.
 //!
@@ -1004,7 +1004,7 @@ mod tests {
         a.set(0, 1, 0.0);
         a.set(1, 0, 0.0);
         a.set(1, 1, 4.0);
-        let (u, sv, v) = svd_thin(&a).unwrap();
+        let (u, sv, v) = svd_thin(&a).expect("should succeed");
         // Singular values should be 4 and 3 (descending)
         assert!(
             (sv[0] - 4.0).abs() < 1e-10,
@@ -1047,7 +1047,7 @@ mod tests {
         a.set(1, 1, 4.0);
         a.set(2, 0, 5.0);
         a.set(2, 1, 6.0);
-        let (u, sv, v) = svd_thin(&a).unwrap();
+        let (u, sv, v) = svd_thin(&a).expect("should succeed");
 
         // Reconstruct
         for i in 0..3 {
@@ -1081,7 +1081,7 @@ mod tests {
             variance_threshold: 0.99,
         };
 
-        let model = StatisticalBodyModel::build(&shapes, &config).unwrap();
+        let model = StatisticalBodyModel::build(&shapes, &config).expect("should succeed");
         assert!(model.num_components() > 0);
         assert!(model.num_components() <= 5);
         assert!(!model.explained_variance().is_empty());
@@ -1107,13 +1107,13 @@ mod tests {
             variance_threshold: 0.999,
         };
 
-        let model = StatisticalBodyModel::build(&shapes, &config).unwrap();
+        let model = StatisticalBodyModel::build(&shapes, &config).expect("should succeed");
 
         // Reconstruct a training shape — should have low error
-        let reconstructed = model.reconstruct(&shapes[3]).unwrap();
+        let reconstructed = model.reconstruct(&shapes[3]).expect("should succeed");
         assert_eq!(reconstructed.len(), n_verts);
 
-        let error = model.reconstruction_error(&shapes[3]).unwrap();
+        let error = model.reconstruction_error(&shapes[3]).expect("should succeed");
         assert!(
             error < 0.1,
             "reconstruction error too high: {error}"
@@ -1132,11 +1132,11 @@ mod tests {
         }
 
         let config = PcaConfig::default();
-        let model = StatisticalBodyModel::build(&shapes, &config).unwrap();
+        let model = StatisticalBodyModel::build(&shapes, &config).expect("should succeed");
 
         // Zero coefficients should give the mean shape
         let zeros = vec![0.0; model.num_components()];
-        let mean_gen = model.generate(&zeros).unwrap();
+        let mean_gen = model.generate(&zeros).expect("should succeed");
         let mean = model.mean_shape();
         for (a, b) in mean_gen.iter().zip(mean.iter()) {
             assert!((a[0] - b[0]).abs() < 1e-10);
@@ -1154,11 +1154,11 @@ mod tests {
         }
 
         let config = PcaConfig::default();
-        let model = StatisticalBodyModel::build(&shapes, &config).unwrap();
+        let model = StatisticalBodyModel::build(&shapes, &config).expect("should succeed");
 
-        let sample1 = model.sample_random(42).unwrap();
-        let sample2 = model.sample_random(42).unwrap();
-        let sample3 = model.sample_random(123).unwrap();
+        let sample1 = model.sample_random(42).expect("should succeed");
+        let sample2 = model.sample_random(42).expect("should succeed");
+        let sample3 = model.sample_random(123).expect("should succeed");
 
         // Same seed -> same result
         for (a, b) in sample1.iter().zip(sample2.iter()) {
@@ -1189,14 +1189,14 @@ mod tests {
         }
 
         let config = PcaConfig::default();
-        let model = StatisticalBodyModel::build(&shapes, &config).unwrap();
+        let model = StatisticalBodyModel::build(&shapes, &config).expect("should succeed");
 
         let shape_a = &shapes[0];
         let shape_b = &shapes[4];
 
         // t=0 should be close to shape_a (after projection)
-        let at_a = model.interpolate(shape_a, shape_b, 0.0).unwrap();
-        let recon_a = model.reconstruct(shape_a).unwrap();
+        let at_a = model.interpolate(shape_a, shape_b, 0.0).expect("should succeed");
+        let recon_a = model.reconstruct(shape_a).expect("should succeed");
         for (a, b) in at_a.iter().zip(recon_a.iter()) {
             assert!((a[0] - b[0]).abs() < 1e-10);
             assert!((a[1] - b[1]).abs() < 1e-10);
@@ -1204,8 +1204,8 @@ mod tests {
         }
 
         // t=1 should be close to shape_b (after projection)
-        let at_b = model.interpolate(shape_a, shape_b, 1.0).unwrap();
-        let recon_b = model.reconstruct(shape_b).unwrap();
+        let at_b = model.interpolate(shape_a, shape_b, 1.0).expect("should succeed");
+        let recon_b = model.reconstruct(shape_b).expect("should succeed");
         for (a, b) in at_b.iter().zip(recon_b.iter()) {
             assert!((a[0] - b[0]).abs() < 1e-10);
             assert!((a[1] - b[1]).abs() < 1e-10);
@@ -1266,7 +1266,7 @@ mod tests {
             max_components: 100,
             variance_threshold: 1.0,
         };
-        let model = StatisticalBodyModel::build(&shapes, &config).unwrap();
+        let model = StatisticalBodyModel::build(&shapes, &config).expect("should succeed");
 
         let total: f64 = model.explained_variance().iter().sum();
         // Total should be <= 1.0 (may be less if some components were dropped)
@@ -1283,7 +1283,7 @@ mod tests {
             vec![[3.0, 4.0, 5.0], [6.0, 7.0, 8.0]],
         ];
         let config = PcaConfig::default();
-        let model = StatisticalBodyModel::build(&shapes, &config).unwrap();
+        let model = StatisticalBodyModel::build(&shapes, &config).expect("should succeed");
         let mean = model.mean_shape();
 
         assert!((mean[0][0] - 2.0).abs() < 1e-10);

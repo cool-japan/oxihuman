@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A named variable in the scripting environment.
@@ -82,7 +82,7 @@ mod tests {
     fn set_and_get_variable() {
         let mut env = new_script_env();
         env_set(&mut env, "x", 2.5);
-        let v = env_get(&env, "x").unwrap();
+        let v = env_get(&env, "x").expect("should succeed");
         assert!((v - 2.5).abs() < 1e-9);
     }
 

@@ -235,7 +235,7 @@ mod tests {
         let mut w = new_bin_writer();
         write_f32_le(&mut w, std::f32::consts::PI);
         let mut r = new_bin_reader(&w.buf);
-        let v = read_f32_le(&mut r).unwrap();
+        let v = read_f32_le(&mut r).expect("should succeed");
         assert!((v - std::f32::consts::PI).abs() < 1e-6);
     }
 
@@ -244,7 +244,7 @@ mod tests {
         let mut w = new_bin_writer();
         write_f32_le(&mut w, -1.5);
         let mut r = new_bin_reader(&w.buf);
-        let v = read_f32_le(&mut r).unwrap();
+        let v = read_f32_le(&mut r).expect("should succeed");
         assert!((v + 1.5).abs() < 1e-6);
     }
 
@@ -273,7 +273,7 @@ mod tests {
         let mut r = new_bin_reader(&w.buf);
         assert_eq!(read_u8(&mut r), Some(7));
         assert_eq!(read_u32_le(&mut r), Some(42));
-        let f = read_f32_le(&mut r).unwrap();
+        let f = read_f32_le(&mut r).expect("should succeed");
         assert!((f - 2.78).abs() < 1e-4);
     }
 

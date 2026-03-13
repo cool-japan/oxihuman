@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Crease set management for subdivision surfaces.
@@ -115,7 +115,7 @@ mod tests {
         add_crease_set(&mut col, "found", 3.0);
         let s = find_crease_set(&col, "found");
         assert!(s.is_some() /* found */);
-        assert!((s.unwrap().sharpness - 3.0).abs() < 1e-6 /* sharpness matches */);
+        assert!((s.expect("should succeed").sharpness - 3.0).abs() < 1e-6 /* sharpness matches */);
     }
 
     #[test]

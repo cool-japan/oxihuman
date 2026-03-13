@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! COLLADA (.dae) stub export for DCC tool interchange.
 //!
@@ -330,7 +330,7 @@ mod tests {
     fn collada_to_xml_stub_contains_header() {
         let a = sample_asset();
         let cfg = default_collada_config();
-        let xml = collada_to_xml_stub(&a, &cfg).unwrap();
+        let xml = collada_to_xml_stub(&a, &cfg).expect("should succeed");
         assert!(xml.contains("<?xml version=\"1.0\""));
         assert!(xml.contains("COLLADA"));
     }
@@ -339,7 +339,7 @@ mod tests {
     fn collada_to_xml_stub_contains_asset_id() {
         let a = sample_asset();
         let cfg = default_collada_config();
-        let xml = collada_to_xml_stub(&a, &cfg).unwrap();
+        let xml = collada_to_xml_stub(&a, &cfg).expect("should succeed");
         assert!(xml.contains("mesh0"));
     }
 
@@ -424,7 +424,7 @@ mod tests {
     fn xml_contains_up_axis() {
         let a = set_up_axis(sample_asset(), "Z_UP");
         let cfg = default_collada_config();
-        let xml = collada_to_xml_stub(&a, &cfg).unwrap();
+        let xml = collada_to_xml_stub(&a, &cfg).expect("should succeed");
         assert!(xml.contains("Z_UP"));
     }
 
@@ -433,7 +433,7 @@ mod tests {
         let a = sample_asset();
         let mut cfg = default_collada_config();
         cfg.author = "TestAuthor".to_string();
-        let xml = collada_to_xml_stub(&a, &cfg).unwrap();
+        let xml = collada_to_xml_stub(&a, &cfg).expect("should succeed");
         assert!(xml.contains("TestAuthor"));
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Programmatic creation and editing of morph targets from mesh pairs.
 
@@ -387,7 +387,11 @@ mod tests {
         let b = create_target_from_mesh_pair("b", &base, &def_b, &default_cfg());
         let m = merge_targets(&a, &b, 0.0);
         // At blend=0, vertex 0 should have dx≈1.0
-        let d0 = m.deltas.iter().find(|d| d.vid == 0).unwrap();
+        let d0 = m
+            .deltas
+            .iter()
+            .find(|d| d.vid == 0)
+            .expect("should succeed");
         assert!((d0.dx - 1.0).abs() < 1e-5);
         // vertex 1 should have zero contribution
         assert!(m.deltas.iter().all(|d| d.vid != 1 || d.dy.abs() < 1e-5));
@@ -413,7 +417,11 @@ mod tests {
         let b = create_target_from_mesh_pair("b", &base, &def_b, &default_cfg());
         let m = merge_targets(&a, &b, 1.0);
         // At blend=1, vertex 1 should have dy≈2.0
-        let d1 = m.deltas.iter().find(|d| d.vid == 1).unwrap();
+        let d1 = m
+            .deltas
+            .iter()
+            .find(|d| d.vid == 1)
+            .expect("should succeed");
         assert!((d1.dy - 2.0).abs() < 1e-5);
         assert!(m.deltas.iter().all(|d| d.vid != 0 || d.dx.abs() < 1e-5));
     }
@@ -521,7 +529,7 @@ mod tests {
         // vertex 1 should now have dx = -1.0 (mirrored X)
         let d1 = mirrored.deltas.iter().find(|d| d.vid == 1);
         assert!(d1.is_some(), "mirrored vertex 1 should appear");
-        let d1 = d1.unwrap();
+        let d1 = d1.expect("should succeed");
         assert!(
             (d1.dx - (-1.0)).abs() < 1e-5,
             "X should be negated: got {}",

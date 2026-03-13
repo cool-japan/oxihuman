@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! PBD (Position Based Dynamics) solver with Gauss-Seidel iteration.
 //!
@@ -474,7 +474,7 @@ mod tests {
     #[test]
     fn test_solver_from_mesh() {
         let mesh = make_simple_mesh();
-        let solver = PbdSolver::from_mesh(&mesh).unwrap();
+        let solver = PbdSolver::from_mesh(&mesh).expect("should succeed");
         assert_eq!(solver.distance_constraints().len(), 5);
         assert_eq!(solver.bend_constraints().len(), 1);
         assert_eq!(solver.area_constraints().len(), 2);
@@ -490,11 +490,11 @@ mod tests {
     #[test]
     fn test_step_returns_stats() {
         let mut mesh = make_simple_mesh();
-        let mut solver = PbdSolver::from_mesh(&mesh).unwrap();
+        let mut solver = PbdSolver::from_mesh(&mesh).expect("should succeed");
         let config = ClothConfigV2::default();
         let collision_config = CollisionConfig::default();
 
-        let stats = solver.step(&mut mesh, &config, &[], &collision_config).unwrap();
+        let stats = solver.step(&mut mesh, &config, &[], &collision_config).expect("should succeed");
         assert_eq!(stats.constraint_iterations, config.iterations);
         assert_eq!(stats.distance_constraint_count, 5);
     }
@@ -505,7 +505,7 @@ mod tests {
         mesh.pin_vertex(0);
         let original_pos = mesh.vertices()[0];
 
-        let mut solver = PbdSolver::from_mesh(&mesh).unwrap();
+        let mut solver = PbdSolver::from_mesh(&mesh).expect("should succeed");
         let config = ClothConfigV2 {
             dt: 0.01,
             gravity: [0.0, -9.81, 0.0],
@@ -514,7 +514,7 @@ mod tests {
         };
         let collision_config = CollisionConfig::default();
 
-        solver.step(&mut mesh, &config, &[], &collision_config).unwrap();
+        solver.step(&mut mesh, &config, &[], &collision_config).expect("should succeed");
 
         assert_eq!(mesh.vertices()[0], original_pos, "Pinned vertex should not move");
     }
@@ -526,7 +526,7 @@ mod tests {
         for v in mesh.vertices_mut().iter_mut() {
             v[1] = 2.0;
         }
-        let mut solver = PbdSolver::from_mesh(&mesh).unwrap();
+        let mut solver = PbdSolver::from_mesh(&mesh).expect("should succeed");
 
         let config = ClothConfigV2 {
             dt: 0.01,
@@ -544,7 +544,7 @@ mod tests {
 
         // Run many steps
         for _ in 0..200 {
-            solver.step(&mut mesh, &config, &bodies, &collision_config).unwrap();
+            solver.step(&mut mesh, &config, &bodies, &collision_config).expect("should succeed");
         }
 
         // All vertices should be at or above ground
@@ -561,7 +561,7 @@ mod tests {
     #[test]
     fn test_substeps() {
         let mut mesh = make_simple_mesh();
-        let mut solver = PbdSolver::from_mesh(&mesh).unwrap();
+        let mut solver = PbdSolver::from_mesh(&mesh).expect("should succeed");
         let config = ClothConfigV2 {
             substeps: 4,
             iterations: 3,
@@ -569,7 +569,7 @@ mod tests {
         };
         let collision_config = CollisionConfig::default();
 
-        let stats = solver.step(&mut mesh, &config, &[], &collision_config).unwrap();
+        let stats = solver.step(&mut mesh, &config, &[], &collision_config).expect("should succeed");
         // 4 substeps * 3 iterations each
         assert_eq!(stats.constraint_iterations, 12);
     }
@@ -579,7 +579,7 @@ mod tests {
         let mesh = make_simple_mesh();
         let aabb = mesh.aabb();
         assert!(aabb.is_some());
-        let (min, max) = aabb.unwrap();
+        let (min, max) = aabb.expect("should succeed");
         assert_eq!(min, [0.0, 0.0, 0.0]);
         assert_eq!(max, [1.0, 0.0, 1.0]);
     }

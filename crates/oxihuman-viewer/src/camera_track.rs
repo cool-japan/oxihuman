@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Camera track — a spline path for animated camera movement.
@@ -218,7 +218,7 @@ mod tests {
     fn sample_single_key() {
         let mut tr = new_camera_track(CameraTrackInterp::Linear);
         ct_add_key(&mut tr, make_key(0.0, 3.0));
-        let s = ct_sample(&tr, 0.0).unwrap();
+        let s = ct_sample(&tr, 0.0).expect("should succeed");
         assert!((s.position[0] - 3.0).abs() < 1e-5);
     }
 
@@ -227,7 +227,7 @@ mod tests {
         let mut tr = new_camera_track(CameraTrackInterp::Linear);
         ct_add_key(&mut tr, make_key(0.0, 0.0));
         ct_add_key(&mut tr, make_key(1.0, 1.0));
-        let s = ct_sample(&tr, 0.5).unwrap();
+        let s = ct_sample(&tr, 0.5).expect("should succeed");
         assert!((s.position[0] - 0.5).abs() < 1e-5);
     }
 

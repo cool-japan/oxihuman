@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! FrameGraph — render frame graph for pass scheduling.
 
@@ -136,7 +136,7 @@ mod tests {
         let mut g = new_frame_graph();
         add_render_pass(&mut g, "depth", &[]);
         add_render_pass(&mut g, "color", &["depth"]);
-        let deps = pass_dependencies(&g, 1).unwrap();
+        let deps = pass_dependencies(&g, 1).expect("should succeed");
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0], "depth");
     }
@@ -170,7 +170,7 @@ mod tests {
     fn test_pass_dependencies_empty() {
         let mut g = new_frame_graph();
         add_render_pass(&mut g, "depth", &[]);
-        let deps = pass_dependencies(&g, 0).unwrap();
+        let deps = pass_dependencies(&g, 0).expect("should succeed");
         assert!(deps.is_empty());
     }
 }

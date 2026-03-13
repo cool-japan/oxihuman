@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Line number to byte offset indexer.
@@ -137,8 +137,8 @@ mod tests {
     #[test]
     fn test_line_col_to_offset_round_trip() {
         let idx = LineIndexer::new(TEXT);
-        let (l, c) = idx.offset_to_line_col(8).unwrap();
-        let back = idx.line_col_to_offset(l, c).unwrap();
+        let (l, c) = idx.offset_to_line_col(8).expect("should succeed");
+        let back = idx.line_col_to_offset(l, c).expect("should succeed");
         assert_eq!(back, 8);
     }
 

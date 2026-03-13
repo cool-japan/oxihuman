@@ -261,7 +261,7 @@ mod tests {
         };
         set_xr_pose(&mut xr, pose);
         // Matrices should be updated (not identity translation)
-        let left = xr_viewport_for_eye(&xr, XrEye::Left).unwrap();
+        let left = xr_viewport_for_eye(&xr, XrEye::Left).expect("should succeed");
         // The view matrix should reflect the pose
         assert!((left.view_matrix[3][1] - (-2.0)).abs() < 1e-5);
     }

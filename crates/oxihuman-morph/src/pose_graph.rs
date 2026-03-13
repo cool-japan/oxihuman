@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -409,8 +409,14 @@ mod tests {
         let params = make_params(&[("weight", 0.5), ("height", 1.8)]);
         let graph = PoseGraph::new("idle", params.clone());
         let evaluated = graph.evaluate();
-        assert!(approx_eq(*evaluated.get("weight").unwrap(), 0.5));
-        assert!(approx_eq(*evaluated.get("height").unwrap(), 1.8));
+        assert!(approx_eq(
+            *evaluated.get("weight").expect("should succeed"),
+            0.5
+        ));
+        assert!(approx_eq(
+            *evaluated.get("height").expect("should succeed"),
+            1.8
+        ));
     }
 
     #[test]
@@ -427,7 +433,7 @@ mod tests {
         assert!(graph.is_transitioning());
 
         let evaluated = graph.evaluate();
-        let w = *evaluated.get("weight").unwrap();
+        let w = *evaluated.get("weight").expect("should succeed");
         // At t=0.5 linear: weight should be ~0.5
         assert!(approx_eq(w, 0.5));
     }

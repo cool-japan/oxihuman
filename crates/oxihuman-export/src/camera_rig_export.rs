@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Camera rig export: export camera rigs with positions and targets.
@@ -128,7 +128,7 @@ mod tests {
     fn test_keyframe_at() {
         let mut r = new_camera_rig_export("cam");
         rig_add_keyframe(&mut r, 0.0, [1.0, 2.0, 3.0], [0.0; 3], 45.0);
-        let kf = rig_keyframe_at(&r, 0).unwrap();
+        let kf = rig_keyframe_at(&r, 0).expect("should succeed");
         assert!((kf.fov - 45.0).abs() < 1e-6);
     }
 

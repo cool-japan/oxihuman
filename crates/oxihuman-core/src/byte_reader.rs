@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A zero-copy byte reader that tracks a cursor position.
@@ -138,7 +138,7 @@ mod tests {
         let val: f32 = 1.0;
         let bytes = val.to_le_bytes();
         let mut r = ByteReader::new(&bytes);
-        let result = r.read_f32_le().unwrap();
+        let result = r.read_f32_le().expect("should succeed");
         assert!((result - 1.0).abs() < f32::EPSILON);
     }
 

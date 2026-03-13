@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GLB binary container stub for glTF 2.0 export.
 //!
@@ -332,7 +332,7 @@ mod tests {
         let mut c = new_glb_container();
         add_json_chunk(&mut c, b"{}".to_vec());
         let bytes = encode_glb(&c);
-        let magic = u32::from_le_bytes(bytes[0..4].try_into().unwrap());
+        let magic = u32::from_le_bytes(bytes[0..4].try_into().expect("should succeed"));
         assert_eq!(magic, GLB_MAGIC);
     }
 
@@ -341,7 +341,7 @@ mod tests {
         let mut c = new_glb_container();
         add_json_chunk(&mut c, b"{}".to_vec());
         let bytes = encode_glb(&c);
-        let version = u32::from_le_bytes(bytes[4..8].try_into().unwrap());
+        let version = u32::from_le_bytes(bytes[4..8].try_into().expect("should succeed"));
         assert_eq!(version, GLB_VERSION);
     }
 
@@ -351,7 +351,7 @@ mod tests {
         add_json_chunk(&mut c, b"{\"a\":1}".to_vec());
         add_binary_chunk(&mut c, vec![0u8; 12]);
         let bytes = encode_glb(&c);
-        let length = u32::from_le_bytes(bytes[8..12].try_into().unwrap()) as usize;
+        let length = u32::from_le_bytes(bytes[8..12].try_into().expect("should succeed")) as usize;
         assert_eq!(length, bytes.len());
     }
 
@@ -360,7 +360,7 @@ mod tests {
         let mut c = new_glb_container();
         add_json_chunk(&mut c, b"{}".to_vec());
         let bytes = encode_glb(&c);
-        let (magic, version, _len) = decode_glb_header(&bytes).unwrap();
+        let (magic, version, _len) = decode_glb_header(&bytes).expect("should succeed");
         assert_eq!(magic, GLB_MAGIC);
         assert_eq!(version, GLB_VERSION);
     }
@@ -387,7 +387,7 @@ mod tests {
     fn test_glb_json_chunk_accessor() {
         let mut c = new_glb_container();
         add_json_chunk(&mut c, b"{\"v\":42}".to_vec());
-        let data = glb_json_chunk(&c).unwrap();
+        let data = glb_json_chunk(&c).expect("should succeed");
         assert_eq!(data, b"{\"v\":42}");
     }
 
@@ -403,7 +403,7 @@ mod tests {
         let mut c = new_glb_container();
         add_json_chunk(&mut c, b"{}".to_vec());
         add_binary_chunk(&mut c, vec![0xAB, 0xCD]);
-        let bin = glb_binary_chunk(&c).unwrap();
+        let bin = glb_binary_chunk(&c).expect("should succeed");
         assert_eq!(bin, &[0xAB, 0xCD]);
     }
 

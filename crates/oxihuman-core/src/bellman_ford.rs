@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Bellman-Ford single-source shortest paths on a weighted directed graph.
@@ -110,7 +110,7 @@ mod tests {
         let mut g = new_bf_graph(3);
         bf_add_edge(&mut g, 0, 1, 1.0);
         bf_add_edge(&mut g, 1, 2, 2.0);
-        let d = bf_distance(&g, 0, 2).unwrap();
+        let d = bf_distance(&g, 0, 2).expect("should succeed");
         assert!((d - 3.0).abs() < 1e-6);
     }
 
@@ -121,7 +121,7 @@ mod tests {
         bf_add_edge(&mut g, 0, 1, 5.0);
         bf_add_edge(&mut g, 0, 2, 2.0);
         bf_add_edge(&mut g, 2, 1, -3.0);
-        let d = bf_distance(&g, 0, 1).unwrap();
+        let d = bf_distance(&g, 0, 1).expect("should succeed");
         assert!((d - (-1.0)).abs() < 1e-6); /* 2 + (-3) = -1 */
     }
 
@@ -169,7 +169,7 @@ mod tests {
         let mut g = new_bf_graph(2);
         bf_add_edge(&mut g, 0, 1, 10.0);
         bf_add_edge(&mut g, 0, 1, 3.0);
-        let d = bf_distance(&g, 0, 1).unwrap();
+        let d = bf_distance(&g, 0, 1).expect("should succeed");
         assert!((d - 3.0).abs() < 1e-6);
     }
 

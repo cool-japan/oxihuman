@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Hierarchical tree index: parent-child relationships by u32 id.
@@ -149,7 +149,7 @@ mod tests {
     fn test_add_child() {
         let mut ti = new_tree_index();
         let root = ti_add_root(&mut ti, "root");
-        let child = ti_add_child(&mut ti, root, "child").unwrap();
+        let child = ti_add_child(&mut ti, root, "child").expect("should succeed");
         assert_eq!(ti_parent(&ti, child), Some(root));
     }
 
@@ -157,8 +157,8 @@ mod tests {
     fn test_children() {
         let mut ti = new_tree_index();
         let r = ti_add_root(&mut ti, "r");
-        let c1 = ti_add_child(&mut ti, r, "c1").unwrap();
-        let c2 = ti_add_child(&mut ti, r, "c2").unwrap();
+        let c1 = ti_add_child(&mut ti, r, "c1").expect("should succeed");
+        let c2 = ti_add_child(&mut ti, r, "c2").expect("should succeed");
         let children = ti_children(&ti, r);
         assert!(children.contains(&c1) && children.contains(&c2));
     }
@@ -167,8 +167,8 @@ mod tests {
     fn test_depth() {
         let mut ti = new_tree_index();
         let r = ti_add_root(&mut ti, "r");
-        let c = ti_add_child(&mut ti, r, "c").unwrap();
-        let gc = ti_add_child(&mut ti, c, "gc").unwrap();
+        let c = ti_add_child(&mut ti, r, "c").expect("should succeed");
+        let gc = ti_add_child(&mut ti, c, "gc").expect("should succeed");
         assert_eq!(ti_depth(&ti, r), 0);
         assert_eq!(ti_depth(&ti, c), 1);
         assert_eq!(ti_depth(&ti, gc), 2);
@@ -178,8 +178,8 @@ mod tests {
     fn test_descendants() {
         let mut ti = new_tree_index();
         let r = ti_add_root(&mut ti, "r");
-        let c = ti_add_child(&mut ti, r, "c").unwrap();
-        ti_add_child(&mut ti, c, "gc").unwrap();
+        let c = ti_add_child(&mut ti, r, "c").expect("should succeed");
+        ti_add_child(&mut ti, c, "gc").expect("should succeed");
         let desc = ti_descendants(&ti, r);
         assert_eq!(desc.len(), 2);
     }
@@ -188,7 +188,7 @@ mod tests {
     fn test_count() {
         let mut ti = new_tree_index();
         let r = ti_add_root(&mut ti, "r");
-        ti_add_child(&mut ti, r, "c").unwrap();
+        ti_add_child(&mut ti, r, "c").expect("should succeed");
         assert_eq!(ti_count(&ti), 2);
     }
 

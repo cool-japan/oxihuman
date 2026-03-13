@@ -159,7 +159,7 @@ mod tests {
         let mut r = make_recorder();
         recorder_push_action(&mut r, "first", "");
         recorder_push_action(&mut r, "second", "");
-        assert_eq!(recorder_last_action(&r).unwrap().name, "second");
+        assert_eq!(recorder_last_action(&r).expect("should succeed").name, "second");
     }
 
     #[test]

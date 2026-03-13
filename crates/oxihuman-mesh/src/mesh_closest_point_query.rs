@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Closest-point-on-mesh query stub.
@@ -218,7 +218,7 @@ mod tests {
     #[test]
     fn test_query_closest_distance_positive() {
         let (verts, tris) = unit_triangle();
-        let result = query_closest_point([0.25, 0.25, 2.0], &verts, &tris).unwrap();
+        let result = query_closest_point([0.25, 0.25, 2.0], &verts, &tris).expect("should succeed");
         assert!(result.distance > 0.0 /* point is above mesh */);
     }
 

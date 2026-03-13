@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -489,7 +489,10 @@ mod tests {
         }
         // LHS: each stratum [k/n, (k+1)/n] for each param should be covered
         // Check that no two samples have identical height values (very unlikely to collide)
-        let heights: Vec<f32> = samples.iter().map(|m| *m.get("height").unwrap()).collect();
+        let heights: Vec<f32> = samples
+            .iter()
+            .map(|m| *m.get("height").expect("should succeed"))
+            .collect();
         // All values should be distinct (LHS guarantee)
         for i in 0..heights.len() {
             for j in (i + 1)..heights.len() {
@@ -514,7 +517,7 @@ mod tests {
         // Check that height values follow van_der_corput(1..17, 2) pattern
         for (i, sample) in samples.iter().enumerate() {
             let expected = van_der_corput(i + 1, 2);
-            let actual = *sample.get("height").unwrap();
+            let actual = *sample.get("height").expect("should succeed");
             assert!(
                 (actual - expected).abs() < 1e-5,
                 "LD mismatch at i={i}: expected {expected}, got {actual}"
@@ -609,7 +612,7 @@ mod tests {
         assert_eq!(pop.len(), pop2.len());
         for (a, b) in pop.iter().zip(pop2.iter()) {
             for (k, v) in a {
-                assert_eq!(*v, *b.get(k).unwrap());
+                assert_eq!(*v, *b.get(k).expect("should succeed"));
             }
         }
     }

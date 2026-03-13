@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Deadline/SLA tracker.
@@ -181,7 +181,7 @@ mod tests {
     fn test_remaining_ms() {
         let mut t = new_deadline_tracker();
         let id = dt_add(&mut t, "x", 0, 1000);
-        let remaining = t.get(id).unwrap().remaining_ms(400);
+        let remaining = t.get(id).expect("should succeed").remaining_ms(400);
         assert_eq!(remaining, Some(600));
     }
 

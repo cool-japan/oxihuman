@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
@@ -462,7 +462,7 @@ mod tests {
         let params = make_params(0.2, 0.8, 0.4, 0.9);
         let dna = encode_dna(&params);
         let hex = dna_to_hex(&dna);
-        let dna2 = dna_from_hex(&hex).unwrap();
+        let dna2 = dna_from_hex(&hex).expect("should succeed");
         assert_eq!(dna.bytes, dna2.bytes);
     }
 
@@ -486,7 +486,7 @@ mod tests {
         let params = make_params(0.3, 0.6, 0.9, 0.1);
         let dna = encode_dna(&params);
         let b64 = dna_to_base64(&dna);
-        let dna2 = dna_from_base64(&b64).unwrap();
+        let dna2 = dna_from_base64(&b64).expect("should succeed");
         assert_eq!(dna.bytes, dna2.bytes);
     }
 

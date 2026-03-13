@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Particle emitter/system for visual effects.
 
@@ -390,9 +390,19 @@ mod tests {
     fn test_step_particle_system_integrates_position() {
         let mut sys = new_particle_system(test_emitter(), 10);
         emit_particle(&mut sys, 1);
-        let initial_y = sys.particles.iter().find(|p| p.active).unwrap().position[1];
+        let initial_y = sys
+            .particles
+            .iter()
+            .find(|p| p.active)
+            .expect("should succeed")
+            .position[1];
         step_particle_system(&mut sys, 0.1, 0);
-        let new_y = sys.particles.iter().find(|p| p.active).unwrap().position[1];
+        let new_y = sys
+            .particles
+            .iter()
+            .find(|p| p.active)
+            .expect("should succeed")
+            .position[1];
         // y should change due to initial_velocity = [0, 1, 0]
         assert!((new_y - initial_y).abs() > 0.001);
     }

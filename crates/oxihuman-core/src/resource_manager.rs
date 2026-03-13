@@ -173,7 +173,7 @@ mod tests {
         let mut mgr = new_resource_manager();
         let id = register_resource(&mut mgr, "texture/grass", "texture");
         assert_eq!(id, 1);
-        let r = get_resource(&mgr, id).unwrap();
+        let r = get_resource(&mgr, id).expect("should succeed");
         assert_eq!(r.state, ResourceState::Unloaded);
         assert_eq!(r.key, "texture/grass");
     }
@@ -183,7 +183,7 @@ mod tests {
         let mut mgr = new_resource_manager();
         let id = register_resource(&mut mgr, "mesh/head", "mesh");
         load_resource(&mut mgr, id, vec![1u8; 1024]);
-        let r = get_resource(&mgr, id).unwrap();
+        let r = get_resource(&mgr, id).expect("should succeed");
         assert_eq!(r.state, ResourceState::Loaded);
         assert_eq!(r.size_bytes, 1024);
         assert_eq!(total_memory(&mgr), 1024);
@@ -195,7 +195,7 @@ mod tests {
         let id = register_resource(&mut mgr, "a", "t");
         load_resource(&mut mgr, id, vec![0u8; 512]);
         unload_resource(&mut mgr, id);
-        let r = get_resource(&mgr, id).unwrap();
+        let r = get_resource(&mgr, id).expect("should succeed");
         assert_eq!(r.state, ResourceState::Unloaded);
         assert_eq!(total_memory(&mgr), 0);
     }
@@ -205,7 +205,7 @@ mod tests {
         let mut mgr = new_resource_manager();
         let id = register_resource(&mut mgr, "b", "t");
         fail_resource(&mut mgr, id, "file not found");
-        let r = get_resource(&mgr, id).unwrap();
+        let r = get_resource(&mgr, id).expect("should succeed");
         assert!(matches!(r.state, ResourceState::Failed(_)));
     }
 
@@ -215,9 +215,9 @@ mod tests {
         let id = register_resource(&mut mgr, "c", "t");
         load_resource(&mut mgr, id, vec![1u8; 256]);
         retain_resource(&mut mgr, id);
-        assert_eq!(get_resource(&mgr, id).unwrap().ref_count, 1);
+        assert_eq!(get_resource(&mgr, id).expect("should succeed").ref_count, 1);
         release_resource(&mut mgr, id);
-        let r = get_resource(&mgr, id).unwrap();
+        let r = get_resource(&mgr, id).expect("should succeed");
         assert_eq!(r.state, ResourceState::Unloaded);
         assert_eq!(total_memory(&mgr), 0);
     }
@@ -243,11 +243,11 @@ mod tests {
         // id2 has ref_count=0, should be GC'd
         garbage_collect(&mut mgr);
         assert_eq!(
-            get_resource(&mgr, id2).unwrap().state,
+            get_resource(&mgr, id2).expect("should succeed").state,
             ResourceState::Unloaded
         );
         assert_eq!(
-            get_resource(&mgr, id1).unwrap().state,
+            get_resource(&mgr, id1).expect("should succeed").state,
             ResourceState::Loaded
         );
     }
@@ -257,7 +257,7 @@ mod tests {
         let mut mgr = new_resource_manager();
         let id = register_resource(&mut mgr, "unique/key", "mesh");
         load_resource(&mut mgr, id, vec![1u8; 32]);
-        let r = get_by_key(&mgr, "unique/key").unwrap();
+        let r = get_by_key(&mgr, "unique/key").expect("should succeed");
         assert_eq!(r.id, id);
     }
 
@@ -300,11 +300,14 @@ mod tests {
         retain_resource(&mut mgr, id);
         release_resource(&mut mgr, id);
         // still loaded (ref_count = 1)
-        assert_eq!(get_resource(&mgr, id).unwrap().state, ResourceState::Loaded);
+        assert_eq!(
+            get_resource(&mgr, id).expect("should succeed").state,
+            ResourceState::Loaded
+        );
         release_resource(&mut mgr, id);
         // now unloaded
         assert_eq!(
-            get_resource(&mgr, id).unwrap().state,
+            get_resource(&mgr, id).expect("should succeed").state,
             ResourceState::Unloaded
         );
     }

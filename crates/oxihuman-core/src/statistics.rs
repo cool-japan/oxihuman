@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 #[allow(dead_code)]
@@ -104,7 +104,7 @@ mod tests {
     #[test]
     fn test_mean() {
         let xs = [1.0, 2.0, 3.0, 4.0, 5.0];
-        assert!((stat_mean(&xs).unwrap() - 3.0).abs() < 1e-10);
+        assert!((stat_mean(&xs).expect("should succeed") - 3.0).abs() < 1e-10);
     }
 
     #[test]
@@ -115,19 +115,19 @@ mod tests {
     #[test]
     fn test_median_odd() {
         let xs = [3.0, 1.0, 5.0, 2.0, 4.0];
-        assert!((stat_median(&xs).unwrap() - 3.0).abs() < 1e-10);
+        assert!((stat_median(&xs).expect("should succeed") - 3.0).abs() < 1e-10);
     }
 
     #[test]
     fn test_median_even() {
         let xs = [1.0, 2.0, 3.0, 4.0];
-        assert!((stat_median(&xs).unwrap() - 2.5).abs() < 1e-10);
+        assert!((stat_median(&xs).expect("should succeed") - 2.5).abs() < 1e-10);
     }
 
     #[test]
     fn test_std_dev() {
         let xs = [2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0];
-        let std = stat_std_dev(&xs).unwrap();
+        let std = stat_std_dev(&xs).expect("should succeed");
         assert!((std - 2.0).abs() < 1e-10);
     }
 
@@ -139,22 +139,22 @@ mod tests {
     #[test]
     fn test_percentile_50th_equals_median() {
         let xs = [1.0, 2.0, 3.0, 4.0, 5.0];
-        let p50 = stat_percentile(&xs, 50.0).unwrap();
-        let med = stat_median(&xs).unwrap();
+        let p50 = stat_percentile(&xs, 50.0).expect("should succeed");
+        let med = stat_median(&xs).expect("should succeed");
         assert!((p50 - med).abs() < 1e-9);
     }
 
     #[test]
     fn test_percentile_100() {
         let xs = [1.0, 2.0, 3.0, 4.0, 5.0];
-        let p100 = stat_percentile(&xs, 100.0).unwrap();
+        let p100 = stat_percentile(&xs, 100.0).expect("should succeed");
         assert!((p100 - 5.0).abs() < 1e-10);
     }
 
     #[test]
     fn test_mode() {
         let xs = [1.0, 2.0, 2.0, 3.0, 3.0, 3.0];
-        let m = stat_mode(&xs).unwrap();
+        let m = stat_mode(&xs).expect("should succeed");
         assert!((m - 3.0).abs() < 0.01);
     }
 }

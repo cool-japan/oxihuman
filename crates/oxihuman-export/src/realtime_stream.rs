@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Real-time mesh streaming session with delta/quantized encoding (WebSocket stub).
 
@@ -557,7 +557,7 @@ mod tests {
         session.push_frame(sample_positions(), sample_normals());
         session.push_frame(sample_positions(), sample_normals());
         let enc1 = session.encode_frame(1);
-        let dec = StreamSession::decode_frame(&enc1).unwrap();
+        let dec = StreamSession::decode_frame(&enc1).expect("should succeed");
         assert_eq!(dec.frame_id, 1);
     }
 

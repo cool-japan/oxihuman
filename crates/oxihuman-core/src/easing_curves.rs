@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Easing functions (linear, cubic, elastic, bounce, back, expo).
 
@@ -184,7 +184,7 @@ mod tests {
 
     #[test]
     fn ease_by_name_linear() {
-        let v = ease_by_name("linear", 0.5).unwrap();
+        let v = ease_by_name("linear", 0.5).expect("should succeed");
         assert!((v - 0.5).abs() < 1e-5);
     }
 
@@ -230,7 +230,7 @@ mod tests {
             "out_back",
         ];
         for name in names {
-            let _v = ease_by_name(name, 0.5).unwrap();
+            let _v = ease_by_name(name, 0.5).expect("should succeed");
         }
     }
 }

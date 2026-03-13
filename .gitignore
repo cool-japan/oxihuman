@@ -5,6 +5,9 @@
 Cargo.lock
 **/*.rlib
 
+# Claude AI config
+**/.claude/
+
 # IDE
 .vscode/
 .idea/
@@ -32,3 +35,6 @@ Cargo.lock
 .DS_Store
 Thumbs.db
 cli_test
+
+# Rustc ICE dumps
+rustc-ice-*.txt

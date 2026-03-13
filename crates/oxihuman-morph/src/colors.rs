@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Color theme system for skin tone, hair color, and eye color.
 //!
@@ -256,14 +256,14 @@ mod tests {
 
     #[test]
     fn from_hex_with_alpha() {
-        let c = Color::from_hex("#FF804080").unwrap();
+        let c = Color::from_hex("#FF804080").expect("should succeed");
         assert!((c.a - 0.502).abs() < 0.005, "alpha was {}", c.a);
     }
 
     #[test]
     fn to_hex_roundtrip() {
         let hex = "#FF8040";
-        let c = Color::from_hex(hex).unwrap();
+        let c = Color::from_hex(hex).expect("should succeed");
         assert_eq!(c.to_hex(), hex);
     }
 

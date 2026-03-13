@@ -96,7 +96,7 @@ mod tests {
     fn test_batch_weight_at() {
         let mut b = new_morph_batch();
         add_morph_to_batch(&mut b, "x", 0.3);
-        assert!((batch_weight_at(&b, 0).unwrap() - 0.3).abs() < 1e-6);
+        assert!((batch_weight_at(&b, 0).expect("should succeed") - 0.3).abs() < 1e-6);
         assert!(batch_weight_at(&b, 5).is_none());
     }
 
@@ -120,7 +120,7 @@ mod tests {
     fn test_clamp_weight() {
         let mut b = new_morph_batch();
         add_morph_to_batch(&mut b, "x", 2.0);
-        assert!((batch_weight_at(&b, 0).unwrap() - 1.0).abs() < 1e-6);
+        assert!((batch_weight_at(&b, 0).expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]

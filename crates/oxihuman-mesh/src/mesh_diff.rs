@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -382,7 +382,7 @@ mod tests {
     #[test]
     fn test_displacement_field_zero() {
         let base = base_triangle();
-        let field = DisplacementField::compute(&base, &base).unwrap();
+        let field = DisplacementField::compute(&base, &base).expect("should succeed");
         assert_eq!(field.vertex_count(), 3);
         assert!(field.is_zero());
         assert!(field.max_magnitude < 1e-6);
@@ -392,7 +392,7 @@ mod tests {
     fn test_displacement_field_nonzero() {
         let base = base_triangle();
         let deformed = deformed_triangle();
-        let field = DisplacementField::compute(&base, &deformed).unwrap();
+        let field = DisplacementField::compute(&base, &deformed).expect("should succeed");
         assert!(!field.is_zero());
         assert!((field.max_magnitude - 1.0).abs() < 1e-5);
     }
@@ -401,7 +401,7 @@ mod tests {
     fn test_displacement_magnitudes() {
         let base = base_triangle();
         let deformed = deformed_triangle();
-        let field = DisplacementField::compute(&base, &deformed).unwrap();
+        let field = DisplacementField::compute(&base, &deformed).expect("should succeed");
         assert_eq!(field.magnitudes.len(), 3);
         for &m in &field.magnitudes {
             assert!(
@@ -427,7 +427,7 @@ mod tests {
             [0.0, 0.0, 4.0],
             [0.0, 0.0, 2.0],
         ]);
-        let field = DisplacementField::compute(&base, &deformed).unwrap();
+        let field = DisplacementField::compute(&base, &deformed).expect("should succeed");
         let top2 = field.top_displaced(2);
         assert_eq!(top2.len(), 2);
         // Largest is index 2 (mag=4), second is index 0 (mag=3)
@@ -439,7 +439,7 @@ mod tests {
     fn test_displacement_scale() {
         let base = base_triangle();
         let deformed = deformed_triangle();
-        let field = DisplacementField::compute(&base, &deformed).unwrap();
+        let field = DisplacementField::compute(&base, &deformed).expect("should succeed");
         let scaled = field.scale(2.0);
         assert!((scaled.max_magnitude - 2.0).abs() < 1e-5);
         assert!((scaled.mean_magnitude - 2.0).abs() < 1e-5);
@@ -456,7 +456,7 @@ mod tests {
             [0.0, 0.0, 1.0], // mag 1.0 – above threshold
             [0.0, 0.0, 0.3], // mag 0.3 – below threshold
         ]);
-        let field = DisplacementField::compute(&base, &deformed).unwrap();
+        let field = DisplacementField::compute(&base, &deformed).expect("should succeed");
         let thresholded = field.threshold(0.8);
         // Only index 1 should survive
         assert!(thresholded.magnitudes[0] < 1e-6);
@@ -468,7 +468,7 @@ mod tests {
     fn test_displacement_apply_to() {
         let base = base_triangle();
         let deformed = deformed_triangle();
-        let field = DisplacementField::compute(&base, &deformed).unwrap();
+        let field = DisplacementField::compute(&base, &deformed).expect("should succeed");
         let result = field.apply_to(&base);
         // Positions should match deformed
         for (r, d) in result.positions.iter().zip(deformed.positions.iter()) {
@@ -502,7 +502,7 @@ mod tests {
     fn test_blend_meshes_zero() {
         let base = base_triangle();
         let target = deformed_triangle();
-        let blended = blend_meshes(&base, &target, 0.0).unwrap();
+        let blended = blend_meshes(&base, &target, 0.0).expect("should succeed");
         assert!(meshes_approx_equal(&blended, &base, 1e-5));
     }
 
@@ -510,7 +510,7 @@ mod tests {
     fn test_blend_meshes_one() {
         let base = base_triangle();
         let target = deformed_triangle();
-        let blended = blend_meshes(&base, &target, 1.0).unwrap();
+        let blended = blend_meshes(&base, &target, 1.0).expect("should succeed");
         assert!(meshes_approx_equal(&blended, &target, 1e-5));
     }
 
@@ -518,7 +518,7 @@ mod tests {
     fn test_blend_meshes_half() {
         let base = base_triangle();
         let target = deformed_triangle();
-        let blended = blend_meshes(&base, &target, 0.5).unwrap();
+        let blended = blend_meshes(&base, &target, 0.5).expect("should succeed");
         // Every vertex should be at Z = 0.5
         for p in &blended.positions {
             assert!((p[2] - 0.5).abs() < 1e-5, "expected Z=0.5, got {}", p[2]);
@@ -531,7 +531,7 @@ mod tests {
     fn test_mesh_diff_stats() {
         let base = base_triangle();
         let deformed = deformed_triangle();
-        let stats = mesh_diff_stats(&base, &deformed, 0.5).unwrap();
+        let stats = mesh_diff_stats(&base, &deformed, 0.5).expect("should succeed");
         assert_eq!(stats.vertex_count, 3);
         assert!((stats.max_displacement - 1.0).abs() < 1e-5);
         assert!((stats.mean_displacement - 1.0).abs() < 1e-5);
@@ -549,15 +549,15 @@ mod tests {
         let frames = vec![f0.clone(), f1.clone()];
 
         // t=0 → first frame
-        let r0 = interpolate_mesh_sequence(&frames, 0.0).unwrap();
+        let r0 = interpolate_mesh_sequence(&frames, 0.0).expect("should succeed");
         assert!(meshes_approx_equal(&r0, &f0, 1e-5));
 
         // t=1 → last frame
-        let r1 = interpolate_mesh_sequence(&frames, 1.0).unwrap();
+        let r1 = interpolate_mesh_sequence(&frames, 1.0).expect("should succeed");
         assert!(meshes_approx_equal(&r1, &f1, 1e-5));
 
         // t=0.5 → midpoint (Z = 0.5 for all verts)
-        let r_half = interpolate_mesh_sequence(&frames, 0.5).unwrap();
+        let r_half = interpolate_mesh_sequence(&frames, 0.5).expect("should succeed");
         for p in &r_half.positions {
             assert!((p[2] - 0.5).abs() < 1e-5);
         }

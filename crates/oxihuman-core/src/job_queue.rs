@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Job/task queue with priority, status tracking and cancellation.
 
@@ -387,7 +387,7 @@ mod tests {
         let mut q = make_queue();
         let first = submit_job(&mut q, "first", 1);
         submit_job(&mut q, "second", 10);
-        let oldest = oldest_pending_job(&q).unwrap();
+        let oldest = oldest_pending_job(&q).expect("should succeed");
         assert_eq!(oldest.id, first);
     }
 
@@ -416,7 +416,7 @@ mod tests {
         let mut q = make_queue();
         let id = submit_job(&mut q, "tagged", 1);
         assert!(tag_job(&mut q, id, "render"));
-        let job = q.jobs.iter().find(|j| j.id == id).unwrap();
+        let job = q.jobs.iter().find(|j| j.id == id).expect("should succeed");
         assert_eq!(job.tag.as_deref(), Some("render"));
     }
 }

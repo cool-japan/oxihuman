@@ -26,3 +26,10 @@ winit    = { version = "0.30", optional = true }
 default = []
 webgpu  = ["dep:wgpu", "dep:pollster"]
 winit   = ["dep:winit"]
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name    = "viewer_bench"
+harness = false

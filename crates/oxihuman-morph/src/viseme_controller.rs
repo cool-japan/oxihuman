@@ -233,7 +233,7 @@ mod tests {
     fn test_weight_clamp() {
         let mut ctrl = new_viseme_controller(default_viseme_config());
         viseme_add_entry(&mut ctrl, "X", 2.5);
-        let list = ctrl.entries.iter().find(|e| e.phoneme == "X").unwrap();
+        let list = ctrl.entries.iter().find(|e| e.phoneme == "X").expect("should succeed");
         assert!(list.weight <= 1.0);
     }
 

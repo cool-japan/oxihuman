@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Fixed-bucket histogram.
@@ -162,7 +162,7 @@ mod tests {
         for _ in 0..10 {
             h.add(5.0);
         }
-        let m = histogram_mean(&h).unwrap();
+        let m = histogram_mean(&h).expect("should succeed");
         assert!((m - 5.5).abs() < 1.0 /* midpoint of bucket 5 = 5.5 */,);
     }
 

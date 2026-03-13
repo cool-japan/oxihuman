@@ -160,7 +160,7 @@ mod tests {
     fn test_query_nearest() {
         let mut sq = new_spatial_query();
         spatial_build(&mut sq, &[[0.0; 3], [10.0, 0.0, 0.0]]);
-        let r = query_nearest(&sq, [1.0, 0.0, 0.0]).unwrap();
+        let r = query_nearest(&sq, [1.0, 0.0, 0.0]).expect("should succeed");
         assert_eq!(r.index, 0);
     }
 
@@ -190,7 +190,7 @@ mod tests {
     fn test_query_first() {
         let mut sq = new_spatial_query();
         spatial_build(&mut sq, &[[5.0, 5.0, 5.0]]);
-        let r = query_first(&sq).unwrap();
+        let r = query_first(&sq).expect("should succeed");
         assert_eq!(r.index, 0);
     }
 

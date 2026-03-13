@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Animation blend buffer — blends multiple animations by weighted mixing.
@@ -176,7 +176,7 @@ mod tests {
         let mut buf = BlendAnimBuffer::new(2);
         buf.add_contribution(make_contrib("a", 0.2, 2));
         buf.add_contribution(make_contrib("b", 0.8, 2));
-        assert_eq!(dominant_contribution(&buf).unwrap().name, "b");
+        assert_eq!(dominant_contribution(&buf).expect("should succeed").name, "b");
     }
 
     #[test]

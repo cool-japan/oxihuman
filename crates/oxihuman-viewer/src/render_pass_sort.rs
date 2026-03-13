@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! RenderPassSort — sort keys and ordering for render passes.
 
@@ -133,7 +133,7 @@ mod tests {
         let mut rps = sample_rps();
         sort_opaque_first(&mut rps);
         assert!(rps.entries[0].is_opaque);
-        assert!(!rps.entries.last().unwrap().is_opaque);
+        assert!(!rps.entries.last().expect("should succeed").is_opaque);
     }
 
     #[test]

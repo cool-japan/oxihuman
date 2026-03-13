@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Layered configuration: base layer overridden by user layer.
@@ -212,8 +212,8 @@ mod tests {
         lc.push_layer(base);
         lc.push_layer(user);
         let flat = lc.flatten();
-        assert_eq!(flat.get("x").unwrap(), "2");
-        assert_eq!(flat.get("y").unwrap(), "3");
+        assert_eq!(flat.get("x").expect("should succeed"), "2");
+        assert_eq!(flat.get("y").expect("should succeed"), "3");
     }
 
     #[test]
@@ -221,7 +221,7 @@ mod tests {
         let mut lc = LayeredConfig::new();
         lc.push_layer(ConfigLayer::new("a"));
         lc.push_layer(ConfigLayer::new("b"));
-        let popped = lc.pop_layer().unwrap();
+        let popped = lc.pop_layer().expect("should succeed");
         assert_eq!(popped.name(), "b");
         assert_eq!(lc.layer_count(), 1);
     }

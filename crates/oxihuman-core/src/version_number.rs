@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Semantic version with optional pre-release label.
@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn parse_simple() {
-        let v = parse_version("1.2.3").unwrap();
+        let v = parse_version("1.2.3").expect("should succeed");
         assert_eq!(v.major, 1);
         assert_eq!(v.minor, 2);
         assert_eq!(v.patch, 3);
@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn parse_with_pre() {
-        let v = parse_version("2.0.0-beta").unwrap();
+        let v = parse_version("2.0.0-beta").expect("should succeed");
         assert_eq!(v.major, 2);
         assert_eq!(v.pre, "beta");
     }
@@ -101,29 +101,29 @@ mod tests {
 
     #[test]
     fn version_cmp_major() {
-        let a = parse_version("2.0.0").unwrap();
-        let b = parse_version("1.0.0").unwrap();
+        let a = parse_version("2.0.0").expect("should succeed");
+        let b = parse_version("1.0.0").expect("should succeed");
         assert_eq!(version_cmp(&a, &b), Ordering::Greater);
     }
 
     #[test]
     fn version_cmp_equal() {
-        let a = parse_version("1.2.3").unwrap();
-        let b = parse_version("1.2.3").unwrap();
+        let a = parse_version("1.2.3").expect("should succeed");
+        let b = parse_version("1.2.3").expect("should succeed");
         assert_eq!(version_cmp(&a, &b), Ordering::Equal);
     }
 
     #[test]
     fn is_compatible_same_major() {
-        let base = parse_version("1.5.0").unwrap();
-        let req = parse_version("1.3.0").unwrap();
+        let base = parse_version("1.5.0").expect("should succeed");
+        let req = parse_version("1.3.0").expect("should succeed");
         assert!(is_compatible(&base, &req));
     }
 
     #[test]
     fn is_compatible_different_major() {
-        let base = parse_version("2.0.0").unwrap();
-        let req = parse_version("1.0.0").unwrap();
+        let base = parse_version("2.0.0").expect("should succeed");
+        let req = parse_version("1.0.0").expect("should succeed");
         assert!(!is_compatible(&base, &req));
     }
 

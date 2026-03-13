@@ -98,7 +98,7 @@ mod tests {
     fn test_shape_key_weight() {
         let mut s = new_shape_key_set();
         add_shape_key(&mut s, "w", 0.7);
-        assert!((shape_key_weight(&s, "w").unwrap() - 0.7).abs() < 1e-6);
+        assert!((shape_key_weight(&s, "w").expect("should succeed") - 0.7).abs() < 1e-6);
     }
 
     #[test]
@@ -106,7 +106,7 @@ mod tests {
         let mut s = new_shape_key_set();
         add_shape_key(&mut s, "w", 0.1);
         assert!(set_shape_key_weight(&mut s, "w", 0.9));
-        assert!((shape_key_weight(&s, "w").unwrap() - 0.9).abs() < 1e-6);
+        assert!((shape_key_weight(&s, "w").expect("should succeed") - 0.9).abs() < 1e-6);
     }
 
     #[test]
@@ -129,15 +129,15 @@ mod tests {
         add_shape_key(&mut s, "a", 0.5);
         add_shape_key(&mut s, "b", 0.8);
         reset_all_shape_keys(&mut s);
-        assert!((shape_key_weight(&s, "a").unwrap()).abs() < 1e-6);
-        assert!((shape_key_weight(&s, "b").unwrap()).abs() < 1e-6);
+        assert!((shape_key_weight(&s, "a").expect("should succeed")).abs() < 1e-6);
+        assert!((shape_key_weight(&s, "b").expect("should succeed")).abs() < 1e-6);
     }
 
     #[test]
     fn test_clamp_weight() {
         let mut s = new_shape_key_set();
         add_shape_key(&mut s, "x", 5.0);
-        assert!((shape_key_weight(&s, "x").unwrap() - 1.0).abs() < 1e-6);
+        assert!((shape_key_weight(&s, "x").expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]

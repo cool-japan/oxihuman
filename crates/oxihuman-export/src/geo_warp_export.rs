@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export geometry warp / space-warp deformation data.
@@ -165,14 +165,14 @@ mod tests {
     #[test]
     fn test_interpolate_at_start() {
         let e = two_kf_export();
-        let d = interpolate_warp(&e, 0.0).unwrap();
+        let d = interpolate_warp(&e, 0.0).expect("should succeed");
         assert!((d[0][0] - 0.0).abs() < 1e-6);
     }
 
     #[test]
     fn test_interpolate_midpoint() {
         let e = two_kf_export();
-        let d = interpolate_warp(&e, 0.5).unwrap();
+        let d = interpolate_warp(&e, 0.5).expect("should succeed");
         assert!((d[0][0] - 0.5).abs() < 1e-6);
     }
 

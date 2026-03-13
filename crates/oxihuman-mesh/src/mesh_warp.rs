@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Mesh warping via Radial Basis Functions (RBF).
 //!
@@ -416,8 +416,8 @@ mod tests {
 
     fn write_tmp(name: &str, content: &str) {
         let path = format!("/tmp/{name}");
-        let mut f = std::fs::File::create(&path).unwrap();
-        f.write_all(content.as_bytes()).unwrap();
+        let mut f = std::fs::File::create(&path).expect("should succeed");
+        f.write_all(content.as_bytes()).expect("should succeed");
     }
 
     // ── RbfKernel ────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Zero-copy buffer management between Rust/WASM and JavaScript.
 //!
@@ -277,8 +277,8 @@ mod tests {
     fn round_trip_f32() {
         let mut buf = WasmBuffer::new(1024);
         let src = vec![1.0f32, -2.5, std::f32::consts::PI, 0.0];
-        buf.write_f32_slice(&src).unwrap();
-        let out = buf.read_f32_slice().unwrap();
+        buf.write_f32_slice(&src).expect("should succeed");
+        let out = buf.read_f32_slice().expect("should succeed");
         assert_eq!(src, out);
     }
 
@@ -286,8 +286,8 @@ mod tests {
     fn round_trip_f64() {
         let mut buf = WasmBuffer::new(1024);
         let src = vec![1.0f64, -2.5, std::f64::consts::PI];
-        buf.write_f64_slice(&src).unwrap();
-        let out = buf.read_f64_slice().unwrap();
+        buf.write_f64_slice(&src).expect("should succeed");
+        let out = buf.read_f64_slice().expect("should succeed");
         assert_eq!(src, out);
     }
 
@@ -302,8 +302,9 @@ mod tests {
     fn mesh_positions_round_trip() {
         let positions: Vec<[f64; 3]> = vec![[1.0, 2.0, 3.0], [-1.0, -2.0, -3.0]];
         let mut buf = WasmBuffer::new(positions.len() * 3 * 8);
-        buf.write_mesh_positions(&positions).unwrap();
-        let out = buf.read_f64_slice().unwrap();
+        buf.write_mesh_positions(&positions)
+            .expect("should succeed");
+        let out = buf.read_f64_slice().expect("should succeed");
         assert_eq!(out.len(), 6);
         assert!((out[0] - 1.0).abs() < f64::EPSILON);
         assert!((out[5] - (-3.0)).abs() < f64::EPSILON);
@@ -313,7 +314,7 @@ mod tests {
     fn mesh_indices_round_trip() {
         let indices: Vec<[usize; 3]> = vec![[0, 1, 2], [3, 4, 5]];
         let mut buf = WasmBuffer::new(indices.len() * 3 * 4);
-        buf.write_mesh_indices(&indices).unwrap();
+        buf.write_mesh_indices(&indices).expect("should succeed");
         assert_eq!(buf.len(), 24);
     }
 

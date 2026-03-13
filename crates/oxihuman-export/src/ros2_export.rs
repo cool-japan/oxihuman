@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! ROS2 message stub export — serialises mesh data into ROS2-compatible message stubs.
@@ -143,7 +143,7 @@ mod tests {
             "geometry_msgs/Pose",
             Ros2Reliability::Reliable,
         );
-        let m = find_ros2_message(&e, "/pose").unwrap();
+        let m = find_ros2_message(&e, "/pose").expect("should succeed");
         assert_eq!(m.topic, "/pose");
     }
 

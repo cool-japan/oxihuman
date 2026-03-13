@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Accumulates and combines multiple forces into a single net force.
@@ -146,7 +146,7 @@ mod tests {
     fn test_get_by_label() {
         let mut c = ForceCombiner::new();
         c.add([5.0, 0.0, 0.0], "wind");
-        let f = c.get_by_label("wind").unwrap();
+        let f = c.get_by_label("wind").expect("should succeed");
         assert!((f[0] - 5.0).abs() < 1e-5);
     }
 
@@ -161,7 +161,7 @@ mod tests {
         let mut c = ForceCombiner::new();
         c.add([2.0, 0.0, 0.0], "a");
         c.scale_all(3.0);
-        let f = c.get_by_label("a").unwrap();
+        let f = c.get_by_label("a").expect("should succeed");
         assert!((f[0] - 6.0).abs() < 1e-5);
     }
 

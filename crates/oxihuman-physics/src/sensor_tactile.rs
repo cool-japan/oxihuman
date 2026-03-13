@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Tactile/touch sensor grid model.
@@ -175,7 +175,7 @@ mod tests {
             time: 0.0,
             taxels: vec![1.0; 4],
         };
-        let cof = centre_of_force(&frame, &cfg).unwrap();
+        let cof = centre_of_force(&frame, &cfg).expect("should succeed");
         assert!((cof[0] - 0.5).abs() < 0.01);
     }
 

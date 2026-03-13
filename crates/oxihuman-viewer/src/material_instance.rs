@@ -108,7 +108,7 @@ mod tests {
     fn test_set_float() {
         let mut inst = new_material_instance("PBR");
         mi_set_float(&mut inst, "roughness", 0.5);
-        assert!((mi_get_float(&inst, "roughness").unwrap() - 0.5).abs() < 1e-6);
+        assert!((mi_get_float(&inst, "roughness").expect("should succeed") - 0.5).abs() < 1e-6);
     }
 
     #[test]

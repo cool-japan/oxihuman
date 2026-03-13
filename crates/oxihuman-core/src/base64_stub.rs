@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Full-featured Base64 encoder/decoder.
 //!
@@ -852,7 +852,7 @@ mod tests {
     fn encode_decode_roundtrip() {
         let data = b"Hello, World!";
         let enc = base64_encode(data);
-        let dec = base64_decode(&enc).unwrap();
+        let dec = base64_decode(&enc).expect("should succeed");
         assert_eq!(dec, data);
     }
 
@@ -893,7 +893,7 @@ mod tests {
         assert!(!url.contains('+'));
         assert!(!url.contains('/'));
 
-        let decoded = base64_decode_url_safe(&url).unwrap();
+        let decoded = base64_decode_url_safe(&url).expect("should succeed");
         assert_eq!(decoded, data);
     }
 
@@ -901,7 +901,7 @@ mod tests {
     fn url_safe_roundtrip_various() {
         for input in &[b"" as &[u8], b"a", b"ab", b"abc", b"abcd", b"Hello, World!"] {
             let enc = base64_encode_url_safe(input);
-            let dec = base64_decode_url_safe(&enc).unwrap();
+            let dec = base64_decode_url_safe(&enc).expect("should succeed");
             assert_eq!(&dec, input, "failed for input len={}", input.len());
         }
     }
@@ -918,9 +918,9 @@ mod tests {
         let enc2 = base64_encode_config(b"Ma", &config);
         assert_eq!(enc2, "TWE");
 
-        let dec = base64_decode_config("TQ", &config).unwrap();
+        let dec = base64_decode_config("TQ", &config).expect("should succeed");
         assert_eq!(dec, b"M");
-        let dec2 = base64_decode_config("TWE", &config).unwrap();
+        let dec2 = base64_decode_config("TWE", &config).expect("should succeed");
         assert_eq!(dec2, b"Ma");
     }
 
@@ -931,7 +931,7 @@ mod tests {
             padding: Base64Padding::NoPad,
             line_wrap: None,
         };
-        let dec = base64_decode_config("TQ==", &config).unwrap();
+        let dec = base64_decode_config("TQ==", &config).expect("should succeed");
         assert_eq!(dec, b"M");
     }
 
@@ -949,14 +949,14 @@ mod tests {
         let enc2 = base64_encode_mime(&data2);
         assert!(enc2.contains("\r\n"), "58 bytes should cause wrapping");
 
-        let dec = base64_decode_config(&enc2, &Base64Config::standard()).unwrap();
+        let dec = base64_decode_config(&enc2, &Base64Config::standard()).expect("should succeed");
         assert_eq!(dec, data2);
     }
 
     #[test]
     fn whitespace_tolerance() {
         let encoded = "SGVs\r\n bG8s\tIFdv\ncmxkIQ==";
-        let dec = base64_decode_config(encoded, &Base64Config::standard()).unwrap();
+        let dec = base64_decode_config(encoded, &Base64Config::standard()).expect("should succeed");
         assert_eq!(dec, b"Hello, World!");
     }
 
@@ -1011,11 +1011,11 @@ mod tests {
         {
             let mut encoder = Base64Encoder::new(&mut output, Base64Config::standard());
             for chunk in data.chunks(7) {
-                encoder.write_all(chunk).unwrap();
+                encoder.write_all(chunk).expect("should succeed");
             }
-            let _ = encoder.finish().unwrap();
+            let _ = encoder.finish().expect("should succeed");
         }
-        let result = String::from_utf8(output).unwrap();
+        let result = String::from_utf8(output).expect("should succeed");
         assert_eq!(result, expected);
     }
 
@@ -1028,11 +1028,11 @@ mod tests {
         {
             let mut encoder = Base64Encoder::new(&mut output, Base64Config::standard());
             for &b in data.iter() {
-                encoder.write_all(&[b]).unwrap();
+                encoder.write_all(&[b]).expect("should succeed");
             }
-            let _ = encoder.finish().unwrap();
+            let _ = encoder.finish().expect("should succeed");
         }
-        let result = String::from_utf8(output).unwrap();
+        let result = String::from_utf8(output).expect("should succeed");
         assert_eq!(result, expected);
     }
 
@@ -1044,10 +1044,10 @@ mod tests {
         let mut output = Vec::new();
         {
             let mut encoder = Base64Encoder::new(&mut output, Base64Config::mime());
-            encoder.write_all(&data).unwrap();
-            let _ = encoder.finish().unwrap();
+            encoder.write_all(&data).expect("should succeed");
+            let _ = encoder.finish().expect("should succeed");
         }
-        let result = String::from_utf8(output).unwrap();
+        let result = String::from_utf8(output).expect("should succeed");
         assert_eq!(result, expected);
     }
 
@@ -1059,7 +1059,7 @@ mod tests {
         let cursor = Cursor::new(encoded.as_bytes());
         let mut decoder = Base64Decoder::new(cursor, Base64Config::standard());
         let mut decoded = Vec::new();
-        decoder.read_to_end(&mut decoded).unwrap();
+        decoder.read_to_end(&mut decoded).expect("should succeed");
         assert_eq!(decoded, original);
     }
 
@@ -1082,7 +1082,7 @@ mod tests {
         let cursor = Cursor::new(with_ws.as_bytes());
         let mut decoder = Base64Decoder::new(cursor, Base64Config::standard());
         let mut decoded = Vec::new();
-        decoder.read_to_end(&mut decoded).unwrap();
+        decoder.read_to_end(&mut decoded).expect("should succeed");
         assert_eq!(decoded, original);
     }
 
@@ -1094,10 +1094,10 @@ mod tests {
         let mut output = Vec::new();
         {
             let mut encoder = Base64Encoder::new(&mut output, Base64Config::url_safe());
-            encoder.write_all(data).unwrap();
-            let _ = encoder.finish().unwrap();
+            encoder.write_all(data).expect("should succeed");
+            let _ = encoder.finish().expect("should succeed");
         }
-        let result = String::from_utf8(output).unwrap();
+        let result = String::from_utf8(output).expect("should succeed");
         assert_eq!(result, expected);
     }
 
@@ -1109,7 +1109,7 @@ mod tests {
         let cursor = Cursor::new(encoded.as_bytes());
         let mut decoder = Base64Decoder::new(cursor, Base64Config::url_safe());
         let mut decoded = Vec::new();
-        decoder.read_to_end(&mut decoded).unwrap();
+        decoder.read_to_end(&mut decoded).expect("should succeed");
         assert_eq!(decoded, original);
     }
 
@@ -1117,11 +1117,11 @@ mod tests {
     fn roundtrip_all_byte_values() {
         let data: Vec<u8> = (0..=255).collect();
         let enc = base64_encode(&data);
-        let dec = base64_decode(&enc).unwrap();
+        let dec = base64_decode(&enc).expect("should succeed");
         assert_eq!(dec, data);
 
         let enc_url = base64_encode_url_safe(&data);
-        let dec_url = base64_decode_url_safe(&enc_url).unwrap();
+        let dec_url = base64_decode_url_safe(&enc_url).expect("should succeed");
         assert_eq!(dec_url, data);
     }
 
@@ -1153,10 +1153,10 @@ mod tests {
 
     #[test]
     fn decode_empty() {
-        let dec = base64_decode("").unwrap();
+        let dec = base64_decode("").expect("should succeed");
         assert!(dec.is_empty());
 
-        let dec2 = base64_decode_config("", &Base64Config::url_safe()).unwrap();
+        let dec2 = base64_decode_config("", &Base64Config::url_safe()).expect("should succeed");
         assert!(dec2.is_empty());
     }
 
@@ -1184,16 +1184,16 @@ mod tests {
         {
             let mut encoder = Base64Encoder::new(&mut enc_out, Base64Config::standard());
             for chunk in data.chunks(100) {
-                encoder.write_all(chunk).unwrap();
+                encoder.write_all(chunk).expect("should succeed");
             }
-            let _ = encoder.finish().unwrap();
+            let _ = encoder.finish().expect("should succeed");
         }
-        assert_eq!(String::from_utf8(enc_out).unwrap(), encoded);
+        assert_eq!(String::from_utf8(enc_out).expect("should succeed"), encoded);
 
         let cursor = Cursor::new(encoded.as_bytes());
         let mut decoder = Base64Decoder::new(cursor, Base64Config::standard());
         let mut decoded = Vec::new();
-        decoder.read_to_end(&mut decoded).unwrap();
+        decoder.read_to_end(&mut decoded).expect("should succeed");
         assert_eq!(decoded, data);
     }
 

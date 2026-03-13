@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export IK/FK blend weight data per bone chain.
@@ -158,7 +158,7 @@ mod tests {
     fn test_set_blend_existing() {
         let mut e = basic_export();
         set_blend(&mut e, "arm_l", BlendMode::FullFk);
-        assert!((ik_weight(find_record(&e, "arm_l").unwrap()) - 0.0).abs() < 1e-6);
+        assert!((ik_weight(find_record(&e, "arm_l").expect("should succeed")) - 0.0).abs() < 1e-6);
     }
 
     #[test]

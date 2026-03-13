@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Minimal YAML parser stub (scalar key-value pairs only).
@@ -148,35 +148,35 @@ mod tests {
     #[test]
     fn test_parse_int() {
         /* integer scalar */
-        let doc = parse_yaml("port: 9090\n").unwrap();
+        let doc = parse_yaml("port: 9090\n").expect("should succeed");
         assert_eq!(get_int(&doc, "port"), Some(9090));
     }
 
     #[test]
     fn test_parse_bool_true() {
         /* true keyword */
-        let doc = parse_yaml("enabled: true\n").unwrap();
+        let doc = parse_yaml("enabled: true\n").expect("should succeed");
         assert_eq!(doc.get("enabled"), Some(&YamlScalar::Bool(true)));
     }
 
     #[test]
     fn test_parse_bool_false() {
         /* false keyword */
-        let doc = parse_yaml("enabled: false\n").unwrap();
+        let doc = parse_yaml("enabled: false\n").expect("should succeed");
         assert_eq!(doc.get("enabled"), Some(&YamlScalar::Bool(false)));
     }
 
     #[test]
     fn test_parse_null() {
         /* null value */
-        let doc = parse_yaml("x: null\n").unwrap();
+        let doc = parse_yaml("x: null\n").expect("should succeed");
         assert_eq!(doc.get("x"), Some(&YamlScalar::Null));
     }
 
     #[test]
     fn test_parse_string() {
         /* string value */
-        let doc = parse_yaml("name: oxihuman\n").unwrap();
+        let doc = parse_yaml("name: oxihuman\n").expect("should succeed");
         assert_eq!(
             doc.get("name"),
             Some(&YamlScalar::Str("oxihuman".to_string()))
@@ -186,14 +186,14 @@ mod tests {
     #[test]
     fn test_comment_skipped() {
         /* comment lines are ignored */
-        let doc = parse_yaml("# comment\nkey: 1\n").unwrap();
+        let doc = parse_yaml("# comment\nkey: 1\n").expect("should succeed");
         assert_eq!(doc.len(), 1);
     }
 
     #[test]
     fn test_parse_float() {
         /* float scalar */
-        let doc = parse_yaml("ratio: 3.14\n").unwrap();
+        let doc = parse_yaml("ratio: 3.14\n").expect("should succeed");
         assert!(matches!(doc.get("ratio"), Some(YamlScalar::Float(_))));
     }
 

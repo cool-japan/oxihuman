@@ -2,14 +2,14 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Version:** 0.1.0 | **Status:** Partial | **Updated:** 2026-03-11
+**Version:** 0.1.1 | **Status:** Stable | **Updated:** 2026-03-13
 
 | Metric | Value |
 |--------|-------|
-| Passing tests | 4,973 |
+| Passing tests | 5,217 |
 | Public API items | 7,274 |
-| Source files | 828 `.rs` files |
-| Stub modules | 50+ (advanced biomechanics / actuators) |
+| Source files | 864 `.rs` files |
+| Stub modules | 0 |
 
 ---
 
@@ -25,7 +25,7 @@ No feature flags are required. All modules are compiled unconditionally; stub mo
 
 ```toml
 [dependencies]
-oxihuman-physics = "0.1"
+oxihuman-physics = "0.1.1"
 ```
 
 ### Workspace dependencies

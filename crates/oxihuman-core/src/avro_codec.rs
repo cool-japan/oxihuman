@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Apache Avro codec stub.
@@ -150,7 +150,7 @@ mod tests {
     #[test]
     fn test_decode_zero() {
         /* decode 0x00 gives 0 */
-        let (v, n) = decode_long(&[0x00]).unwrap();
+        let (v, n) = decode_long(&[0x00]).expect("should succeed");
         assert_eq!(v, 0);
         assert_eq!(n, 1);
     }
@@ -160,7 +160,7 @@ mod tests {
         /* positive value roundtrip */
         let mut buf = vec![];
         encode_long(12345, &mut buf);
-        let (v, _) = decode_long(&buf).unwrap();
+        let (v, _) = decode_long(&buf).expect("should succeed");
         assert_eq!(v, 12345);
     }
 
@@ -169,7 +169,7 @@ mod tests {
         /* negative value roundtrip */
         let mut buf = vec![];
         encode_long(-999, &mut buf);
-        let (v, _) = decode_long(&buf).unwrap();
+        let (v, _) = decode_long(&buf).expect("should succeed");
         assert_eq!(v, -999);
     }
 

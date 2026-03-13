@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A simple chunk-based allocator that tracks allocated slabs.
@@ -186,7 +186,7 @@ mod tests {
     fn test_get_chunk() {
         let mut alloc = ChunkAllocator::new(64);
         alloc.allocate(10);
-        let chunk = alloc.get_chunk(0).unwrap();
+        let chunk = alloc.get_chunk(0).expect("should succeed");
         assert_eq!(chunk.used, 10);
     }
 }

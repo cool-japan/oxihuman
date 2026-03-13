@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! ASCII and binary STL exporter for 3D printing workflows.
 
@@ -150,7 +150,7 @@ mod tests {
     #[test]
     fn ascii_stl_contains_solid_name() {
         let m = triangle_mesh();
-        let s = mesh_to_stl_ascii(&m, "test_human").unwrap();
+        let s = mesh_to_stl_ascii(&m, "test_human").expect("should succeed");
         assert!(s.starts_with("solid test_human"));
         assert!(s.contains("endsolid test_human"));
     }
@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn ascii_stl_has_one_facet() {
         let m = triangle_mesh();
-        let s = mesh_to_stl_ascii(&m, "h").unwrap();
+        let s = mesh_to_stl_ascii(&m, "h").expect("should succeed");
         let facets = s.matches("facet normal").count();
         assert_eq!(facets, 1);
     }
@@ -167,7 +167,7 @@ mod tests {
     fn ascii_stl_writes_file() {
         let m = triangle_mesh();
         let path = std::path::PathBuf::from("/tmp/test_oxihuman.stl");
-        export_stl_ascii(&m, &path, "oxihuman").unwrap();
+        export_stl_ascii(&m, &path, "oxihuman").expect("should succeed");
         assert!(path.exists());
         std::fs::remove_file(&path).ok();
     }
@@ -176,8 +176,8 @@ mod tests {
     fn binary_stl_correct_triangle_count() {
         let m = triangle_mesh();
         let path = std::path::PathBuf::from("/tmp/test_oxihuman_bin.stl");
-        export_stl_binary(&m, &path).unwrap();
-        let count = verify_stl_binary(&path).unwrap();
+        export_stl_binary(&m, &path).expect("should succeed");
+        let count = verify_stl_binary(&path).expect("should succeed");
         assert_eq!(count, 1);
         std::fs::remove_file(&path).ok();
     }
@@ -186,8 +186,8 @@ mod tests {
     fn binary_stl_file_size() {
         let m = triangle_mesh();
         let path = std::path::PathBuf::from("/tmp/test_size.stl");
-        export_stl_binary(&m, &path).unwrap();
-        let size = std::fs::metadata(&path).unwrap().len();
+        export_stl_binary(&m, &path).expect("should succeed");
+        let size = std::fs::metadata(&path).expect("should succeed").len();
         // 80 (header) + 4 (count) + 1 * 50 (per triangle) = 134
         assert_eq!(size, 134);
         std::fs::remove_file(&path).ok();

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use std::io::Write;
 use std::path::Path;
@@ -343,7 +343,7 @@ mod tests {
         assert_eq!(scene.mesh_count(), 0);
         scene.export(&path).expect("export failed");
         assert!(path.exists(), "GLB file should be created");
-        let bytes = std::fs::read(&path).unwrap();
+        let bytes = std::fs::read(&path).expect("should succeed");
         assert!(bytes.len() >= 12, "GLB must have at least 12 bytes");
         std::fs::remove_file(&path).ok();
     }
@@ -354,7 +354,7 @@ mod tests {
         let scene = Scene::new("single").add_mesh(SceneMesh::new("body", tri_mesh(0.0)));
         export_scene_glb(&scene, &path).expect("export failed");
         assert!(path.exists(), "file should exist");
-        let bytes = std::fs::read(&path).unwrap();
+        let bytes = std::fs::read(&path).expect("should succeed");
         assert!(bytes.len() >= 12, "valid GLB header required");
         std::fs::remove_file(&path).ok();
     }
@@ -375,7 +375,7 @@ mod tests {
         let path = std::path::PathBuf::from("/tmp/test_scene_header.glb");
         let scene = Scene::new("header_test").add_mesh(SceneMesh::new("mesh0", tri_mesh(0.0)));
         export_scene_glb(&scene, &path).expect("export failed");
-        let bytes = std::fs::read(&path).unwrap();
+        let bytes = std::fs::read(&path).expect("should succeed");
         assert!(bytes.len() >= 4);
         // Magic: "glTF" = 0x46546C67 in LE = [0x67, 0x6C, 0x54, 0x46]
         assert_eq!(

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! GLSL shader source export.
@@ -124,7 +124,7 @@ mod tests {
     fn render_shader_contains_version() {
         let mut exp = new_glsl_export();
         add_glsl_shader(&mut exp, GlslStage::Vertex, "void main(){}", 450);
-        let s = find_glsl_shader(&exp, GlslStage::Vertex).unwrap();
+        let s = find_glsl_shader(&exp, GlslStage::Vertex).expect("should succeed");
         let src = render_glsl_shader(s);
         assert!(src.contains("450") /* version in output */);
     }
@@ -134,7 +134,7 @@ mod tests {
         let mut exp = new_glsl_export();
         add_glsl_shader(&mut exp, GlslStage::Fragment, "void main(){}", 330);
         add_glsl_define(&mut exp, "USE_IBL");
-        let s = find_glsl_shader(&exp, GlslStage::Fragment).unwrap();
+        let s = find_glsl_shader(&exp, GlslStage::Fragment).expect("should succeed");
         let src = render_glsl_shader(s);
         assert!(src.contains("USE_IBL") /* define */);
     }

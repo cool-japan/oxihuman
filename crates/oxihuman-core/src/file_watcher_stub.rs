@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! File system watcher with debouncing, glob filtering, event batching,
@@ -675,7 +675,7 @@ mod tests {
 
     #[test]
     fn test_glob_pattern_star() {
-        let g = GlobPattern::new("*.rs").unwrap();
+        let g = GlobPattern::new("*.rs").expect("should succeed");
         assert!(g.matches("main.rs"));
         assert!(g.matches("lib.rs"));
         assert!(!g.matches("main.py"));
@@ -684,7 +684,7 @@ mod tests {
 
     #[test]
     fn test_glob_pattern_double_star() {
-        let g = GlobPattern::new("**/*.rs").unwrap();
+        let g = GlobPattern::new("**/*.rs").expect("should succeed");
         assert!(g.matches("src/main.rs"));
         assert!(g.matches("a/b/c/lib.rs"));
         assert!(!g.matches("main.py"));
@@ -692,7 +692,7 @@ mod tests {
 
     #[test]
     fn test_glob_pattern_question() {
-        let g = GlobPattern::new("?.rs").unwrap();
+        let g = GlobPattern::new("?.rs").expect("should succeed");
         assert!(g.matches("a.rs"));
         assert!(!g.matches("ab.rs"));
     }
@@ -700,7 +700,7 @@ mod tests {
     #[test]
     fn test_glob_filter_on_events() {
         let mut w = new_file_watcher();
-        w.add_glob_filter("*.rs").unwrap();
+        w.add_glob_filter("*.rs").expect("should succeed");
         w.inject_event(FsEvent::Modified("main.rs".to_string()));
         w.inject_event(FsEvent::Modified("main.py".to_string()));
         let evs = w.drain_events();
@@ -711,7 +711,7 @@ mod tests {
     #[test]
     fn test_glob_filter_cleared() {
         let mut w = new_file_watcher();
-        w.add_glob_filter("*.rs").unwrap();
+        w.add_glob_filter("*.rs").expect("should succeed");
         w.clear_glob_filters();
         w.inject_event(FsEvent::Modified("main.py".to_string()));
         assert_eq!(w.drain_events().len(), 1);
@@ -726,15 +726,15 @@ mod tests {
     #[test]
     fn test_watch_recursive() {
         let mut w = new_file_watcher();
-        w.watch_recursive("/src", true).unwrap();
-        let entry = w.watch_entry("/src").unwrap();
+        w.watch_recursive("/src", true).expect("should succeed");
+        let entry = w.watch_entry("/src").expect("should succeed");
         assert!(entry.recursive);
     }
 
     #[test]
     fn test_watch_recursive_duplicate() {
         let mut w = new_file_watcher();
-        w.watch_recursive("/src", true).unwrap();
+        w.watch_recursive("/src", true).expect("should succeed");
         let r = w.watch_recursive("/src", false);
         assert!(matches!(r, Err(WatchError::AlreadyWatched(_))));
     }
@@ -742,9 +742,9 @@ mod tests {
     #[test]
     fn test_update_recursive() {
         let mut w = new_file_watcher();
-        w.watch_recursive("/src", false).unwrap();
-        w.update_recursive("/src", true).unwrap();
-        assert!(w.watch_entry("/src").unwrap().recursive);
+        w.watch_recursive("/src", false).expect("should succeed");
+        w.update_recursive("/src", true).expect("should succeed");
+        assert!(w.watch_entry("/src").expect("should succeed").recursive);
     }
 
     #[test]
@@ -857,7 +857,7 @@ mod tests {
         });
         w.inject_event(FsEvent::Created("/a".to_string()));
         let _ = w.flush_batches();
-        let locked = seen.lock().unwrap();
+        let locked = seen.lock().expect("should succeed");
         assert_eq!(locked.len(), 1);
         assert_eq!(locked[0], 1);
     }
@@ -878,7 +878,7 @@ mod tests {
     #[test]
     fn test_inject_unfiltered_bypasses_glob() {
         let mut w = new_file_watcher();
-        w.add_glob_filter("*.rs").unwrap();
+        w.add_glob_filter("*.rs").expect("should succeed");
         w.inject_event_unfiltered(FsEvent::Modified("main.py".to_string()));
         assert_eq!(w.drain_events().len(), 1);
     }
@@ -955,8 +955,8 @@ mod tests {
     #[test]
     fn test_multiple_glob_filters() {
         let mut w = new_file_watcher();
-        w.add_glob_filter("*.rs").unwrap();
-        w.add_glob_filter("*.toml").unwrap();
+        w.add_glob_filter("*.rs").expect("should succeed");
+        w.add_glob_filter("*.toml").expect("should succeed");
         assert_eq!(w.glob_filter_count(), 2);
         assert!(w.passes_glob_filter("lib.rs"));
         assert!(w.passes_glob_filter("Cargo.toml"));

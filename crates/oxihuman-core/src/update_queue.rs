@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Ordered update queue: items enqueued with a priority, drained in order.
@@ -121,7 +121,7 @@ mod tests {
         let mut q = new_update_queue();
         uq_enqueue(&mut q, 1, 10, "low");
         uq_enqueue(&mut q, 2, 1, "high");
-        let first = uq_dequeue(&mut q).unwrap();
+        let first = uq_dequeue(&mut q).expect("should succeed");
         assert_eq!(first.id, 2);
     }
 
@@ -171,7 +171,7 @@ mod tests {
     fn test_tag_preserved() {
         let mut q = new_update_queue();
         uq_enqueue(&mut q, 1, 0, "mytag");
-        let item = uq_dequeue(&mut q).unwrap();
+        let item = uq_dequeue(&mut q).expect("should succeed");
         assert_eq!(item.tag, "mytag".to_string());
     }
 }

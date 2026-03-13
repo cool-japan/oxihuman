@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Synchronous task executor stub for WASM-compatible task scheduling.
 
@@ -190,7 +190,7 @@ mod tests {
         exec_submit(&mut ex, "high", 10, 0);
         exec_tick(&mut ex);
         // "high" (priority=10) should be done
-        let high_id = ex.tasks.iter().find(|t| t.name == "high").unwrap().id;
+        let high_id = ex.tasks.iter().find(|t| t.name == "high").expect("should succeed").id;
         assert_eq!(exec_task_status(&ex, high_id), Some(&ExecTaskStatus::Done));
         assert_eq!(exec_done_count(&ex), 1);
     }

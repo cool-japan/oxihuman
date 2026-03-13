@@ -2,7 +2,7 @@
 
 Morphing engine for the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 5,624 passing | **API:** 8,968 public items | **Files:** 898 .rs files | **Version:** 0.1.0 | **Updated:** 2026-03-11
+**Status:** Stable | **Tests:** 5,865 passing | **Version:** 0.1.1 | **Updated:** 2026-03-13
 
 ---
 
@@ -20,7 +20,7 @@ The crate contains zero `todo!()`/`unimplemented!()` calls; every declared publi
 
 ```toml
 [dependencies]
-oxihuman-morph = "0.1.0"
+oxihuman-morph = "0.1.1"
 ```
 
 No feature flags are required; all subsystems are included by default.
@@ -72,7 +72,9 @@ let mesh = engine.generate()?;
 | `symmetry` | Mirror and symmetry operations — bilateral symmetry enforcement and asymmetry blending |
 | `target_lib` | Target library statistics — aggregated metadata and coverage reports for loaded targets |
 | `timeline` | Animation timeline — keyframe track management and playback cursor for morph animations |
-| `anim_retarget` | Animation retargeting — maps animation curves from a source rig to OxiHuman parameters |
+| `anim_retarget` | Animation retargeting — maps animation curves from a source rig to OxiHuman parameters; includes `BvhData`, `parse_bvh_text`, and `retarget_bvh_to_param_tracks` for BVH animation bridge (added v0.1.1) |
+| `fabrik_ik` | FABRIK inverse kinematics — `IkChain` with `solve_fabrik` and `solve_constrained_fabrik` for real-time IK solving (added v0.1.1) |
+| `secondary_motion` | XPBD secondary motion — `SecondaryMotionSystem`, `XpbdParticle`, and `SecondaryConstraint` for physics-driven secondary animation (added v0.1.1) |
 | `mutation_engine` | Morphological mutation — stochastic perturbation of parameters for generative diversity |
 
 ---
@@ -104,7 +106,7 @@ No thread-pool configuration is required; rayon's global pool is used by default
 
 ## Stability
 
-All public items follow semantic versioning. The 0.1.0 release is considered stable for downstream consumption within the OxiHuman workspace. Breaking changes will be accompanied by a minor-version bump until a 1.0 release is declared.
+All public items follow semantic versioning. The 0.1.1 release is considered stable for downstream consumption within the OxiHuman workspace. Breaking changes will be accompanied by a minor-version bump until a 1.0 release is declared.
 
 ---
 

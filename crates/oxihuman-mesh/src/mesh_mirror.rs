@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Mesh mirroring and symmetrization operations.
 //!
@@ -582,7 +582,7 @@ mod tests {
         let p = [3.0f32, 4.0, 5.0];
         let flipped = MirrorAxis::X.flip(p);
         assert_eq!(flipped, [-3.0, 4.0, 5.0]);
-        fs::write("/tmp/test_mirror_axis_flip_x.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_axis_flip_x.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -590,7 +590,7 @@ mod tests {
         let p = [3.0f32, 4.0, 5.0];
         let flipped = MirrorAxis::Y.flip(p);
         assert_eq!(flipped, [3.0, -4.0, 5.0]);
-        fs::write("/tmp/test_mirror_axis_flip_y.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_axis_flip_y.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -598,7 +598,7 @@ mod tests {
         let p = [3.0f32, 4.0, 5.0];
         let flipped = MirrorAxis::Z.flip(p);
         assert_eq!(flipped, [3.0, 4.0, -5.0]);
-        fs::write("/tmp/test_mirror_axis_flip_z.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_axis_flip_z.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -607,7 +607,7 @@ mod tests {
         assert_eq!(MirrorAxis::X.coord(p), 2.0);
         assert_eq!(MirrorAxis::Y.coord(p), 3.0);
         assert_eq!(MirrorAxis::Z.coord(p), 4.0);
-        fs::write("/tmp/test_mirror_axis_coord.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_axis_coord.txt", "ok").expect("should succeed");
     }
 
     // ── flip_positions / flip_normals_axis / reverse_winding ─────────────
@@ -618,7 +618,7 @@ mod tests {
         flip_positions(&mut positions, MirrorAxis::X);
         assert_eq!(positions[0], [-1.0, 2.0, 3.0]);
         assert_eq!(positions[1], [1.0, 0.0, 0.5]);
-        fs::write("/tmp/test_flip_positions_x.txt", "ok").unwrap();
+        fs::write("/tmp/test_flip_positions_x.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -627,7 +627,7 @@ mod tests {
         flip_normals_axis(&mut normals, MirrorAxis::Y);
         assert!((normals[0][1] - (-1.0)).abs() < 1e-6);
         assert!((normals[1][1] - 0.5).abs() < 1e-6);
-        fs::write("/tmp/test_flip_normals_axis_y.txt", "ok").unwrap();
+        fs::write("/tmp/test_flip_normals_axis_y.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -635,7 +635,7 @@ mod tests {
         let mut indices = vec![0u32, 1, 2, 3, 4, 5];
         reverse_winding(&mut indices);
         assert_eq!(indices, vec![0, 2, 1, 3, 5, 4]);
-        fs::write("/tmp/test_reverse_winding.txt", "ok").unwrap();
+        fs::write("/tmp/test_reverse_winding.txt", "ok").expect("should succeed");
     }
 
     // ── mirror_copy ───────────────────────────────────────────────────────
@@ -652,7 +652,7 @@ mod tests {
                 "Y should be unchanged"
             );
         }
-        fs::write("/tmp/test_mirror_copy_x.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_copy_x.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -660,7 +660,7 @@ mod tests {
         let mesh = make_symmetric_quad();
         let copy = mirror_copy(&mesh, MirrorAxis::Z);
         assert_eq!(copy.indices.len(), mesh.indices.len());
-        fs::write("/tmp/test_mirror_copy_face_count.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_copy_face_count.txt", "ok").expect("should succeed");
     }
 
     // ── mirror_mesh ───────────────────────────────────────────────────────
@@ -678,7 +678,7 @@ mod tests {
         // Original has 1 triangle (3 indices), mirrored adds another → 6 total
         assert_eq!(result.mesh.indices.len(), mesh.indices.len() * 2);
         assert_eq!(result.original_vertex_count, mesh.positions.len());
-        fs::write("/tmp/test_mirror_mesh_doubles_faces.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_mesh_doubles_faces.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -693,7 +693,7 @@ mod tests {
         let result = mirror_mesh(&mesh, &config);
         // Verts at x=0 should be welded
         assert!(result.welded_vertex_count > 0, "Expected some welded verts");
-        fs::write("/tmp/test_mirror_mesh_welds.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_mesh_welds.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -714,7 +714,7 @@ mod tests {
             result.mesh.positions.len(),
             result.original_vertex_count + result.mirrored_vertex_count
         );
-        fs::write("/tmp/test_mirror_mesh_result_fields.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_mesh_result_fields.txt", "ok").expect("should succeed");
     }
 
     // ── extract_half ──────────────────────────────────────────────────────
@@ -727,7 +727,7 @@ mod tests {
         for p in &half.positions {
             assert!(p[0] >= 0.0, "positive half should have x >= 0");
         }
-        fs::write("/tmp/test_extract_positive_half.txt", "ok").unwrap();
+        fs::write("/tmp/test_extract_positive_half.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -737,7 +737,7 @@ mod tests {
         for p in &half.positions {
             assert!(p[0] <= 0.0, "negative half should have x <= 0");
         }
-        fs::write("/tmp/test_extract_negative_half.txt", "ok").unwrap();
+        fs::write("/tmp/test_extract_negative_half.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -745,7 +745,7 @@ mod tests {
         let mesh = make_empty_mesh();
         let half = extract_half(&mesh, MirrorAxis::Y, true);
         assert!(half.positions.is_empty());
-        fs::write("/tmp/test_extract_half_empty.txt", "ok").unwrap();
+        fs::write("/tmp/test_extract_half_empty.txt", "ok").expect("should succeed");
     }
 
     // ── symmetry_error ────────────────────────────────────────────────────
@@ -758,7 +758,7 @@ mod tests {
             err < 1e-4,
             "Symmetric quad should have near-zero error, got {err}"
         );
-        fs::write("/tmp/test_symmetry_error_perfect.txt", "ok").unwrap();
+        fs::write("/tmp/test_symmetry_error_perfect.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -767,7 +767,7 @@ mod tests {
         let err = symmetry_error(&mesh, MirrorAxis::X);
         // No vertex at x=-1, so error should be non-zero
         assert!(err > 0.0, "Asymmetric mesh should have non-zero error");
-        fs::write("/tmp/test_symmetry_error_asymmetric.txt", "ok").unwrap();
+        fs::write("/tmp/test_symmetry_error_asymmetric.txt", "ok").expect("should succeed");
     }
 
     // ── find_symmetry_pairs ───────────────────────────────────────────────
@@ -783,7 +783,7 @@ mod tests {
             "Expected 2 symmetry pairs, got {}",
             pairs.len()
         );
-        fs::write("/tmp/test_find_symmetry_pairs.txt", "ok").unwrap();
+        fs::write("/tmp/test_find_symmetry_pairs.txt", "ok").expect("should succeed");
     }
 
     // ── symmetrize_mesh ───────────────────────────────────────────────────
@@ -793,7 +793,7 @@ mod tests {
         let mesh = make_symmetric_quad();
         let sym = symmetrize_mesh(&mesh, MirrorAxis::X, 0.1);
         assert_eq!(sym.positions.len(), mesh.positions.len());
-        fs::write("/tmp/test_symmetrize_preserves_count.txt", "ok").unwrap();
+        fs::write("/tmp/test_symmetrize_preserves_count.txt", "ok").expect("should succeed");
     }
 
     #[test]
@@ -808,7 +808,7 @@ mod tests {
             after <= before + 1e-4,
             "Symmetrize should not increase error; before={before}, after={after}"
         );
-        fs::write("/tmp/test_symmetrize_reduces_error.txt", "ok").unwrap();
+        fs::write("/tmp/test_symmetrize_reduces_error.txt", "ok").expect("should succeed");
     }
 
     // ── MirrorConfig default ──────────────────────────────────────────────
@@ -820,6 +820,6 @@ mod tests {
         assert!((cfg.merge_threshold - 0.001).abs() < 1e-7);
         assert!(cfg.flip_normals);
         assert_eq!(cfg.offset, 0.0);
-        fs::write("/tmp/test_mirror_config_default.txt", "ok").unwrap();
+        fs::write("/tmp/test_mirror_config_default.txt", "ok").expect("should succeed");
     }
 }

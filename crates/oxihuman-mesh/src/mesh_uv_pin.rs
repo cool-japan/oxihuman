@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! UV vertex pinning for relaxation algorithms.
@@ -98,7 +98,7 @@ mod tests {
     fn get_pin_uv_returns_coordinate() {
         let mut s = new_uv_pin_set();
         pin_vertex(&mut s, 1, [0.25, 0.75]);
-        let uv = get_pin_uv(&s, 1).unwrap();
+        let uv = get_pin_uv(&s, 1).expect("should succeed");
         assert!((uv[0] - 0.25).abs() < 1e-6 /* U correct */);
         assert!((uv[1] - 0.75).abs() < 1e-6 /* V correct */);
     }
@@ -109,7 +109,7 @@ mod tests {
         pin_vertex(&mut s, 2, [0.0, 0.0]);
         pin_vertex(&mut s, 2, [1.0, 1.0]);
         assert_eq!(pin_count(&s), 1 /* no duplicate */);
-        let uv = get_pin_uv(&s, 2).unwrap();
+        let uv = get_pin_uv(&s, 2).expect("should succeed");
         assert!((uv[0] - 1.0).abs() < 1e-6 /* updated U */);
     }
 

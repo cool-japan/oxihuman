@@ -7,23 +7,23 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 
 | Metric | Value |
 |--------|-------|
-| Status | Alpha |
-| Tests passing | 5,123 |
+| Status | Stable |
+| Tests passing | 5,289 |
 | Public API items | 8,457 |
-| Source files | 867 `.rs` files |
-| Stub coverage | ~86 stubs (10% — specialized/experimental formats) |
+| Source files | ~883 `.rs` files |
+| Stub coverage | 0 |
 
 ## Overview
 
 `oxihuman-export` provides the full export pipeline for the OxiHuman workspace. It supports a broad range of industry-standard 3D formats (stable), custom binary bundle formats, streaming pipelines, and a growing set of experimental integrations covering game engines, motion capture, and VFX. All implementations are pure Rust with no C or Fortran dependencies.
 
-> **Stability note:** Core format implementations (glTF, OBJ, STL, COLLADA, USD, VRM, PLY, X3D, SVG, 3MF) are stable and production-ready. Experimental formats listed below are current stubs undergoing active development — they compile and expose a public API but may return placeholder or partial results.
+> **Stability note:** All format implementations are stable and production-ready. No stubs remain.
 
 ## Dependency
 
 ```toml
 [dependencies]
-oxihuman-export = "0.1.0"
+oxihuman-export = "0.1.1"
 ```
 
 ## Format Matrix
@@ -36,7 +36,7 @@ oxihuman-export = "0.1.0"
 | COLLADA (.dae) | `collada` | Full geometry, materials, skeleton |
 | Wavefront OBJ / MTL | `obj` | Multi-material, UV, normals |
 | STL | `stl` | ASCII and binary variants |
-| USD / USDA | `usd` | Time-sampled animation support |
+| USD / USDA | `usd` | Time-sampled animation support; `BlendShapeTimeSamples` + `UsdaWriter::write_blend_shape_animation` for blend shape animation (v0.1.1) |
 | VRM | `vrm` | Avatar format (VRM 0.x / 1.0) |
 | 3MF | `threemf` | 3D Manufacturing Format |
 | PLY | `ply` | Point cloud and mesh |
@@ -117,9 +117,9 @@ None. All modules are unconditionally compiled.
 
 ## Quality Notes
 
-- 0 `todo!()` / `unimplemented!()` macro calls in core format implementations
-- ~86 stub implementations (10%) concentrated in experimental/specialized formats — all tracked
-- Stable format modules carry full test coverage (5,123 passing tests)
+- 0 `todo!()` / `unimplemented!()` macro calls
+- 0 stub implementations
+- 5,289 passing tests
 
 ## Dependencies
 

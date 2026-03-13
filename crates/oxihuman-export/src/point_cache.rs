@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Binary point cache export for vertex animation sequences.
 //!
@@ -277,10 +277,10 @@ mod tests {
     fn test_add_frame() {
         let mut cache = PointCache::new(2, 30.0);
         let frame = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
-        cache.add_frame(frame.clone()).unwrap();
+        cache.add_frame(frame.clone()).expect("should succeed");
         assert_eq!(cache.frame_count(), 1);
         assert_eq!(cache.header.frame_count, 1);
-        assert_eq!(cache.get_frame(0).unwrap(), &frame);
+        assert_eq!(cache.get_frame(0).expect("should succeed"), &frame);
     }
 
     #[test]
@@ -294,8 +294,8 @@ mod tests {
     #[test]
     fn test_duration() {
         let mut cache = PointCache::new(1, 25.0);
-        cache.add_frame(vec![[0.0, 0.0, 0.0]]).unwrap();
-        cache.add_frame(vec![[1.0, 1.0, 1.0]]).unwrap();
+        cache.add_frame(vec![[0.0, 0.0, 0.0]]).expect("should succeed");
+        cache.add_frame(vec![[1.0, 1.0, 1.0]]).expect("should succeed");
         // 2 frames / 25 fps = 0.08 s
         let expected = 2.0 / 25.0;
         assert!((cache.duration() - expected).abs() < 1e-6);
@@ -306,30 +306,30 @@ mod tests {
         let mut cache = PointCache::new(2, 24.0);
         let f0 = vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]];
         let f1 = vec![[0.0, 1.0, 0.0], [1.0, 1.0, 0.0]];
-        cache.add_frame(f0.clone()).unwrap();
-        cache.add_frame(f1.clone()).unwrap();
-        assert_eq!(cache.get_frame(0).unwrap(), &f0);
-        assert_eq!(cache.get_frame(1).unwrap(), &f1);
+        cache.add_frame(f0.clone()).expect("should succeed");
+        cache.add_frame(f1.clone()).expect("should succeed");
+        assert_eq!(cache.get_frame(0).expect("should succeed"), &f0);
+        assert_eq!(cache.get_frame(1).expect("should succeed"), &f1);
         assert!(cache.get_frame(2).is_none());
     }
 
     #[test]
     fn test_sample_exact_frame() {
         let mut cache = PointCache::new(1, 24.0);
-        cache.add_frame(vec![[0.0, 0.0, 0.0]]).unwrap();
-        cache.add_frame(vec![[2.0, 4.0, 6.0]]).unwrap();
-        let s0 = cache.sample(0.0).unwrap();
+        cache.add_frame(vec![[0.0, 0.0, 0.0]]).expect("should succeed");
+        cache.add_frame(vec![[2.0, 4.0, 6.0]]).expect("should succeed");
+        let s0 = cache.sample(0.0).expect("should succeed");
         assert_eq!(s0[0], [0.0, 0.0, 0.0]);
-        let s1 = cache.sample(1.0).unwrap();
+        let s1 = cache.sample(1.0).expect("should succeed");
         assert_eq!(s1[0], [2.0, 4.0, 6.0]);
     }
 
     #[test]
     fn test_sample_between_frames() {
         let mut cache = PointCache::new(1, 24.0);
-        cache.add_frame(vec![[0.0, 0.0, 0.0]]).unwrap();
-        cache.add_frame(vec![[2.0, 4.0, 6.0]]).unwrap();
-        let s = cache.sample(0.5).unwrap();
+        cache.add_frame(vec![[0.0, 0.0, 0.0]]).expect("should succeed");
+        cache.add_frame(vec![[2.0, 4.0, 6.0]]).expect("should succeed");
+        let s = cache.sample(0.5).expect("should succeed");
         let eps = 1e-5;
         assert!((s[0][0] - 1.0).abs() < eps);
         assert!((s[0][1] - 2.0).abs() < eps);
@@ -339,8 +339,8 @@ mod tests {
     #[test]
     fn test_sample_out_of_range() {
         let mut cache = PointCache::new(1, 24.0);
-        cache.add_frame(vec![[0.0, 0.0, 0.0]]).unwrap();
-        cache.add_frame(vec![[1.0, 1.0, 1.0]]).unwrap();
+        cache.add_frame(vec![[0.0, 0.0, 0.0]]).expect("should succeed");
+        cache.add_frame(vec![[1.0, 1.0, 1.0]]).expect("should succeed");
         assert!(cache.sample(-0.1).is_none());
         assert!(cache.sample(1.1).is_none());
     }
@@ -351,13 +351,13 @@ mod tests {
         let mut cache = PointCache::new(2, 30.0);
         cache
             .add_frame(vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
-            .unwrap();
+            .expect("should succeed");
         cache
             .add_frame(vec![[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]])
-            .unwrap();
+            .expect("should succeed");
 
-        export_point_cache(&cache, path).unwrap();
-        let loaded = load_point_cache(path).unwrap();
+        export_point_cache(&cache, path).expect("should succeed");
+        let loaded = load_point_cache(path).expect("should succeed");
 
         assert_eq!(loaded.header.vertex_count, 2);
         assert_eq!(loaded.header.frame_count, 2);
@@ -372,10 +372,10 @@ mod tests {
         let mut cache = PointCache::new(3, 60.0);
         cache
             .add_frame(vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-            .unwrap();
-        export_point_cache(&cache, path).unwrap();
+            .expect("should succeed");
+        export_point_cache(&cache, path).expect("should succeed");
 
-        let hdr = validate_point_cache_file(path).unwrap();
+        let hdr = validate_point_cache_file(path).expect("should succeed");
         assert_eq!(hdr.vertex_count, 3);
         assert_eq!(hdr.frame_count, 1);
         assert_eq!(hdr.fps, 60.0);
@@ -385,7 +385,7 @@ mod tests {
     fn test_validate_bad_magic() {
         let path = std::path::Path::new("/tmp/test_validate_bad_magic.opc");
         // Write a file with wrong magic
-        std::fs::write(path, b"BAAD\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00").unwrap();
+        std::fs::write(path, b"BAAD\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00").expect("should succeed");
         let result = validate_point_cache_file(path);
         assert!(result.is_err());
         let msg = format!("{}", result.unwrap_err());
@@ -396,7 +396,7 @@ mod tests {
     fn test_mesh_sequence_to_cache() {
         let m0 = make_mesh(vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]]);
         let m1 = make_mesh(vec![[0.0, 1.0, 0.0], [1.0, 1.0, 0.0]]);
-        let cache = mesh_sequence_to_cache(&[m0, m1], 24.0).unwrap();
+        let cache = mesh_sequence_to_cache(&[m0, m1], 24.0).expect("should succeed");
         assert_eq!(cache.vertex_count(), 2);
         assert_eq!(cache.frame_count(), 2);
         assert_eq!(cache.header.fps, 24.0);
@@ -414,8 +414,8 @@ mod tests {
     fn test_cache_frame_to_positions() {
         let mut cache = PointCache::new(2, 24.0);
         let f0 = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
-        cache.add_frame(f0.clone()).unwrap();
-        let positions = cache_frame_to_positions(&cache, 0).unwrap();
+        cache.add_frame(f0.clone()).expect("should succeed");
+        let positions = cache_frame_to_positions(&cache, 0).expect("should succeed");
         assert_eq!(positions, f0);
         assert!(cache_frame_to_positions(&cache, 99).is_err());
     }

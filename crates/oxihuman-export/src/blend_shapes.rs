@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::Result;
 use bytemuck::cast_slice;
@@ -254,7 +254,7 @@ mod tests {
         let path = std::path::Path::new("/tmp/test_blend_shapes_export.glb");
         export_glb_blend_shapes(&mesh, &shapes, path).expect("export failed");
         assert!(path.exists(), "GLB file was not created");
-        let meta = std::fs::metadata(path).unwrap();
+        let meta = std::fs::metadata(path).expect("should succeed");
         assert!(meta.len() > 0, "GLB file is empty");
         std::fs::remove_file(path).ok();
     }
@@ -266,7 +266,7 @@ mod tests {
         let path = std::path::Path::new("/tmp/test_blend_shapes_header.glb");
         export_glb_blend_shapes(&mesh, &shapes, path).expect("export failed");
 
-        let bytes = std::fs::read(path).unwrap();
+        let bytes = std::fs::read(path).expect("should succeed");
         assert!(bytes.len() >= 4, "file too short");
         assert_eq!(
             &bytes[0..4],
@@ -292,7 +292,7 @@ mod tests {
         let path = std::path::Path::new("/tmp/test_blend_shapes_empty.glb");
         export_glb_blend_shapes(&mesh, &[], path).expect("empty shapes export failed");
         assert!(path.exists());
-        let bytes = std::fs::read(path).unwrap();
+        let bytes = std::fs::read(path).expect("should succeed");
         assert!(bytes.len() >= 12, "GLB too short");
         std::fs::remove_file(path).ok();
     }

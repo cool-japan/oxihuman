@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Center of mass (CoM) trajectory planner stub.
@@ -130,7 +130,7 @@ mod tests {
             y: 2.0,
             z: 3.0,
         });
-        let p = sample_com_trajectory(&t, 5.0).unwrap();
+        let p = sample_com_trajectory(&t, 5.0).expect("should succeed");
         assert_eq!(p, [1.0, 2.0, 3.0]);
     }
 
@@ -145,7 +145,7 @@ mod tests {
     fn test_linear_trajectory_start() {
         /* first waypoint is at start */
         let traj = linear_com_trajectory([1.0, 2.0, 3.0], [4.0, 5.0, 6.0], 5, 1.0);
-        let p = sample_com_trajectory(&traj, 0.0).unwrap();
+        let p = sample_com_trajectory(&traj, 0.0).expect("should succeed");
         assert!((p[0] - 1.0).abs() < 1e-4);
     }
 
@@ -153,7 +153,7 @@ mod tests {
     fn test_linear_trajectory_end() {
         /* last waypoint is at end */
         let traj = linear_com_trajectory([0.0; 3], [1.0, 0.0, 0.0], 5, 1.0);
-        let p = sample_com_trajectory(&traj, 1.0).unwrap();
+        let p = sample_com_trajectory(&traj, 1.0).expect("should succeed");
         assert!((p[0] - 1.0).abs() < 1e-4);
     }
 
@@ -161,7 +161,7 @@ mod tests {
     fn test_sample_midpoint() {
         /* midpoint interpolation */
         let traj = linear_com_trajectory([0.0, 0.0, 0.0], [2.0, 0.0, 0.0], 3, 2.0);
-        let p = sample_com_trajectory(&traj, 1.0).unwrap();
+        let p = sample_com_trajectory(&traj, 1.0).expect("should succeed");
         assert!((p[0] - 1.0).abs() < 0.01);
     }
 

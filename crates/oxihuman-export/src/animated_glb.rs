@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -593,7 +593,7 @@ mod tests {
             scales: None,
         };
         assert_eq!(kf.times.len(), 3);
-        assert_eq!(kf.rotations.as_ref().unwrap().len(), 3);
+        assert_eq!(kf.rotations.as_ref().expect("should succeed").len(), 3);
     }
 
     #[test]

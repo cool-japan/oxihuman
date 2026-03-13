@@ -312,7 +312,7 @@ mod tests {
         let id = add_geo_node(&mut graph, "Math", GeoNodeType::Math);
         let node = get_geo_node(&graph, id);
         assert!(node.is_some());
-        assert_eq!(node.unwrap().name, "Math");
+        assert_eq!(node.expect("should succeed").name, "Math");
     }
 
     #[test]

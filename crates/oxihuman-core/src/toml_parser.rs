@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Minimal TOML parser stub.
@@ -168,7 +168,9 @@ mod tests {
     #[test]
     fn test_parse_integer_line() {
         /* integer value parsed correctly */
-        let r = parse_line("port = 8080", 1).unwrap().unwrap();
+        let r = parse_line("port = 8080", 1)
+            .expect("should succeed")
+            .expect("should succeed");
         assert_eq!(r.0, "port");
         assert_eq!(r.1, TomlValue::Integer(8080));
     }
@@ -176,41 +178,47 @@ mod tests {
     #[test]
     fn test_parse_string_line() {
         /* quoted string parsed correctly */
-        let r = parse_line("name = \"hello\"", 1).unwrap().unwrap();
+        let r = parse_line("name = \"hello\"", 1)
+            .expect("should succeed")
+            .expect("should succeed");
         assert_eq!(r.1, TomlValue::String("hello".to_string()));
     }
 
     #[test]
     fn test_parse_boolean() {
         /* boolean true/false */
-        let r = parse_line("flag = true", 1).unwrap().unwrap();
+        let r = parse_line("flag = true", 1)
+            .expect("should succeed")
+            .expect("should succeed");
         assert_eq!(r.1, TomlValue::Boolean(true));
     }
 
     #[test]
     fn test_comment_line_skipped() {
         /* comment lines return None */
-        assert!(parse_line("# comment", 1).unwrap().is_none());
+        assert!(parse_line("# comment", 1)
+            .expect("should succeed")
+            .is_none());
     }
 
     #[test]
     fn test_get_integer() {
         /* get_integer helper */
-        let doc = parse_toml("workers = 4\n").unwrap();
+        let doc = parse_toml("workers = 4\n").expect("should succeed");
         assert_eq!(get_integer(&doc, "workers"), Some(4));
     }
 
     #[test]
     fn test_get_string_helper() {
         /* get_string helper */
-        let doc = parse_toml("app = \"oxihuman\"\n").unwrap();
+        let doc = parse_toml("app = \"oxihuman\"\n").expect("should succeed");
         assert_eq!(get_string(&doc, "app"), Some("oxihuman"));
     }
 
     #[test]
     fn test_keys() {
         /* keys returns all key names */
-        let doc = parse_toml("a = 1\nb = 2\n").unwrap();
+        let doc = parse_toml("a = 1\nb = 2\n").expect("should succeed");
         let keys = doc.keys();
         assert_eq!(keys.len(), 2);
     }

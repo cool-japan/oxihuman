@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Multi-body dynamics system with explicit joint constraints.
 //!
@@ -342,7 +342,7 @@ mod tests {
         let sys = make_two_body_system();
         let b = mbd_find_body(&sys, 1);
         assert!(b.is_some());
-        assert_eq!(b.unwrap().id, 1);
+        assert_eq!(b.expect("should succeed").id, 1);
     }
 
     #[test]

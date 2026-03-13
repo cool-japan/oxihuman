@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// An elastic surface modeled as a grid of mass-spring nodes.
@@ -133,7 +133,7 @@ mod tests {
     #[test]
     fn test_position() {
         let s = ElasticSurface::new(2, 2, 1.0, 100.0, 10.0);
-        let p = s.position(0).unwrap();
+        let p = s.position(0).expect("should succeed");
         assert!((p[0]).abs() < 1e-6);
     }
 
@@ -156,7 +156,7 @@ mod tests {
         let mut s = ElasticSurface::new(2, 2, 1.0, 100.0, 10.0);
         s.set_position(0, [0.0, 1.0, 0.0]);
         s.step(0.01);
-        let p = s.position(0).unwrap();
+        let p = s.position(0).expect("should succeed");
         assert!(p[1] < 1.0);
     }
 
@@ -165,7 +165,7 @@ mod tests {
         let mut s = ElasticSurface::new(2, 2, 1.0, 100.0, 10.0);
         s.apply_force(0, [0.0, 10.0, 0.0], 0.1);
         s.step(0.01);
-        let p = s.position(0).unwrap();
+        let p = s.position(0).expect("should succeed");
         assert!(p[1] > 0.0);
     }
 

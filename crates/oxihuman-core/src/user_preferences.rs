@@ -183,7 +183,7 @@ mod tests {
         set_pref(&mut p, "key1", PrefValue::Bool(true), "general");
         let pref = get_pref(&p, "key1");
         assert!(pref.is_some());
-        assert_eq!(pref.unwrap().value, PrefValue::Bool(true));
+        assert_eq!(pref.expect("should succeed").value, PrefValue::Bool(true));
     }
 
     #[test]

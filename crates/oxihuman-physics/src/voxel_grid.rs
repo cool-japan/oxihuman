@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Voxel grid for collision detection and SDF approximation.
 //!
@@ -319,7 +319,7 @@ mod tests {
         let mut grid = small_grid();
         let v = Voxel { occupied: true, sdf: -1.0 };
         assert!(set_voxel(&mut grid, [1, 2, 3], v));
-        let got = get_voxel(&grid, [1, 2, 3]).unwrap();
+        let got = get_voxel(&grid, [1, 2, 3]).expect("should succeed");
         assert!(got.occupied);
         assert!((got.sdf + 1.0).abs() < 1e-6);
     }
@@ -363,7 +363,7 @@ mod tests {
     #[test]
     fn test_world_to_grid_centre() {
         let grid = small_grid();
-        let idx = world_to_grid(&grid, [1.5, 2.5, 0.5]).unwrap();
+        let idx = world_to_grid(&grid, [1.5, 2.5, 0.5]).expect("should succeed");
         assert_eq!(idx, [1, 2, 0]);
     }
 
@@ -413,7 +413,7 @@ mod tests {
         let mut grid = small_grid();
         set_voxel(&mut grid, [0, 0, 0], Voxel { occupied: true, sdf: 0.0 });
         compute_sdf(&mut grid);
-        let v = get_voxel(&grid, [0, 0, 0]).unwrap();
+        let v = get_voxel(&grid, [0, 0, 0]).expect("should succeed");
         assert!(v.sdf <= 0.0);
     }
 
@@ -422,7 +422,7 @@ mod tests {
         let mut grid = small_grid();
         set_voxel(&mut grid, [0, 0, 0], Voxel { occupied: true, sdf: 0.0 });
         compute_sdf(&mut grid);
-        let v = get_voxel(&grid, [3, 3, 3]).unwrap();
+        let v = get_voxel(&grid, [3, 3, 3]).expect("should succeed");
         assert!(v.sdf > 0.0);
     }
 

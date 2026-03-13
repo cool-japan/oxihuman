@@ -247,7 +247,7 @@ mod tests {
         let q = make_query();
         let sp = proximity_closest_surface_point(&q, [0.5, 0.5, 0.5]);
         assert!(sp.is_some());
-        let sp = sp.unwrap();
+        let sp = sp.expect("should succeed");
         assert!(sp.distance >= 0.0);
     }
 

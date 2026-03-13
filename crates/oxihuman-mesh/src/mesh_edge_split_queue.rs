@@ -43,12 +43,12 @@ mod tests {
     use super::*;
     #[test] fn test_new() { assert!(split_is_empty(&new_split_queue())); }
     #[test] fn test_push() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); assert_eq!(split_queue_len(&q), 1); }
-    #[test] fn test_pop_order() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); push_split(&mut q, (1,2), 3.0); let e = pop_split(&mut q).unwrap(); assert!((e.length - 3.0).abs() < 1e-6); }
+    #[test] fn test_pop_order() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); push_split(&mut q, (1,2), 3.0); let e = pop_split(&mut q).expect("should succeed"); assert!((e.length - 3.0).abs() < 1e-6); }
     #[test] fn test_peek() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); assert!(peek_split(&q).is_some()); }
     #[test] fn test_clear() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); clear_split_queue(&mut q); assert!(split_is_empty(&q)); }
     #[test] fn test_pop_empty() { assert!(pop_split(&mut new_split_queue()).is_none()); }
     #[test] fn test_json() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); assert!(split_queue_to_json(&q).contains("queue")); }
     #[test] fn test_multi() { let mut q = new_split_queue(); for i in 0..5 { push_split(&mut q, (i,i+1), i as f32); } assert_eq!(split_queue_len(&q), 5); }
-    #[test] fn test_sorted() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); push_split(&mut q, (1,2), 5.0); push_split(&mut q, (2,3), 3.0); assert!((peek_split(&q).unwrap().length - 5.0).abs() < 1e-6); }
+    #[test] fn test_sorted() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); push_split(&mut q, (1,2), 5.0); push_split(&mut q, (2,3), 3.0); assert!((peek_split(&q).expect("should succeed").length - 5.0).abs() < 1e-6); }
     #[test] fn test_pop_all() { let mut q = new_split_queue(); push_split(&mut q, (0,1), 1.0); pop_split(&mut q); assert!(split_is_empty(&q)); }
 }

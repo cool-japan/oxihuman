@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Vertex animation frame storage — stores per-frame vertex position arrays.
@@ -150,7 +150,7 @@ mod tests {
         let mut seq = VertexAnimSequence::new(24.0, 5);
         seq.push_frame(make_frame(0, 0.0, 5));
         seq.push_frame(make_frame(1, 1.0, 5));
-        let f = seq.frame_at_time(0.4).unwrap();
+        let f = seq.frame_at_time(0.4).expect("should succeed");
         assert_eq!(f.frame_index, 0);
     }
 

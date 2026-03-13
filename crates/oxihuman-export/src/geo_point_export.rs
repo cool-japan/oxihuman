@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export geometry points (scatter / point cloud metadata).
@@ -121,7 +121,7 @@ mod tests {
         let mut e = new_geo_point_export();
         add_geo_point(&mut e, sample_point(0.0));
         add_geo_point(&mut e, sample_point(5.0));
-        let (mn, mx) = geo_point_bounds(&e).unwrap();
+        let (mn, mx) = geo_point_bounds(&e).expect("should succeed");
         assert!(mn[0].abs() < 1e-5);
         assert!((mx[0] - 5.0).abs() < 1e-5);
     }

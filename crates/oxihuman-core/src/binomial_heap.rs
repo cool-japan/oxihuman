@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Binomial heap stub — min-heap composed of binomial trees.
@@ -151,7 +151,7 @@ mod tests {
         let mut h: BinomialHeap<u32, u32> = BinomialHeap::new();
         h.insert(5, 50);
         h.insert(2, 20);
-        let (k, _) = h.peek_min().unwrap();
+        let (k, _) = h.peek_min().expect("should succeed");
         assert_eq!(*k, 2 /* min key */);
     }
 
@@ -160,7 +160,7 @@ mod tests {
         let mut h: BinomialHeap<u32, u32> = BinomialHeap::new();
         h.insert(8, 80);
         h.insert(3, 30);
-        let (k, v) = h.extract_min().unwrap();
+        let (k, v) = h.extract_min().expect("should succeed");
         assert_eq!(k, 3 /* min extracted */);
         assert_eq!(v, 30);
     }
@@ -199,7 +199,7 @@ mod tests {
         a.insert(10, 10);
         b.insert(4, 4);
         a.merge_with(b);
-        let (k, _) = a.peek_min().unwrap();
+        let (k, _) = a.peek_min().expect("should succeed");
         assert_eq!(*k, 4 /* merged min */);
     }
 
@@ -221,6 +221,9 @@ mod tests {
         for i in (0u32..32).rev() {
             h.insert(i, i);
         }
-        assert_eq!(h.extract_min().unwrap().0, 0 /* global minimum */);
+        assert_eq!(
+            h.extract_min().expect("should succeed").0,
+            0 /* global minimum */
+        );
     }
 }

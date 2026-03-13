@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Particle trail/ribbon renderer.
 
@@ -160,7 +160,7 @@ mod tests {
         trail_add_point(&mut t, [1.0, 2.0, 3.0], 1.0);
         let p = trail_get_point(&t, 0);
         assert!(p.is_some());
-        assert!((p.unwrap().position[0] - 1.0).abs() < 1e-6);
+        assert!((p.expect("should succeed").position[0] - 1.0).abs() < 1e-6);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Type name registry — maps type IDs to metadata.
 
@@ -101,7 +101,7 @@ mod tests {
     fn test_register_and_get_by_id() {
         let mut reg = new_type_info_registry();
         type_info_register(&mut reg, make_info(1, "Foo", 8));
-        let info = type_info_get_by_id(&reg, 1).unwrap();
+        let info = type_info_get_by_id(&reg, 1).expect("should succeed");
         assert_eq!(info.name, "Foo");
         assert_eq!(info.size_bytes, 8);
     }
@@ -110,7 +110,7 @@ mod tests {
     fn test_get_by_name() {
         let mut reg = new_type_info_registry();
         type_info_register(&mut reg, make_info(2, "Bar", 4));
-        let info = type_info_get_by_name(&reg, "Bar").unwrap();
+        let info = type_info_get_by_name(&reg, "Bar").expect("should succeed");
         assert_eq!(info.id, 2);
     }
 
@@ -142,7 +142,7 @@ mod tests {
     fn test_remove() {
         let mut reg = new_type_info_registry();
         type_info_register(&mut reg, make_info(5, "Rem", 16));
-        let removed = type_info_remove(&mut reg, 5).unwrap();
+        let removed = type_info_remove(&mut reg, 5).expect("should succeed");
         assert_eq!(removed.name, "Rem");
         assert_eq!(type_info_count(&reg), 0);
         assert!(type_info_get_by_name(&reg, "Rem").is_none());

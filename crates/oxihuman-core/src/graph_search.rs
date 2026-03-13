@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! BFS/DFS graph search on adjacency list graphs.
@@ -202,9 +202,9 @@ mod tests {
         g.add_undirected(0, 1);
         g.add_undirected(1, 2);
         g.add_undirected(2, 3);
-        let path = g.shortest_path(0, 3).unwrap();
+        let path = g.shortest_path(0, 3).expect("should succeed");
         assert_eq!(path[0], 0);
-        assert_eq!(*path.last().unwrap(), 3);
+        assert_eq!(*path.last().expect("should succeed"), 3);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Predefined ParamState presets for common body types.
 
@@ -93,7 +93,7 @@ mod tests {
     #[test]
     fn all_params_in_range() {
         for name in BodyPreset::all_names() {
-            let preset = BodyPreset::from_name(name).unwrap();
+            let preset = BodyPreset::from_name(name).expect("should succeed");
             let p = preset.params();
             assert!(
                 (0.0..=1.0).contains(&p.height),

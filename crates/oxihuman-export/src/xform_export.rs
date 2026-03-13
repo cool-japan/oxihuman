@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export per-node transform data (position, rotation, scale) as JSON or CSV.
 
@@ -214,7 +214,7 @@ mod tests {
         xform_add_node(&mut r, sample_node("spine"));
         let found = xform_node_by_name(&r, "spine");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().name, "spine");
+        assert_eq!(found.expect("should succeed").name, "spine");
     }
 
     #[test]

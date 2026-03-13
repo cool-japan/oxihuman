@@ -160,7 +160,7 @@ mod tests {
     fn test_set_and_get_float() {
         let mut store = make_store();
         storage_set(&mut store, "pi", StoredValue::Float(std::f64::consts::PI));
-        let v = storage_get_float(&store, "pi").unwrap();
+        let v = storage_get_float(&store, "pi").expect("should succeed");
         assert!((v - std::f64::consts::PI).abs() < 1e-9);
     }
 
@@ -243,7 +243,7 @@ mod tests {
     fn test_bytes_storage() {
         let mut store = make_store();
         storage_set(&mut store, "data", StoredValue::Bytes(vec![1, 2, 3]));
-        let v = storage_get(&store, "data").unwrap();
+        let v = storage_get(&store, "data").expect("should succeed");
         assert_eq!(storage_value_type_name(v), "bytes");
         let json = storage_to_json(&store);
         assert!(json.contains("3 bytes"));

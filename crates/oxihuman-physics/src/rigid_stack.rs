@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Stack of rigid boxes with stacking stability analysis.
 
@@ -190,7 +190,7 @@ mod tests {
     #[test]
     fn pop_box_removes_top() {
         let mut s = simple_stack();
-        let top = rs_pop_box(&mut s).unwrap();
+        let top = rs_pop_box(&mut s).expect("should succeed");
         assert_eq!(top.id, 3);
         assert_eq!(rs_count(&s), 2);
     }

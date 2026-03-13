@@ -8,10 +8,10 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 | Metric | Value |
 |--------|-------|
 | Status | Stable |
-| Tests passing | 5,677 |
+| Tests passing | 5,715 |
 | Public API items | 7,381 |
-| Source files | 892 `.rs` files |
-| Stub coverage | ~22 stubs (2.5%) |
+| Source files | 898 `.rs` files |
+| Stub coverage | 0 stubs |
 
 ## Overview
 
@@ -21,7 +21,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 
 ```toml
 [dependencies]
-oxihuman-mesh = "0.1.0"
+oxihuman-mesh = "0.1.1"
 ```
 
 ## Module Reference
@@ -111,7 +111,7 @@ None. All modules are unconditionally compiled.
 ## Quality Notes
 
 - 0 `todo!()` / `unimplemented!()` macro calls in the codebase
-- ~22 stub implementations (2.5% of public API surface) — identified and tracked
+- 0 stub implementations
 - All public items carry doc comments
 
 ## Dependencies

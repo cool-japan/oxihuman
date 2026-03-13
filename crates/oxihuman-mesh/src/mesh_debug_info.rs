@@ -146,7 +146,7 @@ mod tests {
         let p = vec![[1.0, 2.0, 3.0]];
         let info = vertex_info_at(&p, 0);
         assert!(info.is_some());
-        assert!(info.unwrap().contains("1.0000"));
+        assert!(info.expect("should succeed").contains("1.0000"));
     }
 
     #[test]
@@ -168,7 +168,7 @@ mod tests {
         let i = vec![[0u32, 1, 2]];
         let info = edge_info_at(&p, &i, 0, 0);
         assert!(info.is_some());
-        assert!(info.unwrap().contains("len="));
+        assert!(info.expect("should succeed").contains("len="));
     }
 
     #[test]

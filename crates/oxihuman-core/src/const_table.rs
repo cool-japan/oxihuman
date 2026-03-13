@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A read-only lookup table built from a sorted list of key-value pairs.
@@ -121,14 +121,14 @@ mod tests {
     #[test]
     fn test_first_last() {
         let t = sample_table();
-        assert_eq!(t.first().unwrap().0, "apple");
-        assert_eq!(t.last().unwrap().0, "cherry");
+        assert_eq!(t.first().expect("should succeed").0, "apple");
+        assert_eq!(t.last().expect("should succeed").0, "cherry");
     }
 
     #[test]
     fn test_get_index() {
         let t = sample_table();
-        let (k, v) = t.get_index(1).unwrap();
+        let (k, v) = t.get_index(1).expect("should succeed");
         assert_eq!(k, "banana");
         assert_eq!(*v, 2);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Non-manifold edge removal and T-junction resolution for triangle meshes.
 
@@ -572,9 +572,9 @@ mod tests {
     fn topology_report_clean_mesh_zeros() {
         let (pos, tris) = two_tris();
         let report = topology_repair_report(&pos, &tris);
-        let v: serde_json::Value = serde_json::from_str(&report).unwrap();
-        assert_eq!(v["non_manifold_edges"].as_u64().unwrap(), 0);
-        assert_eq!(v["isolated_vertices"].as_u64().unwrap(), 0);
+        let v: serde_json::Value = serde_json::from_str(&report).expect("should succeed");
+        assert_eq!(v["non_manifold_edges"].as_u64().expect("should succeed"), 0);
+        assert_eq!(v["isolated_vertices"].as_u64().expect("should succeed"), 0);
     }
 
     #[test]

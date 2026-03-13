@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Triangle mesh collider (AABB-based broadphase).
@@ -223,7 +223,7 @@ mod tests {
             c: [5.5, 6.0, 0.0],
         };
         let m = new_mesh_collider(vec![t1, t2]);
-        let idx = mc_nearest_tri(&m, [0.5, 0.3, 0.0]).unwrap();
+        let idx = mc_nearest_tri(&m, [0.5, 0.3, 0.0]).expect("should succeed");
         assert_eq!(idx, 0);
     }
     #[test]

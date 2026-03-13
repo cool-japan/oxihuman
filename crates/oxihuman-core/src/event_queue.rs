@@ -184,7 +184,7 @@ mod tests {
         enqueue_event(&mut q, 2, EventPriority::Critical, 2.0);
         enqueue_event(&mut q, 3, EventPriority::Normal, 0.5);
         // Critical should come out first.
-        let first = dequeue_event(&mut q).unwrap();
+        let first = dequeue_event(&mut q).expect("should succeed");
         assert_eq!(first.priority, EventPriority::Critical);
     }
 
@@ -243,8 +243,8 @@ mod tests {
         let mut q = new_event_queue(&cfg);
         enqueue_event(&mut q, 10, EventPriority::Normal, 0.0);
         enqueue_event(&mut q, 20, EventPriority::Normal, 0.0);
-        let first = dequeue_event(&mut q).unwrap();
-        let second = dequeue_event(&mut q).unwrap();
+        let first = dequeue_event(&mut q).expect("should succeed");
+        let second = dequeue_event(&mut q).expect("should succeed");
         // FIFO: event 10 was enqueued first.
         assert_eq!(first.event_id, 10);
         assert_eq!(second.event_id, 20);

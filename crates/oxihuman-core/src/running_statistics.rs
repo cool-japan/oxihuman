@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Welford's online algorithm for mean/variance/std.
@@ -173,8 +173,8 @@ mod tests {
         /* min and max are tracked correctly */
         let mut rs = new_running_stats();
         rs.add_slice(&[3.0, 1.0, 4.0, 1.0, 5.0]);
-        assert!((rs.min().unwrap() - 1.0).abs() < 1e-12);
-        assert!((rs.max().unwrap() - 5.0).abs() < 1e-12);
+        assert!((rs.min().expect("should succeed") - 1.0).abs() < 1e-12);
+        assert!((rs.max().expect("should succeed") - 5.0).abs() < 1e-12);
     }
 
     #[test]

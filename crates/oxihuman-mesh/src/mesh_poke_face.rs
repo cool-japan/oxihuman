@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Poke (fan triangulate) faces — inserts a centre vertex in each face.
@@ -203,6 +203,6 @@ mod tests {
     fn test_poke_with_offset() {
         let pos = vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0]];
         let (new_pos, _) = poke_with_offset(&pos, [0, 1, 2], [0.0, 0.0, 0.1]);
-        assert!(new_pos.last().unwrap()[2] > 0.0);
+        assert!(new_pos.last().expect("should succeed")[2] > 0.0);
     }
 }

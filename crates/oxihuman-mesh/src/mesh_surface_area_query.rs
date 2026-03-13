@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Mesh surface area query stub.
@@ -148,7 +148,7 @@ mod tests {
             [0.0, 0.5, 0.0], /* small: area 0.125 */
         ];
         let tris = vec![[0u32, 1, 2], [3, 4, 5]];
-        let (idx, area) = largest_triangle(&verts, &tris).unwrap();
+        let (idx, area) = largest_triangle(&verts, &tris).expect("should succeed");
         assert_eq!(idx, 0 /* first triangle is largest */);
         assert!(area > 1.0 /* area > 1 */);
     }

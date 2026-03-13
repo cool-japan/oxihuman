@@ -232,7 +232,7 @@ mod tests {
         cache_insert(&mut mgr, "a", vec![1, 2, 3]);
         let data = cache_get(&mut mgr, "a");
         assert!(data.is_some());
-        assert_eq!(data.unwrap(), &[1, 2, 3]);
+        assert_eq!(data.expect("should succeed"), &[1, 2, 3]);
     }
 
     #[test]

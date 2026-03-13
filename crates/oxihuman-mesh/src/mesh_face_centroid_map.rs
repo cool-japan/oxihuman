@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn test_build() { let (p,i)=data(); let m=build_centroid_map(&p,&i); assert_eq!(m.centroids.len(),1); }
     #[test]
-    fn test_centroid_at() { let (p,i)=data(); let m=build_centroid_map(&p,&i); let c=centroid_at_face(&m,0).unwrap(); assert!((c[0]-1.0).abs()<1e-6); }
+    fn test_centroid_at() { let (p,i)=data(); let m=build_centroid_map(&p,&i); let c=centroid_at_face(&m,0).expect("should succeed"); assert!((c[0]-1.0).abs()<1e-6); }
     #[test]
     fn test_centroid_at_none() { let m=FaceCentroidMap{centroids:vec![]}; assert!(centroid_at_face(&m,0).is_none()); }
     #[test]

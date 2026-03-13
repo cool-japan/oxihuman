@@ -394,7 +394,7 @@ mod tests {
         let id = add_ragdoll_bone(&mut r, "test", [0.0; 3], 1.0, 0.1, 0.3, None);
         let bone = get_ragdoll_bone(&r, id);
         assert!(bone.is_some());
-        assert_eq!(bone.unwrap().name, "test");
+        assert_eq!(bone.expect("should succeed").name, "test");
     }
 
     #[test]
@@ -442,7 +442,7 @@ mod tests {
         let mut r = new_ragdoll();
         let id = add_ragdoll_bone(&mut r, "hip", [0.0; 3], 2.0, 0.1, 0.3, None);
         apply_impulse_to_bone(&mut r, id, [2.0, 0.0, 0.0]);
-        let bone = get_ragdoll_bone(&r, id).unwrap();
+        let bone = get_ragdoll_bone(&r, id).expect("should succeed");
         // impulse = mass * delta_v → delta_v = 2/2 = 1
         assert!((bone.velocity[0] - 1.0).abs() < 1e-5);
     }

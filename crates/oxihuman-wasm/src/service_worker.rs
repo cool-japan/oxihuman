@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Offline asset caching strategy and service-worker code generation.
 //!
@@ -585,8 +585,8 @@ mod tests {
     fn manifest_json_empty_entries() {
         let cfg = sample_config(CacheStrategy::CacheFirst);
         let json = generate_cache_manifest_json(&cfg, &[]);
-        let v: serde_json::Value = serde_json::from_str(&json).unwrap();
-        let entries = v["entries"].as_object().unwrap();
+        let v: serde_json::Value = serde_json::from_str(&json).expect("should succeed");
+        let entries = v["entries"].as_object().expect("should succeed");
         assert!(entries.is_empty(), "expected empty entries");
     }
 

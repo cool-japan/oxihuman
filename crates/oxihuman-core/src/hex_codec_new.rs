@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 pub fn hex_encode_new(data: &[u8]) -> String {
@@ -71,7 +71,10 @@ mod tests {
     fn decode_roundtrip() {
         /* encode then decode restores original */
         let data = b"oxihuman";
-        assert_eq!(hex_decode_new(&hex_encode_new(data)).unwrap(), data);
+        assert_eq!(
+            hex_decode_new(&hex_encode_new(data)).expect("should succeed"),
+            data
+        );
     }
 
     #[test]

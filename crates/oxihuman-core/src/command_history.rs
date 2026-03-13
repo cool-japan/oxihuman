@@ -1,7 +1,7 @@
 //! Command history with undo/redo — stores named command records with metadata.
 
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A record of a single executed command.
 #[allow(dead_code)]
@@ -164,7 +164,7 @@ mod tests {
         let cfg = default_command_history_config();
         let mut history = new_command_history(&cfg);
         history_push(&mut history, "scale", 2.0);
-        let rec = history_undo(&mut history).unwrap();
+        let rec = history_undo(&mut history).expect("should succeed");
         assert_eq!(rec.name, "scale");
         assert!((rec.timestamp - 2.0).abs() < 1e-9);
         assert!(!history_can_undo(&history));
@@ -177,7 +177,7 @@ mod tests {
         let mut history = new_command_history(&cfg);
         history_push(&mut history, "rotate", 3.0);
         history_undo(&mut history);
-        let rec = history_redo(&mut history).unwrap();
+        let rec = history_redo(&mut history).expect("should succeed");
         assert_eq!(rec.name, "rotate");
         assert!(history_can_undo(&history));
         assert!(!history_can_redo(&history));
@@ -224,7 +224,7 @@ mod tests {
         let mut history = new_command_history(&cfg);
         assert!(history_current_command(&history).is_none());
         history_push(&mut history, "paint", 5.0);
-        assert_eq!(history_current_command(&history).unwrap().name, "paint");
+        assert_eq!(history_current_command(&history).expect("should succeed").name, "paint");
         history_undo(&mut history);
         assert!(history_current_command(&history).is_none());
     }

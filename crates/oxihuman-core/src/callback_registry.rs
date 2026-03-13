@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A registry of named callbacks identified by string keys.
@@ -110,7 +110,7 @@ mod tests {
     fn test_get() {
         let mut reg = CallbackRegistry::new();
         reg.register("ev", 5);
-        let entry = reg.get("ev").unwrap();
+        let entry = reg.get("ev").expect("should succeed");
         assert_eq!(entry.priority, 5);
     }
 

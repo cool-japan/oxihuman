@@ -112,7 +112,7 @@ mod tests {
     fn test_get_anchor() {
         let mut s = anchor_set_new();
         add_anchor(&mut s, new_anchor(2, [3.0,0.0,0.0], 0.5));
-        let a = get_anchor(&s, 0).unwrap();
+        let a = get_anchor(&s, 0).expect("should succeed");
         assert_eq!(a.vertex_index, 2);
     }
 

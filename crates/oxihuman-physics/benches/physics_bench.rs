@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Physics simulation throughput benchmarks.
 //!
@@ -7,7 +7,8 @@
 //! self-collision spatial hash, garment fitting, proxy generation, and
 //! XPBD distance constraint solving.
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::hint::black_box;
 
 use oxihuman_mesh::mesh::MeshBuffers;
 use oxihuman_physics::{

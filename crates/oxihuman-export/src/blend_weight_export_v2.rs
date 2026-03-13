@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Blend shape weight export v2: named weights with curve evaluation.
@@ -116,7 +116,7 @@ mod tests {
         let mut exp = new_blend_weight_export_v2();
         add_blend_weight_v2(&mut exp, "blink", 0.0);
         set_weight_v2(&mut exp, "blink", 1.0);
-        let w = find_weight_v2(&exp, "blink").unwrap();
+        let w = find_weight_v2(&exp, "blink").expect("should succeed");
         assert!((w.weight - 1.0).abs() < 1e-5);
     }
 

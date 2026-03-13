@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Mesh decimation via edge collapse with quadric error metric (QEM).
 //!
@@ -518,7 +518,7 @@ mod tests {
         let (pos, idx) = subdivided_plane();
         let result = decimate_step(&pos, &idx, f64::INFINITY);
         assert!(result.is_some());
-        let (_, new_idx) = result.unwrap();
+        let (_, new_idx) = result.expect("should succeed");
         assert!(new_idx.len() < idx.len());
     }
 

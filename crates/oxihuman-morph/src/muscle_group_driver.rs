@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Muscle group driver — grouped muscle activation derived from pose parameters.
@@ -138,7 +138,7 @@ mod tests {
     fn set_and_get() {
         let mut d = new_muscle_group_driver();
         mgd_set(&mut d, MuscleGroup::Biceps, 0.8, 0.6);
-        let a = mgd_get(&d, MuscleGroup::Biceps).unwrap();
+        let a = mgd_get(&d, MuscleGroup::Biceps).expect("should succeed");
         assert!((a.level - 0.8).abs() < 1e-6);
     }
 
@@ -146,7 +146,7 @@ mod tests {
     fn clamps_level() {
         let mut d = new_muscle_group_driver();
         mgd_set(&mut d, MuscleGroup::Triceps, 5.0, 0.5);
-        let a = mgd_get(&d, MuscleGroup::Triceps).unwrap();
+        let a = mgd_get(&d, MuscleGroup::Triceps).expect("should succeed");
         assert!((a.level - 1.0).abs() < 1e-6);
     }
 
@@ -185,7 +185,14 @@ mod tests {
         mgd_set(&mut d, MuscleGroup::Abdominals, 0.3, 0.3);
         mgd_set(&mut d, MuscleGroup::Abdominals, 0.9, 0.9);
         assert_eq!(mgd_active_count(&d), 1);
-        assert!((mgd_get(&d, MuscleGroup::Abdominals).unwrap().level - 0.9).abs() < 1e-6);
+        assert!(
+            (mgd_get(&d, MuscleGroup::Abdominals)
+                .expect("should succeed")
+                .level
+                - 0.9)
+                .abs()
+                < 1e-6
+        );
     }
 
     #[test]
@@ -194,7 +201,14 @@ mod tests {
         mgd_set(&mut a, MuscleGroup::Gluteus, 1.0, 1.0);
         let b = new_muscle_group_driver();
         let r = mgd_blend(&a, &b, 0.5);
-        assert!((mgd_get(&r, MuscleGroup::Gluteus).unwrap().level - 0.5).abs() < 1e-5);
+        assert!(
+            (mgd_get(&r, MuscleGroup::Gluteus)
+                .expect("should succeed")
+                .level
+                - 0.5)
+                .abs()
+                < 1e-5
+        );
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! ZIP archive reader stub.
@@ -126,7 +126,7 @@ mod tests {
     fn test_read_entry_bytes() {
         let mut r = open_archive_stub("/tmp/x.zip");
         r.load_entry(ArchiveEntry::new("data.bin", vec![1, 2, 3]));
-        let bytes = read_entry_bytes(&r, "data.bin").unwrap();
+        let bytes = read_entry_bytes(&r, "data.bin").expect("should succeed");
         assert_eq!(bytes, vec![1, 2, 3]);
     }
 
@@ -134,7 +134,7 @@ mod tests {
     fn test_read_entry_text() {
         let mut r = open_archive_stub("/tmp/x.zip");
         r.load_entry(ArchiveEntry::new("note.txt", b"hello world".to_vec()));
-        let text = read_entry_text(&r, "note.txt").unwrap();
+        let text = read_entry_text(&r, "note.txt").expect("should succeed");
         assert_eq!(text, "hello world");
     }
 

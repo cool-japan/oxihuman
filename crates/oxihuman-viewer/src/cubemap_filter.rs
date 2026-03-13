@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Cubemap filter — GGX specular and diffuse irradiance prefiltering utilities.
@@ -190,7 +190,7 @@ mod tests {
             ..Default::default()
         });
         build_mip_chain(&mut f);
-        let last = f.mips.last().unwrap();
+        let last = f.mips.last().expect("should succeed");
         assert!((last.roughness - 1.0).abs() < 1e-6);
     }
 

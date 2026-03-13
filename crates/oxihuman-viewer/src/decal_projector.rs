@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -131,7 +131,7 @@ mod tests {
         let p = new_decal_projector([0.0; 3], [0.0, 0.0, -1.0]);
         let uv = project_to_decal_uv(&p, [0.0, 0.0, 0.0]);
         assert!(uv.is_some());
-        let uv = uv.unwrap();
+        let uv = uv.expect("should succeed");
         assert!((uv[0] - 0.5).abs() < 1e-6);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Fiber/filament body with bending and torsion (v2, distinct from fiber_body.rs).
 
@@ -220,9 +220,9 @@ mod tests {
     #[test]
     fn step_gravity_moves_tip_down() {
         let mut b = default_fiber();
-        let before = fiber_tip(&b).unwrap()[1];
+        let before = fiber_tip(&b).expect("should succeed")[1];
         fiber_step(&mut b, [0.0, -9.81, 0.0], 0.1);
-        let after = fiber_tip(&b).unwrap()[1];
+        let after = fiber_tip(&b).expect("should succeed")[1];
         assert!(after < before);
     }
 

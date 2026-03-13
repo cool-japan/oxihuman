@@ -148,7 +148,7 @@ mod tests {
 
     #[test]
     fn test_parse_asset_version_valid() {
-        let v = parse_asset_version("1.3.7").unwrap();
+        let v = parse_asset_version("1.3.7").expect("should succeed");
         assert_eq!(v.major, 1);
         assert_eq!(v.minor, 3);
         assert_eq!(v.patch, 7);
@@ -196,7 +196,7 @@ mod tests {
     fn test_registry_register_and_get() {
         let mut reg = new_version_registry();
         register_asset_version(&mut reg, "human_base", new_asset_version(1, 0, 0));
-        let v = get_asset_version(&reg, "human_base").unwrap();
+        let v = get_asset_version(&reg, "human_base").expect("should succeed");
         assert_eq!(v.major, 1);
     }
 
@@ -257,7 +257,7 @@ mod tests {
     fn test_parse_roundtrip() {
         let v = new_asset_version(3, 12, 99);
         let s = asset_version_to_string(&v);
-        let parsed = parse_asset_version(&s).unwrap();
+        let parsed = parse_asset_version(&s).expect("should succeed");
         assert_eq!(parsed, v);
     }
 }

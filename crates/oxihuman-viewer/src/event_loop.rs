@@ -1,9 +1,9 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Winit event loop integration for the OxiHuman viewer.
 //!
-//! Provides [`ViewerEventLoop`], [`WindowState`], and [`InputState`] for
+//! Provides `ViewerEventLoop`, `WindowState`, and `InputState` for
 //! windowed rendering, orbit-camera mouse handling, and 60 fps frame timing.
 //!
 //! Gated behind the `winit` Cargo feature.

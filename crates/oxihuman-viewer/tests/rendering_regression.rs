@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Software-rasterizer-based rendering regression tests.
 //!
@@ -233,7 +233,7 @@ fn test_render_empty_scene() {
             &ortho_proj(),
             &LightingPreset::studio(),
         )
-        .unwrap();
+        .expect("should succeed");
 
     assert_eq!(buf.width, 64);
     assert_eq!(buf.height, 64);
@@ -241,7 +241,7 @@ fn test_render_empty_scene() {
 
     for y in 0..buf.height {
         for x in 0..buf.width {
-            let px = buf.pixel_at(x, y).unwrap();
+            let px = buf.pixel_at(x, y).expect("should succeed");
             assert_eq!(
                 px, BG,
                 "pixel ({x},{y}) expected background {BG:?}, got {px:?}"
@@ -285,12 +285,12 @@ fn test_render_single_triangle() {
             &ortho_proj(),
             &LightingPreset::medical(), // flat, even illumination
         )
-        .unwrap();
+        .expect("should succeed");
 
     // Centre pixel should be inside the triangle and lit
     let cx = w / 2;
     let cy = h / 2;
-    let center = buf.pixel_at(cx, cy).unwrap();
+    let center = buf.pixel_at(cx, cy).expect("should succeed");
     let center_lum = luminance(center);
     let bg_lum = luminance(BG);
 
@@ -302,7 +302,7 @@ fn test_render_single_triangle() {
     // Corners (0,0), (w-1,0), (0,h-1), (w-1,h-1) should remain at background
     let corners = [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)];
     for (cx, cy) in corners {
-        let px = buf.pixel_at(cx, cy).unwrap();
+        let px = buf.pixel_at(cx, cy).expect("should succeed");
         assert_eq!(
             px, BG,
             "corner ({cx},{cy}) should be background, got {px:?}"
@@ -334,7 +334,7 @@ fn test_render_cube_silhouette() {
             &proj,
             &LightingPreset::studio(),
         )
-        .unwrap();
+        .expect("should succeed");
 
     // Collect the bounding box of all non-background pixels
     let mut min_x = w;
@@ -345,7 +345,7 @@ fn test_render_cube_silhouette() {
 
     for y in 0..h {
         for x in 0..w {
-            let px = buf.pixel_at(x, y).unwrap();
+            let px = buf.pixel_at(x, y).expect("should succeed");
             if px != BG {
                 lit_count += 1;
                 if x < min_x {
@@ -418,7 +418,7 @@ fn test_render_lighting_presets() {
         .map(|preset| {
             let buf = cap
                 .capture_software_render(&positions, &triangles, &normals, &view, &proj, preset)
-                .unwrap();
+                .expect("should succeed");
             average_luminance(&buf)
         })
         .collect();
@@ -468,7 +468,7 @@ fn test_render_wireframe_overlay() {
             &proj,
             &LightingPreset::studio(),
         )
-        .unwrap();
+        .expect("should succeed");
 
     // ── Wireframe simulation: render only thin edge triangles ─────────────────
     // For each edge of each triangle, build a very thin degenerate triangle
@@ -533,7 +533,7 @@ fn test_render_wireframe_overlay() {
             &proj,
             &LightingPreset::studio(),
         )
-        .unwrap();
+        .expect("should succeed");
 
     // Count lit pixels in each render
     let solid_lit = count_non_bg_pixels(&solid_buf);
@@ -557,7 +557,7 @@ fn count_non_bg_pixels(buf: &ImageBuffer) -> u32 {
     let mut count = 0u32;
     for y in 0..buf.height {
         for x in 0..buf.width {
-            if buf.pixel_at(x, y).unwrap() != BG {
+            if buf.pixel_at(x, y).expect("should succeed") != BG {
                 count += 1;
             }
         }
@@ -590,9 +590,9 @@ fn test_screenshot_ppm_format() {
             &proj,
             &LightingPreset::studio(),
         )
-        .unwrap();
+        .expect("should succeed");
 
-    let ppm_bytes = buf.to_ppm().unwrap();
+    let ppm_bytes = buf.to_ppm().expect("should succeed");
 
     // Verify P6 magic bytes
     assert!(
@@ -611,19 +611,27 @@ fn test_screenshot_ppm_format() {
         .map(|(i, _)| i + 1)
         .expect("PPM header must have 3 newlines");
 
-    let header_str = std::str::from_utf8(&ppm_bytes[..header_end]).unwrap();
+    let header_str = std::str::from_utf8(&ppm_bytes[..header_end]).expect("should succeed");
     let mut lines = header_str.lines();
-    let magic = lines.next().unwrap();
+    let magic = lines.next().expect("should succeed");
     assert_eq!(magic, "P6");
 
-    let dims_line = lines.next().unwrap();
+    let dims_line = lines.next().expect("should succeed");
     let mut dims = dims_line.split_whitespace();
-    let parsed_w: u32 = dims.next().unwrap().parse().unwrap();
-    let parsed_h: u32 = dims.next().unwrap().parse().unwrap();
+    let parsed_w: u32 = dims
+        .next()
+        .expect("should succeed")
+        .parse()
+        .expect("should succeed");
+    let parsed_h: u32 = dims
+        .next()
+        .expect("should succeed")
+        .parse()
+        .expect("should succeed");
     assert_eq!(parsed_w, w, "PPM width mismatch");
     assert_eq!(parsed_h, h, "PPM height mismatch");
 
-    let maxval_line = lines.next().unwrap();
+    let maxval_line = lines.next().expect("should succeed");
     assert_eq!(maxval_line, "255", "PPM maxval should be 255");
 
     // Total size: header bytes + width * height * 3 (RGB)
@@ -636,9 +644,9 @@ fn test_screenshot_ppm_format() {
 
     // Write to temp file and verify it can be read back
     let tmp = std::env::temp_dir().join("oxihuman_test_render.ppm");
-    let mut f = std::fs::File::create(&tmp).unwrap();
-    f.write_all(&ppm_bytes).unwrap();
-    let read_back = std::fs::read(&tmp).unwrap();
+    let mut f = std::fs::File::create(&tmp).expect("should succeed");
+    f.write_all(&ppm_bytes).expect("should succeed");
+    let read_back = std::fs::read(&tmp).expect("should succeed");
     assert_eq!(read_back, ppm_bytes, "PPM file round-trip failed");
     let _ = std::fs::remove_file(&tmp);
 }
@@ -663,9 +671,9 @@ fn test_screenshot_tga_format() {
             &ortho_proj(),
             &LightingPreset::studio(),
         )
-        .unwrap();
+        .expect("should succeed");
 
-    let tga_bytes = buf.to_tga().unwrap();
+    let tga_bytes = buf.to_tga().expect("should succeed");
 
     // TGA header is exactly 18 bytes
     assert!(
@@ -710,9 +718,9 @@ fn test_screenshot_tga_format() {
 
     // Write to temp file
     let tmp = std::env::temp_dir().join("oxihuman_test_render.tga");
-    let mut f = std::fs::File::create(&tmp).unwrap();
-    f.write_all(&tga_bytes).unwrap();
-    let read_back = std::fs::read(&tmp).unwrap();
+    let mut f = std::fs::File::create(&tmp).expect("should succeed");
+    f.write_all(&tga_bytes).expect("should succeed");
+    let read_back = std::fs::read(&tmp).expect("should succeed");
     assert_eq!(read_back, tga_bytes, "TGA file round-trip failed");
     let _ = std::fs::remove_file(&tmp);
 }
@@ -734,11 +742,11 @@ fn test_render_deterministic() {
 
     let buf_a = cap
         .capture_software_render(&positions, &triangles, &normals, &view, &proj, &preset)
-        .unwrap();
+        .expect("should succeed");
 
     let buf_b = cap
         .capture_software_render(&positions, &triangles, &normals, &view, &proj, &preset)
-        .unwrap();
+        .expect("should succeed");
 
     assert_eq!(
         buf_a.data, buf_b.data,
@@ -805,11 +813,11 @@ fn test_render_normal_map_shading() {
             &proj,
             &preset,
         )
-        .unwrap();
+        .expect("should succeed");
 
     let buf_away = cap
         .capture_software_render(&positions, &triangles, &normals_away, &view, &proj, &preset)
-        .unwrap();
+        .expect("should succeed");
 
     // Compute average luminance over a central patch where the quad is visible
     let cx = w / 2;
@@ -869,11 +877,11 @@ fn test_camera_orbit_changes_view() {
 
     let buf_a = cap
         .capture_software_render(&positions, &triangles, &normals, &view_a, &proj, &preset)
-        .unwrap();
+        .expect("should succeed");
 
     let buf_b = cap
         .capture_software_render(&positions, &triangles, &normals, &view_b, &proj, &preset)
-        .unwrap();
+        .expect("should succeed");
 
     // Calculate mean absolute difference per channel across all pixels
     let pixel_count = (w * h) as f64;

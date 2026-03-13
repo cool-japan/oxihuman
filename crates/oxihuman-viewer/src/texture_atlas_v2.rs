@@ -156,7 +156,7 @@ mod tests {
         tav2_pack(&mut a, "tex", 512, 512);
         let uv = tav2_uv(&a, "tex");
         assert!(uv.is_some());
-        let uv = uv.unwrap();
+        let uv = uv.expect("should succeed");
         assert!((0.0..=1.0).contains(&uv[0]));
     }
 
@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn test_region_on_correct_page() {
         let mut a = new_texture_atlas_v2(1024, 1024, 0);
-        let r = tav2_pack(&mut a, "first", 64, 64).unwrap();
+        let r = tav2_pack(&mut a, "first", 64, 64).expect("should succeed");
         assert_eq!(r.page, 0);
     }
 }

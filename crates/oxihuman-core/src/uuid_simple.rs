@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A simple UUID representation (128-bit).
 #[allow(dead_code)]
@@ -82,7 +82,7 @@ mod tests {
     #[test]
     fn test_uuid_from_string() {
         let s = "550e8400-e29b-41d4-a716-446655440000";
-        let uuid = uuid_from_string(s).unwrap();
+        let uuid = uuid_from_string(s).expect("should succeed");
         assert_eq!(uuid_to_string(&uuid), s);
     }
 

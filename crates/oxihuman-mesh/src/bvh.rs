@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! BVH (Bounding Volume Hierarchy) acceleration structure for triangle meshes.
 //!
@@ -642,7 +642,7 @@ mod tests {
         let dir = [0.0f32, 0.0, -1.0];
         let hit = bvh.intersect_ray(&mesh, origin, dir);
         assert!(hit.is_some(), "expected hit, got None");
-        let hit = hit.unwrap();
+        let hit = hit.expect("should succeed");
         assert_eq!(hit.face_index, 0);
         assert!(
             (hit.t - 2.0).abs() < 1e-4,

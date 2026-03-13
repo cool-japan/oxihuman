@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Clustered lighting debug overlay visualization.
@@ -117,7 +117,7 @@ mod tests {
         /* highlight slice should be clamped to depth slice count */
         let mut v = ClusterDebugView::default();
         cdv_set_highlight_slice(&mut v, Some(9999));
-        assert!(v.highlight_slice.unwrap() < v.config.depth_slices);
+        assert!(v.highlight_slice.expect("should succeed") < v.config.depth_slices);
     }
 
     #[test]

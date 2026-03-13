@@ -130,7 +130,7 @@ mod tests {
     #[test]
     fn test_alloc_starts_at_one() {
         let mut a = new_id_allocator(default_id_allocator_config());
-        let id = id_alloc(&mut a).unwrap();
+        let id = id_alloc(&mut a).expect("should succeed");
         assert_eq!(id, 1);
     }
 
@@ -141,19 +141,19 @@ mod tests {
             max_id: 0,
         };
         let mut a = new_id_allocator(cfg);
-        let i1 = id_alloc(&mut a).unwrap();
+        let i1 = id_alloc(&mut a).expect("should succeed");
         id_free(&mut a, i1);
-        let i2 = id_alloc(&mut a).unwrap();
+        let i2 = id_alloc(&mut a).expect("should succeed");
         assert!(i2 > i1);
     }
 
     #[test]
     fn test_free_and_recycle() {
         let mut a = new_id_allocator(default_id_allocator_config());
-        let id1 = id_alloc(&mut a).unwrap();
+        let id1 = id_alloc(&mut a).expect("should succeed");
         id_free(&mut a, id1);
         assert_eq!(id_recycled_count(&a), 1);
-        let id2 = id_alloc(&mut a).unwrap();
+        let id2 = id_alloc(&mut a).expect("should succeed");
         assert_eq!(id1, id2); // recycled
         assert_eq!(id_recycled_count(&a), 0);
     }
@@ -161,7 +161,7 @@ mod tests {
     #[test]
     fn test_is_alive() {
         let mut a = new_id_allocator(default_id_allocator_config());
-        let id = id_alloc(&mut a).unwrap();
+        let id = id_alloc(&mut a).expect("should succeed");
         assert!(id_is_alive(&a, id));
         id_free(&mut a, id);
         assert!(!id_is_alive(&a, id));
@@ -210,7 +210,7 @@ mod tests {
         id_allocator_reset(&mut a);
         assert_eq!(id_live_count(&a), 0);
         assert_eq!(id_peak(&a), 0);
-        let id = id_alloc(&mut a).unwrap();
+        let id = id_alloc(&mut a).expect("should succeed");
         assert_eq!(id, 1);
     }
 

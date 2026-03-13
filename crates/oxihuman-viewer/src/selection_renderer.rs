@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Selection highlight and outline renderer for selected objects.
 //!
@@ -367,7 +367,7 @@ mod tests {
         let mut s = make_state(3);
         select_vertices(&mut s, &[0, 2]);
         let positions = vec![[0.0f32, 0.0, 0.0], [5.0, 5.0, 5.0], [2.0, 3.0, 1.0]];
-        let aabb = selection_bounding_box(&s, &positions).unwrap();
+        let aabb = selection_bounding_box(&s, &positions).expect("should succeed");
         assert!((aabb[0] - 0.0).abs() < 1e-6); // min_x
         assert!((aabb[3] - 2.0).abs() < 1e-6); // max_x
     }

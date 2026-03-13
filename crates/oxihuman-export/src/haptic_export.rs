@@ -359,7 +359,7 @@ mod tests {
         add_haptic_track(&mut e, HapticActuator::Palm, "p");
         add_haptic_sample(&mut e, 0, make_sample(0.0, 0.1));
         add_haptic_sample(&mut e, 0, make_sample(100.0, 0.9));
-        let s = evaluate_haptic_at(&e, 0, 95.0).unwrap();
+        let s = evaluate_haptic_at(&e, 0, 95.0).expect("should succeed");
         assert!((s.time_ms - 100.0).abs() < 1e-5);
     }
 

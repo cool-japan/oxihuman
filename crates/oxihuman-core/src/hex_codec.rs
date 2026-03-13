@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Hex encode/decode utilities.
@@ -90,7 +90,10 @@ mod tests {
     #[test]
     fn test_decode_valid() {
         /* decode known hex */
-        assert_eq!(hex_decode("deadbeef").unwrap(), &[0xDE, 0xAD, 0xBE, 0xEF]);
+        assert_eq!(
+            hex_decode("deadbeef").expect("should succeed"),
+            &[0xDE, 0xAD, 0xBE, 0xEF]
+        );
     }
 
     #[test]

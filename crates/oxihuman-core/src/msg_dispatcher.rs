@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::VecDeque;
@@ -111,7 +111,7 @@ mod tests {
     fn test_send_receive() {
         let mut d = MsgDispatcher::new(10);
         d.send("topic1", "hello", 0);
-        let msg = d.receive().unwrap();
+        let msg = d.receive().expect("should succeed");
         assert_eq!(msg.topic, "topic1");
         assert_eq!(msg.payload, "hello");
     }
@@ -121,8 +121,8 @@ mod tests {
         let mut d = MsgDispatcher::new(10);
         d.send("t", "first", 0);
         d.send("t", "second", 0);
-        assert_eq!(d.receive().unwrap().payload, "first");
-        assert_eq!(d.receive().unwrap().payload, "second");
+        assert_eq!(d.receive().expect("should succeed").payload, "first");
+        assert_eq!(d.receive().expect("should succeed").payload, "second");
     }
 
     #[test]
@@ -139,7 +139,7 @@ mod tests {
         let mut d = MsgDispatcher::new(10);
         d.send("a", "msg_a", 0);
         d.send("b", "msg_b", 0);
-        let msg = d.receive_by_topic("b").unwrap();
+        let msg = d.receive_by_topic("b").expect("should succeed");
         assert_eq!(msg.payload, "msg_b");
         assert_eq!(d.len(), 1);
     }
@@ -148,7 +148,7 @@ mod tests {
     fn test_peek() {
         let mut d = MsgDispatcher::new(10);
         d.send("t", "peek_me", 0);
-        assert_eq!(d.peek().unwrap().payload, "peek_me");
+        assert_eq!(d.peek().expect("should succeed").payload, "peek_me");
         assert_eq!(d.len(), 1);
     }
 

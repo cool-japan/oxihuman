@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -521,7 +521,7 @@ mod tests {
                 features: neutral_pose(),
             },
         ];
-        let dom = dominant_emotion(&profiles).unwrap();
+        let dom = dominant_emotion(&profiles).expect("should succeed");
         assert_eq!(dom.emotion, BodyEmotion::Joyful);
     }
 

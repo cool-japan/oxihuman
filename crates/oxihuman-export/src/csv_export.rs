@@ -234,7 +234,7 @@ mod tests {
         csv_add_row(&mut doc, vec!["42".to_owned()]);
         let path = "/tmp/oxihuman_csv_export_test.csv";
         assert!(csv_write_to_file(&doc, path).is_ok());
-        let read_back = std::fs::read_to_string(path).unwrap();
+        let read_back = std::fs::read_to_string(path).expect("should succeed");
         assert!(read_back.contains("42"));
         let _ = std::fs::remove_file(path);
     }

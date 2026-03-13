@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! File transfer protocol stub.
@@ -194,7 +194,7 @@ mod tests {
         let id = m.enqueue("/src", "/dst", 1000);
         cancel_job(&mut m, id);
         assert!(matches!(
-            m.get_job(id).unwrap().state,
+            m.get_job(id).expect("should succeed").state,
             TransferState::Failed(_)
         ));
     }
@@ -204,7 +204,7 @@ mod tests {
         let mut m = new_transfer_manager();
         m.enqueue("/s", "/d", 100);
         tick_all(&mut m, 50);
-        let j = m.get_job(1).unwrap();
+        let j = m.get_job(1).expect("should succeed");
         assert!((j.state.progress_pct() - 0.5).abs() < 0.01);
     }
 

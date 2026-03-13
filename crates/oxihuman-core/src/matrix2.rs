@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! 2×2 matrix with determinant, inverse, multiply, and add.
 
@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn test_inverse() {
         let m = mat2(2.0, 1.0, 5.0, 3.0);
-        let inv = mat2_inverse(&m).unwrap();
+        let inv = mat2_inverse(&m).expect("should succeed");
         let prod = mat2_mul(&m, &inv);
         assert!(mat2_approx_eq(&prod, &mat2_identity(), 1e-5));
     }

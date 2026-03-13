@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::f32::consts::PI;
@@ -155,7 +155,7 @@ mod tests {
     fn test_rotated_quaternion_is_unit() {
         let mut e = new_joint_orient_v2_export();
         add_joint_orient(&mut e, "hip", [45.0, 0.0, 0.0], RotOrder::Xyz);
-        let j = find_joint_orient(&e, "hip").unwrap();
+        let j = find_joint_orient(&e, "hip").expect("should succeed");
         assert!(quaternion_is_unit(j.quaternion));
     }
 

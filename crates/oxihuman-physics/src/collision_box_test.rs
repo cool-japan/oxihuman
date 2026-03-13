@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Axis-aligned bounding box collision tests: AABB-AABB, AABB-point, AABB-ray, AABB-sphere.
@@ -196,7 +196,7 @@ mod tests {
         let a = TestAabb::new([1.0; 3], [3.0; 3]);
         let t = a.ray_test([0.0, 2.0, 2.0], [1.0, 0.0, 0.0]);
         assert!(t.is_some());
-        assert!((t.unwrap() - 1.0).abs() < 0.01);
+        assert!((t.expect("should succeed") - 1.0).abs() < 0.01);
     }
 
     #[test]

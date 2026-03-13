@@ -175,7 +175,7 @@ mod tests {
         let mut w = HashMap::new();
         w.insert("x".to_string(), 0.5);
         add_preset(&mut pack, "test", w);
-        let entry = get_preset(&pack, "test").unwrap();
+        let entry = get_preset(&pack, "test").expect("should succeed");
         assert!((entry.weights["x"] - 0.5).abs() < f32::EPSILON);
     }
 

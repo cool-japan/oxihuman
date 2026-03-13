@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Ambient occlusion baking — ray-based AO computation for mesh vertices
@@ -288,7 +288,7 @@ mod tests {
         let v2 = [0.0, 1.0, 0.0];
         let hit = ray_triangle_intersect(origin, dir, v0, v1, v2);
         assert!(hit.is_some());
-        assert!((hit.unwrap() - 1.0).abs() < 1e-5);
+        assert!((hit.expect("should succeed") - 1.0).abs() < 1e-5);
     }
 
     #[test]

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Priority-based event queue.
 
@@ -84,7 +84,7 @@ mod tests {
     fn test_push_pop() {
         let mut q = new_event_priority_queue();
         push_event(&mut q, 5, "evt", "data");
-        let e = pop_event(&mut q).unwrap();
+        let e = pop_event(&mut q).expect("should succeed");
         assert_eq!(e.priority, 5);
         assert_eq!(e.name, "evt");
     }
@@ -95,9 +95,9 @@ mod tests {
         push_event(&mut q, 1, "low", "");
         push_event(&mut q, 10, "high", "");
         push_event(&mut q, 5, "mid", "");
-        assert_eq!(pop_event(&mut q).unwrap().name, "high");
-        assert_eq!(pop_event(&mut q).unwrap().name, "mid");
-        assert_eq!(pop_event(&mut q).unwrap().name, "low");
+        assert_eq!(pop_event(&mut q).expect("should succeed").name, "high");
+        assert_eq!(pop_event(&mut q).expect("should succeed").name, "mid");
+        assert_eq!(pop_event(&mut q).expect("should succeed").name, "low");
     }
 
     #[test]
@@ -112,7 +112,7 @@ mod tests {
     fn test_peek() {
         let mut q = new_event_priority_queue();
         push_event(&mut q, 10, "top", "");
-        let e = peek_event(&q).unwrap();
+        let e = peek_event(&q).expect("should succeed");
         assert_eq!(e.name, "top");
         assert_eq!(event_queue_len(&q), 1); // not consumed
     }
@@ -145,7 +145,7 @@ mod tests {
     fn test_payload() {
         let mut q = new_event_priority_queue();
         push_event(&mut q, 1, "e", "payload_data");
-        let e = pop_event(&mut q).unwrap();
+        let e = pop_event(&mut q).expect("should succeed");
         assert_eq!(e.payload, "payload_data");
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Disconnected mesh island detection using Union-Find (disjoint set union).
 //!
@@ -399,7 +399,7 @@ mod tests {
         let idx = two_triangle_indices();
         let cfg = default_island_config();
         let result = detect_islands(&pos, &idx, &cfg);
-        let largest = largest_island(&result).unwrap();
+        let largest = largest_island(&result).expect("should succeed");
         assert_eq!(largest.vertices.len(), 3);
     }
 
@@ -409,7 +409,7 @@ mod tests {
         let idx = two_triangle_indices();
         let cfg = default_island_config();
         let result = detect_islands(&pos, &idx, &cfg);
-        let smallest = smallest_island(&result).unwrap();
+        let smallest = smallest_island(&result).expect("should succeed");
         assert_eq!(smallest.vertices.len(), 3);
     }
 

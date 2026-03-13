@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Simple bounding volume hierarchy (BVH) for 3D primitives.
@@ -280,7 +280,7 @@ mod tests {
             (0, [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]),
             (1, [2.0, 0.0, 0.0], [3.0, 1.0, 1.0]),
         ]);
-        let raabb = bvh.root_aabb().unwrap();
+        let raabb = bvh.root_aabb().expect("should succeed");
         assert!(raabb.max[0] >= 3.0);
     }
 

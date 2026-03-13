@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashMap;
 
@@ -81,7 +81,7 @@ mod tests {
     fn test_get_mass_override() {
         let mut mo = new_mass_override();
         set_mass_override(&mut mo, 1, 10.0);
-        assert!((get_mass_override(&mo, 1).unwrap() - 10.0).abs() < 1e-6);
+        assert!((get_mass_override(&mo, 1).expect("should succeed") - 10.0).abs() < 1e-6);
     }
 
     #[test]

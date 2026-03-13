@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Animation notification event export.
@@ -162,7 +162,7 @@ mod tests {
     fn test_payload_stored() {
         let mut t = new_notify_track("events");
         add_notify(&mut t, "pickup", 1.0, "gold");
-        let n = find_notify(&t, "pickup").unwrap();
+        let n = find_notify(&t, "pickup").expect("should succeed");
         assert_eq!(n.payload, "gold".to_string());
     }
 }

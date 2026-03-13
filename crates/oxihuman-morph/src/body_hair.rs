@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Procedural body hair parameters and generation.
 
@@ -435,7 +435,7 @@ mod tests {
         let p = default_hair_profile();
         let r = region_by_name(&p, "scalp");
         assert!(r.is_some());
-        assert_eq!(r.unwrap().name, "scalp");
+        assert_eq!(r.expect("should succeed").name, "scalp");
     }
 
     #[test]

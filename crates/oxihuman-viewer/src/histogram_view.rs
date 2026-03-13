@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Histogram visualization for vertex attribute distribution.
 
@@ -375,7 +375,7 @@ mod tests {
     fn cumulative_last_bin_equals_total() {
         let h = build_sample_hist();
         let cum = cumulative_histogram(&h);
-        let last_count = cum.bins.last().unwrap().count;
+        let last_count = cum.bins.last().expect("should succeed").count;
         assert_eq!(last_count, h.total_samples);
     }
 

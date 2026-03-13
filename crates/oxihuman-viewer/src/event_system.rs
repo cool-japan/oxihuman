@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 //! Simple viewer event system.
 
@@ -115,7 +115,7 @@ mod tests {
         eq_push(&mut q, ViewerEvent { kind: ViewerEventKind::MouseClick, x: 1.0, y: 0.0, value: 0.0 });
         eq_push(&mut q, ViewerEvent { kind: ViewerEventKind::MouseClick, x: 2.0, y: 0.0, value: 0.0 });
         eq_push(&mut q, ViewerEvent { kind: ViewerEventKind::MouseClick, x: 3.0, y: 0.0, value: 0.0 });
-        let e = eq_pop(&mut q).unwrap();
+        let e = eq_pop(&mut q).expect("should succeed");
         assert!((e.x - 2.0).abs() < 1e-5);
     }
 
@@ -124,7 +124,7 @@ mod tests {
         let mut q = new_event_queue(10);
         eq_push(&mut q, ViewerEvent { kind: ViewerEventKind::MouseClick, x: 10.0, y: 0.0, value: 0.0 });
         eq_push(&mut q, ViewerEvent { kind: ViewerEventKind::MouseClick, x: 20.0, y: 0.0, value: 0.0 });
-        let e = eq_pop(&mut q).unwrap();
+        let e = eq_pop(&mut q).expect("should succeed");
         assert!((e.x - 10.0).abs() < 1e-5);
     }
 }

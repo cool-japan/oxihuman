@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Crowd generation with controlled variation using deterministic LCG.
 
@@ -553,7 +553,10 @@ mod tests {
     fn test_gaussian_distribution_kind() {
         let axes = standard_crowd_axes();
         // height uses gaussian
-        let height_ax = axes.iter().find(|a| a.name == "height").unwrap();
+        let height_ax = axes
+            .iter()
+            .find(|a| a.name == "height")
+            .expect("should succeed");
         assert_eq!(height_ax.distribution.kind, "gaussian");
     }
 }

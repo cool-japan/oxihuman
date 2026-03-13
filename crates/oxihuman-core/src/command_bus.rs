@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -239,7 +239,10 @@ mod tests {
         });
         let result = execute_command(&mut bus, cmd);
         assert!(result.success);
-        assert_eq!(*bus.state.params.get("height").unwrap(), 1.75);
+        assert_eq!(
+            *bus.state.params.get("height").expect("should succeed"),
+            1.75
+        );
     }
 
     #[test]
@@ -251,9 +254,9 @@ mod tests {
             old_value: 25.0,
         });
         execute_command(&mut bus, cmd);
-        let r = undo_last(&mut bus).unwrap();
+        let r = undo_last(&mut bus).expect("should succeed");
         assert!(r.success);
-        assert_eq!(*bus.state.params.get("age").unwrap(), 25.0);
+        assert_eq!(*bus.state.params.get("age").expect("should succeed"), 25.0);
     }
 
     #[test]
@@ -266,9 +269,9 @@ mod tests {
         });
         execute_command(&mut bus, cmd);
         undo_last(&mut bus);
-        let r = redo_last(&mut bus).unwrap();
+        let r = redo_last(&mut bus).expect("should succeed");
         assert!(r.success);
-        assert_eq!(*bus.state.params.get("x").unwrap(), 5.0);
+        assert_eq!(*bus.state.params.get("x").expect("should succeed"), 5.0);
     }
 
     #[test]
@@ -304,7 +307,7 @@ mod tests {
             old_value: false,
         });
         execute_command(&mut bus, cmd);
-        assert!(*bus.state.flags.get("visible").unwrap());
+        assert!(*bus.state.flags.get("visible").expect("should succeed"));
     }
 
     #[test]
@@ -319,7 +322,7 @@ mod tests {
             }),
         );
         undo_last(&mut bus);
-        assert!(!*bus.state.flags.get("f").unwrap());
+        assert!(!*bus.state.flags.get("f").expect("should succeed"));
     }
 
     #[test]
@@ -342,8 +345,8 @@ mod tests {
         });
         let r = execute_command(&mut bus, batch);
         assert!(r.success);
-        assert_eq!(*bus.state.params.get("p1").unwrap(), 1.0);
-        assert_eq!(*bus.state.params.get("p2").unwrap(), 2.0);
+        assert_eq!(*bus.state.params.get("p1").expect("should succeed"), 1.0);
+        assert_eq!(*bus.state.params.get("p2").expect("should succeed"), 2.0);
     }
 
     #[test]
@@ -361,7 +364,7 @@ mod tests {
             }),
         );
         undo_last(&mut bus);
-        assert_eq!(*bus.state.params.get("q").unwrap(), 1.0);
+        assert_eq!(*bus.state.params.get("q").expect("should succeed"), 1.0);
     }
 
     #[test]

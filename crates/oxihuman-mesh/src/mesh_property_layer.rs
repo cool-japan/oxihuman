@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Named float property layer per vertex.
@@ -116,7 +116,7 @@ mod tests {
     fn get_default_value() {
         let mut s = new_property_layer_set();
         add_property_layer(&mut s, "heat", 3, 0.5);
-        let v = get_property(&s, "heat", 1).unwrap();
+        let v = get_property(&s, "heat", 1).expect("should succeed");
         assert!((v - 0.5).abs() < 1e-6 /* default value */);
     }
 
@@ -125,7 +125,7 @@ mod tests {
         let mut s = new_property_layer_set();
         add_property_layer(&mut s, "mass", 4, 1.0);
         set_property(&mut s, "mass", 2, 2.71);
-        let v = get_property(&s, "mass", 2).unwrap();
+        let v = get_property(&s, "mass", 2).expect("should succeed");
         assert!((v - 2.71).abs() < 1e-5 /* updated value */);
     }
 
@@ -150,7 +150,7 @@ mod tests {
         add_property_layer(&mut s, "r", 2, 7.0);
         set_property(&mut s, "r", 0, 99.0);
         reset_property_layer(&mut s, "r");
-        let v = get_property(&s, "r", 0).unwrap();
+        let v = get_property(&s, "r", 0).expect("should succeed");
         assert!((v - 7.0).abs() < 1e-6 /* reset to default */);
     }
 
@@ -161,7 +161,7 @@ mod tests {
         set_property(&mut s, "mm", 0, -1.0);
         set_property(&mut s, "mm", 1, 5.0);
         set_property(&mut s, "mm", 2, 2.0);
-        let (mn, mx) = property_min_max(&s, "mm").unwrap();
+        let (mn, mx) = property_min_max(&s, "mm").expect("should succeed");
         assert!((mn + 1.0).abs() < 1e-6 /* min = -1 */);
         assert!((mx - 5.0).abs() < 1e-6 /* max = 5 */);
     }

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0 / #![allow(dead_code)]
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0 / #![allow(dead_code)]
 
 /// Result of edge extrusion.
 #[allow(dead_code)]
@@ -101,7 +101,7 @@ mod tests {
     fn test_extrude_position() {
         let (pos, idx) = base_mesh();
         let result = extrude_edges(&pos, &idx, &[0], [0.0, 1.0, 0.0], 2.0);
-        let last = result.positions.last().unwrap();
+        let last = result.positions.last().expect("should succeed");
         assert!((last[1] - 2.0).abs() < 1e-5);
     }
 
@@ -150,7 +150,7 @@ mod tests {
     fn test_zero_distance() {
         let (pos, idx) = base_mesh();
         let result = extrude_edges(&pos, &idx, &[0, 1], [0.0, 1.0, 0.0], 0.0);
-        let last = result.positions.last().unwrap();
+        let last = result.positions.last().expect("should succeed");
         assert!((last[0] - 1.0).abs() < 1e-5);
     }
 }

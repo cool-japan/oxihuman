@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export a named color palette as JSON or CSS custom-properties.
 
@@ -217,7 +217,7 @@ mod tests {
         cpe_add_color(&mut e, make_color("sky", 135, 206, 235, 255));
         let found = cpe_find_by_name(&e, "sky");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().r, 135);
+        assert_eq!(found.expect("should succeed").r, 135);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{Context, Result};
 use std::path::Path;
@@ -151,16 +151,16 @@ mod tests {
         use std::time::{SystemTime, UNIX_EPOCH};
         let nanos = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .unwrap()
+            .expect("should succeed")
             .subsec_nanos();
         let path = PathBuf::from(format!("/tmp/oxihuman_pack_verify_test_{}", nanos));
-        fs::create_dir_all(&path).unwrap();
+        fs::create_dir_all(&path).expect("should succeed");
         path
     }
 
     fn write_file(path: &Path, content: &[u8]) {
-        let mut f = fs::File::create(path).unwrap();
-        f.write_all(content).unwrap();
+        let mut f = fs::File::create(path).expect("should succeed");
+        f.write_all(content).expect("should succeed");
     }
 
     // ------------------------------------------------------------------
@@ -174,7 +174,7 @@ mod tests {
         write_file(&tmp.join("b.bin"), b"world");
         write_file(&tmp.join("c.bin"), b"rust");
 
-        let records = scan_pack(&tmp).unwrap();
+        let records = scan_pack(&tmp).expect("should succeed");
         assert_eq!(records.len(), 3);
     }
 
@@ -184,7 +184,7 @@ mod tests {
         let content = b"oxihuman test data";
         write_file(&tmp.join("data.bin"), content);
 
-        let records = scan_pack(&tmp).unwrap();
+        let records = scan_pack(&tmp).expect("should succeed");
         assert_eq!(records.len(), 1);
         let expected = hash_bytes(content);
         assert_eq!(records[0].sha256, expected);
@@ -196,7 +196,7 @@ mod tests {
         let content = b"1234567890"; // 10 bytes
         write_file(&tmp.join("size_test.bin"), content);
 
-        let records = scan_pack(&tmp).unwrap();
+        let records = scan_pack(&tmp).expect("should succeed");
         assert_eq!(records[0].size_bytes, 10);
     }
 
@@ -211,7 +211,7 @@ mod tests {
         write_file(&tmp.join("b.bin"), b"beta");
         write_file(&tmp.join("c.bin"), b"gamma");
 
-        let records = scan_pack(&tmp).unwrap();
+        let records = scan_pack(&tmp).expect("should succeed");
         let report = verify_pack(&tmp, &records);
 
         assert!(report.is_valid);
@@ -230,7 +230,7 @@ mod tests {
         write_file(&tmp.join("good.bin"), b"good content");
         write_file(&tmp.join("bad.bin"), b"original");
 
-        let records = scan_pack(&tmp).unwrap();
+        let records = scan_pack(&tmp).expect("should succeed");
 
         // Tamper with the file after scanning.
         write_file(&tmp.join("bad.bin"), b"tampered!");
@@ -253,10 +253,10 @@ mod tests {
         write_file(&tmp.join("present.bin"), b"here");
         write_file(&tmp.join("gone.bin"), b"temporary");
 
-        let records = scan_pack(&tmp).unwrap();
+        let records = scan_pack(&tmp).expect("should succeed");
 
         // Remove the file after scanning.
-        fs::remove_file(tmp.join("gone.bin")).unwrap();
+        fs::remove_file(tmp.join("gone.bin")).expect("should succeed");
 
         let report = verify_pack(&tmp, &records);
 
@@ -287,7 +287,7 @@ mod tests {
     fn summary_is_non_empty_when_valid() {
         let tmp = tempdir();
         write_file(&tmp.join("x.bin"), b"data");
-        let records = scan_pack(&tmp).unwrap();
+        let records = scan_pack(&tmp).expect("should succeed");
         let report = verify_pack(&tmp, &records);
         assert!(!report.summary().is_empty());
         assert!(report.summary().contains("OK"));
@@ -297,7 +297,7 @@ mod tests {
     fn summary_is_non_empty_when_invalid() {
         let tmp = tempdir();
         write_file(&tmp.join("x.bin"), b"original");
-        let records = scan_pack(&tmp).unwrap();
+        let records = scan_pack(&tmp).expect("should succeed");
         write_file(&tmp.join("x.bin"), b"changed");
         let report = verify_pack(&tmp, &records);
         assert!(!report.summary().is_empty());

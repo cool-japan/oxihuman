@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! 3x3 matrix math.
 
@@ -272,7 +272,7 @@ mod tests {
     fn test_inverse_identity() {
         /* inverse of identity is identity */
         let id = mat3_identity();
-        let inv = mat3_inverse(&id).unwrap();
+        let inv = mat3_inverse(&id).expect("should succeed");
         for i in 0..3 {
             for j in 0..3 {
                 assert!((inv.m[i][j] - id.m[i][j]).abs() < 1e-5);
@@ -293,7 +293,7 @@ mod tests {
     fn test_inverse_roundtrip() {
         /* A * A^-1 = I for non-singular matrix */
         let s = mat3_from_scale(2.0, 3.0, 4.0);
-        let inv = mat3_inverse(&s).unwrap();
+        let inv = mat3_inverse(&s).expect("should succeed");
         let prod = mat3_mul(&s, &inv);
         let id = mat3_identity();
         for i in 0..3 {

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Bone roll angle export for skeleton rigs.
@@ -107,7 +107,7 @@ mod tests {
     fn test_get_roll() {
         let mut e = new_bone_roll_export();
         add_bone_roll(&mut e, "leg", 1.0);
-        assert!((get_roll(&e, 0).unwrap() - 1.0).abs() < 1e-6);
+        assert!((get_roll(&e, 0).expect("should succeed") - 1.0).abs() < 1e-6);
     }
     #[test]
     fn test_get_by_name() {

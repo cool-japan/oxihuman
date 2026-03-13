@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
@@ -118,7 +118,7 @@ mod tests {
     fn test_get_modifier() {
         let mut e = new_modifier_stack_export("Cube");
         ms_add_modifier(&mut e, make_entry("Mirror", ModifierType::Mirror));
-        let m = ms_get_modifier(&e, 0).unwrap();
+        let m = ms_get_modifier(&e, 0).expect("should succeed");
         assert_eq!(m.name, "Mirror");
     }
 

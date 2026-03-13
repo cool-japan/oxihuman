@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Stub exporter that generates Cap'n Proto schema text from mesh/scene data.
 
@@ -185,7 +185,7 @@ mod tests {
         add_capnp_struct(&mut doc, "M");
         add_capnp_field(&mut doc, "a", "Int32");
         add_capnp_field(&mut doc, "b", "Int32");
-        let st = find_capnp_struct(&doc, "M").unwrap();
+        let st = find_capnp_struct(&doc, "M").expect("should succeed");
         assert_eq!(st.fields[1].index, 1);
     }
 }

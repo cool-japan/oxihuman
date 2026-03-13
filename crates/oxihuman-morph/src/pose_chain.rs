@@ -131,7 +131,7 @@ mod tests {
     fn test_chain_link_at() {
         let mut c = new_pose_chain();
         add_chain_link(&mut c, "knee", 1.0, [0.0, 0.0, 0.0]);
-        assert_eq!(chain_link_at(&c, 0).unwrap().name, "knee");
+        assert_eq!(chain_link_at(&c, 0).expect("should succeed").name, "knee");
         assert!(chain_link_at(&c, 99).is_none());
     }
 
@@ -156,7 +156,7 @@ mod tests {
         add_chain_link(&mut c, "first", 1.0, [0.0, 0.0, 0.0]);
         add_chain_link(&mut c, "second", 1.0, [0.0, 0.0, 0.0]);
         chain_reverse(&mut c);
-        assert_eq!(chain_link_at(&c, 0).unwrap().name, "second");
+        assert_eq!(chain_link_at(&c, 0).expect("should succeed").name, "second");
     }
 
     #[test]

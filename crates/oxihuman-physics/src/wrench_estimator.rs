@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! External wrench estimator stub.
@@ -177,7 +177,7 @@ mod tests {
     fn test_force_direction_unit() {
         /* direction has unit length */
         let w = Wrench::new([1.0, 2.0, 3.0], [0.0; 3]);
-        let d = force_direction(&w).unwrap();
+        let d = force_direction(&w).expect("should succeed");
         let len = (d[0] * d[0] + d[1] * d[1] + d[2] * d[2]).sqrt();
         assert!((len - 1.0).abs() < 1e-5);
     }

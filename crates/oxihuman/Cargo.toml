@@ -13,6 +13,7 @@ keywords      = ["human", "makehuman", "3d", "mesh", "pure-rust"]
 categories    = ["graphics", "game-development", "science", "rendering"]
 
 [dependencies]
+anyhow.workspace           = true
 oxihuman-core.workspace    = true
 oxihuman-morph.workspace   = true
 oxihuman-mesh.workspace    = true
@@ -26,6 +27,18 @@ default = ["viewer"]
 viewer  = ["dep:oxihuman-viewer"]
 wasm    = ["dep:oxihuman-wasm"]
 full    = ["viewer", "wasm"]
+
+[[example]]
+name = "basic_generation"
+path = "examples/basic_generation.rs"
+
+[[example]]
+name = "batch_export"
+path = "examples/batch_export.rs"
+
+[[example]]
+name = "physics_step"
+path = "examples/physics_step.rs"
 
 [lints]
 workspace = true

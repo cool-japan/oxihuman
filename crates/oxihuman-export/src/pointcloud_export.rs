@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Point cloud export in XYZ, PCD, and PLY formats.
 
@@ -323,7 +323,7 @@ mod tests {
         add_point(&mut cloud, pt);
         let xyz = export_to_xyz(&cloud);
         // Should have 6 numbers per line (x y z nx ny nz)
-        let parts: Vec<&str> = xyz.lines().next().unwrap().split_whitespace().collect();
+        let parts: Vec<&str> = xyz.lines().next().expect("should succeed").split_whitespace().collect();
         assert_eq!(parts.len(), 6);
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Pairing heap stub — min-heap with simple merge-based structure.
@@ -128,7 +128,7 @@ mod tests {
         let mut h: PairingHeap<u32, u32> = PairingHeap::new();
         h.insert(5, 50);
         h.insert(2, 20);
-        let (k, _) = h.peek_min().unwrap();
+        let (k, _) = h.peek_min().expect("should succeed");
         assert_eq!(*k, 2 /* min key */);
     }
 
@@ -137,7 +137,7 @@ mod tests {
         let mut h: PairingHeap<u32, u32> = PairingHeap::new();
         h.insert(4, 40);
         h.insert(1, 10);
-        let (k, v) = h.extract_min().unwrap();
+        let (k, v) = h.extract_min().expect("should succeed");
         assert_eq!(k, 1 /* min extracted */);
         assert_eq!(v, 10);
     }
@@ -176,7 +176,7 @@ mod tests {
         a.insert(10, 10);
         b.insert(5, 5);
         a.merge(b);
-        let (k, _) = a.peek_min().unwrap();
+        let (k, _) = a.peek_min().expect("should succeed");
         assert_eq!(*k, 5 /* min from merged heap */);
     }
 

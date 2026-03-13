@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Cloth tearing and fracture mechanics.
 //!
@@ -345,7 +345,7 @@ mod tests {
     fn test_tear_length_initial() {
         let mut sys = make_system();
         let id = new_cloth_tear(&mut sys, (0, 1), 60.0);
-        let tear = sys.tears.iter().find(|t| t.id == id).unwrap();
+        let tear = sys.tears.iter().find(|t| t.id == id).expect("should succeed");
         assert_eq!(tear_length(tear), 1);
     }
 
@@ -356,7 +356,7 @@ mod tests {
         let candidates = vec![(1, 2), (1, 3)];
         let severed = propagate_tear(&mut sys, id, &candidates, &[]);
         assert!(severed.is_some());
-        let tear = sys.tears.iter().find(|t| t.id == id).unwrap();
+        let tear = sys.tears.iter().find(|t| t.id == id).expect("should succeed");
         assert_eq!(tear_length(tear), 2);
     }
 
@@ -366,7 +366,7 @@ mod tests {
         let id = new_cloth_tear(&mut sys, (0, 1), 60.0);
         let severed = propagate_tear(&mut sys, id, &[], &[]);
         assert!(severed.is_none());
-        let tear = sys.tears.iter().find(|t| t.id == id).unwrap();
+        let tear = sys.tears.iter().find(|t| t.id == id).expect("should succeed");
         assert!(!tear.active);
     }
 
@@ -375,7 +375,7 @@ mod tests {
         let mut sys = make_system();
         let id0 = new_cloth_tear(&mut sys, (0, 1), 60.0);
         let id1 = new_cloth_tear(&mut sys, (2, 3), 55.0);
-        sys.tears.iter_mut().find(|t| t.id == id0).unwrap().active = false;
+        sys.tears.iter_mut().find(|t| t.id == id0).expect("should succeed").active = false;
         let active = active_tears(&sys);
         assert_eq!(active.len(), 1);
         assert_eq!(active[0].id, id1);
@@ -385,7 +385,7 @@ mod tests {
     fn test_apply_tear_to_mesh_adds_verts() {
         let mut sys = make_system();
         let id = new_cloth_tear(&mut sys, (0, 1), 60.0);
-        let tear = sys.tears.iter().find(|t| t.id == id).unwrap().clone();
+        let tear = sys.tears.iter().find(|t| t.id == id).expect("should succeed").clone();
         let mut positions: Vec<[f32; 3]> =
             vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]];
         let before = positions.len();
@@ -414,7 +414,7 @@ mod tests {
     fn test_tear_to_json_has_id() {
         let mut sys = make_system();
         let id = new_cloth_tear(&mut sys, (0, 1), 60.0);
-        let tear = sys.tears.iter().find(|t| t.id == id).unwrap();
+        let tear = sys.tears.iter().find(|t| t.id == id).expect("should succeed");
         let json = tear_to_json(tear);
         assert!(json.contains(&format!("\"id\":{id}")));
     }
@@ -423,7 +423,7 @@ mod tests {
     fn test_tear_to_json_has_edges_key() {
         let mut sys = make_system();
         let id = new_cloth_tear(&mut sys, (3, 7), 60.0);
-        let tear = sys.tears.iter().find(|t| t.id == id).unwrap();
+        let tear = sys.tears.iter().find(|t| t.id == id).expect("should succeed");
         let json = tear_to_json(tear);
         assert!(json.contains("edges"));
     }

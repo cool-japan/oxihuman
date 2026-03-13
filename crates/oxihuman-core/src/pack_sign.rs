@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! HMAC-like asset pack signing using SHA-256 double-hash construction.
 //!
@@ -244,17 +244,17 @@ mod tests {
         use std::time::{SystemTime, UNIX_EPOCH};
         let nanos = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .unwrap()
+            .expect("should succeed")
             .subsec_nanos();
         let path =
             std::path::PathBuf::from(format!("/tmp/oxihuman_pack_sign_{}_{}", suffix, nanos));
-        std::fs::create_dir_all(&path).unwrap();
+        std::fs::create_dir_all(&path).expect("should succeed");
         path
     }
 
     fn write_file(dir: &std::path::Path, name: &str, data: &[u8]) {
-        let mut f = std::fs::File::create(dir.join(name)).unwrap();
-        f.write_all(data).unwrap();
+        let mut f = std::fs::File::create(dir.join(name)).expect("should succeed");
+        f.write_all(data).expect("should succeed");
     }
 
     // 1. double_hash_sign is deterministic
@@ -325,7 +325,7 @@ mod tests {
             sig.timestamp,
             &sig.signer_id,
         )
-        .unwrap();
+        .expect("should succeed");
         assert_eq!(recovered.signature, raw);
         assert_eq!(recovered.version, 1);
         assert_eq!(recovered.algorithm, "sha256-chain");
@@ -360,8 +360,8 @@ mod tests {
             },
         };
 
-        write_signature_file(&signed, &sig_path).unwrap();
-        let recovered = read_signature_file(&sig_path).unwrap();
+        write_signature_file(&signed, &sig_path).expect("should succeed");
+        let recovered = read_signature_file(&sig_path).expect("should succeed");
 
         assert_eq!(recovered.manifest_hash, signed.manifest_hash);
         assert_eq!(recovered.signature.signature, raw_sig);
@@ -377,7 +377,7 @@ mod tests {
         write_file(&tmp, "b.bin", b"beta");
 
         let key = b"correct-key";
-        let signed = sign_pack_dir(&tmp, key, "test-signer").unwrap();
+        let signed = sign_pack_dir(&tmp, key, "test-signer").expect("should succeed");
         assert!(verify_pack_signature(&tmp, &signed, key));
     }
 
@@ -387,7 +387,7 @@ mod tests {
         let tmp = tempdir("verify_wrong_key");
         write_file(&tmp, "x.bin", b"data");
 
-        let signed = sign_pack_dir(&tmp, b"correct-key", "signer").unwrap();
+        let signed = sign_pack_dir(&tmp, b"correct-key", "signer").expect("should succeed");
         assert!(!verify_pack_signature(&tmp, &signed, b"wrong-key"));
     }
 
@@ -398,7 +398,7 @@ mod tests {
         write_file(&tmp, "file.bin", b"original");
 
         let key = b"tamper-key";
-        let signed = sign_pack_dir(&tmp, key, "signer").unwrap();
+        let signed = sign_pack_dir(&tmp, key, "signer").expect("should succeed");
 
         // Tamper after signing
         write_file(&tmp, "file.bin", b"tampered!");
@@ -414,8 +414,8 @@ mod tests {
         write_file(&tmp, "a.bin", b"alpha");
         write_file(&tmp, "b.bin", b"beta");
 
-        let h1 = pack_manifest_hash(&tmp).unwrap();
-        let h2 = pack_manifest_hash(&tmp).unwrap();
+        let h1 = pack_manifest_hash(&tmp).expect("should succeed");
+        let h2 = pack_manifest_hash(&tmp).expect("should succeed");
         assert_eq!(h1, h2);
     }
 }

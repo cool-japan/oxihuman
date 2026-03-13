@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! DAG-based task scheduler with topological sort.
 
@@ -146,10 +146,10 @@ mod tests {
         let a = add_dag_node(&mut dag, "a");
         let b = add_dag_node(&mut dag, "b");
         add_dag_edge(&mut dag, a, b);
-        let sorted = topological_sort(&dag).unwrap();
+        let sorted = topological_sort(&dag).expect("should succeed");
         assert_eq!(sorted.len(), 2);
-        let pos_a = sorted.iter().position(|&x| x == a).unwrap();
-        let pos_b = sorted.iter().position(|&x| x == b).unwrap();
+        let pos_a = sorted.iter().position(|&x| x == a).expect("should succeed");
+        let pos_b = sorted.iter().position(|&x| x == b).expect("should succeed");
         assert!(pos_a < pos_b);
     }
 
@@ -182,7 +182,7 @@ mod tests {
     #[test]
     fn test_empty_topo_sort() {
         let dag = new_dag_scheduler();
-        let sorted = topological_sort(&dag).unwrap();
+        let sorted = topological_sort(&dag).expect("should succeed");
         assert!(sorted.is_empty());
     }
 
@@ -194,7 +194,7 @@ mod tests {
         let c = add_dag_node(&mut dag, "c");
         add_dag_edge(&mut dag, a, b);
         add_dag_edge(&mut dag, b, c);
-        let sorted = topological_sort(&dag).unwrap();
+        let sorted = topological_sort(&dag).expect("should succeed");
         assert_eq!(sorted.len(), 3);
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Morph channel export: named morph targets with weights.
@@ -100,7 +100,7 @@ mod tests {
     fn test_get_channel() {
         let mut e = new_morph_channel_export();
         mc_add_channel(&mut e, "blink", 0.3, 50);
-        let c = mc_get_channel(&e, 0).unwrap();
+        let c = mc_get_channel(&e, 0).expect("should succeed");
         assert_eq!(c.name, "blink");
     }
 

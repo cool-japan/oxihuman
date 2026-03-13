@@ -334,3 +334,431 @@ mod tests {
         assert!(cfg.gravity[1] < 0.0);
     }
 }
+
+// ---------------------------------------------------------------------------
+// XPBD Secondary-Motion Constraints
+// ---------------------------------------------------------------------------
+
+/// A constraint applied during the XPBD projection pass.
+pub enum SecondaryConstraint {
+    /// Fix a single particle to a world-space target position.
+    Pin { vertex_idx: usize, target: [f32; 3] },
+    /// Maintain a rest distance between two particles.
+    Length { a: usize, b: usize, rest_len: f32 },
+    /// Maintain an approximate volume for a group of particles via radial scaling.
+    Volume { vertices: Vec<usize>, rest_vol: f32 },
+}
+
+/// A single simulated point mass in the XPBD system.
+pub struct XpbdParticle {
+    pub pos: [f32; 3],
+    pub prev_pos: [f32; 3],
+    /// Inverse mass.  `0.0` means the particle is static / pinned by mass.
+    pub inv_mass: f32,
+}
+
+/// Full XPBD secondary-motion system containing particles and constraints.
+pub struct SecondaryMotionSystem {
+    pub particles: Vec<XpbdParticle>,
+    pub constraints: Vec<SecondaryConstraint>,
+    pub gravity: [f32; 3],
+    pub xpbd_iterations: u32,
+}
+
+impl SecondaryMotionSystem {
+    /// Create a new empty system with the given gravity vector.
+    pub fn new(gravity: [f32; 3]) -> Self {
+        SecondaryMotionSystem {
+            particles: Vec::new(),
+            constraints: Vec::new(),
+            gravity,
+            xpbd_iterations: 4,
+        }
+    }
+
+    /// Add a particle at `pos` with `inv_mass` (use `0.0` for a static particle).
+    pub fn add_particle(&mut self, pos: [f32; 3], inv_mass: f32) {
+        self.particles.push(XpbdParticle {
+            pos,
+            prev_pos: pos,
+            inv_mass,
+        });
+    }
+
+    /// Append a constraint to the system.
+    pub fn add_constraint(&mut self, c: SecondaryConstraint) {
+        self.constraints.push(c);
+    }
+
+    /// Advance the simulation by one time step `dt`.
+    ///
+    /// 1. Semi-implicit Euler (gravity + Verlet velocity integration).
+    /// 2. XPBD projection (`xpbd_iterations` passes): Pin, Length, Volume.
+    /// 3. `prev_pos` is already updated in step 1.
+    pub fn update(&mut self, dt: f32) {
+        // --- Step 1: Semi-implicit Euler ---------------------------------
+        for p in self.particles.iter_mut() {
+            if p.inv_mass <= 0.0 {
+                continue;
+            }
+            let velocity = vec3_sub(p.pos, p.prev_pos);
+            p.prev_pos = p.pos;
+            let grav_dt2 = [
+                self.gravity[0] * dt * dt,
+                self.gravity[1] * dt * dt,
+                self.gravity[2] * dt * dt,
+            ];
+            p.pos = vec3_add(vec3_add(p.pos, velocity), grav_dt2);
+        }
+
+        // --- Step 2: XPBD projection -------------------------------------
+        for _ in 0..self.xpbd_iterations {
+            // We need index-based access; collect indices to avoid borrow issues
+            let n_constraints = self.constraints.len();
+            for ci in 0..n_constraints {
+                // Safety: we use raw pointer arithmetic only inside the unsafe
+                // block to satisfy the borrow checker.  The indices are
+                // validated before use.
+                match &self.constraints[ci] {
+                    SecondaryConstraint::Pin { vertex_idx, target } => {
+                        let idx = *vertex_idx;
+                        let tgt = *target;
+                        if idx < self.particles.len() {
+                            let p = &mut self.particles[idx];
+                            if p.inv_mass > 0.0 {
+                                p.pos = tgt;
+                            }
+                        }
+                    }
+                    SecondaryConstraint::Length { a, b, rest_len } => {
+                        let (ia, ib, rl) = (*a, *b, *rest_len);
+                        if ia >= self.particles.len() || ib >= self.particles.len() {
+                            continue;
+                        }
+                        // Read current positions
+                        let pos_a = self.particles[ia].pos;
+                        let pos_b = self.particles[ib].pos;
+                        let inv_a = self.particles[ia].inv_mass;
+                        let inv_b = self.particles[ib].inv_mass;
+
+                        let delta = vec3_sub(pos_b, pos_a);
+                        let dist = vec3_len(delta);
+                        if dist < 1e-10 {
+                            continue;
+                        }
+                        let w_sum = inv_a + inv_b;
+                        if w_sum == 0.0 {
+                            continue;
+                        }
+                        let scale = (dist - rl) / dist;
+                        let correction = [delta[0] * scale, delta[1] * scale, delta[2] * scale];
+                        self.particles[ia].pos = vec3_add(
+                            self.particles[ia].pos,
+                            vec3_scale(correction, inv_a / w_sum),
+                        );
+                        self.particles[ib].pos = vec3_sub(
+                            self.particles[ib].pos,
+                            vec3_scale(correction, inv_b / w_sum),
+                        );
+                    }
+                    SecondaryConstraint::Volume { vertices, rest_vol } => {
+                        let indices: Vec<usize> = vertices.clone();
+                        let rv = *rest_vol;
+                        let n = indices.len();
+                        if n == 0 {
+                            continue;
+                        }
+
+                        // Compute centroid
+                        let mut centroid = [0.0_f32; 3];
+                        let mut valid_count = 0usize;
+                        for &vi in &indices {
+                            if vi < self.particles.len() {
+                                centroid = vec3_add(centroid, self.particles[vi].pos);
+                                valid_count += 1;
+                            }
+                        }
+                        if valid_count == 0 {
+                            continue;
+                        }
+                        let inv_n = 1.0 / valid_count as f32;
+                        centroid = vec3_scale(centroid, inv_n);
+
+                        // Approximate current "volume" as mean squared distance from centroid
+                        let mut mean_r2 = 0.0_f32;
+                        for &vi in &indices {
+                            if vi >= self.particles.len() {
+                                continue;
+                            }
+                            let d = vec3_sub(self.particles[vi].pos, centroid);
+                            mean_r2 += vec3_dot(d, d);
+                        }
+                        mean_r2 *= inv_n;
+
+                        if mean_r2 < 1e-12 {
+                            continue;
+                        }
+
+                        // rest_vol is treated as the rest mean-squared radius
+                        let ratio = (rv / mean_r2).sqrt();
+
+                        for &vi in &indices {
+                            if vi >= self.particles.len() {
+                                continue;
+                            }
+                            if self.particles[vi].inv_mass <= 0.0 {
+                                continue;
+                            }
+                            let offset = vec3_sub(self.particles[vi].pos, centroid);
+                            let new_offset = vec3_scale(offset, ratio);
+                            self.particles[vi].pos = vec3_add(centroid, new_offset);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Return a snapshot of all current particle positions.
+    pub fn particle_positions(&self) -> Vec<[f32; 3]> {
+        self.particles.iter().map(|p| p.pos).collect()
+    }
+
+    /// Detect particle pairs that are closer than `2 * collision_radius`.
+    ///
+    /// Uses O(n²) brute-force for n < 32, and a spatial hash grid for n ≥ 32.
+    pub fn detect_self_collisions(&self, collision_radius: f32) -> Vec<(usize, usize)> {
+        let n = self.particles.len();
+        let threshold = 2.0 * collision_radius;
+
+        if n < 32 {
+            // O(n²) brute-force
+            let mut pairs = Vec::new();
+            for i in 0..n {
+                for j in (i + 1)..n {
+                    let d = vec3_sub(self.particles[i].pos, self.particles[j].pos);
+                    if vec3_len(d) < threshold {
+                        pairs.push((i, j));
+                    }
+                }
+            }
+            pairs
+        } else {
+            // Spatial hash grid
+            spatial_hash_collisions(&self.particles, threshold)
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Private spatial hash collision detection (used when n >= 32)
+// ---------------------------------------------------------------------------
+
+fn spatial_hash_collisions(particles: &[XpbdParticle], threshold: f32) -> Vec<(usize, usize)> {
+    use std::collections::HashMap;
+
+    let cell_size = threshold.max(1e-6);
+    let inv_cell = 1.0 / cell_size;
+
+    let cell_key = |pos: [f32; 3]| -> (i64, i64, i64) {
+        (
+            (pos[0] * inv_cell).floor() as i64,
+            (pos[1] * inv_cell).floor() as i64,
+            (pos[2] * inv_cell).floor() as i64,
+        )
+    };
+
+    // Build grid: cell -> list of particle indices
+    let mut grid: HashMap<(i64, i64, i64), Vec<usize>> = HashMap::new();
+    for (i, p) in particles.iter().enumerate() {
+        let key = cell_key(p.pos);
+        grid.entry(key).or_default().push(i);
+    }
+
+    let mut pairs: Vec<(usize, usize)> = Vec::new();
+    // For each particle, check its own cell and the 26 neighbouring cells
+    let offsets: &[(i64, i64, i64)] = &[
+        (-1, -1, -1),
+        (-1, -1, 0),
+        (-1, -1, 1),
+        (-1, 0, -1),
+        (-1, 0, 0),
+        (-1, 0, 1),
+        (-1, 1, -1),
+        (-1, 1, 0),
+        (-1, 1, 1),
+        (0, -1, -1),
+        (0, -1, 0),
+        (0, -1, 1),
+        (0, 0, -1),
+        (0, 0, 0),
+        (0, 0, 1),
+        (0, 1, -1),
+        (0, 1, 0),
+        (0, 1, 1),
+        (1, -1, -1),
+        (1, -1, 0),
+        (1, -1, 1),
+        (1, 0, -1),
+        (1, 0, 0),
+        (1, 0, 1),
+        (1, 1, -1),
+        (1, 1, 0),
+        (1, 1, 1),
+    ];
+
+    // Use a HashSet to deduplicate pairs
+    let mut seen: std::collections::HashSet<(usize, usize)> = std::collections::HashSet::new();
+
+    for (i, p) in particles.iter().enumerate() {
+        let (cx, cy, cz) = cell_key(p.pos);
+        for &(ox, oy, oz) in offsets {
+            let neighbour_key = (cx + ox, cy + oy, cz + oz);
+            if let Some(bucket) = grid.get(&neighbour_key) {
+                for &j in bucket {
+                    if i == j {
+                        continue;
+                    }
+                    let (lo, hi) = if i < j { (i, j) } else { (j, i) };
+                    if seen.contains(&(lo, hi)) {
+                        continue;
+                    }
+                    let d = vec3_sub(particles[i].pos, particles[j].pos);
+                    if vec3_len(d) < threshold {
+                        seen.insert((lo, hi));
+                        pairs.push((lo, hi));
+                    }
+                }
+            }
+        }
+    }
+
+    pairs.sort_unstable();
+    pairs
+}
+
+// ---------------------------------------------------------------------------
+// Inline vec3 helpers (private)
+// ---------------------------------------------------------------------------
+
+#[inline]
+fn vec3_add(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
+    [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+}
+
+#[inline]
+fn vec3_sub(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
+    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+}
+
+#[inline]
+fn vec3_scale(a: [f32; 3], s: f32) -> [f32; 3] {
+    [a[0] * s, a[1] * s, a[2] * s]
+}
+
+#[inline]
+fn vec3_len(a: [f32; 3]) -> f32 {
+    (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]).sqrt()
+}
+
+#[inline]
+fn vec3_dot(a: [f32; 3], b: [f32; 3]) -> f32 {
+    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+}
+
+// ---------------------------------------------------------------------------
+// Tests for XPBD system
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod xpbd_tests {
+    use super::*;
+
+    /// Pin constraint holds the target position after many steps.
+    #[test]
+    fn test_pin_holds_fixed() {
+        let mut sys = SecondaryMotionSystem::new([0.0, -9.8, 0.0]);
+        sys.add_particle([1.0, 2.0, 3.0], 1.0); // particle 0 — will be pinned
+        sys.add_particle([0.0, 0.0, 0.0], 0.0); // particle 1 — static mass
+        sys.add_constraint(SecondaryConstraint::Pin {
+            vertex_idx: 0,
+            target: [1.0, 2.0, 3.0],
+        });
+
+        for _ in 0..10 {
+            sys.update(0.016);
+        }
+
+        let pos = sys.particles[0].pos;
+        assert!(
+            (pos[0] - 1.0).abs() < 1e-5
+                && (pos[1] - 2.0).abs() < 1e-5
+                && (pos[2] - 3.0).abs() < 1e-5,
+            "Pinned particle drifted: {pos:?}"
+        );
+    }
+
+    /// Length constraint keeps rest distance within 5% after 30 steps.
+    #[test]
+    fn test_length_constraint_preserves_distance() {
+        let mut sys = SecondaryMotionSystem::new([0.0, 0.0, 0.0]);
+        sys.add_particle([0.0, 0.0, 0.0], 1.0);
+        sys.add_particle([2.0, 0.0, 0.0], 1.0); // initially 2.0 apart; rest is 1.0
+        sys.add_constraint(SecondaryConstraint::Length {
+            a: 0,
+            b: 1,
+            rest_len: 1.0,
+        });
+
+        for _ in 0..30 {
+            sys.update(0.016);
+        }
+
+        let p0 = sys.particles[0].pos;
+        let p1 = sys.particles[1].pos;
+        let d = vec3_len(vec3_sub(p1, p0));
+        assert!(
+            (d - 1.0).abs() < 0.05,
+            "Length {d} deviates more than 5% from rest_len=1.0"
+        );
+    }
+
+    /// Under gravity both particles drift down, but their mutual distance stays ≈1.0.
+    #[test]
+    fn test_no_stretch_under_gravity() {
+        let mut sys = SecondaryMotionSystem::new([0.0, -9.8, 0.0]);
+        sys.add_particle([0.0, 0.0, 0.0], 1.0);
+        sys.add_particle([0.0, 1.0, 0.0], 1.0);
+        sys.add_constraint(SecondaryConstraint::Length {
+            a: 0,
+            b: 1,
+            rest_len: 1.0,
+        });
+        // Raise iteration count so the constraint is well-satisfied under gravity
+        sys.xpbd_iterations = 20;
+
+        for _ in 0..30 {
+            sys.update(0.016);
+        }
+
+        let p0 = sys.particles[0].pos;
+        let p1 = sys.particles[1].pos;
+        let d = vec3_len(vec3_sub(p1, p0));
+        assert!(
+            (d - 1.0).abs() < 0.05,
+            "Distance under gravity {d} deviates more than 5% from 1.0"
+        );
+    }
+
+    /// Two nearby particles are detected as a collision pair.
+    #[test]
+    fn test_self_collision_detection() {
+        let mut sys = SecondaryMotionSystem::new([0.0, 0.0, 0.0]);
+        sys.add_particle([0.0, 0.0, 0.0], 1.0);
+        sys.add_particle([0.1, 0.0, 0.0], 1.0);
+
+        let pairs = sys.detect_self_collisions(0.15);
+        assert_eq!(pairs.len(), 1, "Expected 1 collision pair, got {:?}", pairs);
+        assert_eq!(pairs[0], (0, 1));
+    }
+}

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A snapshot of morph weights at a given timestamp.
@@ -155,7 +155,7 @@ mod tests {
         let mut h = new_morph_history(10);
         push_snapshot(&mut h, vec![0.2], 1);
         push_snapshot(&mut h, vec![0.8], 2);
-        let prev = undo(&mut h).unwrap();
+        let prev = undo(&mut h).expect("should succeed");
         assert!((prev[0] - 0.2).abs() < 1e-6);
     }
 
@@ -166,7 +166,7 @@ mod tests {
         push_snapshot(&mut h, vec![0.9], 2);
         undo(&mut h);
         assert!(can_redo(&h));
-        let next = redo(&mut h).unwrap();
+        let next = redo(&mut h).expect("should succeed");
         assert!((next[0] - 0.9).abs() < 1e-6);
     }
 
@@ -226,7 +226,7 @@ mod tests {
         let mut h = new_morph_history(10);
         push_snapshot(&mut h, vec![0.1], 1);
         push_snapshot(&mut h, vec![0.9], 2);
-        let w = undo_morph(&mut h).unwrap();
+        let w = undo_morph(&mut h).expect("should succeed");
         assert!((w[0] - 0.1).abs() < 1e-6);
     }
 
@@ -236,7 +236,7 @@ mod tests {
         push_snapshot(&mut h, vec![0.1], 1);
         push_snapshot(&mut h, vec![0.9], 2);
         undo_morph(&mut h);
-        let w = redo_morph(&mut h).unwrap();
+        let w = redo_morph(&mut h).expect("should succeed");
         assert!((w[0] - 0.9).abs() < 1e-6);
     }
 

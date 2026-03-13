@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! UUID stub (deterministic from seed, no real randomness).
 
@@ -126,7 +126,7 @@ mod tests {
     fn test_uuid_roundtrip() {
         let u = uuid_from_seed(12345);
         let s = uuid_to_string(&u);
-        let u2 = uuid_from_str(&s).unwrap();
+        let u2 = uuid_from_str(&s).expect("should succeed");
         assert_eq!(u, u2);
     }
 

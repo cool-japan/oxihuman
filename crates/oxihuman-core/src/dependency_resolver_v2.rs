@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Topological dependency resolver using Kahn's algorithm.
@@ -189,8 +189,8 @@ mod tests {
         dr_add_dep(&mut r, "D", "C");
         match dr_resolve(&r) {
             ResolveResult::Order(o) => {
-                let ai = o.iter().position(|x| x == "A").unwrap();
-                let di = o.iter().position(|x| x == "D").unwrap();
+                let ai = o.iter().position(|x| x == "A").expect("should succeed");
+                let di = o.iter().position(|x| x == "D").expect("should succeed");
                 assert!(ai < di /* A before D */);
             }
             _ => panic!("expected order"),

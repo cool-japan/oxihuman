@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GLTF 2.0 separated export: produces .gltf JSON + .bin binary file.
 //!
@@ -205,10 +205,10 @@ mod tests {
         let mesh = suited_mesh();
         let gltf = std::path::PathBuf::from("/tmp/test_oxihuman.gltf");
         let bin = std::path::PathBuf::from("/tmp/test_oxihuman.bin");
-        export_gltf_sep(&mesh, &gltf, &bin).unwrap();
+        export_gltf_sep(&mesh, &gltf, &bin).expect("should succeed");
         assert!(gltf.exists(), ".gltf file should exist");
         assert!(bin.exists(), ".bin file should exist");
-        verify_gltf_sep(&gltf).unwrap();
+        verify_gltf_sep(&gltf).expect("should succeed");
         std::fs::remove_file(&gltf).ok();
         std::fs::remove_file(&bin).ok();
     }
@@ -218,8 +218,8 @@ mod tests {
         let mesh = suited_mesh();
         let gltf = std::path::PathBuf::from("/tmp/ref_test.gltf");
         let bin = std::path::PathBuf::from("/tmp/ref_test.bin");
-        export_gltf_sep(&mesh, &gltf, &bin).unwrap();
-        let content = std::fs::read_to_string(&gltf).unwrap();
+        export_gltf_sep(&mesh, &gltf, &bin).expect("should succeed");
+        let content = std::fs::read_to_string(&gltf).expect("should succeed");
         assert!(
             content.contains("ref_test.bin"),
             "gltf should reference bin filename"
@@ -233,8 +233,8 @@ mod tests {
         let mesh = suited_mesh();
         let gltf = std::path::PathBuf::from("/tmp/size_test.gltf");
         let bin = std::path::PathBuf::from("/tmp/size_test.bin");
-        export_gltf_sep(&mesh, &gltf, &bin).unwrap();
-        let bin_size = std::fs::metadata(&bin).unwrap().len() as usize;
+        export_gltf_sep(&mesh, &gltf, &bin).expect("should succeed");
+        let bin_size = std::fs::metadata(&bin).expect("should succeed").len() as usize;
         // 3 verts: pos(12) + norm(12) + uv(8) = 32 bytes/vert × 3 = 96 + idx(4×3=12) = 108, padded to 112
         let expected = (3 * (12 + 12 + 8) + 3 * 4 + 3) & !3; // pad to 4
         assert_eq!(

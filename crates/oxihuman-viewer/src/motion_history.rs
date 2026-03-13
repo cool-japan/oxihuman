@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Motion history buffer — rolling per-object velocity and trajectory recording.
@@ -166,7 +166,7 @@ mod tests {
         mh_push(&mut h, [1.0, 0.0, 0.0], [0.0; 3], 1.0);
         mh_push(&mut h, [2.0, 0.0, 0.0], [0.0; 3], 2.0);
         assert_eq!(mh_sample_count(&h), 2);
-        assert!((mh_oldest(&h).unwrap().position[0] - 1.0).abs() < 1e-5);
+        assert!((mh_oldest(&h).expect("should succeed").position[0] - 1.0).abs() < 1e-5);
     }
 
     #[test]
@@ -218,6 +218,6 @@ mod tests {
         let mut h = new_motion_history(1, 10);
         mh_push(&mut h, [0.0; 3], [0.0; 3], 0.0);
         mh_push(&mut h, [5.0, 0.0, 0.0], [0.0; 3], 1.0);
-        assert!((mh_latest(&h).unwrap().time_s - 1.0).abs() < 1e-5);
+        assert!((mh_latest(&h).expect("should succeed").time_s - 1.0).abs() < 1e-5);
     }
 }

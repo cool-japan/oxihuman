@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Signed distance field (SDF) export for mesh surfaces.
@@ -133,7 +133,7 @@ mod tests {
     fn test_set_get_df_value() {
         let mut df = small_df();
         set_df_value(&mut df, 1, 1, 1, -0.5);
-        let v = get_df_value(&df, 1, 1, 1).unwrap();
+        let v = get_df_value(&df, 1, 1, 1).expect("should succeed");
         assert!((v + 0.5).abs() < 1e-6);
     }
 
@@ -149,7 +149,7 @@ mod tests {
         let mut df = small_df();
         set_df_value(&mut df, 0, 0, 0, 100.0);
         clamp_df(&mut df, 10.0);
-        assert!(get_df_value(&df, 0, 0, 0).unwrap() <= 10.0);
+        assert!(get_df_value(&df, 0, 0, 0).expect("should succeed") <= 10.0);
     }
 
     #[test]

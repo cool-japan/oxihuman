@@ -118,7 +118,7 @@ mod tests {
     #[test]
     fn test_lod_screen_size() {
         let lod = sample();
-        assert!((lod_screen_size(&lod, 2).unwrap() - 0.1).abs() < 1e-6);
+        assert!((lod_screen_size(&lod, 2).expect("should succeed") - 0.1).abs() < 1e-6);
     }
 
     #[test]

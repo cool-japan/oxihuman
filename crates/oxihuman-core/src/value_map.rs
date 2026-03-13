@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Polymorphic value map: string key -> typed value variant.
@@ -143,7 +143,7 @@ mod tests {
     fn test_set_and_get_float() {
         let mut vm = new_value_map();
         vm_set_float(&mut vm, "speed", 3.0);
-        assert!((vm_get_float(&vm, "speed").unwrap() - 3.0).abs() < 1e-6);
+        assert!((vm_get_float(&vm, "speed").expect("should succeed") - 3.0).abs() < 1e-6);
     }
 
     #[test]
@@ -201,7 +201,7 @@ mod tests {
     fn test_text_value() {
         let mut vm = new_value_map();
         vm_set_text(&mut vm, "name", "Alice");
-        let val = vm_get(&vm, "name").unwrap();
+        let val = vm_get(&vm, "name").expect("should succeed");
         assert_eq!(*val, MapVal::Text("Alice".to_string()));
     }
 }

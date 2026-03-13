@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! LiDAR point cloud sensor stub.
@@ -166,7 +166,7 @@ mod tests {
     fn test_cloud_centroid_single() {
         /* centroid of one point is that point */
         let pts = vec![make_point(1.0, 2.0, 3.0)];
-        let c = cloud_centroid(&pts).unwrap();
+        let c = cloud_centroid(&pts).expect("should succeed");
         assert!((c[0] - 1.0).abs() < 1e-6);
     }
 
@@ -243,7 +243,7 @@ mod tests {
             time: 1.0,
             points: vec![],
         });
-        assert_eq!(s.latest().unwrap().frame_index, 7);
+        assert_eq!(s.latest().expect("should succeed").frame_index, 7);
     }
 
     #[test]

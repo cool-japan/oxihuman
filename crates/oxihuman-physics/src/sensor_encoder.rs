@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Joint angle encoder sensor model.
@@ -211,6 +211,6 @@ mod tests {
             time: 1.0,
             count: 512,
         });
-        assert_eq!(s.latest().unwrap().count, 512);
+        assert_eq!(s.latest().expect("should succeed").count, 512);
     }
 }

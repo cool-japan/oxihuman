@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Diff and patch operations on byte slices.
 
@@ -221,7 +221,7 @@ mod tests {
     fn test_serialization_roundtrip() {
         let p = create_patch(b"hello", b"world");
         let bytes = patch_to_bytes(&p);
-        let p2 = patch_from_bytes(&bytes).unwrap();
+        let p2 = patch_from_bytes(&bytes).expect("should succeed");
         assert_eq!(patch_op_count(&p2), patch_op_count(&p));
     }
 

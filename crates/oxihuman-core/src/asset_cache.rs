@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! LRU asset cache with size limits and eviction.
 
@@ -229,7 +229,7 @@ mod tests {
         cache_get(&mut cache, "a");
         let top = most_accessed(&cache);
         assert!(top.is_some());
-        assert_eq!(top.unwrap().key, "b");
+        assert_eq!(top.expect("should succeed").key, "b");
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! General spatial indexing for core-level queries: 2D uniform grid + KD-tree stub.
 
@@ -408,7 +408,7 @@ mod tests {
         let mut idx = make_small_idx();
         insert_point(&mut idx, 42, 50.0, 50.0);
         rebuild_index(&mut idx);
-        let nn = nearest_neighbor(&idx, 55.0, 55.0).unwrap();
+        let nn = nearest_neighbor(&idx, 55.0, 55.0).expect("should succeed");
         assert_eq!(nn.id, 42);
     }
 
@@ -419,7 +419,7 @@ mod tests {
         insert_point(&mut idx, 2, 50.0, 50.0);
         insert_point(&mut idx, 3, 90.0, 90.0);
         rebuild_index(&mut idx);
-        let nn = nearest_neighbor(&idx, 48.0, 48.0).unwrap();
+        let nn = nearest_neighbor(&idx, 48.0, 48.0).expect("should succeed");
         assert_eq!(nn.id, 2);
     }
 
@@ -507,7 +507,7 @@ mod tests {
         let mut idx = make_small_idx();
         insert_point(&mut idx, 1, 10.0, 20.0);
         insert_point(&mut idx, 2, 80.0, 90.0);
-        let b = index_bounds(&idx).unwrap();
+        let b = index_bounds(&idx).expect("should succeed");
         assert!((b.min_x - 10.0).abs() < 1e-5);
         assert!((b.max_y - 90.0).abs() < 1e-5);
     }
@@ -544,7 +544,7 @@ mod tests {
         insert_point(&mut idx, 2, 40.0, 40.0);
         rebuild_index(&mut idx);
         assert!(idx.kdtree.is_none());
-        let nn = nearest_neighbor(&idx, 12.0, 12.0).unwrap();
+        let nn = nearest_neighbor(&idx, 12.0, 12.0).expect("should succeed");
         assert_eq!(nn.id, 1);
     }
 }

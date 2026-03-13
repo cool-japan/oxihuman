@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! 3D convex hull (incremental, gift-wrapping / tetrahedra-based stub).
 
@@ -250,7 +250,7 @@ mod tests {
     #[test]
     fn hull_face_count_cube() {
         let pts = cube_points();
-        let hull = convex_hull_3d(&pts).unwrap();
+        let hull = convex_hull_3d(&pts).expect("should succeed");
         // A cube has 12 triangles
         assert!(
             hull_face_count(&hull) >= 12,
@@ -268,7 +268,7 @@ mod tests {
     #[test]
     fn hull_volume_positive() {
         let pts = cube_points();
-        let hull = convex_hull_3d(&pts).unwrap();
+        let hull = convex_hull_3d(&pts).expect("should succeed");
         let vol = hull_volume(&hull);
         assert!(vol > 0.0, "vol={vol}");
     }
@@ -276,7 +276,7 @@ mod tests {
     #[test]
     fn hull_volume_cube_approx_one() {
         let pts = cube_points();
-        let hull = convex_hull_3d(&pts).unwrap();
+        let hull = convex_hull_3d(&pts).expect("should succeed");
         let vol = hull_volume(&hull);
         assert!(vol > 0.5, "vol too small: {vol}");
     }
@@ -300,14 +300,14 @@ mod tests {
             [0.0, 1.0, 0.0],
             [0.0, 0.0, 1.0],
         ];
-        let hull = convex_hull_3d(&pts).unwrap();
+        let hull = convex_hull_3d(&pts).expect("should succeed");
         assert_eq!(hull.faces.len(), 4);
     }
 
     #[test]
     fn hull_face_indices_in_range() {
         let pts = cube_points();
-        let hull = convex_hull_3d(&pts).unwrap();
+        let hull = convex_hull_3d(&pts).expect("should succeed");
         for f in &hull.faces {
             assert!(f.a < hull.vertices.len());
             assert!(f.b < hull.vertices.len());

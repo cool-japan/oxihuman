@@ -224,7 +224,7 @@ mod tests {
     fn test_schedule_repeating() {
         let mut s = new_scheduler();
         let id = schedule_repeating(&mut s, "rep", 0.5, TaskPriority::High);
-        let task = get_scheduled_task(&s, id).unwrap();
+        let task = get_scheduled_task(&s, id).expect("should succeed");
         assert!(task.interval.is_some());
     }
 
@@ -262,7 +262,7 @@ mod tests {
         assert_eq!(fired1.len(), 1);
         // Task should still be in the scheduler (rescheduled).
         assert!(get_scheduled_task(&s, id).is_some());
-        let task = get_scheduled_task(&s, id).unwrap();
+        let task = get_scheduled_task(&s, id).expect("should succeed");
         assert!(task.scheduled_time > s.current_time - 0.001);
     }
 
@@ -300,7 +300,7 @@ mod tests {
         let mut s = new_scheduler();
         schedule_once(&mut s, "a", 3.0, TaskPriority::Normal);
         schedule_once(&mut s, "b", 1.0, TaskPriority::Normal);
-        let next = next_due_time(&s).unwrap();
+        let next = next_due_time(&s).expect("should succeed");
         assert!((next - 1.0).abs() < 1e-9);
     }
 

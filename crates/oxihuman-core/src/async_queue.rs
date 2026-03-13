@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A simple async-style task queue that stores pending and completed tasks.
@@ -203,7 +203,7 @@ mod tests {
         q.enqueue(1, "a");
         q.start_next();
         assert!(q.set_progress(1, 0.5));
-        let t = q.get_task(1).unwrap();
+        let t = q.get_task(1).expect("should succeed");
         assert!((t.progress - 0.5).abs() < f32::EPSILON);
     }
 

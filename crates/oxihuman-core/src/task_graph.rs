@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Async-style task dependency graph scheduler (synchronous execution, DAG-based ordering).
 
@@ -376,7 +376,7 @@ mod tests {
         let a = add_task(&mut g, "A", vec![], 0);
         let b = add_task(&mut g, "B", vec![a], 0);
         let c = add_task(&mut g, "C", vec![b], 0);
-        let order = topological_order(&g).unwrap();
+        let order = topological_order(&g).expect("should succeed");
         assert_eq!(order, vec![a, b, c]);
     }
 

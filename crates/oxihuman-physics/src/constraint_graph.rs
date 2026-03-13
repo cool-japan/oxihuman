@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A graph of physics constraints connecting body pairs.
@@ -223,7 +223,7 @@ mod tests {
     fn get_existing_edge() {
         let mut g = new_constraint_graph();
         let id = cg_add(&mut g, 10, 11, ConstraintType::Fixed, 0.001);
-        let e = g.get(id).unwrap();
+        let e = g.get(id).expect("should succeed");
         assert_eq!(e.body_a, 10);
         assert_eq!(e.body_b, 11);
     }

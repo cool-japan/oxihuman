@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! IGES curve entity export stub.
@@ -124,7 +124,7 @@ mod tests {
     fn test_entity_line_line_type() {
         let mut exp = new_iges_curve_export("X");
         add_iges_curve(&mut exp, IgesCurveType::Line, vec![[0.0, 0.0, 0.0]]);
-        let line = iges_entity_line(&exp, 0).unwrap();
+        let line = iges_entity_line(&exp, 0).expect("should succeed");
         assert!(line.contains("110"));
     }
 
@@ -132,7 +132,7 @@ mod tests {
     fn test_entity_line_bspline_type() {
         let mut exp = new_iges_curve_export("X");
         add_iges_curve(&mut exp, IgesCurveType::BSpline, vec![[0.0, 0.0, 0.0]]);
-        let line = iges_entity_line(&exp, 0).unwrap();
+        let line = iges_entity_line(&exp, 0).expect("should succeed");
         assert!(line.contains("126"));
     }
 
@@ -159,7 +159,7 @@ mod tests {
     fn test_circular_arc_type_code() {
         let mut exp = new_iges_curve_export("X");
         add_iges_curve(&mut exp, IgesCurveType::CircularArc, vec![[0.0, 0.0, 0.0]]);
-        let line = iges_entity_line(&exp, 0).unwrap();
+        let line = iges_entity_line(&exp, 0).expect("should succeed");
         assert!(line.contains("100"));
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -294,7 +294,7 @@ mod tests {
         let t = make_target("height", vec![delta(10, 1.0, 0.0, 0.0)]);
         let map = InfluenceMap::build(&[("height", &t)]);
         assert_eq!(map.vertex_count, 1);
-        let vi = map.get(10).unwrap();
+        let vi = map.get(10).expect("should succeed");
         assert_eq!(vi.vertex_id, 10);
         assert_eq!(vi.influences.len(), 1);
         assert_eq!(vi.influences[0].0, "height");
@@ -308,7 +308,7 @@ mod tests {
         let t3 = make_target("m3", vec![delta(42, 0.0, 0.0, 1.0)]);
         let map = InfluenceMap::build(&[("m1", &t1), ("m2", &t2), ("m3", &t3)]);
         assert_eq!(map.vertex_count, 1);
-        let vi = map.get(42).unwrap();
+        let vi = map.get(42).expect("should succeed");
         assert_eq!(vi.influences.len(), 3);
     }
 
@@ -319,7 +319,7 @@ mod tests {
         let t1 = make_target("a", vec![delta(5, 3.0, 4.0, 0.0)]); // mag = 5.0
         let t2 = make_target("b", vec![delta(5, 0.0, 0.0, 2.0)]); // mag = 2.0
         let map = InfluenceMap::build(&[("a", &t1), ("b", &t2)]);
-        let vi = map.get(5).unwrap();
+        let vi = map.get(5).expect("should succeed");
         assert!((vi.total_magnitude() - 7.0).abs() < 1e-5);
     }
 
@@ -328,7 +328,7 @@ mod tests {
         let t1 = make_target("small", vec![delta(7, 0.0, 0.0, 1.0)]); // mag = 1.0
         let t2 = make_target("large", vec![delta(7, 3.0, 4.0, 0.0)]); // mag = 5.0
         let map = InfluenceMap::build(&[("small", &t1), ("large", &t2)]);
-        let vi = map.get(7).unwrap();
+        let vi = map.get(7).expect("should succeed");
         assert_eq!(vi.dominant_target(), Some("large"));
     }
 
@@ -444,8 +444,14 @@ mod tests {
         );
         let map = InfluenceMap::build(&[("aa", &t1), ("bb", &t2)]);
         let stats = map.target_stats();
-        let aa = stats.iter().find(|(n, _, _)| n == "aa").unwrap();
-        let bb = stats.iter().find(|(n, _, _)| n == "bb").unwrap();
+        let aa = stats
+            .iter()
+            .find(|(n, _, _)| n == "aa")
+            .expect("should succeed");
+        let bb = stats
+            .iter()
+            .find(|(n, _, _)| n == "bb")
+            .expect("should succeed");
         assert_eq!(aa.1, 2); // aa affects 2 vertices
         assert_eq!(bb.1, 3); // bb affects 3 vertices
         assert!((aa.2 - 3.0).abs() < 1e-5); // 1.0 + 2.0
@@ -490,7 +496,7 @@ mod tests {
         let t_mid = make_target("mid", vec![delta(0, 0.0, 2.0, 0.0)]); // mag = 2.0
         let t_small = make_target("small", vec![delta(0, 1.0, 0.0, 0.0)]); // mag = 1.0
         let map = InfluenceMap::build(&[("small", &t_small), ("big", &t_big), ("mid", &t_mid)]);
-        let vi = map.get(0).unwrap();
+        let vi = map.get(0).expect("should succeed");
         assert_eq!(vi.influences.len(), 3);
         assert_eq!(vi.influences[0].0, "big");
         assert!((vi.influences[0].1 - 5.0).abs() < 1e-5);

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! MIME content negotiation — selects the best media type from Accept headers.
@@ -132,7 +132,7 @@ mod tests {
     fn test_negotiate_exact_match() {
         let accept = parse_accept_header("application/json");
         let offered = ["text/html", "application/json"];
-        let result = negotiate(&accept, &offered).unwrap();
+        let result = negotiate(&accept, &offered).expect("should succeed");
         assert_eq!(result.selected, "application/json");
     }
 
@@ -141,7 +141,7 @@ mod tests {
         let wildcard = ["*", "*"].join("/");
         let accept = parse_accept_header(&wildcard);
         let offered = ["application/json"];
-        let result = negotiate(&accept, &offered).unwrap();
+        let result = negotiate(&accept, &offered).expect("should succeed");
         assert_eq!(result.selected, "application/json");
     }
 
@@ -150,7 +150,7 @@ mod tests {
         let text_wildcard = ["text", "*"].join("/");
         let accept = parse_accept_header(&text_wildcard);
         let offered = ["text/plain", "application/json"];
-        let result = negotiate(&accept, &offered).unwrap();
+        let result = negotiate(&accept, &offered).expect("should succeed");
         assert_eq!(result.selected, "text/plain");
     }
 
@@ -188,7 +188,7 @@ mod tests {
     fn test_highest_quality_selected_first() {
         let accept = parse_accept_header("text/html;q=0.5, application/json;q=0.9");
         let offered = ["text/html", "application/json"];
-        let result = negotiate(&accept, &offered).unwrap();
+        let result = negotiate(&accept, &offered).expect("should succeed");
         assert_eq!(result.selected, "application/json");
     }
 }

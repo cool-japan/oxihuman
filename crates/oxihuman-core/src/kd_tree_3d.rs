@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! 3D k-d tree for nearest-neighbor queries.
@@ -178,14 +178,14 @@ mod tests {
     #[test]
     fn single_point_nearest() {
         let t = kd3_build(&[[2.0, 3.0, 4.0]]);
-        let (p, _) = t.nearest([0.0, 0.0, 0.0]).unwrap();
+        let (p, _) = t.nearest([0.0, 0.0, 0.0]).expect("should succeed");
         assert_eq!(p.id, 0);
     }
 
     #[test]
     fn nearest_to_origin() {
         let t = sample_tree();
-        let (p, d) = t.nearest([0.0, 0.0, 0.0]).unwrap();
+        let (p, d) = t.nearest([0.0, 0.0, 0.0]).expect("should succeed");
         assert_eq!(p.id, 0);
         assert!(d < 1e-6);
     }
@@ -193,7 +193,7 @@ mod tests {
     #[test]
     fn nearest_to_unit_x() {
         let t = sample_tree();
-        let id = kd3_nearest_id(&t, [0.9, 0.0, 0.0]).unwrap();
+        let id = kd3_nearest_id(&t, [0.9, 0.0, 0.0]).expect("should succeed");
         assert_eq!(id, 1);
     }
 
@@ -218,14 +218,14 @@ mod tests {
     #[test]
     fn nn_exact_match_zero_dist() {
         let t = kd3_build(&[[1.0, 2.0, 3.0]]);
-        let (_, d) = t.nearest([1.0, 2.0, 3.0]).unwrap();
+        let (_, d) = t.nearest([1.0, 2.0, 3.0]).expect("should succeed");
         assert!(d < 1e-6);
     }
 
     #[test]
     fn nn_axis_z() {
         let t = kd3_build(&[[0.0, 0.0, 0.0], [0.0, 0.0, 5.0]]);
-        let id = kd3_nearest_id(&t, [0.0, 0.0, 4.0]).unwrap();
+        let id = kd3_nearest_id(&t, [0.0, 0.0, 4.0]).expect("should succeed");
         assert_eq!(id, 1);
     }
 

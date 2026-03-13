@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Named payload slots with typed tags.
@@ -126,7 +126,7 @@ mod tests {
     fn test_push_pop() {
         let mut b = new_payload_buffer(8);
         pybuf_push(&mut b, "msg", &[1, 2, 3]);
-        let e = pybuf_pop(&mut b).unwrap();
+        let e = pybuf_pop(&mut b).expect("should succeed");
         assert_eq!(e.tag, "msg".to_string());
         assert_eq!(e.data, vec![1, 2, 3]);
     }

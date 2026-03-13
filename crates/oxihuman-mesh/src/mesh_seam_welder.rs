@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! UV seam welding — finds boundary edges that share the same 3-D position
 //! but differ in UV, then merges them for correct normal/lighting continuity.

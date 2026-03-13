@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! DeltaMorph — per-vertex position delta morphing.
 
@@ -126,7 +126,7 @@ mod tests {
     fn test_delta_at_some() {
         let mut m = new_delta_morph("t");
         add_delta(&mut m, 3, 0.1, 0.2, 0.3);
-        let d = delta_at(&m, 0).unwrap();
+        let d = delta_at(&m, 0).expect("should succeed");
         assert_eq!(d.index, 3);
         assert!((d.dx - 0.1).abs() < 1e-6);
     }
@@ -158,7 +158,7 @@ mod tests {
         let mut m = new_delta_morph("x");
         add_delta(&mut m, 0, 1.0, 2.0, 3.0);
         let s = scale_delta(&m, 2.0);
-        let d = delta_at(&s, 0).unwrap();
+        let d = delta_at(&s, 0).expect("should succeed");
         assert!((d.dx - 2.0).abs() < 1e-6);
         assert!((d.dz - 6.0).abs() < 1e-6);
     }
@@ -170,7 +170,7 @@ mod tests {
         let mut b = new_delta_morph("b");
         add_delta(&mut b, 0, 2.0, 0.0, 0.0);
         let c = blend_deltas(&a, &b, 0.5);
-        let d = delta_at(&c, 0).unwrap();
+        let d = delta_at(&c, 0).expect("should succeed");
         assert!((d.dx - 1.0).abs() < 1e-6);
     }
 

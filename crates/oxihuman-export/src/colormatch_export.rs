@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Color matching function data export — exports CIE CMF tables.
@@ -181,7 +181,7 @@ mod tests {
     fn test_interpolate_cmf_at_sample() {
         /* Interpolation at a known wavelength should return that sample's values */
         let table = cie1931_stub();
-        let result = interpolate_cmf(&table, 550.0).unwrap();
+        let result = interpolate_cmf(&table, 550.0).expect("should succeed");
         assert!((result[1] - 0.9950).abs() < 0.001);
     }
 

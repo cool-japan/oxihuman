@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Accumulate impulses over solver iterations.
 
@@ -86,7 +86,7 @@ mod tests {
         let mut acc = new_impulse_accumulator();
         accum_add(&mut acc, 1, [1.0, 0.0, 0.0], [0.0, 0.0, 0.0]);
         accum_add(&mut acc, 1, [2.0, 0.0, 0.0], [0.0, 0.0, 0.0]);
-        let e = accum_get(&acc, 1).unwrap();
+        let e = accum_get(&acc, 1).expect("should succeed");
         assert!((e.impulse[0] - 3.0).abs() < EPS);
     }
 
@@ -109,7 +109,7 @@ mod tests {
         let mut acc = new_impulse_accumulator();
         accum_add(&mut acc, 5, [0.0; 3], [1.0, 2.0, 3.0]);
         accum_add(&mut acc, 5, [0.0; 3], [0.5, 0.5, 0.5]);
-        let e = accum_get(&acc, 5).unwrap();
+        let e = accum_get(&acc, 5).expect("should succeed");
         assert!((e.torque[0] - 1.5).abs() < EPS);
     }
 
@@ -125,7 +125,7 @@ mod tests {
     fn test_get_correct_id() {
         let mut acc = new_impulse_accumulator();
         accum_add(&mut acc, 10, [5.0, 0.0, 0.0], [0.0; 3]);
-        let e = accum_get(&acc, 10).unwrap();
+        let e = accum_get(&acc, 10).expect("should succeed");
         assert_eq!(e.id, 10);
         assert!((e.impulse[0] - 5.0).abs() < EPS);
     }

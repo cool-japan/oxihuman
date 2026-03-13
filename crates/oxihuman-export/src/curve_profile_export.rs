@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Curve profile export for bevel/extrude profiles.
@@ -113,7 +113,7 @@ mod tests {
     fn test_point_at() {
         let mut p = new_curve_profile("p");
         cp_add_point(&mut p, 1.0, 2.0);
-        let pt = cp_point_at(&p, 0).unwrap();
+        let pt = cp_point_at(&p, 0).expect("should succeed");
         assert!((pt.x - 1.0).abs() < 1e-6);
     }
 

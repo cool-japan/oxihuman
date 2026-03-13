@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Info/inspection subcommands: info, session, stats, workspace, validate, target-info,
 //! plugin-list, camera-info.
@@ -264,7 +264,7 @@ pub fn parse_stats_args(args: &[String]) -> Result<()> {
 pub fn cmd_workspace_info() {
     println!("OxiHuman v{}", env!("CARGO_PKG_VERSION"));
     println!("  Repository: https://github.com/cool-japan/oxihuman");
-    println!("  License:    MIT OR Apache-2.0");
+    println!("  License:    Apache-2.0");
     println!();
     println!("Workspace crates:");
     println!("  oxihuman-core    — parsers (.target, .obj, .mhclo), manifest, policy, integrity");

@@ -236,7 +236,7 @@ mod tests {
         add_export_bone(&mut skel, make_bone(1, "spine", Some(0)));
         let bone = get_export_bone(&skel, "spine");
         assert!(bone.is_some());
-        assert_eq!(bone.unwrap().id, 1);
+        assert_eq!(bone.expect("should succeed").id, 1);
     }
 
     #[test]

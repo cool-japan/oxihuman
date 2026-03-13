@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Stores named checkpoints of serialised state for save/restore workflows.
@@ -147,7 +147,7 @@ mod tests {
         cs.save("a", vec![1]);
         cs.advance_clock(10);
         cs.save("b", vec![2]);
-        assert_eq!(cs.latest().unwrap().name, "b");
+        assert_eq!(cs.latest().expect("should succeed").name, "b");
     }
 
     #[test]
@@ -156,7 +156,7 @@ mod tests {
         cs.save("a", vec![1]);
         cs.advance_clock(10);
         cs.save("b", vec![2]);
-        assert_eq!(cs.oldest().unwrap().name, "a");
+        assert_eq!(cs.oldest().expect("should succeed").name, "a");
     }
 
     #[test]

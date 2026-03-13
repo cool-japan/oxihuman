@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! gRPC framing codec stub.
@@ -122,7 +122,7 @@ mod tests {
         /* header decoded correctly */
         let mut buf = vec![];
         encode_frame(b"test", false, &mut buf);
-        let h = decode_frame_header(&buf).unwrap();
+        let h = decode_frame_header(&buf).expect("should succeed");
         assert!(!h.compressed);
         assert_eq!(h.message_len, 4);
     }
@@ -132,7 +132,7 @@ mod tests {
         /* full frame decodes message bytes */
         let mut buf = vec![];
         encode_frame(b"abc", false, &mut buf);
-        let (_, msg) = decode_frame(&buf).unwrap();
+        let (_, msg) = decode_frame(&buf).expect("should succeed");
         assert_eq!(msg, b"abc");
     }
 
@@ -177,7 +177,7 @@ mod tests {
         /* compressed flag set correctly */
         let mut buf = vec![];
         encode_frame(b"x", true, &mut buf);
-        let h = decode_frame_header(&buf).unwrap();
+        let h = decode_frame_header(&buf).expect("should succeed");
         assert!(h.compressed);
     }
 

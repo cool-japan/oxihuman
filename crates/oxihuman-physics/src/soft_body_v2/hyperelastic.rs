@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(clippy::needless_range_loop)]
 
@@ -285,7 +285,7 @@ mod tests {
 
     #[test]
     fn test_lame_parameters() {
-        let mat = SoftBodyMaterial::new(1000.0, 0.3).unwrap();
+        let mat = SoftBodyMaterial::new(1000.0, 0.3).expect("should succeed");
         let lambda = mat.lambda();
         let mu = mat.mu();
         // E = mu * (3*lambda + 2*mu) / (lambda + mu)
@@ -297,7 +297,7 @@ mod tests {
     fn test_strain_energy_at_rest() {
         let model = NeoHookeanModel::new(577.0, 384.6);
         let identity = super::super::IDENTITY3;
-        let w = model.strain_energy(&identity).unwrap();
+        let w = model.strain_energy(&identity).expect("should succeed");
         // At rest (F=I), I1=3, J=1, ln(J)=0 => W = 0
         assert!(w.abs() < 1e-12, "W at rest = {w}");
     }
@@ -306,7 +306,9 @@ mod tests {
     fn test_pk_stress_at_rest() {
         let model = NeoHookeanModel::new(577.0, 384.6);
         let identity = super::super::IDENTITY3;
-        let p = model.piola_kirchhoff_stress(&identity).unwrap();
+        let p = model
+            .piola_kirchhoff_stress(&identity)
+            .expect("should succeed");
         // At rest P should be zero
         for i in 0..3 {
             for j in 0..3 {
@@ -326,7 +328,7 @@ mod tests {
         let rest_volume = 1.0 / 6.0;
         let forces = model
             .element_forces(&identity, &identity, rest_volume)
-            .unwrap();
+            .expect("should succeed");
         for n in 0..4 {
             for d in 0..3 {
                 assert!(
@@ -344,18 +346,20 @@ mod tests {
         // Uniform stretch by factor s
         let s = 1.5;
         let f_stretch: Mat3 = [[s, 0.0, 0.0], [0.0, s, 0.0], [0.0, 0.0, s]];
-        let w = model.strain_energy(&f_stretch).unwrap();
+        let w = model.strain_energy(&f_stretch).expect("should succeed");
         // Should be positive for any deformation away from rest
         assert!(w > 0.0, "W = {w} should be positive for stretch");
     }
 
     #[test]
     fn test_pk_stress_uniaxial_stretch() {
-        let mat = SoftBodyMaterial::new(1000.0, 0.3).unwrap();
+        let mat = SoftBodyMaterial::new(1000.0, 0.3).expect("should succeed");
         let model = NeoHookeanModel::from_material(&mat);
         let s = 1.1;
         let f_stretch: Mat3 = [[s, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
-        let p = model.piola_kirchhoff_stress(&f_stretch).unwrap();
+        let p = model
+            .piola_kirchhoff_stress(&f_stretch)
+            .expect("should succeed");
         // P[0][0] should be positive (tensile stress in stretch direction)
         assert!(p[0][0] > 0.0, "P[0][0] = {} should be positive", p[0][0]);
         // Off-diagonal should be zero for diagonal F
@@ -377,7 +381,9 @@ mod tests {
         // Slightly stretched state to avoid singularity at identity
         let f: Mat3 = [[1.01, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
         let rest_volume = 1.0 / 6.0;
-        let k = model.element_stiffness(&f, &identity, rest_volume).unwrap();
+        let k = model
+            .element_stiffness(&f, &identity, rest_volume)
+            .expect("should succeed");
         // Stiffness matrix should be approximately symmetric
         for i in 0..12 {
             for j in i + 1..12 {

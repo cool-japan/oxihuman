@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Lexer token stream abstraction.
@@ -179,9 +179,9 @@ mod tests {
     #[test]
     fn test_peek_does_not_advance() {
         let mut s = lex_string("a b");
-        let first = s.peek().unwrap().text.clone();
+        let first = s.peek().expect("should succeed").text.clone();
         let _ = s.peek();
-        let next = s.next_token().unwrap().text.clone();
+        let next = s.next_token().expect("should succeed").text.clone();
         assert_eq!(first, next);
     }
 

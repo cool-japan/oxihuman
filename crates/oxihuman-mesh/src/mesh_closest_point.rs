@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Brute-force closest point on mesh surface query.
@@ -141,7 +141,7 @@ mod tests {
     fn closest_point_on_surface() {
         let (pos, idx) = unit_quad();
         let q = [0.5, 1.0, 0.5];
-        let res = closest_point_on_mesh(q, &pos, &idx).unwrap();
+        let res = closest_point_on_mesh(q, &pos, &idx).expect("should succeed");
         assert!((res.point[0] - 0.5).abs() < 0.01);
         assert!((res.point[2] - 0.5).abs() < 0.01);
     }
@@ -150,7 +150,7 @@ mod tests {
     fn closest_distance_correct() {
         let (pos, idx) = unit_quad();
         let q = [0.5, 2.0, 0.5];
-        let res = closest_point_on_mesh(q, &pos, &idx).unwrap();
+        let res = closest_point_on_mesh(q, &pos, &idx).expect("should succeed");
         assert!((res.distance - 2.0).abs() < 0.01);
     }
 
@@ -195,14 +195,14 @@ mod tests {
     #[test]
     fn face_index_valid() {
         let (pos, idx) = unit_quad();
-        let res = closest_point_on_mesh([0.5, 0.5, 0.5], &pos, &idx).unwrap();
+        let res = closest_point_on_mesh([0.5, 0.5, 0.5], &pos, &idx).expect("should succeed");
         assert!(res.face_index < idx.len() / 3);
     }
 
     #[test]
     fn barycentric_sum_one() {
         let (pos, idx) = unit_quad();
-        let res = closest_point_on_mesh([0.5, 0.0, 0.5], &pos, &idx).unwrap();
+        let res = closest_point_on_mesh([0.5, 0.0, 0.5], &pos, &idx).expect("should succeed");
         let s = res.barycentric[0] + res.barycentric[1] + res.barycentric[2];
         assert!((s - 1.0).abs() < 0.01);
     }
@@ -210,7 +210,7 @@ mod tests {
     #[test]
     fn closest_to_corner() {
         let (pos, idx) = unit_quad();
-        let res = closest_point_on_mesh([0.0, 0.0, 0.0], &pos, &idx).unwrap();
+        let res = closest_point_on_mesh([0.0, 0.0, 0.0], &pos, &idx).expect("should succeed");
         assert!(res.distance < 0.01);
     }
 }

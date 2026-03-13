@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Linked map: insertion-ordered key→value map using a Vec + HashMap.
@@ -168,7 +168,7 @@ mod tests {
         let mut lm: LinkedMap<u32> = new_linked_map();
         lmap_insert(&mut lm, "first", 1);
         lmap_insert(&mut lm, "second", 2);
-        let (k, v) = lmap_get_at(&lm, 1).unwrap();
+        let (k, v) = lmap_get_at(&lm, 1).expect("should succeed");
         assert_eq!(k, "second");
         assert_eq!(*v, 2);
     }

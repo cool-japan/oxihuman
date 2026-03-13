@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Surface projection — project points and meshes onto triangle meshes.
 
@@ -421,7 +421,7 @@ mod tests {
             &ProjectionMode::ClosestPoint,
         );
         assert!(result.is_some());
-        assert_eq!(result.unwrap().face_index, 0);
+        assert_eq!(result.expect("should succeed").face_index, 0);
     }
 
     // 7

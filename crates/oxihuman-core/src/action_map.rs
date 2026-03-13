@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A mapping from string action names to callbacks represented as closures.
@@ -141,7 +141,7 @@ mod tests {
         let mut map = ActionMap::new();
         assert!(map.register("jump", "movement", 10));
         assert!(map.contains("jump"));
-        let entry = map.get("jump").unwrap();
+        let entry = map.get("jump").expect("should succeed");
         assert_eq!(entry.category, "movement");
         assert_eq!(entry.priority, 10);
     }

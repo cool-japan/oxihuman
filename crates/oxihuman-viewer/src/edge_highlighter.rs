@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! EdgeHighlighter — highlight specific mesh edges in the viewport.
 
@@ -121,7 +121,7 @@ mod tests {
     fn test_highlight_edge_at_some() {
         let mut hs = new_highlight_set();
         add_edge_highlight(&mut hs, 2, 5, [1.0; 4], 1.0);
-        let e = highlight_edge_at(&hs, 0).unwrap();
+        let e = highlight_edge_at(&hs, 0).expect("should succeed");
         assert_eq!(e.v0, 2);
         assert_eq!(e.v1, 5);
     }

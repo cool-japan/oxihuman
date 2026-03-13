@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! AES-GCM encryption stub.
@@ -130,7 +130,7 @@ mod tests {
     #[test]
     fn test_cipher_good_key() {
         /* 32-byte key is accepted */
-        let c = AesGcmCipher::new(&[0u8; 32], AesGcmConfig::default()).unwrap();
+        let c = AesGcmCipher::new(&[0u8; 32], AesGcmConfig::default()).expect("should succeed");
         assert_eq!(c.key_len_bytes(), 32);
     }
 
@@ -140,8 +140,8 @@ mod tests {
         let key = [0x42u8; 32];
         let nonce = [0x01u8; 12];
         let plain = b"hello aes-gcm";
-        let enc = aes_gcm_encrypt(&key, &nonce, plain).unwrap();
-        let dec = aes_gcm_decrypt(&key, &enc).unwrap();
+        let enc = aes_gcm_encrypt(&key, &nonce, plain).expect("should succeed");
+        let dec = aes_gcm_decrypt(&key, &enc).expect("should succeed");
         assert_eq!(dec, plain);
     }
 
@@ -169,7 +169,7 @@ mod tests {
         /* output = 12 + 16 + plaintext */
         let key = [0u8; 32];
         let nonce = [0u8; 12];
-        let enc = aes_gcm_encrypt(&key, &nonce, b"hello").unwrap();
+        let enc = aes_gcm_encrypt(&key, &nonce, b"hello").expect("should succeed");
         assert_eq!(enc.len(), 12 + 16 + 5);
     }
 }

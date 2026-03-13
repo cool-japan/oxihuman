@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Decal projection renderer.
 
@@ -212,7 +212,7 @@ mod tests {
         let mut r = new_decal_renderer();
         dr_add_decal(&mut r, make_test_decal());
         dr_set_visible(&mut r, 0, false);
-        assert!(!dr_get(&r, 0).unwrap().visible);
+        assert!(!dr_get(&r, 0).expect("should succeed").visible);
     }
 
     #[test]

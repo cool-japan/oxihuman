@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Motion-vector buffer management for temporal effects (TAA, motion blur).
@@ -117,7 +117,7 @@ mod tests {
     fn set_and_get() {
         let mut b = MotionVectorBuffer::new(8, 8);
         mv_set(&mut b, 2, 3, 0.1, 0.2);
-        let v = mv_get(&b, 2, 3).unwrap();
+        let v = mv_get(&b, 2, 3).expect("should succeed");
         assert!((v.du - 0.1).abs() < 1e-5);
     }
 
@@ -152,7 +152,7 @@ mod tests {
         let mut b = MotionVectorBuffer::new(2, 2);
         mv_set(&mut b, 0, 0, 1.0, 0.0);
         mv_scale(&mut b, 2.0);
-        let v = mv_get(&b, 0, 0).unwrap();
+        let v = mv_get(&b, 0, 0).expect("should succeed");
         assert!((v.du - 2.0).abs() < 1e-5);
     }
 

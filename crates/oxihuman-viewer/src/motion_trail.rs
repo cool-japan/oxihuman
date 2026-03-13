@@ -313,7 +313,7 @@ mod tests {
         add_trail_point(&mut t, [1.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], 2.0);
         let oldest = oldest_trail_point(&t);
         assert!(oldest.is_some());
-        assert!((oldest.unwrap().time - 1.0).abs() < f32::EPSILON);
+        assert!((oldest.expect("should succeed").time - 1.0).abs() < f32::EPSILON);
     }
 
     #[test]
@@ -323,7 +323,7 @@ mod tests {
         add_trail_point(&mut t, [1.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], 2.0);
         let newest = newest_trail_point(&t);
         assert!(newest.is_some());
-        assert!((newest.unwrap().time - 2.0).abs() < f32::EPSILON);
+        assert!((newest.expect("should succeed").time - 2.0).abs() < f32::EPSILON);
     }
 
     #[test]

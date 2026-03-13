@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Bisect mesh by plane.
@@ -90,7 +90,7 @@ mod tests {
         let p = xz_plane();
         let t = bisect_edge_intersection(&p, [0.0, -1.0, 0.0], [0.0, 1.0, 0.0]);
         assert!(t.is_some());
-        let t = t.unwrap();
+        let t = t.expect("should succeed");
         assert!((t - 0.5).abs() < 1e-5);
     }
 

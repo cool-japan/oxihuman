@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::f32::consts::E;
@@ -150,7 +150,7 @@ mod tests {
     #[test]
     fn test_time_to_reach() {
         let dc = DecayCounter::with_initial(100.0, 1.0);
-        let t = dc.time_to_reach(50.0).unwrap();
+        let t = dc.time_to_reach(50.0).expect("should succeed");
         assert!((t - 1.0).abs() < 0.1);
     }
 

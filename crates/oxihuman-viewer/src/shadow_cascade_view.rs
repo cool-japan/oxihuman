@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Shadow cascade visualization debug overlay.
@@ -98,7 +98,7 @@ mod tests {
         /* cascade index should be clamped to num_cascades - 1 */
         let mut v = ShadowCascadeView::default();
         scv_set_active_cascade(&mut v, Some(9999));
-        assert!(v.active_cascade.unwrap() < v.config.num_cascades);
+        assert!(v.active_cascade.expect("should succeed") < v.config.num_cascades);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! HTTP-style response cache — stores and retrieves keyed response entries.
@@ -154,7 +154,7 @@ mod tests {
         cache_store(&mut c, "/k", make_response(200, "v1", 300, 0));
         cache_store(&mut c, "/k", make_response(200, "v2", 300, 0));
         assert_eq!(cache_size(&c), 1);
-        assert_eq!(cache_get(&c, "/k", 0).unwrap().body, "v2");
+        assert_eq!(cache_get(&c, "/k", 0).expect("should succeed").body, "v2");
     }
 
     #[test]
@@ -182,6 +182,6 @@ mod tests {
     fn test_response_status_preserved() {
         let mut c = make_cache();
         cache_store(&mut c, "/e", make_response(404, "not found", 300, 0));
-        assert_eq!(cache_get(&c, "/e", 0).unwrap().status, 404);
+        assert_eq!(cache_get(&c, "/e", 0).expect("should succeed").status, 404);
     }
 }

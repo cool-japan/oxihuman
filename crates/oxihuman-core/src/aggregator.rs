@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Statistical aggregator over a stream of f64 values.
@@ -70,7 +70,7 @@ mod tests {
         push(&mut agg, 1.0);
         push(&mut agg, 2.0);
         push(&mut agg, 3.0);
-        assert!((mean(&agg).unwrap() - 2.0).abs() < 1e-9);
+        assert!((mean(&agg).expect("should succeed") - 2.0).abs() < 1e-9);
     }
 
     #[test]
@@ -78,7 +78,7 @@ mod tests {
         let mut agg = new_aggregator();
         push(&mut agg, 2.0);
         push(&mut agg, 4.0);
-        let var = variance(&agg).unwrap();
+        let var = variance(&agg).expect("should succeed");
         assert!((var - 1.0).abs() < 1e-9);
     }
 
@@ -88,7 +88,7 @@ mod tests {
         push(&mut agg, 5.0);
         push(&mut agg, 1.0);
         push(&mut agg, 3.0);
-        assert!((min_val(&agg).unwrap() - 1.0).abs() < 1e-9);
+        assert!((min_val(&agg).expect("should succeed") - 1.0).abs() < 1e-9);
     }
 
     #[test]
@@ -97,7 +97,7 @@ mod tests {
         push(&mut agg, 5.0);
         push(&mut agg, 1.0);
         push(&mut agg, 3.0);
-        assert!((max_val(&agg).unwrap() - 5.0).abs() < 1e-9);
+        assert!((max_val(&agg).expect("should succeed") - 5.0).abs() < 1e-9);
     }
 
     #[test]
@@ -133,7 +133,7 @@ mod tests {
         let mut agg = new_aggregator();
         push(&mut agg, 0.0);
         push(&mut agg, 2.0);
-        let sd = std_dev(&agg).unwrap();
+        let sd = std_dev(&agg).expect("should succeed");
         assert!((sd - 1.0).abs() < 1e-9);
     }
 }

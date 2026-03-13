@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! 3MF (3D Manufacturing Format) export.
 //!
@@ -532,9 +532,9 @@ mod tests {
     fn test_export_basic_cube() {
         let mut exporter = ThreeMfExporter::new(ThreeMfUnit::Millimeter);
         let (v, t) = cube_geometry();
-        let id = exporter.add_object("Cube", &v, &t).unwrap();
-        exporter.add_build_item(id, None).unwrap();
-        let bytes = exporter.export().unwrap();
+        let id = exporter.add_object("Cube", &v, &t).expect("should succeed");
+        exporter.add_build_item(id, None).expect("should succeed");
+        let bytes = exporter.export().expect("should succeed");
 
         // Should start with PK (ZIP magic)
         assert!(bytes.len() > 4);
@@ -548,23 +548,23 @@ mod tests {
         exporter.set_metadata("Designer", "OxiHuman");
 
         let (v, t) = cube_geometry();
-        let id = exporter.add_object("Body", &v, &t).unwrap();
-        exporter.add_build_item(id, None).unwrap();
+        let id = exporter.add_object("Body", &v, &t).expect("should succeed");
+        exporter.add_build_item(id, None).expect("should succeed");
 
-        let bytes = exporter.export().unwrap();
+        let bytes = exporter.export().expect("should succeed");
         assert!(!bytes.is_empty());
 
         // Verify we can read the ZIP and find the model XML
         let cursor = Cursor::new(&bytes);
         let mut reader =
-            oxiarc_archive::zip::ZipReader::new(cursor).unwrap();
+            oxiarc_archive::zip::ZipReader::new(cursor).expect("should succeed");
 
         let model_entry = reader
             .entry_by_name("3D/3dmodel.model")
             .cloned()
             .expect("missing 3dmodel.model");
-        let model_data = reader.extract(&model_entry).unwrap();
-        let model_str = std::str::from_utf8(&model_data).unwrap();
+        let model_data = reader.extract(&model_entry).expect("should succeed");
+        let model_str = std::str::from_utf8(&model_data).expect("should succeed");
 
         assert!(model_str.contains("unit=\"inch\""));
         assert!(model_str.contains("My Model"));
@@ -575,23 +575,23 @@ mod tests {
     fn test_export_with_transform() {
         let mut exporter = ThreeMfExporter::new(ThreeMfUnit::Meter);
         let (v, t) = cube_geometry();
-        let id = exporter.add_object("Scaled", &v, &t).unwrap();
+        let id = exporter.add_object("Scaled", &v, &t).expect("should succeed");
 
         // Identity + translation (0,0,5)
         let transform = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 5.0];
-        exporter.add_build_item(id, Some(transform)).unwrap();
+        exporter.add_build_item(id, Some(transform)).expect("should succeed");
 
-        let bytes = exporter.export().unwrap();
+        let bytes = exporter.export().expect("should succeed");
         let cursor = Cursor::new(&bytes);
         let mut reader =
-            oxiarc_archive::zip::ZipReader::new(cursor).unwrap();
+            oxiarc_archive::zip::ZipReader::new(cursor).expect("should succeed");
 
         let model_entry = reader
             .entry_by_name("3D/3dmodel.model")
             .cloned()
             .expect("missing 3dmodel.model");
-        let model_data = reader.extract(&model_entry).unwrap();
-        let model_str = std::str::from_utf8(&model_data).unwrap();
+        let model_data = reader.extract(&model_entry).expect("should succeed");
+        let model_str = std::str::from_utf8(&model_data).expect("should succeed");
 
         assert!(model_str.contains("transform=\""));
         assert!(model_str.contains("unit=\"meter\""));
@@ -602,14 +602,14 @@ mod tests {
         let mut exporter = ThreeMfExporter::new(ThreeMfUnit::Centimeter);
         let (v, t) = cube_geometry();
 
-        let id1 = exporter.add_object("Object1", &v, &t).unwrap();
-        let id2 = exporter.add_object("Object2", &v, &t).unwrap();
+        let id1 = exporter.add_object("Object1", &v, &t).expect("should succeed");
+        let id2 = exporter.add_object("Object2", &v, &t).expect("should succeed");
         assert_ne!(id1, id2);
 
-        exporter.add_build_item(id1, None).unwrap();
-        exporter.add_build_item(id2, None).unwrap();
+        exporter.add_build_item(id1, None).expect("should succeed");
+        exporter.add_build_item(id2, None).expect("should succeed");
 
-        let bytes = exporter.export().unwrap();
+        let bytes = exporter.export().expect("should succeed");
         assert!(!bytes.is_empty());
     }
 
@@ -623,7 +623,7 @@ mod tests {
     fn test_no_build_items_fails() {
         let mut exporter = ThreeMfExporter::new(ThreeMfUnit::Millimeter);
         let (v, t) = cube_geometry();
-        let _id = exporter.add_object("Thing", &v, &t).unwrap();
+        let _id = exporter.add_object("Thing", &v, &t).expect("should succeed");
         assert!(exporter.export().is_err());
     }
 
@@ -680,20 +680,20 @@ mod tests {
         exporter.set_metadata("Title", "A & B <C> \"D\"");
 
         let (v, t) = cube_geometry();
-        let id = exporter.add_object("Obj", &v, &t).unwrap();
-        exporter.add_build_item(id, None).unwrap();
+        let id = exporter.add_object("Obj", &v, &t).expect("should succeed");
+        exporter.add_build_item(id, None).expect("should succeed");
 
-        let bytes = exporter.export().unwrap();
+        let bytes = exporter.export().expect("should succeed");
         let cursor = Cursor::new(&bytes);
         let mut reader =
-            oxiarc_archive::zip::ZipReader::new(cursor).unwrap();
+            oxiarc_archive::zip::ZipReader::new(cursor).expect("should succeed");
 
         let model_entry = reader
             .entry_by_name("3D/3dmodel.model")
             .cloned()
             .expect("missing 3dmodel.model");
-        let model_data = reader.extract(&model_entry).unwrap();
-        let model_str = std::str::from_utf8(&model_data).unwrap();
+        let model_data = reader.extract(&model_entry).expect("should succeed");
+        let model_str = std::str::from_utf8(&model_data).expect("should succeed");
 
         assert!(model_str.contains("A &amp; B &lt;C&gt; &quot;D&quot;"));
     }
@@ -702,13 +702,13 @@ mod tests {
     fn test_content_types_present() {
         let mut exporter = ThreeMfExporter::new(ThreeMfUnit::Millimeter);
         let (v, t) = cube_geometry();
-        let id = exporter.add_object("X", &v, &t).unwrap();
-        exporter.add_build_item(id, None).unwrap();
+        let id = exporter.add_object("X", &v, &t).expect("should succeed");
+        exporter.add_build_item(id, None).expect("should succeed");
 
-        let bytes = exporter.export().unwrap();
+        let bytes = exporter.export().expect("should succeed");
         let cursor = Cursor::new(&bytes);
         let reader =
-            oxiarc_archive::zip::ZipReader::new(cursor).unwrap();
+            oxiarc_archive::zip::ZipReader::new(cursor).expect("should succeed");
 
         let names: Vec<&str> = reader.entries().iter().map(|e| e.filename.as_str()).collect();
         assert!(names.contains(&"[Content_Types].xml"));
@@ -722,20 +722,20 @@ mod tests {
         let (v, t) = cube_geometry();
         let id = exporter
             .add_object_with_type("SupportBlock", &v, &t, ThreeMfObjectType::Support)
-            .unwrap();
-        exporter.add_build_item(id, None).unwrap();
+            .expect("should succeed");
+        exporter.add_build_item(id, None).expect("should succeed");
 
-        let bytes = exporter.export().unwrap();
+        let bytes = exporter.export().expect("should succeed");
         let cursor = Cursor::new(&bytes);
         let mut reader =
-            oxiarc_archive::zip::ZipReader::new(cursor).unwrap();
+            oxiarc_archive::zip::ZipReader::new(cursor).expect("should succeed");
 
         let model_entry = reader
             .entry_by_name("3D/3dmodel.model")
             .cloned()
             .expect("missing 3dmodel.model");
-        let model_data = reader.extract(&model_entry).unwrap();
-        let model_str = std::str::from_utf8(&model_data).unwrap();
+        let model_data = reader.extract(&model_entry).expect("should succeed");
+        let model_str = std::str::from_utf8(&model_data).expect("should succeed");
 
         assert!(model_str.contains("type=\"support\""));
     }
@@ -751,9 +751,9 @@ mod tests {
         ] {
             let mut exporter = ThreeMfExporter::new(unit);
             let (v, t) = cube_geometry();
-            let id = exporter.add_object("U", &v, &t).unwrap();
-            exporter.add_build_item(id, None).unwrap();
-            let bytes = exporter.export().unwrap();
+            let id = exporter.add_object("U", &v, &t).expect("should succeed");
+            exporter.add_build_item(id, None).expect("should succeed");
+            let bytes = exporter.export().expect("should succeed");
             assert!(!bytes.is_empty(), "failed for unit {unit}");
         }
     }

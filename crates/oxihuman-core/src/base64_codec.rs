@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Base64 encode/decode (standard alphabet, no external deps).
 
@@ -160,7 +160,7 @@ mod tests {
     fn test_roundtrip_ascii() {
         let original = b"Hello, World!";
         let encoded = base64_encode(original);
-        let decoded = base64_decode(&encoded).unwrap();
+        let decoded = base64_decode(&encoded).expect("should succeed");
         assert_eq!(decoded, original);
     }
 
@@ -168,7 +168,7 @@ mod tests {
     fn test_roundtrip_binary() {
         let original: Vec<u8> = (0u8..=255).collect();
         let encoded = base64_encode(&original);
-        let decoded = base64_decode(&encoded).unwrap();
+        let decoded = base64_decode(&encoded).expect("should succeed");
         assert_eq!(decoded, original);
     }
 
@@ -176,7 +176,7 @@ mod tests {
     fn test_encode_str() {
         let s = "test";
         let encoded = base64_encode_str(s);
-        let decoded = base64_decode(&encoded).unwrap();
+        let decoded = base64_decode(&encoded).expect("should succeed");
         assert_eq!(decoded, s.as_bytes());
     }
 

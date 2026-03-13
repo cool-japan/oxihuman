@@ -108,7 +108,7 @@ mod tests {
     fn test_stage_at() {
         let mut p = new_render_pipeline("p");
         add_pipeline_stage(&mut p, "s", 0);
-        assert_eq!(stage_at(&p, 0).unwrap().name, "s");
+        assert_eq!(stage_at(&p, 0).expect("should succeed").name, "s");
         assert!(stage_at(&p, 5).is_none());
     }
 
@@ -132,7 +132,7 @@ mod tests {
         let mut p = new_render_pipeline("p");
         add_pipeline_stage(&mut p, "b", 2);
         add_pipeline_stage(&mut p, "a", 1);
-        assert_eq!(stage_at(&p, 0).unwrap().name, "a");
+        assert_eq!(stage_at(&p, 0).expect("should succeed").name, "a");
     }
 
     #[test]

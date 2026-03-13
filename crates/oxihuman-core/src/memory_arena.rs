@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Bump-allocator style memory arena.
 
@@ -120,8 +120,8 @@ mod tests {
     #[test]
     fn test_sequential_alloc() {
         let mut a = new_memory_arena(1024);
-        let o1 = arena_alloc_bytes(&mut a, 10).unwrap();
-        let o2 = arena_alloc_bytes(&mut a, 20).unwrap();
+        let o1 = arena_alloc_bytes(&mut a, 10).expect("should succeed");
+        let o2 = arena_alloc_bytes(&mut a, 20).expect("should succeed");
         assert_eq!(o1, 0);
         assert_eq!(o2, 10);
     }

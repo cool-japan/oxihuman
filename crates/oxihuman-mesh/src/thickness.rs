@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -519,7 +519,7 @@ mod tests {
         let dir = [0.0f32, 0.0, -1.0];
         let hit = ray_triangle_hit(origin, dir, v0, v1, v2);
         assert!(hit.is_some(), "expected hit");
-        let t = hit.unwrap();
+        let t = hit.expect("should succeed");
         assert!((t - 1.0).abs() < 1e-5, "expected t~1.0, got {t}");
     }
 

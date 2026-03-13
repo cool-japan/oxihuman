@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Performance metrics tracking.
 
@@ -204,7 +204,7 @@ mod tests {
         r.record_counter("frames", 1.0);
         r.record_counter("frames", 1.0);
         // second sample = 1+1 = 2
-        assert!((r.last_value("frames").unwrap() - 2.0).abs() < 1e-9);
+        assert!((r.last_value("frames").expect("should succeed") - 2.0).abs() < 1e-9);
     }
 
     #[test]
@@ -212,7 +212,7 @@ mod tests {
         let mut r = MetricsRegistry::new();
         r.record_gauge("fps", 60.0);
         r.record_gauge("fps", 30.0);
-        assert!((r.last_value("fps").unwrap() - 30.0).abs() < 1e-9);
+        assert!((r.last_value("fps").expect("should succeed") - 30.0).abs() < 1e-9);
     }
 
     #[test]
@@ -242,7 +242,7 @@ mod tests {
         r.record_histogram("latency", 10.0);
         r.record_histogram("latency", 20.0);
         r.record_histogram("latency", 30.0);
-        let mean = r.mean_value("latency").unwrap();
+        let mean = r.mean_value("latency").expect("should succeed");
         assert!((mean - 20.0).abs() < 1e-9);
     }
 

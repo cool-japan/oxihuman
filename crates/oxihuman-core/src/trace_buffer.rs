@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Ring-buffer trace for recording named span events.
@@ -129,14 +129,17 @@ mod tests {
         tb_record(&mut buf, "c", 3, "t");
         tb_record(&mut buf, "d", 4, "t");
         assert_eq!(tb_len(&buf), 3);
-        assert_eq!(tb_get(&buf, 0).unwrap().name, "b".to_string());
+        assert_eq!(
+            tb_get(&buf, 0).expect("should succeed").name,
+            "b".to_string()
+        );
     }
 
     #[test]
     fn test_get_event() {
         let mut buf = new_trace_buffer(10);
         tb_record(&mut buf, "physics", 50, "cpu");
-        let ev = tb_get(&buf, 0).unwrap();
+        let ev = tb_get(&buf, 0).expect("should succeed");
         assert_eq!(ev.name, "physics".to_string());
         assert_eq!(ev.duration_us, 50);
     }
@@ -165,7 +168,7 @@ mod tests {
         let mut buf = new_trace_buffer(10);
         tb_record(&mut buf, "slow", 999, "t");
         tb_record(&mut buf, "fast", 1, "t");
-        let max = tb_max_event(&buf).unwrap();
+        let max = tb_max_event(&buf).expect("should succeed");
         assert_eq!(max.name, "slow".to_string());
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Utility functions operating on slices and vectors.
@@ -162,7 +162,7 @@ mod tests {
     #[test]
     fn test_mean_f32() {
         let v = vec![2.0_f32, 4.0, 6.0];
-        let m = mean_f32(&v).unwrap();
+        let m = mean_f32(&v).expect("should succeed");
         assert!((m - 4.0).abs() < f32::EPSILON);
     }
 

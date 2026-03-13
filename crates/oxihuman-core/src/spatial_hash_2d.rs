@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! 2D spatial hashing for broad-phase point queries.
 
@@ -183,7 +183,7 @@ mod tests {
         let mut h = SpatialHash2D::new(1.0);
         use std::f32::consts::PI;
         let id = h.insert([PI, 2.71]);
-        let p = h.get(id).unwrap();
+        let p = h.get(id).expect("should succeed");
         assert!((p[0] - PI).abs() < 1e-5);
     }
 

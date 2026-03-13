@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Ray casting for mouse picking.
 
@@ -190,7 +190,7 @@ mod tests {
         let r = new_ray([0.0, 0.0, -5.0], [0.0, 0.0, 1.0]);
         let hit = ray_intersect_sphere(&r, [0.0, 0.0, 0.0], 1.0);
         assert!(hit.is_some());
-        assert!((hit.unwrap() - 4.0).abs() < 1e-4);
+        assert!((hit.expect("should succeed") - 4.0).abs() < 1e-4);
     }
 
     #[test]

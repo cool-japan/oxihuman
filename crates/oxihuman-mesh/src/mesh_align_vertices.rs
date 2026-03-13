@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Align selected vertices to a world axis, average, or custom plane.
@@ -221,7 +221,7 @@ mod tests {
     #[test]
     fn vertex_range_correct() {
         let pos = three_verts();
-        let (min, max) = vertex_range(&pos, &[0, 1, 2], AlignAxisAV::X).unwrap();
+        let (min, max) = vertex_range(&pos, &[0, 1, 2], AlignAxisAV::X).expect("should succeed");
         assert!((min - 0.0).abs() < 1e-5);
         assert!((max - 4.0).abs() < 1e-5);
     }

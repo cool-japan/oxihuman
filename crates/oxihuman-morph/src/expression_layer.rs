@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! ExpressionLayer — weight-stacked expression layers.
 
@@ -101,7 +101,7 @@ mod tests {
         let mut stack = LayerStack::default();
         push_layer(&mut stack, new_expression_layer("a", 1.0, vec![]));
         push_layer(&mut stack, new_expression_layer("b", 0.5, vec![]));
-        let top = pop_layer(&mut stack).unwrap();
+        let top = pop_layer(&mut stack).expect("should succeed");
         assert_eq!(top.name, "b");
         assert_eq!(layer_count(&stack), 1);
     }

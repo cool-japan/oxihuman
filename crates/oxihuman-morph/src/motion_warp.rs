@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Motion time-warping, speed scaling, and blend between motion clips.
 
@@ -383,7 +383,7 @@ mod tests {
         let rev = reverse_clip(&clip);
         assert_eq!(rev.frames.len(), 5);
         // Last frame of original becomes first of reversed
-        let orig_last_pose = clip.frames.last().unwrap().pose.clone();
+        let orig_last_pose = clip.frames.last().expect("should succeed").pose.clone();
         assert!((rev.frames[0].time).abs() < 1e-4);
         // original last frame value
         assert!((rev.frames[0].pose[0] - orig_last_pose[0]).abs() < 1e-4);

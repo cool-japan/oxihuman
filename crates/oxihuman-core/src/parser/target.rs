@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{Context, Result};
 
@@ -56,7 +56,7 @@ mod tests {
     #[test]
     fn parse_basic_target() {
         let src = "# comment\n1358 0 -.006 -.006\n1359 .001 -.004 -.005\n";
-        let t = parse_target("test", src).unwrap();
+        let t = parse_target("test", src).expect("should succeed");
         assert_eq!(t.name, "test");
         assert_eq!(t.deltas.len(), 2);
         assert_eq!(t.deltas[0].vid, 1358);
@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn skip_malformed_lines() {
         let src = "# header\n1 2 3\n100 0.1 0.2 0.3\n";
-        let t = parse_target("t", src).unwrap();
+        let t = parse_target("t", src).expect("should succeed");
         assert_eq!(t.deltas.len(), 1);
         assert_eq!(t.deltas[0].vid, 100);
     }
@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn deltas_are_sorted_by_vid() {
         let src = "# comment\n500 0.1 0.2 0.3\n100 0.4 0.5 0.6\n300 0.7 0.8 0.9\n";
-        let t = parse_target("sorted", src).unwrap();
+        let t = parse_target("sorted", src).expect("should succeed");
         assert_eq!(t.deltas[0].vid, 100);
         assert_eq!(t.deltas[1].vid, 300);
         assert_eq!(t.deltas[2].vid, 500);
@@ -95,8 +95,8 @@ mod tests {
             .take(1)
             .collect();
         if let Some(entry) = entries.first() {
-            let src = std::fs::read_to_string(entry.path()).unwrap();
-            let t = parse_target("real", &src).unwrap();
+            let src = std::fs::read_to_string(entry.path()).expect("should succeed");
+            let t = parse_target("real", &src).expect("should succeed");
             assert!(!t.deltas.is_empty(), "real target should have deltas");
         }
     }

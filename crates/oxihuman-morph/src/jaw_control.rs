@@ -423,8 +423,8 @@ mod tests {
     fn test_jaw_to_morph_weights_closed() {
         let s = new_jaw_state();
         let w = jaw_to_morph_weights(&s);
-        assert_eq!(*w.get("jaw_open").unwrap(), 0.0);
-        assert!(*w.get("lips_together").unwrap() > 0.9);
+        assert_eq!(*w.get("jaw_open").expect("should succeed"), 0.0);
+        assert!(*w.get("lips_together").expect("should succeed") > 0.9);
     }
 
     #[test]
@@ -436,8 +436,8 @@ mod tests {
             velocity: 0.0,
         };
         let w = jaw_to_morph_weights(&s);
-        assert!(*w.get("mouth_wide").unwrap() > 0.0);
-        assert_eq!(*w.get("lips_together").unwrap(), 0.0);
+        assert!(*w.get("mouth_wide").expect("should succeed") > 0.0);
+        assert_eq!(*w.get("lips_together").expect("should succeed"), 0.0);
     }
 
     #[test]

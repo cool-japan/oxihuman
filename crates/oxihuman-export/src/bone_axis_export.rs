@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Export bone axis orientation data.
@@ -163,7 +163,7 @@ mod tests {
     #[test]
     fn test_bone_length() {
         let e = arm_bone();
-        let b = find_bone_axis(&e, "upper_arm").unwrap();
+        let b = find_bone_axis(&e, "upper_arm").expect("should succeed");
         assert!((bone_length(b) - 1.0).abs() < 1e-5);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! FBX 7.4 binary format writer.
 //!
@@ -17,10 +17,15 @@
 //!   `F`=f32, `D`=f64, `S`=string, `R`=raw bytes,
 //!   `i`=i32 array, `d`=f64 array, `f`=f32 array.
 
+use miniz_oxide::deflate::compress_to_vec_zlib;
+use oxihuman_mesh::MeshBuffers;
 use std::io::Write;
 
 /// FBX binary magic header bytes.
 const FBX_MAGIC: &[u8] = b"Kaydara FBX Binary  \x00\x1a\x00";
+
+/// Arrays with more elements than this threshold are zlib-compressed (encoding=1).
+const COMPRESSION_THRESHOLD: usize = 512;
 
 /// FBX version we target.
 const FBX_VERSION: u32 = 7400;
@@ -98,13 +103,13 @@ impl FbxProperty {
                 buf.extend_from_slice(&len.to_le_bytes());
                 buf.extend_from_slice(data);
             }
-            Self::I32Array(arr) => write_array_uncompressed(buf, arr, 4, |b, v| {
+            Self::I32Array(arr) => write_array_with_compression(buf, arr, 4, |b, v| {
                 b.extend_from_slice(&v.to_le_bytes());
             })?,
-            Self::F64Array(arr) => write_array_uncompressed(buf, arr, 8, |b, v| {
+            Self::F64Array(arr) => write_array_with_compression(buf, arr, 8, |b, v| {
                 b.extend_from_slice(&v.to_le_bytes());
             })?,
-            Self::F32Array(arr) => write_array_uncompressed(buf, arr, 4, |b, v| {
+            Self::F32Array(arr) => write_array_with_compression(buf, arr, 4, |b, v| {
                 b.extend_from_slice(&v.to_le_bytes());
             })?,
         }
@@ -112,11 +117,12 @@ impl FbxProperty {
     }
 }
 
-/// Writes an uncompressed FBX array header + elements.
+/// Writes an FBX array header + elements, using zlib compression when the array
+/// is larger than [`COMPRESSION_THRESHOLD`] elements.
 ///
-/// Array header: array_length(u32), encoding(u32=0), compressed_length(u32),
-/// followed by raw element bytes.
-fn write_array_uncompressed<T>(
+/// Array header layout: array_length(u32), encoding(u32), compressed_length(u32),
+/// followed by element bytes (raw when encoding=0, zlib-deflated when encoding=1).
+fn write_array_with_compression<T>(
     buf: &mut Vec<u8>,
     arr: &[T],
     elem_size: u32,
@@ -124,14 +130,30 @@ fn write_array_uncompressed<T>(
 ) -> anyhow::Result<()> {
     let count = u32::try_from(arr.len())
         .map_err(|_| anyhow::anyhow!("FBX array too long: {} elements", arr.len()))?;
-    let data_len = count
-        .checked_mul(elem_size)
-        .ok_or_else(|| anyhow::anyhow!("FBX array byte length overflow"))?;
-    buf.extend_from_slice(&count.to_le_bytes()); // array_length
-    buf.extend_from_slice(&0u32.to_le_bytes()); // encoding = 0 (uncompressed)
-    buf.extend_from_slice(&data_len.to_le_bytes()); // compressed_length == data_len
+
+    // Serialise all elements into a temporary raw buffer.
+    let mut raw: Vec<u8> = Vec::with_capacity(arr.len() * elem_size as usize);
     for v in arr {
-        write_elem(buf, v);
+        write_elem(&mut raw, v);
+    }
+
+    buf.extend_from_slice(&count.to_le_bytes()); // array_length
+
+    if arr.len() > COMPRESSION_THRESHOLD {
+        // encoding = 1 (zlib / deflate)
+        let compressed = compress_to_vec_zlib(&raw, 6);
+        let compressed_len = u32::try_from(compressed.len())
+            .map_err(|_| anyhow::anyhow!("FBX compressed array too large: {} bytes", compressed.len()))?;
+        buf.extend_from_slice(&1u32.to_le_bytes()); // encoding = 1
+        buf.extend_from_slice(&compressed_len.to_le_bytes()); // compressed_length
+        buf.extend_from_slice(&compressed);
+    } else {
+        // encoding = 0 (uncompressed)
+        let data_len = u32::try_from(raw.len())
+            .map_err(|_| anyhow::anyhow!("FBX array byte length overflow"))?;
+        buf.extend_from_slice(&0u32.to_le_bytes()); // encoding = 0
+        buf.extend_from_slice(&data_len.to_le_bytes()); // compressed_length == data_len
+        buf.extend_from_slice(&raw);
     }
     Ok(())
 }
@@ -451,7 +473,7 @@ impl FbxBinaryWriter {
 
         // FBX footer: a fixed sequence of bytes (simplified but conformant).
         // Pad to 16-byte alignment, then write the footer magic.
-        let footer_padding_target = ((self.output.len() + 15) / 16) * 16;
+        let footer_padding_target = self.output.len().div_ceil(16) * 16;
         while self.output.len() < footer_padding_target {
             self.output.push(0);
         }
@@ -469,6 +491,54 @@ impl FbxBinaryWriter {
 
         Ok(self.output)
     }
+}
+
+// ── Convenience API ─────────────────────────────────────────────────────────
+
+/// Export a [`MeshBuffers`] to a self-contained FBX 7.4 binary byte vector.
+///
+/// The returned bytes form a valid `.fbx` file with a Geometry node, a Model
+/// node, and the corresponding Connections, ready for import into any
+/// FBX-compatible DCC tool.  Large arrays (> 512 elements)
+/// are automatically zlib-compressed per the FBX spec (encoding = 1).
+pub fn export_mesh_fbx_binary(mesh: &MeshBuffers) -> anyhow::Result<Vec<u8>> {
+    let mut writer = FbxBinaryWriter::new();
+    writer.write_header()?;
+
+    // Convert f32 positions / normals / uvs to f64 for FBX compatibility.
+    let positions_f64: Vec<[f64; 3]> = mesh
+        .positions
+        .iter()
+        .map(|p| [p[0] as f64, p[1] as f64, p[2] as f64])
+        .collect();
+
+    let normals_f64: Vec<[f64; 3]> = mesh
+        .normals
+        .iter()
+        .map(|n| [n[0] as f64, n[1] as f64, n[2] as f64])
+        .collect();
+
+    let uvs_f64: Vec<[f64; 2]> = mesh
+        .uvs
+        .iter()
+        .map(|u| [u[0] as f64, u[1] as f64])
+        .collect();
+
+    // Convert flat u32 index list into triangle triples.
+    let triangles: Vec<[usize; 3]> = mesh
+        .indices
+        .chunks(3)
+        .filter_map(|tri| {
+            if tri.len() == 3 {
+                Some([tri[0] as usize, tri[1] as usize, tri[2] as usize])
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    writer.write_mesh("Mesh", &positions_f64, &normals_f64, &uvs_f64, &triangles)?;
+    writer.finish()
 }
 
 // ── Recursive node serialisation ────────────────────────────────────────────
@@ -672,6 +742,81 @@ mod tests {
     fn test_default_trait() {
         let w = FbxBinaryWriter::default();
         assert!(w.output.is_empty());
+    }
+
+    // ── v0.1.1 workstream-F tests ────────────────────────────────────────────
+
+    fn minimal_mesh() -> MeshBuffers {
+        MeshBuffers {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0]; 3],
+            tangents: vec![[1.0, 0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
+            indices: vec![0, 1, 2],
+            colors: None,
+            has_suit: false,
+        }
+    }
+
+    /// The convenience export must start with the FBX binary magic header.
+    #[test]
+    fn test_fbx_magic_bytes() {
+        let mesh = minimal_mesh();
+        let data = export_mesh_fbx_binary(&mesh).expect("export_mesh_fbx_binary failed");
+        assert_eq!(
+            &data[..23],
+            b"Kaydara FBX Binary  \x00\x1a\x00",
+            "FBX magic header mismatch"
+        );
+    }
+
+    /// A large array (> COMPRESSION_THRESHOLD elements) must be written with
+    /// encoding = 1 (zlib), so the fourth byte of the array header payload must
+    /// be 1 (first byte of the little-endian u32 encoding field).
+    #[test]
+    fn test_zlib_array_round_trip() {
+        let data: Vec<f32> = (0..1000).map(|i| i as f32).collect();
+        let mut buf: Vec<u8> = Vec::new();
+        // array_length (4 bytes) + encoding (4 bytes) + compressed_len (4 bytes) + ...
+        write_array_with_compression(&mut buf, &data, 4, |b, v: &f32| {
+            b.extend_from_slice(&v.to_le_bytes());
+        })
+        .expect("write_array_with_compression failed");
+
+        // encoding field starts at byte offset 4 (after array_length u32).
+        let encoding = u32::from_le_bytes(
+            buf[4..8]
+                .try_into()
+                .expect("encoding slice must be 4 bytes"),
+        );
+        assert_eq!(encoding, 1, "expected zlib encoding (1) for large array");
+
+        // The compressed payload must be smaller than the raw data (1000 * 4 = 4000 bytes).
+        let compressed_len = u32::from_le_bytes(
+            buf[8..12]
+                .try_into()
+                .expect("compressed_len slice must be 4 bytes"),
+        ) as usize;
+        assert!(
+            compressed_len < data.len() * 4,
+            "compressed payload ({compressed_len} B) should be smaller than raw ({} B)",
+            data.len() * 4
+        );
+    }
+
+    /// Smoke-test: the convenience function must succeed and produce a file
+    /// larger than just the 27-byte header.
+    #[test]
+    fn test_mesh_export_smoke() {
+        let mesh = minimal_mesh();
+        let result = export_mesh_fbx_binary(&mesh);
+        assert!(result.is_ok(), "export_mesh_fbx_binary returned error");
+        let bytes = result.expect("already checked above");
+        assert!(
+            bytes.len() > 27,
+            "exported FBX should be larger than the 27-byte header, got {} bytes",
+            bytes.len()
+        );
     }
 
     #[test]

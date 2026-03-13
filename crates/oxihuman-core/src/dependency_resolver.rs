@@ -284,11 +284,11 @@ mod tests {
         add_dep_node(&mut g, make_node("A", &[]));
         add_dep_node(&mut g, make_node("B", &[("A", true)]));
         add_dep_node(&mut g, make_node("C", &[("B", true)]));
-        let result = resolve_dependencies(&g).unwrap();
+        let result = resolve_dependencies(&g).expect("should succeed");
         let order = &result.order;
-        let a_pos = order.iter().position(|x| x == "A").unwrap();
-        let b_pos = order.iter().position(|x| x == "B").unwrap();
-        let c_pos = order.iter().position(|x| x == "C").unwrap();
+        let a_pos = order.iter().position(|x| x == "A").expect("should succeed");
+        let b_pos = order.iter().position(|x| x == "B").expect("should succeed");
+        let c_pos = order.iter().position(|x| x == "C").expect("should succeed");
         assert!(a_pos < b_pos);
         assert!(b_pos < c_pos);
     }
@@ -400,7 +400,7 @@ mod tests {
         let mut g = new_dependency_graph();
         add_dep_node(&mut g, make_node("X", &[]));
         add_dep_node(&mut g, make_node("Y", &[]));
-        let result = resolve_dependencies(&g).unwrap();
+        let result = resolve_dependencies(&g).expect("should succeed");
         assert_eq!(result.order.len(), 2);
     }
 }

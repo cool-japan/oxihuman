@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Space-efficient packed 3D vector storage using u16 components.
 
@@ -181,7 +181,7 @@ mod tests {
         let mut buf = new_packed_buffer(cfg);
         pvbuf_push(&mut buf, [0.5, -0.5, 0.0]);
         assert_eq!(pvbuf_len(&buf), 1);
-        let got = pvbuf_get(&buf, 0).unwrap();
+        let got = pvbuf_get(&buf, 0).expect("should succeed");
         assert!((got[0] - 0.5).abs() < 0.0001);
     }
 

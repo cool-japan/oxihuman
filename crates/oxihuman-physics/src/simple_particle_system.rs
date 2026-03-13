@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Simple particle emitter/system.
 
@@ -153,7 +153,7 @@ mod tests {
         let mut sys = new_simple_particle_system(default_simple_particle_config());
         sps_emit(&mut sys, [0.0, 0.0, 0.0], [1.0, 0.0, 0.0]);
         sps_step(&mut sys, 0.1);
-        let p = sps_particle_at(&sys, 0).unwrap();
+        let p = sps_particle_at(&sys, 0).expect("should succeed");
         assert!(p.pos[0] > 0.0);
     }
 
@@ -181,7 +181,7 @@ mod tests {
         sps_set_gravity(&mut sys, [0.0, 0.0, 0.0]);
         sps_emit(&mut sys, [0.0; 3], [1.0, 0.0, 0.0]);
         sps_step(&mut sys, 1.0);
-        let p = sps_particle_at(&sys, 0).unwrap();
+        let p = sps_particle_at(&sys, 0).expect("should succeed");
         // With zero gravity, Y should not change
         assert!((p.pos[1]).abs() < 1e-6);
     }

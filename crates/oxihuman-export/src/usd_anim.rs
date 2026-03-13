@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -369,7 +369,7 @@ mod tests {
         let path = std::path::Path::new("/tmp/test_usd_anim_export.usda");
         export_usda_animated(&mesh, &samples, &cfg, path).expect("should write file");
         assert!(path.exists());
-        let content = std::fs::read_to_string(path).unwrap();
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.contains("timeSamples"));
     }
 }

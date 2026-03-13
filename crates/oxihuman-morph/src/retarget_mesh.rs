@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Retarget mesh geometry between different topologies using closest-point transfer.
 
@@ -245,7 +245,7 @@ mod tests {
     #[test]
     fn test_closest_vertex_finds_nearest() {
         let pts = vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 0.0, 0.0]];
-        let (idx, d) = closest_vertex([0.49, 0.0, 0.0], &pts, 1.0).unwrap();
+        let (idx, d) = closest_vertex([0.49, 0.0, 0.0], &pts, 1.0).expect("should succeed");
         assert_eq!(idx, 2);
         assert!(d < 0.02);
     }
@@ -261,7 +261,7 @@ mod tests {
     #[test]
     fn test_closest_vertex_exact() {
         let pts = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
-        let (idx, d) = closest_vertex([1.0, 2.0, 3.0], &pts, 0.001).unwrap();
+        let (idx, d) = closest_vertex([1.0, 2.0, 3.0], &pts, 0.001).expect("should succeed");
         assert_eq!(idx, 0);
         assert!(d < 1e-6);
     }

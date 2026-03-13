@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 pub fn varint_encoded_size_u64(v: u64) -> usize {
@@ -80,7 +80,7 @@ mod tests {
         /* large value roundtrip */
         let v = 300u64;
         let enc = varint_encode_u64(v);
-        let (dec, _) = varint_decode_u64(&enc).unwrap();
+        let (dec, _) = varint_decode_u64(&enc).expect("should succeed");
         assert_eq!(dec, v);
     }
 
@@ -88,7 +88,7 @@ mod tests {
     fn decode_consumes_correct_bytes_u64() {
         /* decode returns correct byte count consumed */
         let enc = varint_encode_u64(300);
-        let (_, n) = varint_decode_u64(&enc).unwrap();
+        let (_, n) = varint_decode_u64(&enc).expect("should succeed");
         assert_eq!(n, enc.len());
     }
 
@@ -97,7 +97,7 @@ mod tests {
         /* positive i64 roundtrip */
         let v = 42i64;
         let enc = varint_encode_i64(v);
-        let (dec, _) = varint_decode_i64(&enc).unwrap();
+        let (dec, _) = varint_decode_i64(&enc).expect("should succeed");
         assert_eq!(dec, v);
     }
 
@@ -106,7 +106,7 @@ mod tests {
         /* negative i64 roundtrip via zigzag */
         let v = -1i64;
         let enc = varint_encode_i64(v);
-        let (dec, _) = varint_decode_i64(&enc).unwrap();
+        let (dec, _) = varint_decode_i64(&enc).expect("should succeed");
         assert_eq!(dec, v);
     }
 

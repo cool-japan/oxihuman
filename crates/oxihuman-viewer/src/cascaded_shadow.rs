@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! CascadedShadow — cascaded shadow map (CSM) management.
 
@@ -130,7 +130,7 @@ mod tests {
     fn test_cascade_view_proj_identity() {
         let mut cs = new_cascaded_shadow(2, 0.5);
         compute_cascade_splits(&mut cs, 0.1, 10.0, 2);
-        let vp = cascade_view_proj(&cs, 0).unwrap();
+        let vp = cascade_view_proj(&cs, 0).expect("should succeed");
         assert!((vp[0] - 1.0).abs() < 1e-6);
     }
 

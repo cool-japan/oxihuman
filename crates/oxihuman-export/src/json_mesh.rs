@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Minimal JSON mesh exporter for debugging and tooling.
 
@@ -76,7 +76,7 @@ mod tests {
     fn json_positions_round_trip() {
         let m = triangle_mesh();
         let v = export_json_mesh(&m);
-        let positions = import_json_mesh_positions(&v).unwrap();
+        let positions = import_json_mesh_positions(&v).expect("should succeed");
         assert_eq!(positions.len(), 3);
         assert!((positions[0][0] - 1.0).abs() < 1e-5);
         assert!((positions[2][2] - 9.0).abs() < 1e-5);
@@ -86,8 +86,8 @@ mod tests {
     fn export_json_creates_file() {
         let m = triangle_mesh();
         let path = std::path::PathBuf::from("/tmp/test_oxihuman_mesh.json");
-        export_json_mesh_to_file(&m, &path).unwrap();
-        let content = std::fs::read_to_string(&path).unwrap();
+        export_json_mesh_to_file(&m, &path).expect("should succeed");
+        let content = std::fs::read_to_string(&path).expect("should succeed");
         assert!(content.contains("vertex_count"));
         std::fs::remove_file(&path).ok();
     }

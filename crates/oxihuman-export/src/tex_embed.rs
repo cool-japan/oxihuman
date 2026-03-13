@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GLB texture embedding: embed a texture into a GLB file alongside the mesh,
 //! wired to the material's `baseColorTexture`.
@@ -266,9 +266,9 @@ mod tests {
         let tex = small_tex();
         let path = std::path::PathBuf::from("/tmp/test_tex_embed_header.glb");
         export_glb_with_texture(&mesh, &mat, &tex, &path).expect("export failed");
-        let bytes = std::fs::read(&path).unwrap();
+        let bytes = std::fs::read(&path).expect("should succeed");
         assert!(bytes.len() >= 4, "file too short to contain GLB magic");
-        let magic = u32::from_le_bytes(bytes[0..4].try_into().unwrap());
+        let magic = u32::from_le_bytes(bytes[0..4].try_into().expect("should succeed"));
         assert_eq!(magic, 0x46546C67u32, "first 4 bytes are not GLB magic");
         std::fs::remove_file(&path).ok();
     }
@@ -286,8 +286,8 @@ mod tests {
         export_glb(&mesh, &path_plain).expect("plain export failed");
         export_glb_with_texture(&mesh, &mat, &tex, &path_tex).expect("texture export failed");
 
-        let size_plain = std::fs::metadata(&path_plain).unwrap().len();
-        let size_tex = std::fs::metadata(&path_tex).unwrap().len();
+        let size_plain = std::fs::metadata(&path_plain).expect("should succeed").len();
+        let size_tex = std::fs::metadata(&path_tex).expect("should succeed").len();
 
         assert!(
             size_tex > size_plain,

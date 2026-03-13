@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Advanced aging pipeline: piecewise-linear age stages, morph deltas, skin/face/body params.
 
@@ -490,7 +490,10 @@ mod tests {
         };
         // aging backward (target < base) — delta_fat_pct should be negative
         let params = simulate_aging(&profile, 30.0, &curve);
-        let fat_delta = params.iter().find(|(k, _)| k == "delta_fat_pct").unwrap();
+        let fat_delta = params
+            .iter()
+            .find(|(k, _)| k == "delta_fat_pct")
+            .expect("should succeed");
         assert!(fat_delta.1 < 0.0);
     }
 }

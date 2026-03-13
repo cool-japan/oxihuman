@@ -274,7 +274,7 @@ mod tests {
     fn test_last_frame_some() {
         let mut o = new_stats_overlay(60);
         push_frame_stats(&mut o, make_stats(42, 60.0, 16.67, 0, 0));
-        let lf = last_frame(&o).unwrap();
+        let lf = last_frame(&o).expect("should succeed");
         assert_eq!(lf.frame_number, 42);
     }
 

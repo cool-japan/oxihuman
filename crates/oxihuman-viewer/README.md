@@ -2,14 +2,14 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Version:** 0.1.0 | **Status:** Alpha | **Updated:** 2026-03-11
+**Version:** 0.1.1 | **Status:** Stable | **Updated:** 2026-03-13
 
 | Metric | Value |
 |--------|-------|
-| Passing tests | 4,800 |
+| Passing tests | 4,974 |
 | Public API items | 9,528 |
-| Source files | 857 `.rs` files |
-| Stub modules | 40+ (advanced rendering effects) |
+| Source files | ~880 `.rs` files |
+| Stub modules | 0 |
 
 ---
 

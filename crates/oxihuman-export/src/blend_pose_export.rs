@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export blended pose data (weighted combination of multiple poses).
@@ -127,7 +127,7 @@ mod tests {
             pose: p,
             weight: 1.0,
         }];
-        let b = blend_poses(&w).unwrap();
+        let b = blend_poses(&w).expect("should succeed");
         assert!((b.joint_rotations[0][3] - 1.0).abs() < 1e-5);
     }
 
@@ -143,7 +143,7 @@ mod tests {
                 weight: 0.5,
             },
         ];
-        let b = blend_poses(&w).unwrap();
+        let b = blend_poses(&w).expect("should succeed");
         assert!((b.joint_rotations[0][3] - 1.0).abs() < 1e-5);
     }
 
@@ -207,7 +207,7 @@ mod tests {
             pose: id_pose("a"),
             weight: 1.0,
         }];
-        let b = blend_poses(&w).unwrap();
+        let b = blend_poses(&w).expect("should succeed");
         assert_eq!(b.joint_count, 3);
     }
 }

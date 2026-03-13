@@ -177,28 +177,28 @@ mod tests {
     fn test_write_read_u8_roundtrip() {
         let mut buf = new_byte_buffer();
         bb_write_u8(&mut buf, 42);
-        assert_eq!(bb_read_u8(&mut buf).unwrap(), 42);
+        assert_eq!(bb_read_u8(&mut buf).expect("should succeed"), 42);
     }
 
     #[test]
     fn test_write_read_u16_roundtrip() {
         let mut buf = new_byte_buffer();
         bb_write_u16(&mut buf, 1234);
-        assert_eq!(bb_read_u16(&mut buf).unwrap(), 1234);
+        assert_eq!(bb_read_u16(&mut buf).expect("should succeed"), 1234);
     }
 
     #[test]
     fn test_write_read_u32_roundtrip() {
         let mut buf = new_byte_buffer();
         bb_write_u32(&mut buf, 0xDEAD_BEEF);
-        assert_eq!(bb_read_u32(&mut buf).unwrap(), 0xDEAD_BEEF);
+        assert_eq!(bb_read_u32(&mut buf).expect("should succeed"), 0xDEAD_BEEF);
     }
 
     #[test]
     fn test_write_read_f32_roundtrip() {
         let mut buf = new_byte_buffer();
         bb_write_f32(&mut buf, std::f32::consts::PI);
-        let v = bb_read_f32(&mut buf).unwrap();
+        let v = bb_read_f32(&mut buf).expect("should succeed");
         assert!((v - std::f32::consts::PI).abs() < 1e-5);
     }
 
@@ -207,7 +207,7 @@ mod tests {
         let mut buf = new_byte_buffer();
         let data = vec![10u8, 20, 30, 40];
         bb_write_bytes(&mut buf, &data);
-        let out = bb_read_bytes(&mut buf, 4).unwrap();
+        let out = bb_read_bytes(&mut buf, 4).expect("should succeed");
         assert_eq!(out, data);
     }
 
@@ -218,7 +218,7 @@ mod tests {
         bb_write_u8(&mut buf, 2);
         bb_write_u8(&mut buf, 3);
         assert_eq!(bb_remaining(&buf), 3);
-        bb_read_u8(&mut buf).unwrap();
+        bb_read_u8(&mut buf).expect("should succeed");
         assert_eq!(bb_remaining(&buf), 2);
     }
 
@@ -267,9 +267,9 @@ mod tests {
         bb_write_u8(&mut buf, 5);
         bb_write_u16(&mut buf, 300);
         bb_write_u32(&mut buf, 70000);
-        assert_eq!(bb_read_u8(&mut buf).unwrap(), 5);
-        assert_eq!(bb_read_u16(&mut buf).unwrap(), 300);
-        assert_eq!(bb_read_u32(&mut buf).unwrap(), 70000);
+        assert_eq!(bb_read_u8(&mut buf).expect("should succeed"), 5);
+        assert_eq!(bb_read_u16(&mut buf).expect("should succeed"), 300);
+        assert_eq!(bb_read_u32(&mut buf).expect("should succeed"), 70000);
         assert_eq!(bb_remaining(&buf), 0);
     }
 }

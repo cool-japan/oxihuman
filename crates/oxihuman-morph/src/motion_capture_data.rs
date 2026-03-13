@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A single joint in a motion capture frame.
 #[derive(Debug, Clone)]
@@ -110,7 +110,7 @@ mod tests {
         let mut c = new_mcap_clip("clip", 30.0);
         add_frame(&mut c, 0.5, vec![]);
         add_frame(&mut c, 1.0, vec![]);
-        let f = frame_at_time(&c, 1.0).unwrap();
+        let f = frame_at_time(&c, 1.0).expect("should succeed");
         assert!((f.time - 1.0).abs() < 1e-6);
     }
 
@@ -119,7 +119,7 @@ mod tests {
         let mut c = new_mcap_clip("clip", 30.0);
         add_frame(&mut c, 0.0, vec![]);
         add_frame(&mut c, 1.0, vec![]);
-        let f = frame_at_time(&c, 0.4).unwrap();
+        let f = frame_at_time(&c, 0.4).expect("should succeed");
         assert!((f.time - 0.0).abs() < 1e-6);
     }
 

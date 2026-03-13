@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Ambient occlusion preview data (CPU-side AO computation).
 
@@ -348,7 +348,7 @@ mod tests {
         let dir = [0.0, 0.0, 1.0];
         let result = ray_intersects_triangle(origin, dir, v0, v1, v2);
         assert!(result.is_some(), "ray should hit triangle");
-        let t = result.unwrap();
+        let t = result.expect("should succeed");
         assert!((t - 1.0).abs() < 1e-4);
     }
 

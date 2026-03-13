@@ -90,7 +90,7 @@ mod tests {
     fn test_frame_at() {
         let mut s = new_sprite_sheet2(512, 512);
         add_frame2(&mut s, sample_frame("walk"));
-        let f = frame2_at(&s, 0).unwrap();
+        let f = frame2_at(&s, 0).expect("should succeed");
         assert_eq!(f.name, "walk");
     }
 
@@ -104,7 +104,7 @@ mod tests {
     fn test_sprite_uv_rect() {
         let mut s = new_sprite_sheet2(512, 512);
         add_frame2(&mut s, SpriteFrame2 { name:"x".to_string(), x:0, y:0, w:256, h:256 });
-        let uv = sprite2_uv_rect(&s, 0).unwrap();
+        let uv = sprite2_uv_rect(&s, 0).expect("should succeed");
         assert!((uv[2] - 0.5).abs() < 1e-5);
     }
 

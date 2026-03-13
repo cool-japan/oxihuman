@@ -66,7 +66,7 @@ mod tests {
     }
     #[test] fn test_free() {
         let mut m = new_gpu_memory(1024);
-        let off = allocate_block(&mut m, 256, "a").unwrap();
+        let off = allocate_block(&mut m, 256, "a").expect("should succeed");
         assert!(free_block(&mut m, off));
         assert_eq!(allocated_bytes(&m), 0);
     }

@@ -296,7 +296,7 @@ mod tests {
     #[test]
     fn test_rope_tip_is_last_node() {
         let rope = make_rope(3);
-        let last_pos = rope.nodes.last().unwrap().position;
+        let last_pos = rope.nodes.last().expect("should succeed").position;
         assert_eq!(rope_tip(&rope), last_pos);
     }
 }

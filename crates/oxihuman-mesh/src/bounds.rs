@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Mesh bounding volumes: AABB, bounding sphere, and OBB approximation.
 //!
@@ -297,7 +297,7 @@ mod tests {
 
     #[test]
     fn aabb_from_unit_cube() {
-        let aabb = Aabb::from_positions(&unit_cube_positions()).unwrap();
+        let aabb = Aabb::from_positions(&unit_cube_positions()).expect("should succeed");
         assert_eq!(aabb.min, [0.0, 0.0, 0.0]);
         assert_eq!(aabb.max, [1.0, 1.0, 1.0]);
     }
@@ -315,7 +315,7 @@ mod tests {
             [0.0, 2.0, 2.0],
             [2.0, 2.0, 2.0],
         ];
-        let aabb = Aabb::from_positions(&positions).unwrap();
+        let aabb = Aabb::from_positions(&positions).expect("should succeed");
         let c = aabb.center();
         assert!((c[0] - 1.0).abs() < 1e-6);
         assert!((c[1] - 1.0).abs() < 1e-6);
@@ -334,7 +334,7 @@ mod tests {
 
     #[test]
     fn aabb_contains_point() {
-        let aabb = Aabb::from_positions(&unit_cube_positions()).unwrap();
+        let aabb = Aabb::from_positions(&unit_cube_positions()).expect("should succeed");
         let center = aabb.center();
         assert!(aabb.contains_point(center), "center should be inside");
         assert!(!aabb.contains_point([2.0, 0.5, 0.5]), "outside X");
@@ -379,7 +379,7 @@ mod tests {
     #[test]
     fn bounding_sphere_contains_center() {
         let positions = unit_cube_positions();
-        let sphere = BoundingSphere::from_positions(&positions).unwrap();
+        let sphere = BoundingSphere::from_positions(&positions).expect("should succeed");
         // The centroid of the unit cube is [0.5, 0.5, 0.5]
         assert!(
             sphere.contains_point([0.5, 0.5, 0.5]),
@@ -390,7 +390,7 @@ mod tests {
     #[test]
     fn bounding_sphere_contains_all_points() {
         let positions = unit_cube_positions();
-        let sphere = BoundingSphere::from_positions(&positions).unwrap();
+        let sphere = BoundingSphere::from_positions(&positions).expect("should succeed");
         for &p in &positions {
             assert!(
                 sphere.contains_point(p),

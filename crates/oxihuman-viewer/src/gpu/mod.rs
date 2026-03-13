@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GPU-related types: mesh buffers, context, render pipeline, draw utilities,
 //! WGSL shaders, pipeline cache, surface configuration, and bind groups.

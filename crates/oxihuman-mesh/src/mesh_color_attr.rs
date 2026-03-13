@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Vertex color attribute manipulation for meshes.
@@ -116,7 +116,7 @@ mod tests {
     fn test_set_get_color() {
         let mut attr = new_color_attr(3, [0.0; 4]);
         set_color(&mut attr, 1, [0.5, 0.5, 0.5, 1.0]);
-        let c = get_color(&attr, 1).unwrap();
+        let c = get_color(&attr, 1).expect("should succeed");
         assert!((c[0] - 0.5).abs() < 1e-6);
     }
 

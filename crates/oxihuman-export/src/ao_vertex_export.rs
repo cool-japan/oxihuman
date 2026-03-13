@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Ambient occlusion per-vertex export.
@@ -95,7 +95,7 @@ mod tests {
     #[test]
     fn test_ao_value_at() {
         let e = new_ao_vertex_export(&[0.1, 0.9]);
-        assert!((ao_value_at(&e, 0).unwrap() - 0.1).abs() < 1e-6);
+        assert!((ao_value_at(&e, 0).expect("should succeed") - 0.1).abs() < 1e-6);
     }
 
     #[test]

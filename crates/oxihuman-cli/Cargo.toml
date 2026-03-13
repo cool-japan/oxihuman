@@ -13,6 +13,10 @@ keywords    = ["cli", "human", "body", "export", "makehuman"]
 categories  = ["command-line-utilities", "science"]
 exclude     = ["target/", "tests/fixtures/", "*.wasm"]
 
+[lib]
+name    = "oxihuman_cli"
+path    = "src/lib.rs"
+
 [[bin]]
 name = "oxihuman"
 path = "src/main.rs"
@@ -30,3 +34,7 @@ oxihuman-viewer.workspace  = true
 [[test]]
 name    = "e2e_tests"
 path    = "tests/e2e_tests.rs"
+
+[[test]]
+name    = "unit_tests"
+path    = "tests/unit_tests.rs"

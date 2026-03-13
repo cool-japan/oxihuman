@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Convex hull computation for 3D point sets using an incremental algorithm.
 //!
@@ -556,7 +556,7 @@ mod tests {
     fn test_compute_hull_cube() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         assert_eq!(hull_vertex_count(&hull), 8);
         // Cube has 12 triangular faces (6 quads / 2 triangles each)
         assert_eq!(hull_face_count(&hull), 12);
@@ -566,7 +566,7 @@ mod tests {
     fn test_compute_hull_tetrahedron() {
         let pts = tetra_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         assert_eq!(hull_vertex_count(&hull), 4);
         assert_eq!(hull_face_count(&hull), 4);
     }
@@ -594,7 +594,7 @@ mod tests {
     fn test_hull_volume_cube() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         let vol = convex_hull_volume(&hull);
         assert!((vol - 1.0).abs() < 0.1, "Cube volume ~ 1.0, got {vol}");
     }
@@ -603,7 +603,7 @@ mod tests {
     fn test_hull_surface_area_cube() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         let area = convex_hull_surface_area(&hull);
         assert!(
             (area - 6.0).abs() < 0.1,
@@ -615,7 +615,7 @@ mod tests {
     fn test_point_inside_hull() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         assert!(is_point_inside_hull(&hull, [0.5, 0.5, 0.5]));
     }
 
@@ -623,7 +623,7 @@ mod tests {
     fn test_point_outside_hull() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         assert!(!is_point_inside_hull(&hull, [2.0, 2.0, 2.0]));
     }
 
@@ -631,7 +631,7 @@ mod tests {
     fn test_hull_centroid_cube() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         let c = hull_centroid(&hull);
         assert!((c[0] - 0.5).abs() < 0.01);
         assert!((c[1] - 0.5).abs() < 0.01);
@@ -642,7 +642,7 @@ mod tests {
     fn test_support_point_cube() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         let sp = support_point(&hull, [1.0, 0.0, 0.0]);
         assert!((sp[0] - 1.0).abs() < 0.01);
     }
@@ -651,7 +651,7 @@ mod tests {
     fn test_hull_bounding_box_cube() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         let (mn, mx) = hull_bounding_box(&hull);
         for k in 0..3 {
             assert!(mn[k].abs() < 0.01);
@@ -663,7 +663,7 @@ mod tests {
     fn test_hull_edge_count_tetrahedron() {
         let pts = tetra_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         // Tetrahedron: V=4, F=4, E=6
         assert_eq!(hull_edge_count(&hull), 6);
     }
@@ -672,7 +672,7 @@ mod tests {
     fn test_hull_edge_count_cube() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         // Triangulated cube: V=8, F=12, E = 8+12-2 = 18
         assert_eq!(hull_edge_count(&hull), 18);
     }
@@ -681,7 +681,7 @@ mod tests {
     fn test_project_to_hull_surface() {
         let pts = cube_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         let proj = project_to_hull_surface(&hull, [0.5, 0.5, 2.0]);
         // Should project onto the z=1 face
         assert!((proj[2] - 1.0).abs() < 0.1);
@@ -694,7 +694,7 @@ mod tests {
         pts.push([0.5, 0.5, 0.5]);
         pts.push([0.3, 0.3, 0.3]);
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         assert_eq!(hull_vertex_count(&hull), 8);
     }
 
@@ -702,7 +702,7 @@ mod tests {
     fn test_hull_volume_tetrahedron() {
         let pts = tetra_points();
         let cfg = default_hull_config();
-        let hull = compute_convex_hull(&pts, &cfg).unwrap();
+        let hull = compute_convex_hull(&pts, &cfg).expect("should succeed");
         let vol = convex_hull_volume(&hull);
         // Tetrahedron volume = |det([b-a, c-a, d-a])| / 6
         assert!(vol > 0.0);

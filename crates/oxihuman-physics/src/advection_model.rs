@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! 1D advection equation solver using upwind scheme.
@@ -160,16 +160,16 @@ mod tests {
         let init_max_pos =
             a.u.iter()
                 .enumerate()
-                .max_by(|x, y| x.1.partial_cmp(y.1).unwrap())
+                .max_by(|x, y| x.1.partial_cmp(y.1).expect("should succeed"))
                 .map(|(i, _)| i)
-                .unwrap();
+                .expect("should succeed");
         a.advance_periodic(20);
         let after_max_pos =
             a.u.iter()
                 .enumerate()
-                .max_by(|x, y| x.1.partial_cmp(y.1).unwrap())
+                .max_by(|x, y| x.1.partial_cmp(y.1).expect("should succeed"))
                 .map(|(i, _)| i)
-                .unwrap();
+                .expect("should succeed");
         /* Pulse should move to the right */
         assert!(after_max_pos >= init_max_pos || after_max_pos < 5 /* wrapped around */);
     }

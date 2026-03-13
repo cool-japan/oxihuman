@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Named signal handler registry for hooking OS-style signals or custom events.
@@ -175,7 +175,7 @@ mod tests {
         sh.register("h1", "tick", 0);
         sh.dispatch("tick", 1);
         sh.dispatch("tick", 2);
-        assert_eq!(sh.get("h1").unwrap().call_count, 2);
+        assert_eq!(sh.get("h1").expect("should succeed").call_count, 2);
     }
 
     #[test]

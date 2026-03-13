@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export curve control point data (Bezier / NURBS control polygons).
@@ -172,7 +172,7 @@ mod tests {
     #[test]
     fn test_aabb_some() {
         let c = line_curve();
-        let (mn, mx) = control_point_aabb(&c).unwrap();
+        let (mn, mx) = control_point_aabb(&c).expect("should succeed");
         assert!((mn[0] - 0.0).abs() < 1e-6);
         assert!((mx[0] - 1.0).abs() < 1e-6);
     }

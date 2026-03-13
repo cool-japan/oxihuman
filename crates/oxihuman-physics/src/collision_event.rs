@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Collision event queue.
 
@@ -85,7 +85,7 @@ mod tests {
     fn test_push_pop() {
         let mut q = new_collision_event_queue();
         push_collision_event(&mut q, 1, 2, [0.0, 1.0, 0.0], 0.1);
-        let e = pop_collision_event(&mut q).unwrap();
+        let e = pop_collision_event(&mut q).expect("should succeed");
         assert_eq!(e.body_a, 1);
         assert_eq!(e.body_b, 2);
     }
@@ -110,7 +110,7 @@ mod tests {
     fn test_peek() {
         let mut q = new_collision_event_queue();
         push_collision_event(&mut q, 5, 6, [1.0, 0.0, 0.0], 0.5);
-        let e = peek_event(&q).unwrap();
+        let e = peek_event(&q).expect("should succeed");
         assert_eq!(e.body_a, 5);
         assert_eq!(event_count(&q), 1);
     }
@@ -150,7 +150,7 @@ mod tests {
     fn test_depth() {
         let mut q = new_collision_event_queue();
         push_collision_event(&mut q, 1, 2, [0.0, 1.0, 0.0], 0.75);
-        let e = pop_collision_event(&mut q).unwrap();
+        let e = pop_collision_event(&mut q).expect("should succeed");
         assert!((e.depth - 0.75).abs() < 1e-6);
     }
 }

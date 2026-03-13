@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Dynamic median with dual-heap (max-heap lower half + min-heap upper half).
 
@@ -170,7 +170,7 @@ mod tests {
         for v in [5.0, 1.0, 3.0, 7.0] {
             mh.push(v);
         }
-        assert!(mh.lower_max().unwrap() <= mh.upper_min().unwrap());
+        assert!(mh.lower_max().expect("should succeed") <= mh.upper_min().expect("should succeed"));
     }
 
     #[test]

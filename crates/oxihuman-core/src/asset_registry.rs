@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Asset catalog with type tagging and metadata.
 
@@ -262,7 +262,7 @@ mod tests {
         let mut r = make_registry();
         let id = register_asset(&mut r, "mat1", AssetKind::Material);
         assert!(set_asset_metadata(&mut r, id, "author", "alice"));
-        let meta = get_asset_metadata(&r, id).unwrap();
+        let meta = get_asset_metadata(&r, id).expect("should succeed");
         assert_eq!(meta.get("author").map(String::as_str), Some("alice"));
     }
 

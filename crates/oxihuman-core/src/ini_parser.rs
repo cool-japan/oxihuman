@@ -164,14 +164,14 @@ mod tests {
 
     #[test]
     fn test_parse_empty() {
-        let cfg = parse_ini("").unwrap();
+        let cfg = parse_ini("").expect("should succeed");
         assert_eq!(ini_section_count(&cfg), 0);
     }
 
     #[test]
     fn test_parse_single_section() {
         let text = "[server]\nhost = localhost\nport = 8080\n";
-        let cfg = parse_ini(text).unwrap();
+        let cfg = parse_ini(text).expect("should succeed");
         assert!(ini_has_section(&cfg, "server"));
         assert_eq!(ini_get(&cfg, "server", "host"), Some("localhost"));
         assert_eq!(ini_get(&cfg, "server", "port"), Some("8080"));
@@ -180,7 +180,7 @@ mod tests {
     #[test]
     fn test_parse_multiple_sections() {
         let text = "[a]\nk1 = v1\n[b]\nk2 = v2\n";
-        let cfg = parse_ini(text).unwrap();
+        let cfg = parse_ini(text).expect("should succeed");
         assert_eq!(ini_section_count(&cfg), 2);
         assert_eq!(ini_get(&cfg, "a", "k1"), Some("v1"));
         assert_eq!(ini_get(&cfg, "b", "k2"), Some("v2"));
@@ -188,21 +188,21 @@ mod tests {
 
     #[test]
     fn test_ini_get_or_fallback() {
-        let cfg = parse_ini("[s]\nkey = val\n").unwrap();
+        let cfg = parse_ini("[s]\nkey = val\n").expect("should succeed");
         let result = ini_get_or(&cfg, "s", "missing", "fallback");
         assert_eq!(result, "fallback");
     }
 
     #[test]
     fn test_ini_set_new_key() {
-        let mut cfg = parse_ini("[s]\nk = v\n").unwrap();
+        let mut cfg = parse_ini("[s]\nk = v\n").expect("should succeed");
         ini_set(&mut cfg, "s", "new_key", "new_val");
         assert_eq!(ini_get(&cfg, "s", "new_key"), Some("new_val"));
     }
 
     #[test]
     fn test_ini_set_update_existing() {
-        let mut cfg = parse_ini("[s]\nk = old\n").unwrap();
+        let mut cfg = parse_ini("[s]\nk = old\n").expect("should succeed");
         ini_set(&mut cfg, "s", "k", "new");
         assert_eq!(ini_get(&cfg, "s", "k"), Some("new"));
     }
@@ -210,16 +210,16 @@ mod tests {
     #[test]
     fn test_ini_to_string_roundtrip() {
         let text = "[section]\nfoo = bar\nbaz = 42\n\n";
-        let cfg = parse_ini(text).unwrap();
+        let cfg = parse_ini(text).expect("should succeed");
         let out = ini_to_string(&cfg);
-        let cfg2 = parse_ini(&out).unwrap();
+        let cfg2 = parse_ini(&out).expect("should succeed");
         assert_eq!(ini_get(&cfg2, "section", "foo"), Some("bar"));
         assert_eq!(ini_get(&cfg2, "section", "baz"), Some("42"));
     }
 
     #[test]
     fn test_ini_remove_key() {
-        let mut cfg = parse_ini("[s]\na = 1\nb = 2\n").unwrap();
+        let mut cfg = parse_ini("[s]\na = 1\nb = 2\n").expect("should succeed");
         let removed = ini_remove_key(&mut cfg, "s", "a");
         assert!(removed);
         assert!(!ini_has_key(&cfg, "s", "a"));
@@ -228,14 +228,14 @@ mod tests {
 
     #[test]
     fn test_ini_remove_nonexistent_key() {
-        let mut cfg = parse_ini("[s]\na = 1\n").unwrap();
+        let mut cfg = parse_ini("[s]\na = 1\n").expect("should succeed");
         let removed = ini_remove_key(&mut cfg, "s", "z");
         assert!(!removed);
     }
 
     #[test]
     fn test_ini_key_count() {
-        let cfg = parse_ini("[sec]\na = 1\nb = 2\nc = 3\n").unwrap();
+        let cfg = parse_ini("[sec]\na = 1\nb = 2\nc = 3\n").expect("should succeed");
         assert_eq!(ini_key_count(&cfg, "sec"), 3);
         assert_eq!(ini_key_count(&cfg, "nonexistent"), 0);
     }
@@ -243,7 +243,7 @@ mod tests {
     #[test]
     fn test_parse_comments_skipped() {
         let text = "; comment\n[s]\n# another\nk = v\n";
-        let cfg = parse_ini(text).unwrap();
+        let cfg = parse_ini(text).expect("should succeed");
         assert_eq!(ini_key_count(&cfg, "s"), 1);
     }
 
@@ -255,7 +255,7 @@ mod tests {
 
     #[test]
     fn test_ini_set_creates_section() {
-        let mut cfg = parse_ini("").unwrap();
+        let mut cfg = parse_ini("").expect("should succeed");
         ini_set(&mut cfg, "new_section", "key", "val");
         assert!(ini_has_section(&cfg, "new_section"));
         assert_eq!(ini_get(&cfg, "new_section", "key"), Some("val"));

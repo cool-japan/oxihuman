@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! FlatBuffers builder stub.
@@ -138,7 +138,7 @@ mod tests {
     fn test_push_u8() {
         /* push u8 grows buffer by 1 */
         let mut b = FlatBuilder::new();
-        b.push_u8(0xAB).unwrap();
+        b.push_u8(0xAB).expect("should succeed");
         assert_eq!(b.len(), 1);
     }
 
@@ -146,7 +146,7 @@ mod tests {
     fn test_push_u32() {
         /* push u32 grows buffer by 4 */
         let mut b = FlatBuilder::new();
-        b.push_u32(0xDEAD_BEEF).unwrap();
+        b.push_u32(0xDEAD_BEEF).expect("should succeed");
         assert_eq!(b.len(), 4);
     }
 
@@ -154,7 +154,7 @@ mod tests {
     fn test_push_after_finish_fails() {
         /* push after finish returns error */
         let b = FlatBuilder::new();
-        b.finish().unwrap();
+        b.finish().expect("should succeed");
         /* create new builder to test error */
         let mut b2 = FlatBuilder::new();
         b2.finished = true;
@@ -165,7 +165,7 @@ mod tests {
     fn test_push_bytes() {
         /* push_bytes copies data */
         let mut b = FlatBuilder::new();
-        b.push_bytes(&[1, 2, 3]).unwrap();
+        b.push_bytes(&[1, 2, 3]).expect("should succeed");
         assert_eq!(b.len(), 3);
     }
 
@@ -173,8 +173,8 @@ mod tests {
     fn test_finish_returns_bytes() {
         /* finish produces the accumulated bytes */
         let mut b = FlatBuilder::new();
-        b.push_u8(99).unwrap();
-        let data = b.finish().unwrap();
+        b.push_u8(99).expect("should succeed");
+        let data = b.finish().expect("should succeed");
         assert_eq!(data, &[99]);
     }
 
@@ -182,7 +182,7 @@ mod tests {
     fn test_align_pads_to_boundary() {
         /* align pads buffer to next boundary */
         let mut b = FlatBuilder::new();
-        b.push_u8(1).unwrap();
+        b.push_u8(1).expect("should succeed");
         b.align(4);
         assert_eq!(b.len() % 4, 0);
     }
@@ -191,7 +191,7 @@ mod tests {
     fn test_read_u32_ok() {
         /* read_u32 decodes little-endian correctly */
         let data = [1u8, 0, 0, 0];
-        assert_eq!(read_u32(&data, 0).unwrap(), 1);
+        assert_eq!(read_u32(&data, 0).expect("should succeed"), 1);
     }
 
     #[test]

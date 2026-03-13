@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export renderer configuration (resolution, AA, shadow, AO settings) as JSON.
 
@@ -169,7 +169,7 @@ mod tests {
         rse_add_setting(&mut e, make_setting("aa_samples", "4", "anti-aliasing"));
         rse_add_setting(&mut e, make_setting("aa_samples", "8", "anti-aliasing"));
         assert_eq!(rse_setting_count(&e), 1);
-        assert_eq!(rse_get_setting(&e, "aa_samples").unwrap().value, "8");
+        assert_eq!(rse_get_setting(&e, "aa_samples").expect("should succeed").value, "8");
     }
 
     #[test]
@@ -178,7 +178,7 @@ mod tests {
         rse_add_setting(&mut e, make_setting("shadow_res", "2048", "shadow"));
         let s = rse_get_setting(&e, "shadow_res");
         assert!(s.is_some());
-        assert_eq!(s.unwrap().value, "2048");
+        assert_eq!(s.expect("should succeed").value, "2048");
     }
 
     #[test]

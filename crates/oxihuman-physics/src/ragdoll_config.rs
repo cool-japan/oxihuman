@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A single bone in a ragdoll mapped to a physics body.
@@ -79,7 +79,7 @@ mod tests {
     fn get_bone_by_name() {
         let mut cfg = new_ragdoll_config();
         add_ragdoll_bone(&mut cfg, "head", 10, [0.1, 0.1, 0.1], 4.0);
-        let bone = get_ragdoll_bone(&cfg, "head").unwrap();
+        let bone = get_ragdoll_bone(&cfg, "head").expect("should succeed");
         assert_eq!(bone.body_id, 10);
     }
 
@@ -108,7 +108,7 @@ mod tests {
         let mut cfg = new_ragdoll_config();
         let half = [0.15, 0.3, 0.1];
         add_ragdoll_bone(&mut cfg, "torso", 5, half, 10.0);
-        let bone = get_ragdoll_bone(&cfg, "torso").unwrap();
+        let bone = get_ragdoll_bone(&cfg, "torso").expect("should succeed");
         assert_eq!(bone.half_extents, half);
     }
 
@@ -116,7 +116,7 @@ mod tests {
     fn mass_stored() {
         let mut cfg = new_ragdoll_config();
         add_ragdoll_bone(&mut cfg, "leg_l", 3, [0.07, 0.4, 0.07], 7.5);
-        let bone = get_ragdoll_bone(&cfg, "leg_l").unwrap();
+        let bone = get_ragdoll_bone(&cfg, "leg_l").expect("should succeed");
         assert!((bone.mass - 7.5).abs() < 1e-6);
     }
 
@@ -125,8 +125,8 @@ mod tests {
         let mut cfg = new_ragdoll_config();
         add_ragdoll_bone(&mut cfg, "a", 1, [0.1; 3], 1.0);
         add_ragdoll_bone(&mut cfg, "b", 2, [0.2; 3], 2.0);
-        assert_eq!(get_ragdoll_bone(&cfg, "a").unwrap().body_id, 1);
-        assert_eq!(get_ragdoll_bone(&cfg, "b").unwrap().body_id, 2);
+        assert_eq!(get_ragdoll_bone(&cfg, "a").expect("should succeed").body_id, 1);
+        assert_eq!(get_ragdoll_bone(&cfg, "b").expect("should succeed").body_id, 2);
     }
 
     #[test]

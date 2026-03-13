@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A view into a contiguous byte buffer with offset and length.
@@ -119,7 +119,7 @@ mod tests {
 
     #[test]
     fn test_from_range() {
-        let bs = BufferSlice::from_range(vec![10, 20, 30, 40], 1, 2).unwrap();
+        let bs = BufferSlice::from_range(vec![10, 20, 30, 40], 1, 2).expect("should succeed");
         assert_eq!(bs.as_bytes(), &[20, 30]);
     }
 
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn test_sub_slice() {
         let bs = BufferSlice::new(vec![1, 2, 3, 4, 5]);
-        let sub = bs.sub_slice(2, 2).unwrap();
+        let sub = bs.sub_slice(2, 2).expect("should succeed");
         assert_eq!(sub.as_bytes(), &[3, 4]);
     }
 
@@ -159,7 +159,7 @@ mod tests {
         let val: f32 = 1.5;
         let bytes = val.to_le_bytes().to_vec();
         let bs = BufferSlice::new(bytes);
-        let read = bs.read_f32_le(0).unwrap();
+        let read = bs.read_f32_le(0).expect("should succeed");
         assert!((read - val).abs() < f32::EPSILON);
     }
 

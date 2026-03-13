@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A pool of contact points recycled each physics step.
@@ -133,7 +133,7 @@ mod tests {
         pool.add(make_contact(0, 1, 0.1));
         pool.add(make_contact(1, 2, 0.5));
         pool.add(make_contact(2, 3, 0.3));
-        let d = pool.deepest_contact().unwrap();
+        let d = pool.deepest_contact().expect("should succeed");
         assert!((d.depth - 0.5).abs() < 1e-5);
     }
 
@@ -163,7 +163,7 @@ mod tests {
     fn test_get() {
         let mut pool = ContactPool::new(10);
         pool.add(make_contact(5, 6, 0.7));
-        let c = pool.get(0).unwrap();
+        let c = pool.get(0).expect("should succeed");
         assert_eq!(c.body_a, 5);
     }
 

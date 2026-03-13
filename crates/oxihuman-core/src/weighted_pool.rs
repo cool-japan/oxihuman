@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A weighted pool that maps items to weights for deterministic selection.
@@ -148,7 +148,7 @@ mod tests {
         let mut p = WeightedPool::new();
         p.add(10, 1.0);
         p.add(20, 1.0);
-        let removed = p.remove(0).unwrap();
+        let removed = p.remove(0).expect("should succeed");
         assert_eq!(removed.item, 10);
         assert_eq!(p.len(), 1);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Implicit Euler integration with conjugate gradient solver.
 //!
@@ -508,7 +508,7 @@ mod tests {
                 &gravity,
                 0.99,
             )
-            .unwrap();
+            .expect("should succeed");
 
         // Node 0 should not move
         assert!((positions[0][0]).abs() < 1e-15);
@@ -607,7 +607,7 @@ mod tests {
                 &cols,
                 &values,
             )
-            .unwrap();
+            .expect("should succeed");
 
         // Should converge immediately with empty stiffness
         assert!(result.converged || result.cg_iterations <= 1);

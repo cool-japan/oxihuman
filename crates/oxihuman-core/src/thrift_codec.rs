@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Apache Thrift codec stub.
@@ -134,7 +134,7 @@ mod tests {
         /* encode then decode gives back original */
         let mut buf = vec![];
         encode_i32(12345, &mut buf);
-        assert_eq!(decode_i32(&buf, 0).unwrap(), 12345);
+        assert_eq!(decode_i32(&buf, 0).expect("should succeed"), 12345);
     }
 
     #[test]
@@ -148,7 +148,7 @@ mod tests {
         /* string encoded with length prefix */
         let mut buf = vec![];
         encode_string("hi", &mut buf);
-        assert_eq!(decode_i32(&buf, 0).unwrap(), 2);
+        assert_eq!(decode_i32(&buf, 0).expect("should succeed"), 2);
         assert_eq!(&buf[4..], b"hi");
     }
 
@@ -199,6 +199,6 @@ mod tests {
         /* decode at non-zero offset */
         let mut buf = vec![0u8; 4];
         buf.extend_from_slice(&42i32.to_be_bytes());
-        assert_eq!(decode_i32(&buf, 4).unwrap(), 42);
+        assert_eq!(decode_i32(&buf, 4).expect("should succeed"), 42);
     }
 }

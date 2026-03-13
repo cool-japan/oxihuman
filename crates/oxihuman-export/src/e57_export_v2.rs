@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! E57 point cloud format export stub.
@@ -83,7 +83,7 @@ mod tests {
         let mut exp = new_e57_export_v2("g");
         e57_add_point_v2(&mut exp, 0.0, 0.0, 0.0, 1.0);
         e57_add_point_v2(&mut exp, 1.0, 2.0, 3.0, 0.5);
-        let (mn, mx) = e57_bounds_v2(&exp).unwrap();
+        let (mn, mx) = e57_bounds_v2(&exp).expect("should succeed");
         assert!((mn[0]).abs() < 1e-9);
         assert!((mx[2] - 3.0).abs() < 1e-9);
     }
@@ -117,7 +117,7 @@ mod tests {
         let mut exp = new_e57_export_v2("g");
         e57_add_point_v2(&mut exp, -5.0, -3.0, -1.0, 1.0);
         e57_add_point_v2(&mut exp, 5.0, 3.0, 1.0, 1.0);
-        let (mn, mx) = e57_bounds_v2(&exp).unwrap();
+        let (mn, mx) = e57_bounds_v2(&exp).expect("should succeed");
         assert!((mn[0] - (-5.0)).abs() < 1e-9);
         assert!((mx[0] - 5.0).abs() < 1e-9);
     }

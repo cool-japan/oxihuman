@@ -371,12 +371,12 @@ mod tests {
     fn test_gravity_moves_tips_down() {
         let mut sys = make_sys();
         add_strand(&mut sys, [0.0, 0.0, 0.0], [0.0, 1.0, 0.0], 1.0, 4);
-        let tip_y_before = sys.strands[0].particles.last().unwrap().position[1];
+        let tip_y_before = sys.strands[0].particles.last().expect("should succeed").position[1];
         // Run several steps with gravity pointing down.
         for _ in 0..10 {
             step_hair(&mut sys, 0.016, [0.0, -9.8, 0.0], [0.0; 3]);
         }
-        let tip_y_after = sys.strands[0].particles.last().unwrap().position[1];
+        let tip_y_after = sys.strands[0].particles.last().expect("should succeed").position[1];
         assert!(
             tip_y_after < tip_y_before,
             "tip should move down under gravity"

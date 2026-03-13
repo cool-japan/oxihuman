@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(clippy::needless_range_loop)]
 
@@ -323,7 +323,7 @@ mod tests {
 
     #[test]
     fn test_identity_polar_decomposition() {
-        let (r, s) = polar_decomposition(&IDENTITY3, 50, 1e-12).unwrap();
+        let (r, s) = polar_decomposition(&IDENTITY3, 50, 1e-12).expect("should succeed");
         for i in 0..3 {
             for j in 0..3 {
                 let expected = if i == j { 1.0 } else { 0.0 };
@@ -343,7 +343,7 @@ mod tests {
     #[test]
     fn test_mat3_inverse() {
         let m = [[2.0, 1.0, 0.0], [0.0, 3.0, 1.0], [1.0, 0.0, 2.0]];
-        let inv = mat3_inverse(&m).unwrap();
+        let inv = mat3_inverse(&m).expect("should succeed");
         let prod = mat3_mul(&m, &inv);
         for i in 0..3 {
             for j in 0..3 {
@@ -357,7 +357,7 @@ mod tests {
     fn test_soft_body_v2_creation() {
         let positions = vec![[0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
         let tets = vec![[0, 1, 2, 3]];
-        let body = SoftBodyV2::new(positions, tets, 1.0).unwrap();
+        let body = SoftBodyV2::new(positions, tets, 1.0).expect("should succeed");
         assert_eq!(body.num_nodes(), 4);
         assert_eq!(body.num_tetrahedra(), 1);
     }
@@ -366,8 +366,8 @@ mod tests {
     fn test_fix_node() {
         let positions = vec![[0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
         let tets = vec![[0, 1, 2, 3]];
-        let mut body = SoftBodyV2::new(positions, tets, 1.0).unwrap();
-        body.fix_node(0).unwrap();
+        let mut body = SoftBodyV2::new(positions, tets, 1.0).expect("should succeed");
+        body.fix_node(0).expect("should succeed");
         assert!((body.inv_masses[0]).abs() < 1e-15);
     }
 
@@ -375,7 +375,7 @@ mod tests {
     fn test_polar_decomposition_rotation() {
         // A pure rotation (90 degrees about Z axis)
         let r_in: Mat3 = [[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]];
-        let (r_out, s_out) = polar_decomposition(&r_in, 50, 1e-12).unwrap();
+        let (r_out, s_out) = polar_decomposition(&r_in, 50, 1e-12).expect("should succeed");
         // R should match input rotation
         for i in 0..3 {
             for j in 0..3 {

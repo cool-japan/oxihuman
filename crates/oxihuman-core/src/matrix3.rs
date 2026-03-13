@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! 3×3 matrix with determinant, inverse, transpose, and multiply.
 
@@ -187,7 +187,7 @@ mod tests {
     #[test]
     fn test_inverse() {
         let m = mat3(1.0, 2.0, 0.0, 0.0, 1.0, 3.0, 0.0, 0.0, 1.0);
-        let inv = mat3_inverse(&m).unwrap();
+        let inv = mat3_inverse(&m).expect("should succeed");
         let prod = mat3_mul(&m, &inv);
         assert!(mat3_approx_eq(&prod, &mat3_identity(), 1e-5));
     }

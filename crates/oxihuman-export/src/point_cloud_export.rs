@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Point cloud export in multiple formats (.xyz, .pcd stub, .csv).
 
@@ -571,7 +571,7 @@ mod tests {
         let c = sample_cloud();
         let opts = PointCloudExportOptions::default();
         let s = point_cloud_to_xyz(&c, &opts);
-        let c2 = point_cloud_from_xyz(&s).unwrap();
+        let c2 = point_cloud_from_xyz(&s).expect("should succeed");
         assert_eq!(c2.points.len(), 3);
         assert!((c2.points[1][0] - 1.0).abs() < 1e-4);
     }

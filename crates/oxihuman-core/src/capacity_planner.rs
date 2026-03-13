@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Capacity planning calculator stub.
@@ -159,7 +159,7 @@ mod tests {
         let spec = make_spec("net", 100.0, 50.0, 0.2);
         let p = spec.periods_until_full();
         assert!(p.is_some());
-        assert!(p.unwrap() > 0);
+        assert!(p.expect("should succeed") > 0);
     }
 
     #[test]
@@ -180,7 +180,7 @@ mod tests {
         let mut planner = new_capacity_planner();
         cp_add(&mut planner, make_spec("cpu", 100.0, 80.0, 0.05));
         cp_add(&mut planner, make_spec("mem", 100.0, 30.0, 0.05));
-        let top = cp_most_utilized(&planner).unwrap();
+        let top = cp_most_utilized(&planner).expect("should succeed");
         assert_eq!(top.resource_name, "cpu");
     }
 

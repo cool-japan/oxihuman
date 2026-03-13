@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -173,7 +173,10 @@ mod tests {
     fn test_set_get_float() {
         let mut p = new_param_set();
         ps_set_float(&mut p, "speed", std::f32::consts::PI);
-        assert!((ps_get_float(&p, "speed").unwrap() - std::f32::consts::PI).abs() < 1e-6);
+        assert!(
+            (ps_get_float(&p, "speed").expect("should succeed") - std::f32::consts::PI).abs()
+                < 1e-6
+        );
     }
     #[test]
     fn test_set_get_int() {

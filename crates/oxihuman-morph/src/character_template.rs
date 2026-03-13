@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -83,7 +83,7 @@ mod tests {
     fn set_and_get() {
         let mut t = new_character_template("hero");
         template_set_param(&mut t, "height", 1.8);
-        assert!((template_get_param(&t, "height").unwrap() - 1.8).abs() < 1e-6);
+        assert!((template_get_param(&t, "height").expect("should succeed") - 1.8).abs() < 1e-6);
     }
 
     #[test]
@@ -135,7 +135,7 @@ mod tests {
         let mut t = new_character_template("t");
         template_set_param(&mut t, "x", 0.5);
         template_set_param(&mut t, "x", 0.9);
-        assert!((template_get_param(&t, "x").unwrap() - 0.9).abs() < 1e-6);
+        assert!((template_get_param(&t, "x").expect("should succeed") - 0.9).abs() < 1e-6);
     }
 
     #[test]

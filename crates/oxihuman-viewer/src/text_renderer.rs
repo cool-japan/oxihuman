@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! On-screen text rendering stub.
 
@@ -179,7 +179,7 @@ mod tests {
     fn test_get_valid() {
         let mut r = new_text_renderer();
         tr_add_text(&mut r, make_entry("Test", 0.0, 0.0));
-        assert_eq!(tr_get(&r, 0).unwrap().text, "Test");
+        assert_eq!(tr_get(&r, 0).expect("should succeed").text, "Test");
     }
 
     #[test]

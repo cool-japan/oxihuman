@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Per-vertex ambient occlusion baking with BVH-accelerated ray casting.
 //!
@@ -696,7 +696,7 @@ mod tests {
         let v2 = [0.0, 1.0, 1.0];
         let t = moller_trumbore([0.25, 0.25, 0.0], [0.0, 0.0, 1.0], v0, v1, v2);
         assert!(t.is_some());
-        assert!((t.unwrap() - 1.0).abs() < 1e-5, "t should be ≈ 1.0");
+        assert!((t.expect("should succeed") - 1.0).abs() < 1e-5, "t should be ≈ 1.0");
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Edge collapse v2: QEF-guided half-edge collapse with feature detection.
@@ -197,7 +197,7 @@ mod tests {
     fn collapse_reduces_faces() {
         let (pos, idx) = simple_quad();
         let edges = collect_edges(&idx);
-        let op = find_cheapest_edge_v2(&pos, &edges).unwrap();
+        let op = find_cheapest_edge_v2(&pos, &edges).expect("should succeed");
         let res = collapse_edge_v2(&pos, &idx, &op);
         assert!(ec_v2_face_count(&res) <= 2);
     }
@@ -206,7 +206,7 @@ mod tests {
     fn vertex_count_preserved() {
         let (pos, idx) = simple_quad();
         let edges = collect_edges(&idx);
-        let op = find_cheapest_edge_v2(&pos, &edges).unwrap();
+        let op = find_cheapest_edge_v2(&pos, &edges).expect("should succeed");
         let res = collapse_edge_v2(&pos, &idx, &op);
         assert_eq!(ec_v2_vertex_count(&res), pos.len());
     }
@@ -237,7 +237,7 @@ mod tests {
     fn collapsed_count_one() {
         let (pos, idx) = simple_quad();
         let edges = collect_edges(&idx);
-        let op = find_cheapest_edge_v2(&pos, &edges).unwrap();
+        let op = find_cheapest_edge_v2(&pos, &edges).expect("should succeed");
         let res = collapse_edge_v2(&pos, &idx, &op);
         assert_eq!(res.collapsed, 1);
     }

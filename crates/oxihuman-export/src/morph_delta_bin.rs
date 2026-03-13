@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -345,8 +345,8 @@ mod tests {
     fn round_trip_basic() {
         let bin = make_bin();
         let path = tmp_path("oxmd_round_trip_basic.bin");
-        write_morph_delta_bin(&bin, &path).unwrap();
-        let loaded = read_morph_delta_bin(&path).unwrap();
+        write_morph_delta_bin(&bin, &path).expect("should succeed");
+        let loaded = read_morph_delta_bin(&path).expect("should succeed");
         assert_eq!(loaded.vertex_count, bin.vertex_count);
         assert_eq!(loaded.targets.len(), bin.targets.len());
     }
@@ -355,8 +355,8 @@ mod tests {
     fn round_trip_names_preserved() {
         let bin = make_bin();
         let path = tmp_path("oxmd_round_trip_names.bin");
-        write_morph_delta_bin(&bin, &path).unwrap();
-        let loaded = read_morph_delta_bin(&path).unwrap();
+        write_morph_delta_bin(&bin, &path).expect("should succeed");
+        let loaded = read_morph_delta_bin(&path).expect("should succeed");
         assert_eq!(loaded.targets[0].name, "smile");
         assert_eq!(loaded.targets[1].name, "brow_raise");
     }
@@ -365,8 +365,8 @@ mod tests {
     fn round_trip_deltas_preserved() {
         let bin = make_bin();
         let path = tmp_path("oxmd_round_trip_deltas.bin");
-        write_morph_delta_bin(&bin, &path).unwrap();
-        let loaded = read_morph_delta_bin(&path).unwrap();
+        write_morph_delta_bin(&bin, &path).expect("should succeed");
+        let loaded = read_morph_delta_bin(&path).expect("should succeed");
         let d = &loaded.targets[0].deltas[0];
         assert_eq!(d.vertex_index, 0);
         assert!((d.dx - 0.1).abs() < 1e-6);
@@ -378,8 +378,8 @@ mod tests {
     fn round_trip_vertex_count() {
         let bin = make_bin();
         let path = tmp_path("oxmd_round_trip_vc.bin");
-        write_morph_delta_bin(&bin, &path).unwrap();
-        let loaded = read_morph_delta_bin(&path).unwrap();
+        write_morph_delta_bin(&bin, &path).expect("should succeed");
+        let loaded = read_morph_delta_bin(&path).expect("should succeed");
         assert_eq!(loaded.vertex_count, 1000);
     }
 
@@ -390,8 +390,8 @@ mod tests {
             targets: vec![],
         };
         let path = tmp_path("oxmd_empty_targets.bin");
-        write_morph_delta_bin(&bin, &path).unwrap();
-        let loaded = read_morph_delta_bin(&path).unwrap();
+        write_morph_delta_bin(&bin, &path).expect("should succeed");
+        let loaded = read_morph_delta_bin(&path).expect("should succeed");
         assert_eq!(loaded.vertex_count, 500);
         assert!(loaded.targets.is_empty());
     }
@@ -406,8 +406,8 @@ mod tests {
             }],
         };
         let path = tmp_path("oxmd_zero_deltas.bin");
-        write_morph_delta_bin(&bin, &path).unwrap();
-        let loaded = read_morph_delta_bin(&path).unwrap();
+        write_morph_delta_bin(&bin, &path).expect("should succeed");
+        let loaded = read_morph_delta_bin(&path).expect("should succeed");
         assert_eq!(loaded.targets.len(), 1);
         assert_eq!(loaded.targets[0].name, "empty_target");
         assert!(loaded.targets[0].deltas.is_empty());
@@ -428,8 +428,8 @@ mod tests {
             }],
         };
         let path = tmp_path("oxmd_unicode_name.bin");
-        write_morph_delta_bin(&bin, &path).unwrap();
-        let loaded = read_morph_delta_bin(&path).unwrap();
+        write_morph_delta_bin(&bin, &path).expect("should succeed");
+        let loaded = read_morph_delta_bin(&path).expect("should succeed");
         assert_eq!(loaded.targets[0].name, "スマイル_αβγ");
     }
 
@@ -439,26 +439,26 @@ mod tests {
     fn validate_valid_file() {
         let bin = make_bin();
         let path = tmp_path("oxmd_validate_valid.bin");
-        write_morph_delta_bin(&bin, &path).unwrap();
-        assert!(validate_morph_delta_bin(&path).unwrap());
+        write_morph_delta_bin(&bin, &path).expect("should succeed");
+        assert!(validate_morph_delta_bin(&path).expect("should succeed"));
     }
 
     #[test]
     fn validate_invalid_magic() {
         let path = tmp_path("oxmd_bad_magic.bin");
-        let mut f = File::create(&path).unwrap();
+        let mut f = File::create(&path).expect("should succeed");
         f.write_all(b"BAD!\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-            .unwrap();
-        assert!(!validate_morph_delta_bin(&path).unwrap());
+            .expect("should succeed");
+        assert!(!validate_morph_delta_bin(&path).expect("should succeed"));
     }
 
     #[test]
     fn validate_wrong_version() {
         let path = tmp_path("oxmd_bad_version.bin");
-        let mut f = File::create(&path).unwrap();
-        f.write_all(b"OXMD").unwrap();
-        f.write_all(&99u32.to_le_bytes()).unwrap();
-        assert!(!validate_morph_delta_bin(&path).unwrap());
+        let mut f = File::create(&path).expect("should succeed");
+        f.write_all(b"OXMD").expect("should succeed");
+        f.write_all(&99u32.to_le_bytes()).expect("should succeed");
+        assert!(!validate_morph_delta_bin(&path).expect("should succeed"));
     }
 
     // ── from_target_files ───────────────────────────────────────────────────
@@ -466,7 +466,7 @@ mod tests {
     #[test]
     fn from_target_files_basic() {
         let src = "0 0.1 0.2 0.3\n5 -0.1 0.0 0.05\n";
-        let tf = parse_target("smile", src).unwrap();
+        let tf = parse_target("smile", src).expect("should succeed");
         let pairs: Vec<(String, &TargetFile)> = vec![("smile".to_string(), &tf)];
         let bin = from_target_files(&pairs, 1000);
         assert_eq!(bin.vertex_count, 1000);
@@ -486,7 +486,7 @@ mod tests {
     #[test]
     fn from_target_files_delta_values() {
         let src = "42 1.0 2.0 3.0\n";
-        let tf = parse_target("test", src).unwrap();
+        let tf = parse_target("test", src).expect("should succeed");
         let pairs: Vec<(String, &TargetFile)> = vec![("test".to_string(), &tf)];
         let bin = from_target_files(&pairs, 100);
         let d = &bin.targets[0].deltas[0];
@@ -564,7 +564,7 @@ mod tests {
                 deltas: vec![],
             }],
         };
-        let merged = merge_bins(&a, &b).unwrap();
+        let merged = merge_bins(&a, &b).expect("should succeed");
         assert_eq!(merged.vertex_count, 100);
         assert_eq!(merged.targets.len(), 2);
         assert_eq!(merged.targets[0].name, "a");
@@ -610,10 +610,10 @@ mod tests {
                 }],
             }],
         };
-        let merged = merge_bins(&a, &b).unwrap();
+        let merged = merge_bins(&a, &b).expect("should succeed");
         let path = tmp_path("oxmd_merge_round_trip.bin");
-        write_morph_delta_bin(&merged, &path).unwrap();
-        let loaded = read_morph_delta_bin(&path).unwrap();
+        write_morph_delta_bin(&merged, &path).expect("should succeed");
+        let loaded = read_morph_delta_bin(&path).expect("should succeed");
         assert_eq!(loaded.targets.len(), 2);
         assert_eq!(loaded.targets[1].deltas[0].vertex_index, 2);
     }
@@ -623,9 +623,9 @@ mod tests {
     #[test]
     fn read_invalid_magic_errors() {
         let path = tmp_path("oxmd_read_bad_magic.bin");
-        let mut f = File::create(&path).unwrap();
+        let mut f = File::create(&path).expect("should succeed");
         // Write garbage bytes
-        f.write_all(&[0u8; 16]).unwrap();
+        f.write_all(&[0u8; 16]).expect("should succeed");
         assert!(read_morph_delta_bin(&path).is_err());
     }
 
@@ -633,8 +633,8 @@ mod tests {
     fn from_target_files_multiple() {
         let src_a = "0 0.1 0.2 0.3\n";
         let src_b = "1 0.4 0.5 0.6\n2 0.7 0.8 0.9\n";
-        let tf_a = parse_target("ta", src_a).unwrap();
-        let tf_b = parse_target("tb", src_b).unwrap();
+        let tf_a = parse_target("ta", src_a).expect("should succeed");
+        let tf_b = parse_target("tb", src_b).expect("should succeed");
         let pairs: Vec<(String, &TargetFile)> =
             vec![("ta".to_string(), &tf_a), ("tb".to_string(), &tf_b)];
         let bin = from_target_files(&pairs, 300);

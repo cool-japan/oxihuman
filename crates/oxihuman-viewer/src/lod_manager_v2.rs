@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Multi-LOD rendering manager.
 //!
@@ -781,7 +781,7 @@ mod tests {
         let mgr = LodManagerV2::from_mesh(&mesh);
         let params = mgr.get_draw_params(LodLevelV2::Full);
         assert!(params.is_some());
-        let p = params.unwrap();
+        let p = params.expect("should succeed");
         assert_eq!(p.first_index, 0, "Full LOD should start at index 0");
     }
 

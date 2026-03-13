@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Cubemap mip-chain generation helpers.
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn last_level_roughness_one() {
         let c = cm_build_mip_chain(4);
-        let last = c.levels.last().unwrap();
+        let last = c.levels.last().expect("should succeed");
         assert!((last.roughness - 1.0).abs() < 0.5);
     }
 

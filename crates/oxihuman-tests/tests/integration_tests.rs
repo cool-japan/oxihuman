@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Cross-crate integration tests for the OxiHuman workspace.
 //!
@@ -309,7 +309,7 @@ mod core_physics {
         let mesh = make_body_like_mesh();
         let proxies = oxihuman_physics::generate_proxies(&mesh);
         assert!(proxies.is_some(), "proxies should be generated");
-        let proxies = proxies.unwrap();
+        let proxies = proxies.expect("should succeed");
         assert!(
             proxies.total_count() > 0,
             "should have at least one proxy primitive"
@@ -328,7 +328,7 @@ mod core_physics {
     #[test]
     fn proxies_to_json_roundtrip() {
         let mesh = make_body_like_mesh();
-        let proxies = oxihuman_physics::generate_proxies(&mesh).unwrap();
+        let proxies = oxihuman_physics::generate_proxies(&mesh).expect("should succeed");
         let json = oxihuman_physics::proxies_to_json(&proxies);
         assert!(json.contains("\"capsules\""));
         assert!(json.contains("\"spheres\""));
@@ -385,7 +385,7 @@ mod core_physics {
             contact.is_some(),
             "overlapping spheres should produce a contact"
         );
-        let c = contact.unwrap();
+        let c = contact.expect("should succeed");
         assert!(c.depth > 0.0);
     }
 
@@ -393,7 +393,7 @@ mod core_physics {
     #[test]
     fn build_physics_rig() {
         let mesh = make_body_like_mesh();
-        let proxies = oxihuman_physics::generate_proxies(&mesh).unwrap();
+        let proxies = oxihuman_physics::generate_proxies(&mesh).expect("should succeed");
         let rig = oxihuman_physics::build_rig(&proxies);
         assert!(
             !rig.joints.is_empty(),
@@ -419,7 +419,7 @@ mod morph_measurements {
 
         let meas = oxihuman_mesh::compute_measurements(&mesh);
         assert!(meas.is_some(), "measurements should be computable");
-        let meas = meas.unwrap();
+        let meas = meas.expect("should succeed");
         assert!(
             meas.total_height > 0.0,
             "height should be positive: {}",
@@ -436,7 +436,7 @@ mod morph_measurements {
     #[test]
     fn body_like_mesh_measurements() {
         let mesh = make_body_like_mesh();
-        let meas = oxihuman_mesh::compute_measurements(&mesh).unwrap();
+        let meas = oxihuman_mesh::compute_measurements(&mesh).expect("should succeed");
         assert!(meas.total_height > 1.0, "height should be over 1m");
         assert!(
             meas.shoulder_width > meas.waist_width,
@@ -455,7 +455,7 @@ mod morph_measurements {
         let engine = HumanEngine::new(obj, test_policy());
         let mesh = morph_to_mesh(engine.build_mesh());
 
-        let aabb = oxihuman_mesh::compute_aabb(&mesh).unwrap();
+        let aabb = oxihuman_mesh::compute_aabb(&mesh).expect("should succeed");
         assert!(aabb.height() > 0.0);
         assert!(aabb.width() > 0.0);
         assert!(aabb.depth() > 0.0);
@@ -555,33 +555,22 @@ mod morph_export_formats {
         );
     }
 
-    /// Export to FBX ASCII format.
+    /// Export to FBX binary format.
     #[test]
-    fn export_fbx_ascii_from_morph() {
+    fn export_fbx_binary_from_morph() {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
         let morph_buf = engine.build_mesh();
+        let mesh_buf = MeshBuffers::from_morph(morph_buf);
 
-        let mut scene = oxihuman_export::new_fbx_scene("IntegrationTest");
-        let node_id = oxihuman_export::add_fbx_node(&mut scene, "BodyMesh", None);
-        let fbx_mesh = oxihuman_export::FbxMesh {
-            node_id,
-            positions: morph_buf.positions.clone(),
-            normals: morph_buf.normals.clone(),
-            uvs: morph_buf.uvs.clone(),
-            indices: morph_buf.indices.clone(),
-        };
-        oxihuman_export::add_fbx_mesh(&mut scene, fbx_mesh);
-
-        let export = oxihuman_export::export_fbx_ascii(&scene);
+        let result = oxihuman_export::export_mesh_fbx_binary(&mesh_buf);
+        assert!(result.is_ok(), "FBX binary export should succeed");
+        let bytes = result.expect("should succeed");
+        assert!(!bytes.is_empty(), "FBX binary content should not be empty");
+        // FBX binary magic: "Kaydara FBX Binary  \0"
         assert!(
-            !export.content.is_empty(),
-            "FBX content should not be empty"
-        );
-        assert_eq!(export.version, 7400);
-        assert!(
-            export.content.contains("Objects"),
-            "FBX should contain Objects block"
+            bytes.starts_with(b"Kaydara FBX Binary"),
+            "FBX binary should start with magic header"
         );
     }
 
@@ -750,7 +739,7 @@ mod core_morph_viewer {
 
         let upload = MeshUploadBuffer::from_raw_bytes(&bytes);
         assert!(upload.is_some(), "should parse binary buffer");
-        let upload = upload.unwrap();
+        let upload = upload.expect("should succeed");
         assert_eq!(upload.positions.len(), morph_buf.positions.len());
         assert_eq!(upload.indices.len(), morph_buf.indices.len());
 
@@ -802,7 +791,7 @@ mod cross_cutting {
     fn full_pipeline_morph_physics_export() {
         let mesh = make_body_like_mesh();
 
-        let proxies = oxihuman_physics::generate_proxies(&mesh).unwrap();
+        let proxies = oxihuman_physics::generate_proxies(&mesh).expect("should succeed");
         let json = oxihuman_physics::proxies_to_json(&proxies);
 
         for cap in &proxies.capsules {
@@ -820,7 +809,8 @@ mod cross_cutting {
             );
         }
 
-        let stl = oxihuman_export::mesh_to_stl_ascii(&mesh, "physics_body").unwrap();
+        let stl =
+            oxihuman_export::mesh_to_stl_ascii(&mesh, "physics_body").expect("should succeed");
         assert!(!stl.is_empty());
     }
 
@@ -890,7 +880,7 @@ mod cross_cutting {
 
         let hull = oxihuman_mesh::convex_hull(&mesh.positions);
         assert!(hull.is_some(), "convex hull should succeed for a box");
-        let hull = hull.unwrap();
+        let hull = hull.expect("should succeed");
         assert!(!hull.vertices.is_empty(), "hull should have vertices");
         assert!(!hull.indices.is_empty(), "hull should have faces");
         assert_eq!(hull.vertices.len(), 8);
@@ -924,7 +914,7 @@ mod cross_cutting {
 
         let undone = oxihuman_core::undo(&mut stack);
         assert!(undone.is_some());
-        assert_eq!(undone.unwrap().name, "set_weight");
+        assert_eq!(undone.expect("should succeed").name, "set_weight");
 
         assert!(oxihuman_core::can_redo(&stack));
         let redone = oxihuman_core::redo(&mut stack);
@@ -960,7 +950,7 @@ mod cross_cutting {
         let engine = HumanEngine::new(obj, test_policy());
         let mesh = morph_to_mesh(engine.build_mesh());
 
-        let meas = oxihuman_mesh::compute_measurements(&mesh).unwrap();
+        let meas = oxihuman_mesh::compute_measurements(&mesh).expect("should succeed");
         assert!(meas.total_height > 0.0);
 
         let meas_json = oxihuman_export::export_mesh_measurements(&mesh);

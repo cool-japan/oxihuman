@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! CLI subcommand implementations, split into logical groups.
 
@@ -9,3 +9,4 @@ pub mod generate;
 pub mod info;
 pub mod misc;
 pub mod pack;
+pub mod wizard;

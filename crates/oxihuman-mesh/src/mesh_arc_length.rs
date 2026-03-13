@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Arc-length parameterisation utilities for polyline curves.
@@ -195,7 +195,7 @@ mod tests {
     #[test]
     fn last_sample_t_is_one() {
         let res = compute_arc_length(&line_pts());
-        let last = res.samples.last().unwrap();
+        let last = res.samples.last().expect("should succeed");
         assert!((last.t - 1.0).abs() < 1e-5);
     }
 

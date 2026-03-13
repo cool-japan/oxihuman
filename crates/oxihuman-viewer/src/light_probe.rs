@@ -246,7 +246,7 @@ mod tests {
         let id = add_light_probe(&mut set, "probe1", [0.0, 0.0, 0.0], ProbeType::Sphere);
         let probe = get_light_probe(&set, id);
         assert!(probe.is_some());
-        assert_eq!(probe.unwrap().name, "probe1");
+        assert_eq!(probe.expect("should succeed").name, "probe1");
     }
 
     #[test]
@@ -280,7 +280,7 @@ mod tests {
         add_light_probe(&mut set, "near", [1.0, 0.0, 0.0], ProbeType::Sphere);
         let nearest = nearest_probe(&set, [0.0, 0.0, 0.0]);
         assert!(nearest.is_some());
-        assert_eq!(nearest.unwrap().name, "near");
+        assert_eq!(nearest.expect("should succeed").name, "near");
     }
 
     #[test]
@@ -299,7 +299,7 @@ mod tests {
     fn test_sample_probe_sh() {
         let mut set = new_light_probe_set();
         let id = add_light_probe(&mut set, "p", [0.0, 0.0, 0.0], ProbeType::Sphere);
-        let probe = get_light_probe(&set, id).unwrap();
+        let probe = get_light_probe(&set, id).expect("should succeed");
         let color = sample_probe_sh(probe, [0.0, 0.0, 1.0]);
         // Should produce some positive value from L0 band
         assert!(color[0] >= 0.0);
@@ -309,7 +309,7 @@ mod tests {
     fn test_probe_influence_weight_at_origin() {
         let mut set = new_light_probe_set();
         let id = add_light_probe(&mut set, "p", [0.0, 0.0, 0.0], ProbeType::Sphere);
-        let probe = get_light_probe(&set, id).unwrap();
+        let probe = get_light_probe(&set, id).expect("should succeed");
         let w = probe_influence_weight(probe, [0.0, 0.0, 0.0]);
         assert!((w - 1.0).abs() < 1e-5);
     }
@@ -318,7 +318,7 @@ mod tests {
     fn test_probe_influence_weight_falloff() {
         let mut set = new_light_probe_set();
         let id = add_light_probe(&mut set, "p", [0.0, 0.0, 0.0], ProbeType::Sphere);
-        let probe = get_light_probe(&set, id).unwrap();
+        let probe = get_light_probe(&set, id).expect("should succeed");
         let w = probe_influence_weight(probe, [10.0, 0.0, 0.0]);
         assert!(w < 1.0);
         assert!(w > 0.0);
@@ -331,15 +331,15 @@ mod tests {
         let id_b = add_light_probe(&mut set, "b", [1.0, 0.0, 0.0], ProbeType::Sphere);
         // Get probes separately to avoid borrow issues
         let ca = {
-            let a = get_light_probe(&set, id_a).unwrap();
+            let a = get_light_probe(&set, id_a).expect("should succeed");
             sample_probe_sh(a, [0.0, 0.0, 1.0])
         };
         let cb = {
-            let b = get_light_probe(&set, id_b).unwrap();
+            let b = get_light_probe(&set, id_b).expect("should succeed");
             sample_probe_sh(b, [0.0, 0.0, 1.0])
         };
-        let a_probe = get_light_probe(&set, id_a).unwrap();
-        let b_probe = get_light_probe(&set, id_b).unwrap();
+        let a_probe = get_light_probe(&set, id_a).expect("should succeed");
+        let b_probe = get_light_probe(&set, id_b).expect("should succeed");
         let blended = blend_probes(a_probe, b_probe, 0.5);
         let expected = (ca[0] + cb[0]) / 2.0;
         assert!((blended[0] - expected).abs() < 1e-5);
@@ -350,7 +350,7 @@ mod tests {
         let mut set = new_light_probe_set();
         let id = add_light_probe(&mut set, "p", [0.0, 0.0, 0.0], ProbeType::Sphere);
         set_probe_enabled(&mut set, id, false);
-        let probe = get_light_probe(&set, id).unwrap();
+        let probe = get_light_probe(&set, id).expect("should succeed");
         assert!(!probe.enabled);
     }
 

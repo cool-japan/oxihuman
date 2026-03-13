@@ -224,7 +224,7 @@ mod tests {
         let dir = [0.0, -1.0, 0.0];
         let contact = wheel_raycast(&w, origin, dir, 5.0);
         assert!(contact.is_some());
-        let c = contact.unwrap();
+        let c = contact.expect("should succeed");
         assert!((c.point[1]).abs() < 1e-5);
         assert!((c.distance - 1.0).abs() < 1e-5);
     }

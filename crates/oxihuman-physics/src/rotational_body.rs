@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Body with rotational-only degrees of freedom.
@@ -142,7 +142,7 @@ mod tests {
     fn period_when_spinning() {
         let mut b = new_rotational_body(1.0);
         b.angular_velocity = 2.0 * PI;
-        let p = b.period().unwrap();
+        let p = b.period().expect("should succeed");
         assert!((p - 1.0).abs() < 1e-5);
     }
 

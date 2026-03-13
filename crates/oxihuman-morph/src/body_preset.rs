@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Named body type presets for character creation.
 
@@ -594,12 +594,12 @@ mod tests {
 
         // blend at t=0 should give preset_a values
         let blended_0 = lib.blend("average", "athletic", 0.0).expect("blend failed");
-        let avg = lib.get("average").unwrap();
+        let avg = lib.get("average").expect("should succeed");
         assert!((blended_0["height"] - avg.get_param("height")).abs() < 1e-5);
 
         // blend at t=1 should give preset_b values
         let blended_1 = lib.blend("average", "athletic", 1.0).expect("blend failed");
-        let ath = lib.get("athletic").unwrap();
+        let ath = lib.get("athletic").expect("should succeed");
         assert!((blended_1["height"] - ath.get_param("height")).abs() < 1e-5);
 
         // blend at t=0.5 should be midpoint

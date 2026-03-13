@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Metric counter: named counters with min/max/sum tracking.
@@ -173,7 +173,7 @@ mod tests {
         mc_record(&mut mc, "lat", 5.0);
         mc_record(&mut mc, "lat", 15.0);
         mc_record(&mut mc, "lat", 10.0);
-        let s = mc_stats(&mc, "lat").unwrap();
+        let s = mc_stats(&mc, "lat").expect("should succeed");
         assert!((s.min - 5.0).abs() < 1e-9);
         assert!((s.max - 15.0).abs() < 1e-9);
     }

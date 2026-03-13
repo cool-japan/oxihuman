@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A link in a kinematic chain (articulated body).
@@ -165,7 +165,7 @@ mod tests {
         let mut chain = KinematicChain::new([0.0, 0.0]);
         chain.add_link(1.0, 0.0, -1.0, 1.0);
         chain.set_angle(0, 0.5);
-        assert!((chain.get_angle(0).unwrap() - 0.5).abs() < 1e-9);
+        assert!((chain.get_angle(0).expect("should succeed") - 0.5).abs() < 1e-9);
     }
 
     #[test]
@@ -173,7 +173,7 @@ mod tests {
         let mut chain = KinematicChain::new([0.0, 0.0]);
         chain.add_link(1.0, 0.0, -1.0, 1.0);
         chain.set_angle(0, 5.0);
-        assert!((chain.get_angle(0).unwrap() - 1.0).abs() < 1e-9);
+        assert!((chain.get_angle(0).expect("should succeed") - 1.0).abs() < 1e-9);
     }
 
     #[test]

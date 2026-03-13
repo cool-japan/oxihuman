@@ -89,7 +89,7 @@ mod tests {
     fn test_dequeue_task() {
         let mut q = new_export_queue2();
         enqueue_task2(&mut q, make_task("obj", "/out/b.obj"));
-        let t = dequeue_task2(&mut q).unwrap();
+        let t = dequeue_task2(&mut q).expect("should succeed");
         assert_eq!(task2_format(&t), "obj");
     }
 
@@ -126,7 +126,7 @@ mod tests {
         let mut q = new_export_queue2();
         enqueue_task2(&mut q, make_task("a", "/a"));
         enqueue_task2(&mut q, make_task("b", "/b"));
-        let first = dequeue_task2(&mut q).unwrap();
+        let first = dequeue_task2(&mut q).expect("should succeed");
         assert_eq!(first.format, "a");
     }
 

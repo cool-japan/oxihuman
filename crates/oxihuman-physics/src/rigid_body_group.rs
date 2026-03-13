@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Group of rigid bodies with collective transform.
@@ -165,7 +165,7 @@ mod tests {
         let mut g = new_rigid_body_group(1);
         g.position = [1.0, 0.0, 0.0];
         g.add_member(1, [2.0, 0.0, 0.0], 1.0);
-        let pos = g.member_world_pos(1).unwrap();
+        let pos = g.member_world_pos(1).expect("should succeed");
         assert!((pos[0] - 3.0).abs() < 1e-6);
     }
 

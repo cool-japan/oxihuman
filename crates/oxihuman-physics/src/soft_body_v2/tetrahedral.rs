@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(clippy::needless_range_loop)]
 
@@ -274,11 +274,11 @@ mod tests {
     #[test]
     fn test_tetrahedral_element() {
         let (pos, tets) = standard_tet();
-        let elem = TetrahedralElement::new(tets[0], &pos).unwrap();
+        let elem = TetrahedralElement::new(tets[0], &pos).expect("should succeed");
         assert!((elem.rest_volume - 1.0 / 6.0).abs() < 1e-12);
 
         // Deformation gradient at rest should be identity
-        let f = elem.deformation_gradient(&pos).unwrap();
+        let f = elem.deformation_gradient(&pos).expect("should succeed");
         for i in 0..3 {
             for j in 0..3 {
                 let expected = if i == j { 1.0 } else { 0.0 };
@@ -294,16 +294,16 @@ mod tests {
     #[test]
     fn test_tet_mesh_from_soft_body() {
         let (pos, tets) = standard_tet();
-        let body = SoftBodyV2::new(pos, tets, 1.0).unwrap();
-        let mesh = TetMesh::from_soft_body(&body).unwrap();
+        let body = SoftBodyV2::new(pos, tets, 1.0).expect("should succeed");
+        let mesh = TetMesh::from_soft_body(&body).expect("should succeed");
         assert_eq!(mesh.elements.len(), 1);
         assert!((mesh.total_rest_volume() - 1.0 / 6.0).abs() < 1e-12);
     }
 
     #[test]
     fn test_unit_cube_mesh() {
-        let (pos, tets) = make_unit_cube_tet_mesh().unwrap();
-        let mesh = TetMesh::new(&tets, &pos, pos.len()).unwrap();
+        let (pos, tets) = make_unit_cube_tet_mesh().expect("should succeed");
+        let mesh = TetMesh::new(&tets, &pos, pos.len()).expect("should succeed");
         // A unit cube has volume 1.0
         assert!(
             (mesh.total_rest_volume() - 1.0).abs() < 1e-10,
@@ -315,14 +315,14 @@ mod tests {
     #[test]
     fn test_scaled_deformation_gradient() {
         let (pos, tets) = standard_tet();
-        let elem = TetrahedralElement::new(tets[0], &pos).unwrap();
+        let elem = TetrahedralElement::new(tets[0], &pos).expect("should succeed");
 
         // Scale all positions by 2
         let scaled: Vec<Vec3> = pos
             .iter()
             .map(|p| [p[0] * 2.0, p[1] * 2.0, p[2] * 2.0])
             .collect();
-        let f = elem.deformation_gradient(&scaled).unwrap();
+        let f = elem.deformation_gradient(&scaled).expect("should succeed");
         for i in 0..3 {
             for j in 0..3 {
                 let expected = if i == j { 2.0 } else { 0.0 };
@@ -356,7 +356,7 @@ mod tests {
     #[test]
     fn test_validate_mesh_positive() {
         let (pos, tets) = standard_tet();
-        let mesh = TetMesh::new(&tets, &pos, pos.len()).unwrap();
-        validate_mesh(&mesh, &pos).unwrap();
+        let mesh = TetMesh::new(&tets, &pos, pos.len()).expect("should succeed");
+        validate_mesh(&mesh, &pos).expect("should succeed");
     }
 }

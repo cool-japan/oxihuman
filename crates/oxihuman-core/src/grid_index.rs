@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! 2D grid spatial index for fast lookups.
@@ -165,7 +165,7 @@ mod tests {
     #[test]
     fn test_insert_and_query_cell() {
         let mut g = new_grid_index(10, 10);
-        let id = g.insert(0.15, 0.15).unwrap();
+        let id = g.insert(0.15, 0.15).expect("should succeed");
         let r = g.query_cell(0.15, 0.15);
         assert!(r.contains(&id));
     }
@@ -180,7 +180,7 @@ mod tests {
     #[test]
     fn test_query_rect() {
         let mut g = new_grid_index(10, 10);
-        let id = g.insert(0.5, 0.5).unwrap();
+        let id = g.insert(0.5, 0.5).expect("should succeed");
         let r = g.query_rect(0.0, 0.0, 1.0, 1.0);
         assert!(r.contains(&id));
     }
@@ -188,8 +188,8 @@ mod tests {
     #[test]
     fn test_query_radius() {
         let mut g = new_grid_index(10, 10);
-        let id = g.insert(0.5, 0.5).unwrap();
-        g.insert(0.9, 0.9).unwrap();
+        let id = g.insert(0.5, 0.5).expect("should succeed");
+        g.insert(0.9, 0.9).expect("should succeed");
         let r = g.query_radius(0.5, 0.5, 0.1);
         assert!(r.contains(&id));
         assert_eq!(r.len(), 1);
@@ -198,8 +198,8 @@ mod tests {
     #[test]
     fn test_len_and_clear() {
         let mut g = new_grid_index(5, 5);
-        g.insert(0.1, 0.1).unwrap();
-        g.insert(0.2, 0.2).unwrap();
+        g.insert(0.1, 0.1).expect("should succeed");
+        g.insert(0.2, 0.2).expect("should succeed");
         assert_eq!(g.len(), 2);
         g.clear();
         assert!(g.is_empty());
@@ -208,8 +208,8 @@ mod tests {
     #[test]
     fn test_get_point() {
         let mut g = new_grid_index(10, 10);
-        let id = g.insert(0.3, 0.7).unwrap();
-        let p = g.get_point(id).unwrap();
+        let id = g.insert(0.3, 0.7).expect("should succeed");
+        let p = g.get_point(id).expect("should succeed");
         assert!((p[0] - 0.3).abs() < 1e-5);
         assert!((p[1] - 0.7).abs() < 1e-5);
     }

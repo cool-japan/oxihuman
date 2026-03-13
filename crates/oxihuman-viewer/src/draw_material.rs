@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Draw material binding — associate draw calls with material descriptors.
@@ -159,7 +159,7 @@ mod tests {
         let mut lib = new_draw_material_lib();
         dml_add(&mut lib, DrawMaterial::new(1, "r"));
         dml_set_roughness(&mut lib, 1, 5.0);
-        assert!((dml_get(&lib, 1).unwrap().roughness - 1.0).abs() < 1e-6);
+        assert!((dml_get(&lib, 1).expect("should succeed").roughness - 1.0).abs() < 1e-6);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Asset pack builder: scan a targets directory → generate a verified manifest.
 
@@ -295,7 +295,7 @@ mod tests {
             policy: Policy::new(PolicyProfile::Standard),
             max_files: Some(5),
         };
-        let manifest = build_pack(config).unwrap();
+        let manifest = build_pack(config).expect("should succeed");
         assert!(!manifest.entries.is_empty());
         assert!(manifest.stats.total_files <= 5);
         assert!(manifest.stats.total_deltas > 0);
@@ -347,7 +347,7 @@ mod tests {
                 estimated_memory_bytes: 0,
             },
         };
-        let toml_str = manifest.to_toml().unwrap();
+        let toml_str = manifest.to_toml().expect("should succeed");
         assert!(toml_str.contains("version"));
     }
 
@@ -362,9 +362,9 @@ mod tests {
             policy: Policy::new(PolicyProfile::Standard),
             max_files: Some(3),
         };
-        let manifest = build_pack(config).unwrap();
+        let manifest = build_pack(config).expect("should succeed");
         let out = std::path::PathBuf::from("/tmp/test_pack_manifest.toml");
-        manifest.write_to(&out).unwrap();
+        manifest.write_to(&out).expect("should succeed");
         assert!(out.exists());
         std::fs::remove_file(&out).ok();
     }
@@ -418,7 +418,7 @@ mod tests {
         // Write a temp file
         let dir = std::path::PathBuf::from("/tmp");
         let filename = "oxihuman_test_target.target";
-        std::fs::write(dir.join(filename), b"# test\n1 0.1 0.2 0.3\n").unwrap();
+        std::fs::write(dir.join(filename), b"# test\n1 0.1 0.2 0.3\n").expect("should succeed");
 
         let manifest = PackManifest {
             version: "0.1.0".to_string(),
@@ -462,7 +462,7 @@ mod tests {
             policy: Policy::new(PolicyProfile::Standard),
             max_files: Some(3),
         };
-        let manifest = build_pack(config).unwrap();
+        let manifest = build_pack(config).expect("should succeed");
         let policy = Policy::new(PolicyProfile::Standard);
         let report = validate_manifest(&manifest, dir, &policy);
         // All files we just hashed should validate correctly

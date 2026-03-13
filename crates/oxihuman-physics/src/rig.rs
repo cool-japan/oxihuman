@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Skeleton rig adapter: hierarchy of joints linking body-part capsule proxies
 //! into a physics skeleton.
@@ -363,7 +363,7 @@ mod tests {
     fn children_of_pelvis() {
         let proxies = make_proxies();
         let rig = build_rig(&proxies);
-        let root_idx = rig.find_joint("pelvis").unwrap();
+        let root_idx = rig.find_joint("pelvis").expect("should succeed");
         let children: Vec<_> = rig
             .children_of(root_idx)
             .into_iter()
@@ -454,8 +454,11 @@ mod tests {
         let proxies = make_proxies();
         let rig = build_rig(&proxies);
         let chains = CapsuleChain::standard_chains(&rig);
-        let spine = chains.iter().find(|c| c.name == "spine").unwrap();
-        let head_idx = rig.find_joint("head").unwrap();
+        let spine = chains
+            .iter()
+            .find(|c| c.name == "spine")
+            .expect("should succeed");
+        let head_idx = rig.find_joint("head").expect("should succeed");
         assert!(
             spine.joint_indices.contains(&head_idx),
             "spine chain should contain head joint index {}; got {:?}",

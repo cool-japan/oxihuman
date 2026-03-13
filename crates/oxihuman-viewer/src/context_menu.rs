@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Context menu state (right-click menus).
 
@@ -131,7 +131,7 @@ mod tests {
         add_menu_item(&mut m, 42, "Rename", true);
         let item = find_item(&m, 42);
         assert!(item.is_some());
-        assert_eq!(item.unwrap().label, "Rename");
+        assert_eq!(item.expect("should succeed").label, "Rename");
     }
 
     #[test]

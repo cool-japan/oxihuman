@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Fixed-capacity ring-buffer log.
@@ -158,7 +158,7 @@ mod tests {
         log.push(RingLogLevel::Info, "d");
         assert_eq!(log.len(), 3);
         let entries = log.entries();
-        assert_eq!(entries.last().unwrap().message, "d");
+        assert_eq!(entries.last().expect("should succeed").message, "d");
     }
 
     #[test]
@@ -175,7 +175,7 @@ mod tests {
         let mut log = new_ring_log(5);
         log.push(RingLogLevel::Info, "first");
         log.push(RingLogLevel::Debug, "last");
-        assert_eq!(log.last().unwrap().message, "last");
+        assert_eq!(log.last().expect("should succeed").message, "last");
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Facial expression blending system.
 //!
@@ -604,8 +604,8 @@ mod tests {
     #[test]
     fn blend_to_weights_scales_with_intensity() {
         let b = blender();
-        let w_full = b.blend_to_weights("Happy", 1.0).unwrap();
-        let w_half = b.blend_to_weights("Happy", 0.5).unwrap();
+        let w_full = b.blend_to_weights("Happy", 1.0).expect("should succeed");
+        let w_half = b.blend_to_weights("Happy", 0.5).expect("should succeed");
         for (k, v_full) in &w_full {
             let v_half = w_half[k];
             assert!(
@@ -618,7 +618,7 @@ mod tests {
     #[test]
     fn blend_to_weights_zero_intensity_returns_all_zeros() {
         let b = blender();
-        let w = b.blend_to_weights("Happy", 0.0).unwrap();
+        let w = b.blend_to_weights("Happy", 0.0).expect("should succeed");
         for v in w.values() {
             assert_eq!(*v, 0.0);
         }
@@ -627,7 +627,7 @@ mod tests {
     #[test]
     fn blend_to_weights_neutral_returns_empty_map() {
         let b = blender();
-        let w = b.blend_to_weights("Neutral", 1.0).unwrap();
+        let w = b.blend_to_weights("Neutral", 1.0).expect("should succeed");
         assert!(w.is_empty(), "Neutral should have no targets");
     }
 
@@ -640,15 +640,15 @@ mod tests {
     #[test]
     fn blend_to_weights_clamps_intensity_over_one() {
         let b = blender();
-        let w_one = b.blend_to_weights("Happy", 1.0).unwrap();
-        let w_over = b.blend_to_weights("Happy", 2.5).unwrap();
+        let w_one = b.blend_to_weights("Happy", 1.0).expect("should succeed");
+        let w_over = b.blend_to_weights("Happy", 2.5).expect("should succeed");
         assert_eq!(w_one, w_over, "intensity > 1.0 should be clamped to 1.0");
     }
 
     #[test]
     fn blend_to_weights_clamps_intensity_negative() {
         let b = blender();
-        let w = b.blend_to_weights("Happy", -0.5).unwrap();
+        let w = b.blend_to_weights("Happy", -0.5).expect("should succeed");
         for v in w.values() {
             assert_eq!(*v, 0.0);
         }
@@ -673,7 +673,7 @@ mod tests {
         let exprs = vec![("Happy".to_string(), 1.0), ("UnknownXYZ".to_string(), 1.0)];
         let w = b.blend_multi(&exprs);
         // Should match Happy alone
-        let w_happy = b.blend_to_weights("Happy", 1.0).unwrap();
+        let w_happy = b.blend_to_weights("Happy", 1.0).expect("should succeed");
         for k in w_happy.keys() {
             assert!(w.contains_key(k));
         }
@@ -703,7 +703,7 @@ mod tests {
     fn lerp_at_t0_equals_from() {
         let b = blender();
         let lerped = b.lerp_expression("Happy", "Sad", 0.0);
-        let from = b.blend_to_weights("Happy", 1.0).unwrap();
+        let from = b.blend_to_weights("Happy", 1.0).expect("should succeed");
         for (k, v) in &from {
             let lv = lerped.get(k).copied().unwrap_or(0.0);
             assert!((lv - v).abs() < 1e-10, "t=0 mismatch for {k}: {lv} vs {v}");
@@ -714,7 +714,7 @@ mod tests {
     fn lerp_at_t1_equals_to() {
         let b = blender();
         let lerped = b.lerp_expression("Happy", "Sad", 1.0);
-        let to_map = b.blend_to_weights("Sad", 1.0).unwrap();
+        let to_map = b.blend_to_weights("Sad", 1.0).expect("should succeed");
         for (k, v) in &to_map {
             let lv = lerped.get(k).copied().unwrap_or(0.0);
             assert!((lv - v).abs() < 1e-10, "t=1 mismatch for {k}: {lv} vs {v}");
@@ -725,8 +725,8 @@ mod tests {
     fn lerp_at_t_half_midpoint() {
         let b = blender();
         let lerped = b.lerp_expression("Happy", "Angry", 0.5);
-        let happy = b.blend_to_weights("Happy", 1.0).unwrap();
-        let angry = b.blend_to_weights("Angry", 1.0).unwrap();
+        let happy = b.blend_to_weights("Happy", 1.0).expect("should succeed");
+        let angry = b.blend_to_weights("Angry", 1.0).expect("should succeed");
         for k in happy.keys().chain(angry.keys()) {
             let a = happy.get(k).copied().unwrap_or(0.0);
             let c = angry.get(k).copied().unwrap_or(0.0);
@@ -743,7 +743,7 @@ mod tests {
     fn lerp_unknown_from_returns_to_at_t1() {
         let b = blender();
         let lerped = b.lerp_expression("NonExistent", "Happy", 1.0);
-        let to_map = b.blend_to_weights("Happy", 1.0).unwrap();
+        let to_map = b.blend_to_weights("Happy", 1.0).expect("should succeed");
         for (k, v) in &to_map {
             let lv = lerped.get(k).copied().unwrap_or(0.0);
             assert!((lv - v).abs() < 1e-10, "t=1 mismatch for {k}");
@@ -851,7 +851,7 @@ mod tests {
     #[test]
     fn happy_has_basic_tag() {
         let b = blender();
-        let def = b.get("Happy").unwrap();
+        let def = b.get("Happy").expect("should succeed");
         assert!(
             def.tags.iter().any(|t| t == "basic"),
             "Happy should have 'basic' tag"
@@ -861,7 +861,7 @@ mod tests {
     #[test]
     fn contempt_has_symmetry_pair() {
         let b = blender();
-        let def = b.get("Contempt").unwrap();
+        let def = b.get("Contempt").expect("should succeed");
         assert!(
             def.symmetry_pair.is_some(),
             "Contempt should have a symmetry_pair"

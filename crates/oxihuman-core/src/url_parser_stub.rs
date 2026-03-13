@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Full-featured URL parser supporting RFC 3986, IPv6, userinfo, percent-encoding,
 //! relative URL resolution, query-string parsing, punycode/IDNA basics, and
@@ -770,7 +770,7 @@ mod tests {
 
     #[test]
     fn parse_simple_http() {
-        let u = parse_url("http://example.com/").unwrap();
+        let u = parse_url("http://example.com/").expect("should succeed");
         assert_eq!(u.scheme, "http");
         assert_eq!(u.host, "example.com");
         assert_eq!(u.path, "/");
@@ -778,21 +778,21 @@ mod tests {
 
     #[test]
     fn parse_with_port() {
-        let u = parse_url("http://localhost:8080/api").unwrap();
+        let u = parse_url("http://localhost:8080/api").expect("should succeed");
         assert_eq!(u.port, Some(8080));
         assert_eq!(u.host, "localhost");
     }
 
     #[test]
     fn parse_with_query() {
-        let u = parse_url("https://example.com/search?q=hello&lang=en").unwrap();
+        let u = parse_url("https://example.com/search?q=hello&lang=en").expect("should succeed");
         assert_eq!(url_query_param(&u, "q"), Some("hello".to_string()));
         assert_eq!(url_query_param(&u, "lang"), Some("en".to_string()));
     }
 
     #[test]
     fn parse_with_fragment() {
-        let u = parse_url("https://example.com/page#section1").unwrap();
+        let u = parse_url("https://example.com/page#section1").expect("should succeed");
         assert_eq!(u.fragment, "section1");
     }
 
@@ -804,7 +804,7 @@ mod tests {
     #[test]
     fn url_to_string_round_trip() {
         let original = "https://example.com:443/path?x=1";
-        let u = parse_url(original).unwrap();
+        let u = parse_url(original).expect("should succeed");
         let s = url_to_string(&u);
         assert!(s.contains("https://"));
         assert!(s.contains("example.com"));
@@ -822,13 +822,13 @@ mod tests {
 
     #[test]
     fn query_param_missing_returns_none() {
-        let u = parse_url("https://example.com/").unwrap();
+        let u = parse_url("https://example.com/").expect("should succeed");
         assert_eq!(url_query_param(&u, "missing"), None);
     }
 
     #[test]
     fn https_scheme_parsed() {
-        let u = parse_url("https://secure.example.com/").unwrap();
+        let u = parse_url("https://secure.example.com/").expect("should succeed");
         assert_eq!(u.scheme, "https");
     }
 
@@ -866,7 +866,7 @@ mod tests {
 
     #[test]
     fn parse_ipv6_host() {
-        let u = parse_url("http://[::1]:8080/path").unwrap();
+        let u = parse_url("http://[::1]:8080/path").expect("should succeed");
         assert_eq!(u.host, "::1");
         assert_eq!(u.port, Some(8080));
         assert_eq!(u.path, "/path");
@@ -874,14 +874,14 @@ mod tests {
 
     #[test]
     fn parse_ipv6_no_port() {
-        let u = parse_url("http://[2001:db8::1]/").unwrap();
+        let u = parse_url("http://[2001:db8::1]/").expect("should succeed");
         assert_eq!(u.host, "2001:db8::1");
         assert_eq!(u.port, None);
     }
 
     #[test]
     fn url_to_string_ipv6() {
-        let u = parse_url("http://[::1]:8080/").unwrap();
+        let u = parse_url("http://[::1]:8080/").expect("should succeed");
         let s = url_to_string(&u);
         assert_eq!(s, "http://[::1]:8080/");
     }
@@ -890,7 +890,7 @@ mod tests {
 
     #[test]
     fn parse_userinfo() {
-        let u = parse_url("ftp://user:pass@ftp.example.com/pub").unwrap();
+        let u = parse_url("ftp://user:pass@ftp.example.com/pub").expect("should succeed");
         assert_eq!(u.userinfo, Some("user:pass".to_string()));
         assert_eq!(u.host, "ftp.example.com");
         assert_eq!(u.path, "/pub");
@@ -898,14 +898,14 @@ mod tests {
 
     #[test]
     fn parse_userinfo_no_password() {
-        let u = parse_url("http://admin@example.com/").unwrap();
+        let u = parse_url("http://admin@example.com/").expect("should succeed");
         assert_eq!(u.userinfo, Some("admin".to_string()));
         assert_eq!(u.host, "example.com");
     }
 
     #[test]
     fn url_to_string_with_userinfo() {
-        let u = parse_url("http://user:pw@host.com/").unwrap();
+        let u = parse_url("http://user:pw@host.com/").expect("should succeed");
         let s = url_to_string(&u);
         assert_eq!(s, "http://user:pw@host.com/");
     }
@@ -914,8 +914,8 @@ mod tests {
 
     #[test]
     fn resolve_absolute_reference() {
-        let base = parse_url("http://example.com/a/b").unwrap();
-        let r = resolve_url(&base, "https://other.com/c").unwrap();
+        let base = parse_url("http://example.com/a/b").expect("should succeed");
+        let r = resolve_url(&base, "https://other.com/c").expect("should succeed");
         assert_eq!(r.scheme, "https");
         assert_eq!(r.host, "other.com");
         assert_eq!(r.path, "/c");
@@ -923,23 +923,23 @@ mod tests {
 
     #[test]
     fn resolve_relative_path() {
-        let base = parse_url("http://example.com/a/b/c").unwrap();
-        let r = resolve_url(&base, "../d").unwrap();
+        let base = parse_url("http://example.com/a/b/c").expect("should succeed");
+        let r = resolve_url(&base, "../d").expect("should succeed");
         assert_eq!(r.path, "/a/d");
         assert_eq!(r.host, "example.com");
     }
 
     #[test]
     fn resolve_absolute_path() {
-        let base = parse_url("http://example.com/a/b/c").unwrap();
-        let r = resolve_url(&base, "/x/y").unwrap();
+        let base = parse_url("http://example.com/a/b/c").expect("should succeed");
+        let r = resolve_url(&base, "/x/y").expect("should succeed");
         assert_eq!(r.path, "/x/y");
     }
 
     #[test]
     fn resolve_fragment_only() {
-        let base = parse_url("http://example.com/a?q=1").unwrap();
-        let r = resolve_url(&base, "#frag").unwrap();
+        let base = parse_url("http://example.com/a?q=1").expect("should succeed");
+        let r = resolve_url(&base, "#frag").expect("should succeed");
         assert_eq!(r.path, "/a");
         assert_eq!(r.query, "q=1");
         assert_eq!(r.fragment, "frag");
@@ -947,16 +947,16 @@ mod tests {
 
     #[test]
     fn resolve_query_only() {
-        let base = parse_url("http://example.com/a").unwrap();
-        let r = resolve_url(&base, "?x=1").unwrap();
+        let base = parse_url("http://example.com/a").expect("should succeed");
+        let r = resolve_url(&base, "?x=1").expect("should succeed");
         assert_eq!(r.path, "/a");
         assert_eq!(r.query, "x=1");
     }
 
     #[test]
     fn resolve_protocol_relative() {
-        let base = parse_url("https://example.com/a").unwrap();
-        let r = resolve_url(&base, "//other.com/b").unwrap();
+        let base = parse_url("https://example.com/a").expect("should succeed");
+        let r = resolve_url(&base, "//other.com/b").expect("should succeed");
         assert_eq!(r.scheme, "https");
         assert_eq!(r.host, "other.com");
         assert_eq!(r.path, "/b");
@@ -1009,14 +1009,14 @@ mod tests {
 
     #[test]
     fn fragment_with_query() {
-        let u = parse_url("https://example.com/page?q=1#section").unwrap();
+        let u = parse_url("https://example.com/page?q=1#section").expect("should succeed");
         assert_eq!(u.query, "q=1");
         assert_eq!(u.fragment, "section");
     }
 
     #[test]
     fn fragment_empty() {
-        let u = parse_url("https://example.com/page#").unwrap();
+        let u = parse_url("https://example.com/page#").expect("should succeed");
         assert_eq!(u.fragment, "");
     }
 
@@ -1024,8 +1024,8 @@ mod tests {
 
     #[test]
     fn punycode_encode_decode() {
-        let encoded = punycode_encode("m\u{00FC}nchen").unwrap();
-        let decoded = punycode_decode(&encoded).unwrap();
+        let encoded = punycode_encode("m\u{00FC}nchen").expect("should succeed");
+        let decoded = punycode_decode(&encoded).expect("should succeed");
         assert_eq!(decoded, "m\u{00FC}nchen");
     }
 
@@ -1033,10 +1033,10 @@ mod tests {
     fn punycode_ascii_only() {
         // All-ASCII input: punycode output is just the ASCII chars (no non-basic
         // code points to encode).
-        let encoded = punycode_encode("example").unwrap();
+        let encoded = punycode_encode("example").expect("should succeed");
         assert_eq!(encoded, "example");
         // Decoding with trailing delimiter (the standard separator) works.
-        let decoded = punycode_decode("example-").unwrap();
+        let decoded = punycode_decode("example-").expect("should succeed");
         assert_eq!(decoded, "example");
     }
 
@@ -1064,21 +1064,21 @@ mod tests {
 
     #[test]
     fn normalize_removes_default_port() {
-        let mut u = parse_url("https://example.com:443/path").unwrap();
+        let mut u = parse_url("https://example.com:443/path").expect("should succeed");
         normalize_url(&mut u);
         assert_eq!(u.port, None);
     }
 
     #[test]
     fn normalize_keeps_non_default_port() {
-        let mut u = parse_url("http://example.com:8080/path").unwrap();
+        let mut u = parse_url("http://example.com:8080/path").expect("should succeed");
         normalize_url(&mut u);
         assert_eq!(u.port, Some(8080));
     }
 
     #[test]
     fn normalize_lowercases_scheme_and_host() {
-        let mut u = parse_url("HTTP://EXAMPLE.COM/Path").unwrap();
+        let mut u = parse_url("HTTP://EXAMPLE.COM/Path").expect("should succeed");
         normalize_url(&mut u);
         assert_eq!(u.scheme, "http");
         assert_eq!(u.host, "example.com");
@@ -1086,28 +1086,28 @@ mod tests {
 
     #[test]
     fn normalize_path_dots() {
-        let mut u = parse_url("http://example.com/a/b/../c/./d").unwrap();
+        let mut u = parse_url("http://example.com/a/b/../c/./d").expect("should succeed");
         normalize_url(&mut u);
         assert_eq!(u.path, "/a/c/d");
     }
 
     #[test]
     fn normalize_percent_encoding_uppercase() {
-        let mut u = parse_url("http://example.com/a%2fb").unwrap();
+        let mut u = parse_url("http://example.com/a%2fb").expect("should succeed");
         normalize_url(&mut u);
         assert_eq!(u.path, "/a%2Fb");
     }
 
     #[test]
     fn normalize_percent_decodes_unreserved() {
-        let mut u = parse_url("http://example.com/%61%62%63").unwrap();
+        let mut u = parse_url("http://example.com/%61%62%63").expect("should succeed");
         normalize_url(&mut u);
         assert_eq!(u.path, "/abc");
     }
 
     #[test]
     fn parse_and_normalize_convenience() {
-        let u = parse_and_normalize_url("HTTP://Example.COM:80/a/../b").unwrap();
+        let u = parse_and_normalize_url("HTTP://Example.COM:80/a/../b").expect("should succeed");
         assert_eq!(u.scheme, "http");
         assert_eq!(u.host, "example.com");
         assert_eq!(u.port, None);
@@ -1156,7 +1156,7 @@ mod tests {
 
     #[test]
     fn query_param_percent_encoded() {
-        let u = parse_url("http://example.com/?name=John%20Doe").unwrap();
+        let u = parse_url("http://example.com/?name=John%20Doe").expect("should succeed");
         assert_eq!(url_query_param(&u, "name"), Some("John Doe".to_string()));
     }
 
@@ -1164,7 +1164,7 @@ mod tests {
 
     #[test]
     fn display_impl() {
-        let u = parse_url("http://example.com/path?q=1#f").unwrap();
+        let u = parse_url("http://example.com/path?q=1#f").expect("should succeed");
         let s = format!("{}", u);
         assert_eq!(s, "http://example.com/path?q=1#f");
     }

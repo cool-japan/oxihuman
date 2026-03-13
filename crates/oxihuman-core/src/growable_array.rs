@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A growable array with explicit growth factor control and statistics.
@@ -171,7 +171,7 @@ mod tests {
     fn test_get_mut() {
         let mut a = GrowableArray::new();
         a.push(1);
-        *a.get_mut(0).unwrap() = 99;
+        *a.get_mut(0).expect("should succeed") = 99;
         assert_eq!(a.get(0), Some(&99));
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A cache that tracks byte-size usage and evicts LRU entries when over budget.
@@ -170,7 +170,7 @@ mod tests {
         let mut c = new_size_cache(1000);
         c.insert("a", 10);
         c.get("a");
-        assert_eq!(c.get("a").unwrap().access_count, 3);
+        assert_eq!(c.get("a").expect("should succeed").access_count, 3);
     }
 
     #[test]

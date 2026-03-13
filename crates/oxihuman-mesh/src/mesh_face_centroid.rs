@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Face centroid computation and analysis.
@@ -136,7 +136,7 @@ mod tests {
     fn test_get_face_centroid() {
         let pos = vec![[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [0.0, 3.0, 0.0]];
         let data = compute_all_face_centroids(&pos, &[0, 1, 2]);
-        let c = get_face_centroid(&data, 0).unwrap();
+        let c = get_face_centroid(&data, 0).expect("should succeed");
         assert!((c[0] - 1.0).abs() < 1e-6);
     }
 

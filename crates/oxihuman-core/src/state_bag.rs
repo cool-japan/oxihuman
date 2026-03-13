@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A heterogeneous key-value bag for storing named state entries.
@@ -165,7 +165,7 @@ mod tests {
     fn set_and_get_float() {
         let mut b = new_state_bag();
         sb_set(&mut b, "speed", BagValue::Float(1.5));
-        assert!((b.get_float("speed").unwrap() - 1.5).abs() < 1e-6);
+        assert!((b.get_float("speed").expect("should succeed") - 1.5).abs() < 1e-6);
     }
 
     #[test]

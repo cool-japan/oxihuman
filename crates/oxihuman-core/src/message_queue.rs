@@ -93,7 +93,7 @@ mod tests {
         let mut q = new_message_queue();
         let id = send_message(&mut q, "test", "hello");
         assert_eq!(id, 1);
-        let msg = receive_message(&mut q).unwrap();
+        let msg = receive_message(&mut q).expect("should succeed");
         assert_eq!(msg.topic, "test");
         assert_eq!(msg.payload, "hello");
     }
@@ -110,7 +110,7 @@ mod tests {
     fn test_peek() {
         let mut q = new_message_queue();
         send_message(&mut q, "t", "p");
-        let peeked = peek_message(&q).unwrap();
+        let peeked = peek_message(&q).expect("should succeed");
         assert_eq!(peeked.topic, "t");
         assert_eq!(message_count(&q), 1);
     }
@@ -138,7 +138,7 @@ mod tests {
         let mut q = new_message_queue();
         send_message(&mut q, "first", "1");
         send_message(&mut q, "second", "2");
-        let m1 = receive_message(&mut q).unwrap();
+        let m1 = receive_message(&mut q).expect("should succeed");
         assert_eq!(m1.topic, "first");
     }
 

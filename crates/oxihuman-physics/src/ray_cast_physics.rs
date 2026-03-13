@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Ray casting against physics shapes.
 
@@ -160,7 +160,7 @@ mod tests {
     #[test]
     fn test_ray_sphere_hit() {
         let ray = new_physics_ray([0.0, 0.0, -5.0], [0.0, 0.0, 1.0], 100.0);
-        let hit = cast_ray_sphere(&ray, [0.0, 0.0, 0.0], 1.0).unwrap();
+        let hit = cast_ray_sphere(&ray, [0.0, 0.0, 0.0], 1.0).expect("should succeed");
         assert!((hit.distance - 4.0).abs() < 1e-4);
     }
 
@@ -173,7 +173,7 @@ mod tests {
     #[test]
     fn test_ray_box_hit() {
         let ray = new_physics_ray([-5.0, 0.0, 0.0], [1.0, 0.0, 0.0], 100.0);
-        let hit = cast_ray_box(&ray, [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]).unwrap();
+        let hit = cast_ray_box(&ray, [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]).expect("should succeed");
         assert!((hit.distance - 4.0).abs() < 1e-4);
     }
 
@@ -215,7 +215,7 @@ mod tests {
             RayHit { distance: 2.0, point: [0.0; 3], normal: [0.0; 3] },
             RayHit { distance: 8.0, point: [0.0; 3], normal: [0.0; 3] },
         ];
-        let closest = ray_closest_hit(&hits).unwrap();
+        let closest = ray_closest_hit(&hits).expect("should succeed");
         assert!((closest.distance - 2.0).abs() < 1e-6);
     }
 

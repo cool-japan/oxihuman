@@ -156,7 +156,7 @@ mod tests {
     #[test]
     fn test_basic_insert_get() {
         let mut c = make_cache();
-        assert!((lru_get(&mut c, "a").unwrap() - 1.0).abs() < f32::EPSILON);
+        assert!((lru_get(&mut c, "a").expect("should succeed") - 1.0).abs() < f32::EPSILON);
     }
 
     #[test]
@@ -209,7 +209,7 @@ mod tests {
     #[test]
     fn test_evict_oldest() {
         let mut c = make_cache();
-        let evicted = lru_evict_oldest(&mut c).unwrap();
+        let evicted = lru_evict_oldest(&mut c).expect("should succeed");
         assert_eq!(evicted.key, "a");
         assert_eq!(lru_len(&c), 2);
     }
@@ -219,7 +219,7 @@ mod tests {
         let mut c = make_cache();
         lru_insert(&mut c, "a", 99.0);
         assert_eq!(lru_len(&c), 3); // no eviction
-        assert!((lru_get(&mut c, "a").unwrap() - 99.0).abs() < f32::EPSILON);
+        assert!((lru_get(&mut c, "a").expect("should succeed") - 99.0).abs() < f32::EPSILON);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Red-black tree stub (color invariant maintained via basic insertion).
@@ -240,7 +240,7 @@ mod tests {
     fn root_is_black_after_insert() {
         let mut t: RedBlackTree<i32, i32> = RedBlackTree::new();
         t.insert(1, 1);
-        assert_eq!(t.root.as_ref().unwrap().color, Color::Black);
+        assert_eq!(t.root.as_ref().expect("should succeed").color, Color::Black);
     }
 
     #[test]

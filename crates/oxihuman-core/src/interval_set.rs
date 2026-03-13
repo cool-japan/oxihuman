@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A set of non-overlapping intervals with merge-on-insert semantics.
@@ -171,7 +171,7 @@ mod tests {
         let mut s = IntervalSet::new();
         s.insert(Interval::new(2.0, 4.0));
         s.insert(Interval::new(8.0, 10.0));
-        let span = s.span().unwrap();
+        let span = s.span().expect("should succeed");
         assert!((span.lo - 2.0).abs() < f64::EPSILON);
         assert!((span.hi - 10.0).abs() < f64::EPSILON);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Sharp/crease edge marking for subdivision and rendering.
@@ -139,7 +139,7 @@ mod tests {
     fn test_get_sharpness_found() {
         /* sharpness should round-trip */
         let s = simple_set();
-        assert!((get_sharpness(&s, 0, 1).unwrap() - 1.0).abs() < 1e-6);
+        assert!((get_sharpness(&s, 0, 1).expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]
@@ -185,7 +185,7 @@ mod tests {
         /* values out of range are clamped to [0,1] */
         let mut s = SharpEdgeSet::new();
         mark_sharp_edge(&mut s, 0, 1, 5.0);
-        assert!((get_sharpness(&s, 0, 1).unwrap() - 1.0).abs() < 1e-6);
+        assert!((get_sharpness(&s, 0, 1).expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! ParamMap — bidirectional parameter remapping.
 
@@ -157,7 +157,7 @@ mod tests {
     fn test_invert_mapping() {
         let mut m = new_param_map();
         add_mapping(&mut m, "fwd", 0.0, 1.0, 10.0, 20.0);
-        let inv = invert_mapping(&m, 0).unwrap();
+        let inv = invert_mapping(&m, 0).expect("should succeed");
         assert!((inv.src_lo - 10.0).abs() < 1e-5);
         assert!((inv.dst_hi - 1.0).abs() < 1e-5);
     }
@@ -175,7 +175,7 @@ mod tests {
     fn test_mapping_range_some() {
         let mut m = new_param_map();
         add_mapping(&mut m, "r", 0.0, 1.0, 5.0, 9.0);
-        let (lo, hi) = mapping_range(&m, 0).unwrap();
+        let (lo, hi) = mapping_range(&m, 0).expect("should succeed");
         assert!((lo - 5.0).abs() < 1e-5);
         assert!((hi - 9.0).abs() < 1e-5);
     }

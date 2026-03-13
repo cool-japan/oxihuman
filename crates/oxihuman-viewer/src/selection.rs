@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Selection buffer and hover state for the interactive viewer.
 
@@ -301,7 +301,7 @@ mod tests {
         let mut buf = SelectionBuffer::new();
         assert!(buf.hover().is_none());
         buf.set_hover(Some(face_item(7)));
-        assert_eq!(buf.hover().unwrap().index, 7);
+        assert_eq!(buf.hover().expect("should succeed").index, 7);
     }
 
     #[test]
@@ -409,6 +409,6 @@ mod tests {
             object_id: 1,
         };
         buf.set_hover(Some(item));
-        assert_eq!(buf.hover().unwrap().kind, SelectionKind::Bone);
+        assert_eq!(buf.hover().expect("should succeed").kind, SelectionKind::Bone);
     }
 }

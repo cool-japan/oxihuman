@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Position-based dynamics rope/cable simulation using Verlet integration.
 
@@ -385,7 +385,7 @@ mod tests {
     fn attach_rope_end_pins_last() {
         let mut rope = simple_rope(4);
         attach_rope_end(&mut rope, [5.0, 5.0, 5.0]);
-        let last = rope.particles.last().unwrap();
+        let last = rope.particles.last().expect("should succeed");
         assert!(last.pinned);
         assert!((last.position[0] - 5.0).abs() < 1e-6);
     }

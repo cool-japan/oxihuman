@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! JSON-RPC 2.0 request/response serialization.
@@ -168,7 +168,7 @@ mod tests {
     #[test]
     fn error_code_stored() {
         let resp = new_jsonrpc_error(-32700, "Parse error", None);
-        assert_eq!(resp.error.as_ref().unwrap().code, -32700);
+        assert_eq!(resp.error.as_ref().expect("should succeed").code, -32700);
     }
 
     #[test]

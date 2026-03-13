@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Binary delta cache for fast morph target loading.
 //!
@@ -218,7 +218,7 @@ mod tests {
         write_cache(&lib, &path).expect("write_cache failed");
 
         let bytes = std::fs::read(&path).expect("read file failed");
-        let version = u32::from_le_bytes(bytes[4..8].try_into().unwrap());
+        let version = u32::from_le_bytes(bytes[4..8].try_into().expect("should succeed"));
         assert_eq!(version, 1, "bytes[4..8] must encode version 1 as u32 LE");
     }
 
@@ -303,7 +303,7 @@ mod tests {
 
         // Verify the entry-count field in the file is 0
         let bytes = std::fs::read(&path).expect("read file failed");
-        let count = u32::from_le_bytes(bytes[8..12].try_into().unwrap());
+        let count = u32::from_le_bytes(bytes[8..12].try_into().expect("should succeed"));
         assert_eq!(count, 0, "entry count field must be 0 for empty library");
     }
 }

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A single bone retargeting pair.
 #[derive(Debug, Clone)]
@@ -66,7 +66,7 @@ mod tests {
         add_pair(&mut m, "Hips", "pelvis", 1.5);
         let r = retarget_weight(&m, "Hips");
         assert!(r.is_some());
-        let (tgt, scale) = r.unwrap();
+        let (tgt, scale) = r.expect("should succeed");
         assert_eq!(tgt, "pelvis");
         assert!((scale - 1.5).abs() < 1e-6);
     }
@@ -111,8 +111,8 @@ mod tests {
         let mut m = new_pose_retarget_map();
         add_pair(&mut m, "A", "a", 1.0);
         add_pair(&mut m, "B", "b", 2.0);
-        let ra = retarget_weight(&m, "A").unwrap();
-        let rb = retarget_weight(&m, "B").unwrap();
+        let ra = retarget_weight(&m, "A").expect("should succeed");
+        let rb = retarget_weight(&m, "B").expect("should succeed");
         assert_eq!(ra.0, "a");
         assert_eq!(rb.0, "b");
     }

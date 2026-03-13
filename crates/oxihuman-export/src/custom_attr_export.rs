@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Custom attribute export: arbitrary per-object key-value metadata.
@@ -134,7 +134,7 @@ mod tests {
     fn get_float_correct() {
         let mut exp = new_custom_attr_export("obj");
         add_attr(&mut exp, "mass", AttrValue::Float(1.5));
-        assert!((get_float(&exp, "mass").unwrap() - 1.5).abs() < 1e-5);
+        assert!((get_float(&exp, "mass").expect("should succeed") - 1.5).abs() < 1e-5);
     }
 
     #[test]

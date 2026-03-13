@@ -208,7 +208,7 @@ mod tests {
         let id = add_pose_entry(&mut db, "Walk", make_joints(1.0), vec![]);
         let entry = get_pose(&db, id);
         assert!(entry.is_some());
-        assert_eq!(entry.unwrap().name, "Walk");
+        assert_eq!(entry.expect("should succeed").name, "Walk");
     }
 
     #[test]
@@ -303,7 +303,7 @@ mod tests {
         let query = vec![[1.0, 0.0, 0.0, 0.0]];
         let nearest = nearest_pose(&db, &query);
         assert!(nearest.is_some());
-        assert_eq!(nearest.unwrap().name, "A");
+        assert_eq!(nearest.expect("should succeed").name, "A");
     }
 
     #[test]

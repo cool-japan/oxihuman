@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Mesh hole detection and hole-filling (triangulated polygon patches).
 //!
@@ -1192,7 +1192,7 @@ mod tests {
         std::fs::write("/tmp/mesh_patch_report.txt", &report).ok();
 
         // Verify the file was written
-        let content = std::fs::read_to_string("/tmp/mesh_patch_report.txt").unwrap();
+        let content = std::fs::read_to_string("/tmp/mesh_patch_report.txt").expect("should succeed");
         assert!(content.contains("holes_filled"));
     }
 }

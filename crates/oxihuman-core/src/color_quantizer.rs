@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Median-cut color quantization for RGB palettes.
@@ -198,7 +198,7 @@ mod tests {
         /* closest finds nearest palette color */
         let palette = vec![RgbColor::new(0, 0, 0), RgbColor::new(255, 0, 0)];
         let q = RgbColor::new(200, 0, 0);
-        let closest = ColorQuantizer::closest(&palette, q).unwrap();
+        let closest = ColorQuantizer::closest(&palette, q).expect("should succeed");
         assert_eq!(closest.r, 255);
     }
 

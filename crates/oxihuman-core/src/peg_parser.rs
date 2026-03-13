@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Minimal PEG-style parser combinator.
@@ -132,7 +132,7 @@ mod tests {
     use super::*;
     #[test]
     fn test_parse_literal_success() {
-        let (node, rest) = parse_literal("hello world", "hello").unwrap();
+        let (node, rest) = parse_literal("hello world", "hello").expect("should succeed");
         assert_eq!(node_text(&node), Some("hello"));
         assert_eq!(rest, " world");
     }
@@ -142,13 +142,13 @@ mod tests {
     }
     #[test]
     fn test_parse_integer() {
-        let (node, rest) = parse_integer("123abc").unwrap();
+        let (node, rest) = parse_integer("123abc").expect("should succeed");
         assert_eq!(node_text(&node), Some("123"));
         assert_eq!(rest, "abc");
     }
     #[test]
     fn test_parse_ident() {
-        let (node, rest) = parse_ident("foo_bar 42").unwrap();
+        let (node, rest) = parse_ident("foo_bar 42").expect("should succeed");
         assert_eq!(node_text(&node), Some("foo_bar"));
         assert_eq!(rest, " 42");
     }

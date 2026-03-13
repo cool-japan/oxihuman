@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! BFS shortest path on an unweighted directed/undirected graph.
@@ -142,9 +142,9 @@ mod tests {
         bfs_add_edge(&mut g, 1, 3);
         bfs_add_edge(&mut g, 0, 2);
         bfs_add_edge(&mut g, 2, 3);
-        let path = bfs_shortest_path(&g, 0, 3).unwrap();
+        let path = bfs_shortest_path(&g, 0, 3).expect("should succeed");
         assert_eq!(path[0], 0);
-        assert_eq!(*path.last().unwrap(), 3);
+        assert_eq!(*path.last().expect("should succeed"), 3);
         assert_eq!(path.len(), 3); /* 0 -> 1 -> 3 or 0 -> 2 -> 3 */
     }
 

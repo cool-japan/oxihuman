@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -469,7 +469,7 @@ mod tests {
         // Center vertex (x=0.2, dist=0) should have weight ~1.0
         let center_inf = m.influences.iter().find(|&&(vi, _)| vi == 2);
         assert!(center_inf.is_some());
-        let (_, w) = center_inf.unwrap();
+        let (_, w) = center_inf.expect("should succeed");
         assert!(
             (*w - 1.0).abs() < 1e-5,
             "center vertex weight should be 1.0, got {w}"

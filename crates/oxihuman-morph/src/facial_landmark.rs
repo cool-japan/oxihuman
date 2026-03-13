@@ -135,7 +135,7 @@ mod tests {
     fn test_landmark_at() {
         let mut s = new_landmark_set("face");
         add_landmark(&mut s, "chin", [0.0, -0.5, 0.0]);
-        let l = landmark_at(&s, 0).unwrap();
+        let l = landmark_at(&s, 0).expect("should succeed");
         assert_eq!(l.name, "chin");
     }
 

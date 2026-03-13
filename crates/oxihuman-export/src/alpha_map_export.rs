@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Alpha map export: per-pixel alpha channel image buffer.
@@ -111,7 +111,7 @@ mod tests {
     fn test_set_get_alpha() {
         let mut am = new_alpha_map(4, 4);
         set_alpha(&mut am, 2, 1, 0.7);
-        let v = get_alpha(&am, 2, 1).unwrap();
+        let v = get_alpha(&am, 2, 1).expect("should succeed");
         assert!((v - 0.7).abs() < 1e-6);
     }
 
@@ -167,7 +167,7 @@ mod tests {
     fn test_alpha_value_in_range() {
         let mut am = new_alpha_map(1, 1);
         set_alpha(&mut am, 0, 0, 0.5);
-        let v = get_alpha(&am, 0, 0).unwrap();
+        let v = get_alpha(&am, 0, 0).expect("should succeed");
         assert!((0.0..=1.0).contains(&v));
     }
 }

@@ -182,7 +182,7 @@ mod tests {
         let id = add_track(&mut tl, "Anim", [1.0, 0.0, 0.0, 1.0]);
         assert_eq!(track_count(&tl), 1);
         assert_eq!(id, 1);
-        let track = get_track(&tl, id).unwrap();
+        let track = get_track(&tl, id).expect("should succeed");
         assert_eq!(track.name, "Anim");
     }
 
@@ -208,7 +208,7 @@ mod tests {
         let id = add_track(&mut tl, "T", [0.0; 4]);
         assert!(add_key_to_track(&mut tl, id, 1.0));
         assert!(add_key_to_track(&mut tl, id, 2.0));
-        let track = get_track(&tl, id).unwrap();
+        let track = get_track(&tl, id).expect("should succeed");
         assert_eq!(track.keys.len(), 2);
     }
 
@@ -219,7 +219,7 @@ mod tests {
         add_key_to_track(&mut tl, id, 2.0);
         add_key_to_track(&mut tl, id, 0.5);
         add_key_to_track(&mut tl, id, 1.0);
-        let track = get_track(&tl, id).unwrap();
+        let track = get_track(&tl, id).expect("should succeed");
         assert!((track.keys[0] - 0.5).abs() < 1e-6);
         assert!((track.keys[1] - 1.0).abs() < 1e-6);
         assert!((track.keys[2] - 2.0).abs() < 1e-6);
@@ -232,7 +232,7 @@ mod tests {
         add_key_to_track(&mut tl, id, 1.0);
         add_key_to_track(&mut tl, id, 2.0);
         assert!(remove_key_from_track(&mut tl, id, 0));
-        let track = get_track(&tl, id).unwrap();
+        let track = get_track(&tl, id).expect("should succeed");
         assert_eq!(track.keys.len(), 1);
     }
 

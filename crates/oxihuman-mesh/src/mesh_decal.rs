@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -564,7 +564,7 @@ mod tests {
         let result = project_decal(&mesh, &bounds, &default_config());
         let out = apply_decal_colors(&mesh, &result, [1.0, 0.0, 0.0, 1.0]);
         assert!(out.colors.is_some());
-        assert_eq!(out.colors.as_ref().unwrap().len(), 4);
+        assert_eq!(out.colors.as_ref().expect("should succeed").len(), 4);
     }
 
     #[test]
@@ -582,7 +582,7 @@ mod tests {
         let result = project_decal(&mesh, &bounds, &default_config());
         let decal_rgba = [1.0f32, 0.0, 0.5, 0.8];
         let out = apply_decal_colors(&mesh, &result, decal_rgba);
-        let colors = out.colors.as_ref().unwrap();
+        let colors = out.colors.as_ref().expect("should succeed");
         for c in colors {
             for ch in 0..4 {
                 assert!(

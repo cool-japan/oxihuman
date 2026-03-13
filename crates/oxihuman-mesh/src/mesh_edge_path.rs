@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0 / #![allow(dead_code)]
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0 / #![allow(dead_code)]
 
 /// A path of edges through a mesh.
 #[allow(dead_code)]
@@ -165,7 +165,7 @@ mod tests {
     fn test_shortest_path_same() {
         let path = shortest_edge_path(&line_mesh(), 4, 0, 0);
         assert!(path.is_some());
-        assert_eq!(path.unwrap().vertices.len(), 1);
+        assert_eq!(path.expect("should succeed").vertices.len(), 1);
     }
 
     #[test]

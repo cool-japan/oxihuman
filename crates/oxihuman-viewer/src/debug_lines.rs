@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Debug line renderer (for physics/skeleton visualization).
 
@@ -162,7 +162,7 @@ mod tests {
         dl_add_line(&mut r, [1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [1.0; 4]);
         let line = dl_get(&r, 0);
         assert!(line.is_some());
-        assert!((line.unwrap().start[0] - 1.0).abs() < 1e-6);
+        assert!((line.expect("should succeed").start[0] - 1.0).abs() < 1e-6);
     }
 
     #[test]

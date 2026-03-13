@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Emotional prosody analysis and generation for speech parameters.
 //! Maps pitch, rate, emphasis and emotion to morph parameters.
@@ -634,7 +634,7 @@ mod tests {
                 features: sad_features(),
             },
         ];
-        let dom = dominant_prosody_emotion(&profiles).unwrap();
+        let dom = dominant_prosody_emotion(&profiles).expect("should succeed");
         assert_eq!(dom.emotion, ProsodyEmotion::Sad);
     }
 

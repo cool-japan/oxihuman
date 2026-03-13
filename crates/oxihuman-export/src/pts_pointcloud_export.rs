@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! PTS point cloud text format export.
@@ -156,7 +156,7 @@ mod tests {
     fn test_bbox_single_point() {
         let mut exp = new_pts_export(false, false);
         add_pts_point(&mut exp, 5.0, 6.0, 7.0, 0, 0, 0, 0);
-        let (mn, mx) = pts_bbox(&exp).unwrap();
+        let (mn, mx) = pts_bbox(&exp).expect("should succeed");
         assert!((mn[0] - 5.0).abs() < 1e-9);
         assert!((mx[0] - 5.0).abs() < 1e-9);
     }

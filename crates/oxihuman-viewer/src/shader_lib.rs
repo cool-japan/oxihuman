@@ -92,7 +92,7 @@ mod tests {
         let mut l = new_shader_lib();
         add_shader_sl(&mut l, "x", "old");
         add_shader_sl(&mut l, "x", "new");
-        assert_eq!(get_shader_sl(&l, "x").unwrap().source, "new");
+        assert_eq!(get_shader_sl(&l, "x").expect("should succeed").source, "new");
     }
     #[test] fn test_empty_names() { assert!(shader_names_sl(&new_shader_lib()).is_empty()); }
 }

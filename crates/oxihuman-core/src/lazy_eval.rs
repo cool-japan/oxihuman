@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 pub struct LazyValue<T: Clone> {
@@ -85,7 +85,7 @@ mod tests {
         let mut lv = new_lazy_f32();
         lazy_set(&mut lv, 3.0);
         assert!(lazy_is_computed(&lv));
-        assert!((lv.value.unwrap() - 3.0).abs() < 1e-5);
+        assert!((lv.value.expect("should succeed") - 3.0).abs() < 1e-5);
     }
 
     #[test]

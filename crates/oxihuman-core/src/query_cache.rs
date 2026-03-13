@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Query result cache with TTL and hit-rate tracking.
@@ -136,7 +136,7 @@ mod tests {
     fn insert_and_get() {
         let mut c: QueryCache<i32> = new_query_cache(10);
         c.insert("k", 42);
-        assert_eq!(*c.get("k").unwrap(), 42);
+        assert_eq!(*c.get("k").expect("should succeed"), 42);
     }
 
     #[test]

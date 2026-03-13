@@ -117,7 +117,7 @@ mod tests {
         let bytes = chunk_to_bytes(&c);
         let parsed = chunk_from_bytes(&bytes);
         assert!(parsed.is_some());
-        let parsed = parsed.unwrap();
+        let parsed = parsed.expect("should succeed");
         assert_eq!(chunk_type(&parsed), 42);
         assert_eq!(parsed.data, vec![1, 2, 3, 4]);
     }
@@ -151,7 +151,7 @@ mod tests {
     fn test_chunk_roundtrip() {
         let original = new_binary_chunk(100, vec![10, 20, 30]);
         let bytes = chunk_to_bytes(&original);
-        let restored = chunk_from_bytes(&bytes).unwrap();
+        let restored = chunk_from_bytes(&bytes).expect("should succeed");
         assert_eq!(original, restored);
     }
 

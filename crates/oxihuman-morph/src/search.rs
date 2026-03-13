@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Lightweight search index over morph target names.
 //!
@@ -264,8 +264,8 @@ mod tests {
         let index = TargetIndex::from_names(&sample_names());
         let sorted = index.sorted_by_name();
         assert!(!sorted.is_empty());
-        let first = sorted.first().unwrap().name.as_str();
-        let last = sorted.last().unwrap().name.as_str();
+        let first = sorted.first().expect("should succeed").name.as_str();
+        let last = sorted.last().expect("should succeed").name.as_str();
         assert!(
             first <= last,
             "first ({first}) should come before last ({last}) alphabetically"

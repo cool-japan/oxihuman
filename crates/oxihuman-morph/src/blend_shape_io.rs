@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Import and export blend shapes in JSON, OBJ-delta, and CSV formats.
 
@@ -362,7 +362,7 @@ mod tests {
     fn test_json_roundtrip() {
         let lib = sample_lib();
         let json = export_blend_shapes_json(&lib);
-        let imported = import_blend_shapes_json(&json).unwrap();
+        let imported = import_blend_shapes_json(&json).expect("should succeed");
         assert_eq!(imported.shapes.len(), 1);
         assert_eq!(imported.shapes[0].name, "smile");
         assert_eq!(imported.shapes[0].deltas.len(), 2);
@@ -382,7 +382,7 @@ mod tests {
     fn test_json_import_name_deltas() {
         let json =
             r#"{"version":1,"vertex_count":1,"shapes":[{"name":"brow","deltas":[[0.5,0.0,0.0]]}]}"#;
-        let lib = import_blend_shapes_json(json).unwrap();
+        let lib = import_blend_shapes_json(json).expect("should succeed");
         assert_eq!(lib.shapes[0].name, "brow");
         assert!((lib.shapes[0].deltas[0][0] - 0.5).abs() < 1e-5);
     }
@@ -410,7 +410,7 @@ mod tests {
             vertex_count: 2,
         };
         let obj = export_blend_shape_obj_delta(&entry, &base);
-        let imported = import_blend_shape_obj_delta(&obj, &base).unwrap();
+        let imported = import_blend_shape_obj_delta(&obj, &base).expect("should succeed");
         for (a, b) in entry.deltas.iter().zip(imported.deltas.iter()) {
             assert!((a[0] - b[0]).abs() < 1e-4);
             assert!((a[1] - b[1]).abs() < 1e-4);
@@ -431,7 +431,7 @@ mod tests {
     fn test_csv_roundtrip() {
         let lib = sample_lib();
         let csv = export_blend_shapes_csv(&lib);
-        let imported = import_blend_shapes_csv(&csv, 2).unwrap();
+        let imported = import_blend_shapes_csv(&csv, 2).expect("should succeed");
         assert_eq!(imported.shapes.len(), 1);
         assert_eq!(imported.shapes[0].name, "smile");
         assert!((imported.shapes[0].deltas[0][0] - 0.1).abs() < 1e-4);
@@ -492,7 +492,7 @@ mod tests {
                 vertex_count: 2,
             }],
         };
-        let merged = merge_blend_shape_libraries(a, b).unwrap();
+        let merged = merge_blend_shape_libraries(a, b).expect("should succeed");
         assert_eq!(merged.shapes.len(), 2);
     }
 
@@ -517,7 +517,7 @@ mod tests {
             shapes: vec![],
         };
         let json = export_blend_shapes_json(&lib);
-        let imported = import_blend_shapes_json(&json).unwrap();
+        let imported = import_blend_shapes_json(&json).expect("should succeed");
         assert_eq!(imported.shapes.len(), 0);
     }
 
@@ -534,7 +534,7 @@ mod tests {
             }],
         };
         let json = export_blend_shapes_json(&lib);
-        let imported = import_blend_shapes_json(&json).unwrap();
+        let imported = import_blend_shapes_json(&json).expect("should succeed");
         let d = &imported.shapes[0].deltas[0];
         assert!((d[0] - 1.5).abs() < 1e-4);
         assert!((d[1] - (-2.5)).abs() < 1e-4);
@@ -546,7 +546,7 @@ mod tests {
     fn test_json_vertex_count_field() {
         let lib = sample_lib();
         let json = export_blend_shapes_json(&lib);
-        let imported = import_blend_shapes_json(&json).unwrap();
+        let imported = import_blend_shapes_json(&json).expect("should succeed");
         assert_eq!(imported.base_vertex_count, 2);
     }
 }

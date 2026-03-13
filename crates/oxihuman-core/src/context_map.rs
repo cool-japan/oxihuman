@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A string-keyed context map for passing heterogeneous values through pipelines.
@@ -142,7 +142,9 @@ mod tests {
     fn set_get_float() {
         let mut m = ContextMap::new();
         m.set_float("ratio", std::f32::consts::PI);
-        assert!((m.get_float("ratio").unwrap() - std::f32::consts::PI).abs() < 1e-6);
+        assert!(
+            (m.get_float("ratio").expect("should succeed") - std::f32::consts::PI).abs() < 1e-6
+        );
     }
 
     #[test]

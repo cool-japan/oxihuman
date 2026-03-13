@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Convert mesh coordinates between Y-up and Z-up conventions.
@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn test_bounds_zup_some() {
         let pts = vec![[0.0, 0.0, 0.0], [1.0, 2.0, 3.0]];
-        let (mn, mx) = bounds_zup(&pts).unwrap();
+        let (mn, mx) = bounds_zup(&pts).expect("should succeed");
         assert!((mx[0] - 1.0).abs() < 1e-6);
         assert!((mx[2] - 3.0).abs() < 1e-6);
         let _ = mn;

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! FFT-based frequency analysis via direct DFT computation.
@@ -158,7 +158,7 @@ mod tests {
         let sr = 1000.0f32;
         let samples = sine_wave(10.0, sr, 256);
         let fa = new_frequency_analyzer(sr);
-        let dom = fa.dominant_frequency(&samples).unwrap();
+        let dom = fa.dominant_frequency(&samples).expect("should succeed");
         assert!((dom - 10.0).abs() < 5.0, "dom={dom}");
     }
 

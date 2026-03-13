@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 //! Pose library for storing named morph poses.
 
@@ -96,7 +96,7 @@ mod tests {
         let mut lib = new_pose_library();
         pl_add_pose(&mut lib, "neutral", vec![0.0]);
         pl_add_pose(&mut lib, "smile", vec![1.0]);
-        let v = pl_blend(&lib, "neutral", "smile", 0.5).unwrap();
+        let v = pl_blend(&lib, "neutral", "smile", 0.5).expect("should succeed");
         assert!((v[0] - 0.5).abs() < 1e-5);
     }
 

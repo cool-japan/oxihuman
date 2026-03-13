@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Processing context: key/value state bag for pipeline stages.
@@ -152,7 +152,7 @@ mod tests {
     fn set_and_get_float() {
         let mut ctx = new_proc_context();
         ctx.set_float("ratio", std::f64::consts::PI);
-        assert!(ctx.get_float("ratio").unwrap() > std::f64::consts::E);
+        assert!(ctx.get_float("ratio").expect("should succeed") > std::f64::consts::E);
     }
 
     #[test]

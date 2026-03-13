@@ -225,7 +225,7 @@ mod tests {
         let set = standard_facs_set();
         let au = get_au(&set, 12);
         assert!(au.is_some());
-        assert_eq!(au.unwrap().au_code, 12);
+        assert_eq!(au.expect("should succeed").au_code, 12);
     }
 
     #[test]
@@ -239,7 +239,7 @@ mod tests {
         let mut set = standard_facs_set();
         let result = set_au_intensity(&mut set, 12, 0.8);
         assert!(result);
-        let au = get_au(&set, 12).unwrap();
+        let au = get_au(&set, 12).expect("should succeed");
         assert!((au.intensity - 0.8).abs() < 1e-6);
     }
 
@@ -247,7 +247,7 @@ mod tests {
     fn test_set_au_intensity_clamps() {
         let mut set = standard_facs_set();
         set_au_intensity(&mut set, 1, 2.0);
-        assert!((get_au(&set, 1).unwrap().intensity - 1.0).abs() < 1e-6);
+        assert!((get_au(&set, 1).expect("should succeed").intensity - 1.0).abs() < 1e-6);
     }
 
     #[test]
@@ -264,7 +264,7 @@ mod tests {
         assert!(!result.is_empty());
         let au12 = result.iter().find(|(name, _)| name == "au_12");
         assert!(au12.is_some());
-        assert!((au12.unwrap().1 - 0.5).abs() < 1e-6);
+        assert!((au12.expect("should succeed").1 - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -308,7 +308,7 @@ mod tests {
         assert!((frame.time - 1.5).abs() < 1e-6);
         let au12_entry = frame.au_intensities.iter().find(|&&(code, _)| code == 12);
         assert!(au12_entry.is_some());
-        assert!((au12_entry.unwrap().1 - 0.7).abs() < 1e-6);
+        assert!((au12_entry.expect("should succeed").1 - 0.7).abs() < 1e-6);
     }
 
     #[test]
@@ -318,7 +318,7 @@ mod tests {
         let frame = au_frame_from_set(&set, 0.0);
         let mut set2 = standard_facs_set();
         apply_au_frame(&mut set2, &frame);
-        assert!((get_au(&set2, 12).unwrap().intensity - 0.7).abs() < 1e-6);
+        assert!((get_au(&set2, 12).expect("should succeed").intensity - 0.7).abs() < 1e-6);
     }
 
     #[test]
@@ -334,7 +334,7 @@ mod tests {
         let blended = blend_au_frames(&frame_a, &frame_b, 0.5);
         let au12 = blended.au_intensities.iter().find(|&&(code, _)| code == 12);
         assert!(au12.is_some());
-        assert!((au12.unwrap().1 - 0.5).abs() < 1e-6);
+        assert!((au12.expect("should succeed").1 - 0.5).abs() < 1e-6);
         assert!((blended.time - 0.5).abs() < 1e-6);
     }
 

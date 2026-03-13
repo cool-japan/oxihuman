@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
@@ -578,14 +578,14 @@ mod tests {
 
         let a = make_a();
         let b = make_b();
-        let avg = average_params(&[a.clone(), b.clone()]).unwrap();
+        let avg = average_params(&[a.clone(), b.clone()]).expect("should succeed");
         assert!((avg.height - 0.5).abs() < 1e-5);
         assert!((avg.weight - 0.5).abs() < 1e-5);
         assert!((avg.muscle - 0.5).abs() < 1e-5);
         assert!((avg.age - 0.5).abs() < 1e-5);
 
         // Single element → itself
-        let single = average_params(std::slice::from_ref(&a)).unwrap();
+        let single = average_params(std::slice::from_ref(&a)).expect("should succeed");
         assert!((single.height - a.height).abs() < 1e-5);
     }
 }

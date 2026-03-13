@@ -108,7 +108,7 @@ mod tests {
     fn test_caption_at() {
         let mut t = new_caption_track2("en");
         add_caption2(&mut t, 0, 1000, "Test");
-        let e = caption2_at(&t, 0).unwrap();
+        let e = caption2_at(&t, 0).expect("should succeed");
         assert_eq!(caption2_text(e), "Test");
     }
 

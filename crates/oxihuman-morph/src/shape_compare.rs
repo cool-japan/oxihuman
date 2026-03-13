@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use crate::params::ParamState;
 
@@ -447,7 +447,7 @@ mod tests {
     fn average_shape_of_two() {
         let a = p(0.0, 0.0, 0.0, 0.0);
         let b = p(1.0, 1.0, 1.0, 1.0);
-        let avg = average_shape(&[a, b]).unwrap();
+        let avg = average_shape(&[a, b]).expect("should succeed");
         assert!((avg.height - 0.5).abs() < 1e-5);
         assert!((avg.weight - 0.5).abs() < 1e-5);
     }

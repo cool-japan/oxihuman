@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Split a face by inserting a new edge between two of its vertices.
@@ -130,21 +130,21 @@ mod tests {
     #[test]
     fn split_increases_face_count() {
         let (pos, idx) = one_tri();
-        let res = split_face_by_edge_midpoint(&pos, &idx, 0, 1).unwrap();
+        let res = split_face_by_edge_midpoint(&pos, &idx, 0, 1).expect("should succeed");
         assert_eq!(res.new_indices.len() / 3, 2);
     }
 
     #[test]
     fn split_adds_one_vertex() {
         let (pos, idx) = one_tri();
-        let res = split_face_by_edge_midpoint(&pos, &idx, 0, 1).unwrap();
+        let res = split_face_by_edge_midpoint(&pos, &idx, 0, 1).expect("should succeed");
         assert_eq!(res.new_positions.len(), pos.len() + 1);
     }
 
     #[test]
     fn midpoint_inserted_index() {
         let (pos, idx) = one_tri();
-        let res = split_face_by_edge_midpoint(&pos, &idx, 0, 1).unwrap();
+        let res = split_face_by_edge_midpoint(&pos, &idx, 0, 1).expect("should succeed");
         assert_eq!(res.inserted_midpoint, Some(3));
     }
 

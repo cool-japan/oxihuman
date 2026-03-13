@@ -209,14 +209,14 @@ mod tests {
     #[test]
     fn test_contact_normal() {
         let r = sphere_vs_sphere([0.0; 3], 1.0, [1.5, 0.0, 0.0], 1.0);
-        let n = narrow_contact_normal(&r).unwrap();
+        let n = narrow_contact_normal(&r).expect("should succeed");
         assert!(n[0] > 0.0);
     }
 
     #[test]
     fn test_contact_depth() {
         let r = sphere_vs_sphere([0.0; 3], 1.0, [1.5, 0.0, 0.0], 1.0);
-        let d = narrow_contact_depth(&r).unwrap();
+        let d = narrow_contact_depth(&r).expect("should succeed");
         assert!(d > 0.0);
     }
 

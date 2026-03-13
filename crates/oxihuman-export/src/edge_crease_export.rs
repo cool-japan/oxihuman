@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0 / #![allow(dead_code)]
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0 / #![allow(dead_code)]
 
 /// Edge crease export for subdivision surface data.
 #[allow(dead_code)]
@@ -93,8 +93,8 @@ mod tests {
     fn test_get_sharpness() {
         let mut ec = EdgeCreaseExport::new();
         ec.add(0, 1, 3.0);
-        assert!((ec.get_sharpness(0, 1).unwrap() - 3.0).abs() < 1e-5);
-        assert!((ec.get_sharpness(1, 0).unwrap() - 3.0).abs() < 1e-5);
+        assert!((ec.get_sharpness(0, 1).expect("should succeed") - 3.0).abs() < 1e-5);
+        assert!((ec.get_sharpness(1, 0).expect("should succeed") - 3.0).abs() < 1e-5);
     }
 
     #[test]

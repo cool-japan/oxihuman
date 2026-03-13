@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Histogram with configurable bins, count, and normalize.
@@ -172,7 +172,7 @@ mod tests {
         /* mode_bin returns bin with highest count */
         let mut h = new_histogram(0.0, 4.0, 4);
         h.add_many(&[0.5, 0.5, 0.5, 1.5, 2.5]);
-        let mode = h.mode_bin().unwrap();
+        let mode = h.mode_bin().expect("should succeed");
         assert_eq!(mode.count, 3);
     }
 

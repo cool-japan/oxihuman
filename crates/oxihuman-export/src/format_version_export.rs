@@ -142,7 +142,7 @@ mod tests {
     fn test_version_roundtrip() {
         let v = new_format_version(255, 128, 64);
         let bytes = version_to_bytes(&v);
-        let restored = version_from_bytes(&bytes).unwrap();
+        let restored = version_from_bytes(&bytes).expect("should succeed");
         assert_eq!(v, restored);
     }
 }

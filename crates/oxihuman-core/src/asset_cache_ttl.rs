@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Reference-counted asset cache with LRU eviction policy.
 
@@ -219,7 +219,7 @@ mod tests {
         ttl_cache_insert(&mut c, "k", 10, 100);
         let hit = ttl_cache_touch(&mut c, "k", 200);
         assert!(hit);
-        let e = c.entries.iter().find(|e| e.key == "k").unwrap();
+        let e = c.entries.iter().find(|e| e.key == "k").expect("should succeed");
         assert_eq!(e.last_access, 200);
         assert_eq!(e.access_count, 1);
     }

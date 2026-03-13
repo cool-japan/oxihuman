@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Timer / alarm system for deferred and recurring events.
 
@@ -311,7 +311,7 @@ mod tests {
         let id = add_timer(&mut s, "r", TimerKind::OneShot, 1.0);
         tick_timers(&mut s, 0.8);
         reset_timer(&mut s, id);
-        assert!((timer_elapsed(&s, id).unwrap()).abs() < 1e-9);
+        assert!((timer_elapsed(&s, id).expect("should succeed")).abs() < 1e-9);
     }
 
     #[test]
@@ -327,10 +327,10 @@ mod tests {
         pause_timer(&mut s, id);
         tick_timers(&mut s, 0.9);
         // elapsed should still be 0 because paused
-        assert!((timer_elapsed(&s, id).unwrap()).abs() < 1e-9);
+        assert!((timer_elapsed(&s, id).expect("should succeed")).abs() < 1e-9);
         resume_timer(&mut s, id);
         tick_timers(&mut s, 0.5);
-        assert!(timer_elapsed(&s, id).unwrap() > 0.0);
+        assert!(timer_elapsed(&s, id).expect("should succeed") > 0.0);
     }
 
     #[test]
@@ -338,7 +338,7 @@ mod tests {
         let mut s = make_sys();
         let id = add_timer(&mut s, "rem", TimerKind::OneShot, 2.0);
         tick_timers(&mut s, 0.5);
-        let rem = timer_remaining(&s, id).unwrap();
+        let rem = timer_remaining(&s, id).expect("should succeed");
         assert!((rem - 1.5).abs() < 1e-9);
     }
 
@@ -347,7 +347,7 @@ mod tests {
         let mut s = make_sys();
         let id = add_timer(&mut s, "e", TimerKind::OneShot, 5.0);
         tick_timers(&mut s, 1.25);
-        assert!((timer_elapsed(&s, id).unwrap() - 1.25).abs() < 1e-9);
+        assert!((timer_elapsed(&s, id).expect("should succeed") - 1.25).abs() < 1e-9);
     }
 
     #[test]

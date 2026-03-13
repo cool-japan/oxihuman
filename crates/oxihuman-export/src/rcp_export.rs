@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! RCP (ReCap project) format stub export.
@@ -152,6 +152,6 @@ mod tests {
         add_rcp_scan(&mut e, "abc", 50);
         let found = find_rcp_scan(&e, "abc");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().point_count, 50);
+        assert_eq!(found.expect("should succeed").point_count, 50);
     }
 }

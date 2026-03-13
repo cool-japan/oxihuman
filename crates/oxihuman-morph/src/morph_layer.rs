@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -331,7 +331,7 @@ mod tests {
         stack.push(MorphLayer::new("layer2"));
         assert_eq!(stack.layer_count(), 2);
 
-        let popped = stack.pop().unwrap();
+        let popped = stack.pop().expect("should succeed");
         assert_eq!(popped.name, "layer2");
         assert_eq!(stack.layer_count(), 1);
     }
@@ -385,21 +385,21 @@ mod tests {
 
         // Move index 2 ("c") up to index 1
         stack.move_up(2);
-        assert_eq!(stack.get(1).unwrap().name, "c");
-        assert_eq!(stack.get(2).unwrap().name, "b");
+        assert_eq!(stack.get(1).expect("should succeed").name, "c");
+        assert_eq!(stack.get(2).expect("should succeed").name, "b");
 
         // Move index 1 ("c") down to index 2
         stack.move_down(1);
-        assert_eq!(stack.get(1).unwrap().name, "b");
-        assert_eq!(stack.get(2).unwrap().name, "c");
+        assert_eq!(stack.get(1).expect("should succeed").name, "b");
+        assert_eq!(stack.get(2).expect("should succeed").name, "c");
 
         // Move up at index 0 is a no-op
         stack.move_up(0);
-        assert_eq!(stack.get(0).unwrap().name, "a");
+        assert_eq!(stack.get(0).expect("should succeed").name, "a");
 
         // Move down at last index is a no-op
         stack.move_down(2);
-        assert_eq!(stack.get(2).unwrap().name, "c");
+        assert_eq!(stack.get(2).expect("should succeed").name, "c");
     }
 
     #[test]

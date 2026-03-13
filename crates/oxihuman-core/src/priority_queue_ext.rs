@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Extended priority queue with decrease-key via BinaryHeap + HashMap.
@@ -125,7 +125,7 @@ mod tests {
         /* insert then pop returns the entry */
         let mut pq = new_priority_queue_ext();
         pq.insert("a", 10);
-        let e = pq.pop_min().unwrap();
+        let e = pq.pop_min().expect("should succeed");
         assert_eq!(e.key, "a");
         assert_eq!(e.priority, 10);
     }
@@ -137,7 +137,7 @@ mod tests {
         pq.insert("c", 30);
         pq.insert("a", 10);
         pq.insert("b", 20);
-        let first = pq.pop_min().unwrap();
+        let first = pq.pop_min().expect("should succeed");
         assert_eq!(first.priority, 10);
     }
 
@@ -148,7 +148,7 @@ mod tests {
         pq.insert("a", 50);
         pq.insert("b", 20);
         pq.decrease_key("a", 5);
-        let first = pq.pop_min().unwrap();
+        let first = pq.pop_min().expect("should succeed");
         assert_eq!(first.key, "a");
         assert_eq!(first.priority, 5);
     }

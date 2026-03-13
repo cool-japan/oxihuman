@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Property-based tests for oxihuman-core: LZ77, Huffman, Base64, SHA-256.
 
@@ -50,7 +50,7 @@ proptest! {
         };
 
         // Encode
-        let (encoded_bytes, bit_count) = oxihuman_core::huffman_stub::huffman_encode(&data, &table).unwrap();
+        let (encoded_bytes, bit_count) = oxihuman_core::huffman_stub::huffman_encode(&data, &table).expect("should succeed");
 
         // Decode
         let decoded = oxihuman_core::huffman_stub::huffman_decode(
@@ -58,7 +58,7 @@ proptest! {
             bit_count,
             data.len(),
             &table,
-        ).unwrap();
+        ).expect("should succeed");
 
         prop_assert_eq!(&decoded, &data,
             "Huffman roundtrip failed for input of length {}", data.len());
@@ -75,7 +75,7 @@ proptest! {
     #[test]
     fn base64_roundtrip(data in proptest::collection::vec(any::<u8>(), 0..512)) {
         let encoded = oxihuman_core::base64_codec::base64_encode(&data);
-        let decoded = oxihuman_core::base64_codec::base64_decode(&encoded).unwrap();
+        let decoded = oxihuman_core::base64_codec::base64_decode(&encoded).expect("should succeed");
         prop_assert_eq!(&decoded, &data,
             "Base64 roundtrip failed for input of length {}", data.len());
     }

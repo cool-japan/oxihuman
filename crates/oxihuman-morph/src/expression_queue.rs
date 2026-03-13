@@ -94,7 +94,7 @@ mod tests {
     fn test_dequeue_expression() {
         let mut q = new_expression_queue();
         enqueue_expression(&mut q, "smile", 0.5, 1.0);
-        let e = dequeue_expression(&mut q).unwrap();
+        let e = dequeue_expression(&mut q).expect("should succeed");
         assert_eq!(e.name, "smile");
         assert!(queue_is_empty(&q));
     }
@@ -111,7 +111,7 @@ mod tests {
     fn test_peek_expression() {
         let mut q = new_expression_queue();
         enqueue_expression(&mut q, "first", 0.3, 1.0);
-        let p = peek_expression(&q).unwrap();
+        let p = peek_expression(&q).expect("should succeed");
         assert_eq!(p.name, "first");
         assert_eq!(queue_len(&q), 1);
     }
@@ -137,8 +137,8 @@ mod tests {
         let mut q = new_expression_queue();
         enqueue_expression(&mut q, "first", 0.1, 1.0);
         enqueue_expression(&mut q, "second", 0.2, 1.0);
-        assert_eq!(dequeue_expression(&mut q).unwrap().name, "first");
-        assert_eq!(dequeue_expression(&mut q).unwrap().name, "second");
+        assert_eq!(dequeue_expression(&mut q).expect("should succeed").name, "first");
+        assert_eq!(dequeue_expression(&mut q).expect("should succeed").name, "second");
     }
 
     #[test]
@@ -151,7 +151,7 @@ mod tests {
     fn test_weight_clamp() {
         let mut q = new_expression_queue();
         enqueue_expression(&mut q, "x", 5.0, 1.0);
-        let e = dequeue_expression(&mut q).unwrap();
+        let e = dequeue_expression(&mut q).expect("should succeed");
         assert!((e.weight - 1.0).abs() < 1e-6);
     }
 }

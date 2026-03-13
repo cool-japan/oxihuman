@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! GPU statistics collector — frame-level draw calls, triangles, bandwidth.
@@ -157,7 +157,7 @@ mod tests {
         gs_push_frame(&mut s, make_frame(2, 0, 0));
         gs_push_frame(&mut s, make_frame(3, 0, 0));
         assert_eq!(gs_frame_count(&s), 2);
-        assert_eq!(gs_last_frame(&s).unwrap().draw_calls, 3);
+        assert_eq!(gs_last_frame(&s).expect("should succeed").draw_calls, 3);
     }
 
     #[test]
@@ -206,6 +206,6 @@ mod tests {
         let mut s = new_gpu_stats(5);
         gs_push_frame(&mut s, make_frame(0, 0, 0));
         gs_push_frame(&mut s, make_frame(0, 0, 0));
-        assert_eq!(gs_last_frame(&s).unwrap().frame_index, 2);
+        assert_eq!(gs_last_frame(&s).expect("should succeed").frame_index, 2);
     }
 }

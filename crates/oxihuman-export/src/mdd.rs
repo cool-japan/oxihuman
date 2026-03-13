@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! MDD (Motion Displacement Data) binary point cache — LightWave format.
 //!
@@ -201,7 +201,7 @@ mod tests {
     #[test]
     fn roundtrip_positions() {
         let cache = two_frame_cache();
-        let back = read_mdd(&write_mdd(&cache)).unwrap();
+        let back = read_mdd(&write_mdd(&cache)).expect("should succeed");
         assert_eq!(back.frames[0], vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
         assert_eq!(back.frames[1], vec![[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]]);
     }
@@ -210,7 +210,7 @@ mod tests {
     #[test]
     fn roundtrip_metadata() {
         let cache = two_frame_cache();
-        let back = read_mdd(&write_mdd(&cache)).unwrap();
+        let back = read_mdd(&write_mdd(&cache)).expect("should succeed");
         assert_eq!(back.point_count, 2);
         assert_eq!(back.frames.len(), 2);
     }
@@ -220,7 +220,7 @@ mod tests {
     fn big_endian_frame_count() {
         let cache = two_frame_cache();
         let bytes = write_mdd(&cache);
-        let fc = i32::from_be_bytes(bytes[0..4].try_into().unwrap());
+        let fc = i32::from_be_bytes(bytes[0..4].try_into().expect("should succeed"));
         assert_eq!(fc, 2);
     }
 
@@ -229,7 +229,7 @@ mod tests {
     fn big_endian_point_count() {
         let cache = two_frame_cache();
         let bytes = write_mdd(&cache);
-        let pc = i32::from_be_bytes(bytes[4..8].try_into().unwrap());
+        let pc = i32::from_be_bytes(bytes[4..8].try_into().expect("should succeed"));
         assert_eq!(pc, 2);
     }
 
@@ -237,7 +237,7 @@ mod tests {
     #[test]
     fn roundtrip_times() {
         let cache = two_frame_cache();
-        let back = read_mdd(&write_mdd(&cache)).unwrap();
+        let back = read_mdd(&write_mdd(&cache)).expect("should succeed");
         assert!((back.times[0] - 0.0).abs() < 1e-6);
         assert!((back.times[1] - 1.0 / 24.0).abs() < 1e-5);
     }
@@ -297,7 +297,7 @@ mod tests {
     fn single_point_roundtrip() {
         let mut c = MddCache::new(1);
         c.add_frame(0.0, vec![[1.23, 4.56, 7.89]]);
-        let back = read_mdd(&write_mdd(&c)).unwrap();
+        let back = read_mdd(&write_mdd(&c)).expect("should succeed");
         let p = back.frames[0][0];
         assert!((p[0] - 1.23).abs() < 1e-5);
         assert!((p[1] - 4.56).abs() < 1e-5);

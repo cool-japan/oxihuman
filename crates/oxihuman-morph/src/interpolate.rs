@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use crate::params::ParamState;
 
@@ -270,7 +270,7 @@ mod tests {
         let mut track = MorphTrack::new("test");
         track.add_keyframe(Keyframe::new(1.0, default_params(0.3)));
         track.add_keyframe(Keyframe::new(2.0, default_params(0.7)));
-        let r = track.sample_linear(0.0).unwrap();
+        let r = track.sample_linear(0.0).expect("should succeed");
         assert!((r.height - 0.3).abs() < 1e-6);
     }
 
@@ -279,7 +279,7 @@ mod tests {
         let mut track = MorphTrack::new("test");
         track.add_keyframe(Keyframe::new(0.0, default_params(0.1)));
         track.add_keyframe(Keyframe::new(1.0, default_params(0.9)));
-        let r = track.sample_linear(5.0).unwrap();
+        let r = track.sample_linear(5.0).expect("should succeed");
         assert!((r.height - 0.9).abs() < 1e-6);
     }
 
@@ -288,7 +288,7 @@ mod tests {
         let mut track = MorphTrack::new("test");
         track.add_keyframe(Keyframe::new(0.0, default_params(0.0)));
         track.add_keyframe(Keyframe::new(1.0, default_params(1.0)));
-        let r = track.sample_linear(0.5).unwrap();
+        let r = track.sample_linear(0.5).expect("should succeed");
         assert!((r.height - 0.5).abs() < 1e-6);
     }
 

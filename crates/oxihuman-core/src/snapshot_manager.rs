@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 pub struct SnapshotManager {
@@ -71,7 +71,7 @@ mod tests {
         /* get retrieves correct snapshot */
         let mut m = new_snapshot_manager(5);
         snapshot_save(&mut m, &[3.0, 4.0]);
-        let s = snapshot_get(&m, 0).unwrap();
+        let s = snapshot_get(&m, 0).expect("should succeed");
         assert_eq!(s, &[3.0f32, 4.0]);
     }
 
@@ -81,7 +81,7 @@ mod tests {
         let mut m = new_snapshot_manager(5);
         snapshot_save(&mut m, &[1.0]);
         snapshot_save(&mut m, &[9.0]);
-        assert_eq!(snapshot_latest(&m).unwrap(), &[9.0f32]);
+        assert_eq!(snapshot_latest(&m).expect("should succeed"), &[9.0f32]);
     }
 
     #[test]
@@ -92,7 +92,7 @@ mod tests {
         snapshot_save(&mut m, &[2.0]);
         snapshot_save(&mut m, &[3.0]);
         assert_eq!(snapshot_count(&m), 2);
-        assert_eq!(snapshot_get(&m, 0).unwrap(), &[2.0f32]);
+        assert_eq!(snapshot_get(&m, 0).expect("should succeed"), &[2.0f32]);
     }
 
     #[test]

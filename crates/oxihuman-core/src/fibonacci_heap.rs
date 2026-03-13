@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Fibonacci heap stub — min-heap with amortized O(1) insert and decrease-key.
@@ -130,7 +130,7 @@ mod tests {
         let mut h: FibonacciHeap<u32, &str> = FibonacciHeap::new();
         h.insert(3, "three");
         h.insert(1, "one");
-        let (k, _) = h.peek_min().unwrap();
+        let (k, _) = h.peek_min().expect("should succeed");
         assert_eq!(*k, 1 /* min should be 1 */);
     }
 
@@ -139,7 +139,7 @@ mod tests {
         let mut h: FibonacciHeap<u32, u32> = FibonacciHeap::new();
         h.insert(5, 50);
         h.insert(2, 20);
-        let (k, v) = h.extract_min().unwrap();
+        let (k, v) = h.extract_min().expect("should succeed");
         assert_eq!(k, 2 /* extracted min key */);
         assert_eq!(v, 20 /* extracted min val */);
     }
@@ -164,7 +164,7 @@ mod tests {
         for v in [4u32, 1, 3, 2, 5] {
             h.insert(v, v);
         }
-        let first = h.extract_min().unwrap().0;
+        let first = h.extract_min().expect("should succeed").0;
         assert_eq!(first, 1 /* smallest extracted first */);
     }
 
@@ -175,7 +175,7 @@ mod tests {
         a.insert(5, 5);
         b.insert(3, 3);
         a.merge(b);
-        let (k, _) = a.peek_min().unwrap();
+        let (k, _) = a.peek_min().expect("should succeed");
         assert_eq!(*k, 3 /* min of merged heap */);
     }
 

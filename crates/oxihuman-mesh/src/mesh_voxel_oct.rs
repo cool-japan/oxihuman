@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Octree-based voxel structure for a mesh.
@@ -169,7 +169,7 @@ mod tests {
     #[test]
     fn test_compute_aabb() {
         let pts = four_points();
-        let aabb = compute_aabb_vo(&pts).unwrap();
+        let aabb = compute_aabb_vo(&pts).expect("should succeed");
         assert!((aabb.max[0] - 1.0).abs() < 1e-6);
     }
 

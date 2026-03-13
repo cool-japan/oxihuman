@@ -166,7 +166,7 @@ mod tests {
     fn test_joint_count() {
         let mut store = new_pose_snapshot_store(5);
         make_snapshot(&mut store, "test");
-        let snap = pss_get(&store, "test").unwrap();
+        let snap = pss_get(&store, "test").expect("should succeed");
         assert_eq!(pss_joint_count(snap), 1);
     }
 

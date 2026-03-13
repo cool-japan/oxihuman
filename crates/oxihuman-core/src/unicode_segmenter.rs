@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Unicode grapheme cluster segmenter stub.
@@ -129,7 +129,7 @@ mod tests {
     #[test]
     fn test_nth_grapheme() {
         let g = nth_grapheme("abc", 1);
-        assert_eq!(g.unwrap().text, "b");
+        assert_eq!(g.expect("should succeed").text, "b");
     }
 
     #[test]

@@ -220,7 +220,7 @@ mod tests {
         register_plugin(&mut reg, make_meta("bar", vec![]));
         let p = get_plugin(&reg, "bar");
         assert!(p.is_some());
-        assert_eq!(p.unwrap().metadata.id, "bar");
+        assert_eq!(p.expect("should succeed").metadata.id, "bar");
     }
 
     #[test]
@@ -234,7 +234,10 @@ mod tests {
         let mut reg = new_registry();
         register_plugin(&mut reg, make_meta("baz", vec![]));
         assert!(activate_plugin(&mut reg, "baz"));
-        assert_eq!(get_plugin(&reg, "baz").unwrap().state, PluginState::Active);
+        assert_eq!(
+            get_plugin(&reg, "baz").expect("should succeed").state,
+            PluginState::Active
+        );
     }
 
     #[test]
@@ -249,7 +252,10 @@ mod tests {
         register_plugin(&mut reg, make_meta("qux", vec![]));
         activate_plugin(&mut reg, "qux");
         assert!(deactivate_plugin(&mut reg, "qux"));
-        assert_eq!(get_plugin(&reg, "qux").unwrap().state, PluginState::Loaded);
+        assert_eq!(
+            get_plugin(&reg, "qux").expect("should succeed").state,
+            PluginState::Loaded
+        );
     }
 
     #[test]
@@ -268,7 +274,7 @@ mod tests {
         let mut reg = new_registry();
         register_plugin(&mut reg, make_meta("err_plugin", vec![]));
         set_plugin_error(&mut reg, "err_plugin", "init failed");
-        let p = get_plugin(&reg, "err_plugin").unwrap();
+        let p = get_plugin(&reg, "err_plugin").expect("should succeed");
         assert!(matches!(&p.state, PluginState::Error(msg) if msg == "init failed"));
     }
 
@@ -286,7 +292,7 @@ mod tests {
                 dependencies: vec![],
             },
         );
-        let p = get_plugin(&reg, "ver").unwrap();
+        let p = get_plugin(&reg, "ver").expect("should succeed");
         assert_eq!(plugin_version_string(p), "2.3.4");
     }
 
@@ -313,9 +319,18 @@ mod tests {
         register_plugin(&mut reg, make_meta("top", vec!["mid"]));
         let order = dependency_order(&reg);
         assert_eq!(order.len(), 3);
-        let base_pos = order.iter().position(|&s| s == "base").unwrap();
-        let mid_pos = order.iter().position(|&s| s == "mid").unwrap();
-        let top_pos = order.iter().position(|&s| s == "top").unwrap();
+        let base_pos = order
+            .iter()
+            .position(|&s| s == "base")
+            .expect("should succeed");
+        let mid_pos = order
+            .iter()
+            .position(|&s| s == "mid")
+            .expect("should succeed");
+        let top_pos = order
+            .iter()
+            .position(|&s| s == "top")
+            .expect("should succeed");
         assert!(base_pos < mid_pos);
         assert!(mid_pos < top_pos);
     }

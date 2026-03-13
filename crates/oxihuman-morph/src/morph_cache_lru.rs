@@ -137,7 +137,7 @@ mod tests {
         cache_put(&mut c, "smile", vec![0.5, 0.8]);
         let result = cache_get(&mut c, "smile");
         assert!(result.is_some());
-        assert!((result.unwrap()[0] - 0.5).abs() < f32::EPSILON);
+        assert!((result.expect("should succeed")[0] - 0.5).abs() < f32::EPSILON);
     }
 
     #[test]

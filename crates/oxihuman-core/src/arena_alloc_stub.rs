@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Arena/bump allocator stub with alignment support.
 
@@ -107,8 +107,8 @@ mod tests {
     #[test]
     fn test_sequential_allocs() {
         let mut a = new_arena_stub(64);
-        let o1 = arena_alloc_stub(&mut a, 8, 1).unwrap();
-        let o2 = arena_alloc_stub(&mut a, 8, 1).unwrap();
+        let o1 = arena_alloc_stub(&mut a, 8, 1).expect("should succeed");
+        let o2 = arena_alloc_stub(&mut a, 8, 1).expect("should succeed");
         assert!(o2 > o1);
     }
 

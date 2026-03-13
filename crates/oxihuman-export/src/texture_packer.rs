@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Texture atlas packing utilities.
 
@@ -403,7 +403,7 @@ mod tests {
         let result = pack_single(&inp, &cfg);
         let found = find_placement(&result, 42);
         assert!(found.is_some());
-        assert_eq!(found.unwrap().id, 42);
+        assert_eq!(found.expect("should succeed").id, 42);
     }
 
     #[test]

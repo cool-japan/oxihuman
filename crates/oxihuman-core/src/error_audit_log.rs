@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A single audit event.
@@ -88,7 +88,7 @@ mod tests {
         let mut log = new_audit_event_log();
         audit_event_record(&mut log, 100, "bob", "create");
         audit_event_record(&mut log, 200, "alice", "delete");
-        let last = audit_event_last(&log).unwrap();
+        let last = audit_event_last(&log).expect("should succeed");
         assert_eq!(last.actor, "alice");
         assert_eq!(last.action, "delete");
     }

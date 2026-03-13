@@ -167,7 +167,7 @@ mod tests {
     #[test]
     fn test_get_entry() {
         let m = make_map();
-        let e = emotion_map_get(&m, "joy").unwrap();
+        let e = emotion_map_get(&m, "joy").expect("should succeed");
         assert!((e.params[0] - 1.0).abs() < 1e-6);
     }
 
@@ -176,7 +176,7 @@ mod tests {
         let mut m = make_map();
         emotion_map_add(&mut m, "joy", vec![0.5; 8], 0.5);
         assert_eq!(emotion_map_count(&m), 3);
-        let e = emotion_map_get(&m, "joy").unwrap();
+        let e = emotion_map_get(&m, "joy").expect("should succeed");
         assert!((e.params[0] - 0.5).abs() < 1e-6);
     }
 
@@ -223,7 +223,7 @@ mod tests {
     fn test_intensity_clamped() {
         let mut m = new_emotion_map(default_emotion_map_config());
         emotion_map_add(&mut m, "test", vec![0.0; 8], 2.0);
-        let e = emotion_map_get(&m, "test").unwrap();
+        let e = emotion_map_get(&m, "test").expect("should succeed");
         assert!(e.intensity <= 1.0);
     }
 }

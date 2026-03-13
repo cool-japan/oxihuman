@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Motion capture marker sensor stub.
@@ -182,7 +182,7 @@ mod tests {
             time: 0.0,
             markers: vec![make_marker("A", [1.0, 2.0, 3.0])],
         };
-        let c = marker_centroid(&frame).unwrap();
+        let c = marker_centroid(&frame).expect("should succeed");
         assert!((c[0] - 1.0).abs() < 1e-6);
     }
 
@@ -238,7 +238,7 @@ mod tests {
             time: 0.5,
             markers: vec![],
         });
-        assert_eq!(s.latest().unwrap().frame_index, 5);
+        assert_eq!(s.latest().expect("should succeed").frame_index, 5);
     }
 
     #[test]

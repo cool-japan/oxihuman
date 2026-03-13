@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Manual reference-counted resource table.
@@ -113,7 +113,7 @@ mod tests {
     fn insert_and_get() {
         let mut rc: RefCounted<i32> = new_ref_counted();
         assert!(rc.insert("res", 42));
-        assert_eq!(*rc.get("res").unwrap(), 42);
+        assert_eq!(*rc.get("res").expect("should succeed"), 42);
     }
 
     #[test]

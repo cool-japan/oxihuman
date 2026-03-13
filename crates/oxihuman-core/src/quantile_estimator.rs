@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! P² quantile estimator (Jain & Chlamtac algorithm).
@@ -173,35 +173,35 @@ mod tests {
         for i in 0..=100 {
             q.add(i as f64);
         }
-        let est = q.estimate().unwrap();
+        let est = q.estimate().expect("should succeed");
         assert!((est - 50.0).abs() < 5.0 /* median of 0..100 ≈ 50 */,);
     }
 
     #[test]
     fn test_quantile_batch_median() {
         let data: Vec<f64> = (1..=11).map(|x| x as f64).collect();
-        let m = quantile_batch(&data, 0.5).unwrap();
+        let m = quantile_batch(&data, 0.5).expect("should succeed");
         assert!((m - 6.0).abs() < 1e-10 /* median of 1..11 = 6 */,);
     }
 
     #[test]
     fn test_quantile_batch_min() {
         let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-        let m = quantile_batch(&data, 0.0).unwrap();
+        let m = quantile_batch(&data, 0.0).expect("should succeed");
         assert!((m - 1.0).abs() < 1e-10);
     }
 
     #[test]
     fn test_quantile_batch_max() {
         let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-        let m = quantile_batch(&data, 1.0).unwrap();
+        let m = quantile_batch(&data, 1.0).expect("should succeed");
         assert!((m - 5.0).abs() < 1e-10);
     }
 
     #[test]
     fn test_median_batch() {
         let data = vec![3.0, 1.0, 4.0, 1.0, 5.0, 9.0];
-        let m = median_batch(&data).unwrap();
+        let m = median_batch(&data).expect("should succeed");
         assert!(m > 0.0 /* median is positive */,);
     }
 

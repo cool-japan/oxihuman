@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use crate::mesh::MeshBuffers;
 
@@ -512,7 +512,7 @@ mod tests {
         let dir = [0.0f32, 0.0, -1.0];
         let t = ray_triangle_intersect(origin, dir, v0, v1, v2);
         assert!(t.is_some(), "expected hit, got None");
-        let t = t.unwrap();
+        let t = t.expect("should succeed");
         assert!((t - 2.0).abs() < 1e-5, "expected t≈2.0, got {t}");
     }
 

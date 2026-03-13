@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! An ordered map that preserves insertion order and supports sequence access.
@@ -154,7 +154,7 @@ mod tests {
     fn get_by_index() {
         let mut m: SequenceMap<i32> = new_sequence_map();
         m.insert("z", 7);
-        let e = m.get_by_index(0).unwrap();
+        let e = m.get_by_index(0).expect("should succeed");
         assert_eq!(e.key, "z");
     }
 

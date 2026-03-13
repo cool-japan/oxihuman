@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Sentence boundary detector stub.
@@ -205,7 +205,7 @@ mod tests {
                 end: 23,
             },
         ];
-        let longest = longest_sentence(&sents).unwrap();
+        let longest = longest_sentence(&sents).expect("should succeed");
         assert_eq!(longest.text, "Hello world friend.");
     }
 

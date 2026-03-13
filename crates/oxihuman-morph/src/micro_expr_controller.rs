@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Micro-expression timing controller: FACS-based brief involuntary expressions.
 
@@ -360,7 +360,7 @@ mod tests {
     #[test]
     fn test_cancel_micro_expr() {
         let mut ctrl = make_ctrl();
-        let id = trigger_micro_expr(&mut ctrl, MicroExprType::Disgust, 300.0, 0.5).unwrap();
+        let id = trigger_micro_expr(&mut ctrl, MicroExprType::Disgust, 300.0, 0.5).expect("should succeed");
         assert!(cancel_micro_expr(&mut ctrl, id));
         update_micro_expressions(&mut ctrl, 1.0);
         assert_eq!(active_micro_expr_count(&ctrl), 0);
@@ -375,7 +375,7 @@ mod tests {
     #[test]
     fn test_micro_expr_intensity_some() {
         let mut ctrl = make_ctrl();
-        let id = trigger_micro_expr(&mut ctrl, MicroExprType::Contempt, 200.0, 1.0).unwrap();
+        let id = trigger_micro_expr(&mut ctrl, MicroExprType::Contempt, 200.0, 1.0).expect("should succeed");
         update_micro_expressions(&mut ctrl, 50.0);
         assert!(micro_expr_intensity(&ctrl, id).is_some());
     }
@@ -415,8 +415,8 @@ mod tests {
     #[test]
     fn test_micro_expr_to_json() {
         let mut ctrl = make_ctrl();
-        let id = trigger_micro_expr(&mut ctrl, MicroExprType::Happiness, 100.0, 0.9).unwrap();
-        let expr = ctrl.active.iter().find(|e| e.id == id).unwrap();
+        let id = trigger_micro_expr(&mut ctrl, MicroExprType::Happiness, 100.0, 0.9).expect("should succeed");
+        let expr = ctrl.active.iter().find(|e| e.id == id).expect("should succeed");
         let json = micro_expr_to_json(expr);
         assert!(json.contains("happiness"));
     }

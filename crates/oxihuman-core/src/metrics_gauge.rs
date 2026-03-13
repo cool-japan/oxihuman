@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Metrics gauge with min/max tracking.
@@ -139,7 +139,7 @@ mod tests {
         gauge_set(&mut g, "x", 1.0);
         gauge_set(&mut g, "x", 2.0);
         gauge_set(&mut g, "x", 3.0);
-        assert_eq!(g.get("x").unwrap().sample_count, 3);
+        assert_eq!(g.get("x").expect("should succeed").sample_count, 3);
     }
 
     #[test]

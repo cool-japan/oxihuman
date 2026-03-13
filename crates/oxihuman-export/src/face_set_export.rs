@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export face sets (named groups of faces for material assignment).
@@ -76,7 +76,7 @@ mod tests {
     #[test] fn test_total() { assert_eq!(fse_total_faces(&sample()), 6); }
     #[test] fn test_find() { assert!(fse_find(&sample(), "body").is_some()); }
     #[test] fn test_find_missing() { assert!(fse_find(&sample(), "nope").is_none()); }
-    #[test] fn test_largest() { let s = sample(); let l = fse_largest_set(&s).unwrap(); assert_eq!(l.name, "body"); }
+    #[test] fn test_largest() { let s = sample(); let l = fse_largest_set(&s).expect("should succeed"); assert_eq!(l.name, "body"); }
     #[test] fn test_validate() { assert!(fse_validate(&sample())); }
     #[test] fn test_names() { let s = sample(); let n = fse_names(&s); assert_eq!(n.len(), 2); }
     #[test] fn test_to_json() { assert!(fse_to_json(&sample()).contains("body")); }

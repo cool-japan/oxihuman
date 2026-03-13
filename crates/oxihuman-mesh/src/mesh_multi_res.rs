@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Multi-resolution mesh representation.
@@ -191,7 +191,7 @@ mod tests {
         let (pos, idx) = quad_mesh();
         let cfg = default_multi_res_config();
         let mr = build_multi_res(&pos, &idx, &cfg);
-        let finest = finest_level(&mr).unwrap();
+        let finest = finest_level(&mr).expect("should succeed");
         assert_eq!(finest.indices.len() / 3, 2);
     }
 
@@ -203,8 +203,8 @@ mod tests {
             reduction_ratio: 0.5,
         };
         let mr = build_multi_res(&pos, &idx, &cfg);
-        let finest_fc = finest_level(&mr).unwrap().indices.len() / 3;
-        let coarsest_fc = coarsest_level(&mr).unwrap().indices.len() / 3;
+        let finest_fc = finest_level(&mr).expect("should succeed").indices.len() / 3;
+        let coarsest_fc = coarsest_level(&mr).expect("should succeed").indices.len() / 3;
         assert!(coarsest_fc <= finest_fc);
     }
 

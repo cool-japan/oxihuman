@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Measurement-driven parameter fitting.
 //!
@@ -332,8 +332,8 @@ mod tests {
         let base_path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
         if std::path::Path::new(base_path).exists() {
             use oxihuman_core::parser::obj::parse_obj;
-            let src = std::fs::read_to_string(base_path).unwrap();
-            let mesh = parse_obj(&src).unwrap();
+            let src = std::fs::read_to_string(base_path).expect("should succeed");
+            let mesh = parse_obj(&src).expect("should succeed");
             HumanEngine::new(mesh, Policy::new(PolicyProfile::Standard))
         } else {
             make_engine_with_tall_mesh()

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 #![allow(clippy::needless_range_loop)]
 
@@ -127,7 +127,7 @@ mod tests {
         /* solve 2x2 system: [[2,1],[1,3]] x = [5,10] -> x=[1,3] */
         let a = vec![vec![2.0, 1.0], vec![1.0, 3.0]];
         let b = vec![5.0, 10.0];
-        let x = gaussian_solve(&a, &b).unwrap();
+        let x = gaussian_solve(&a, &b).expect("should succeed");
         assert!((x[0] - 1.0).abs() < 1e-9);
         assert!((x[1] - 3.0).abs() < 1e-9);
     }
@@ -137,7 +137,7 @@ mod tests {
         /* Ix = b has solution x = b */
         let a = identity_matrix(3);
         let b = vec![1.0, 2.0, 3.0];
-        let x = gaussian_solve(&a, &b).unwrap();
+        let x = gaussian_solve(&a, &b).expect("should succeed");
         for i in 0..3 {
             assert!((x[i] - b[i]).abs() < 1e-9);
         }
@@ -156,7 +156,7 @@ mod tests {
         /* residual of exact solution is near 0 */
         let a = vec![vec![2.0, 1.0], vec![1.0, 3.0]];
         let b = vec![5.0, 10.0];
-        let x = gaussian_solve(&a, &b).unwrap();
+        let x = gaussian_solve(&a, &b).expect("should succeed");
         let r = residual_norm(&a, &b, &x);
         assert!(r < 1e-9, "r={r}");
     }
@@ -175,7 +175,7 @@ mod tests {
     fn test_determinant_2x2() {
         /* determinant of [[1,2],[3,4]] = -2 */
         let a = vec![vec![1.0, 2.0], vec![3.0, 4.0]];
-        let d = determinant(&a).unwrap();
+        let d = determinant(&a).expect("should succeed");
         assert!((d - (-2.0)).abs() < 1e-9, "d={d}");
     }
 
@@ -183,7 +183,7 @@ mod tests {
     fn test_determinant_singular() {
         /* singular matrix has det = 0 */
         let a = vec![vec![1.0, 2.0], vec![2.0, 4.0]];
-        let d = determinant(&a).unwrap();
+        let d = determinant(&a).expect("should succeed");
         assert!(d.abs() < 1e-9, "d={d}");
     }
 
@@ -196,7 +196,7 @@ mod tests {
             vec![0.0, 0.0, 3.0],
         ];
         let b = vec![1.0, 4.0, 9.0];
-        let x = gaussian_solve(&a, &b).unwrap();
+        let x = gaussian_solve(&a, &b).expect("should succeed");
         assert!((x[0] - 1.0).abs() < 1e-9);
         assert!((x[1] - 2.0).abs() < 1e-9);
         assert!((x[2] - 3.0).abs() < 1e-9);

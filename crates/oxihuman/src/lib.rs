@@ -21,13 +21,13 @@
 //! | [`export`] | `oxihuman-export` | Export pipeline: glTF, OBJ, STL, COLLADA, USD, 50+ formats |
 //! | [`physics`] | `oxihuman-physics` | Physics: collision proxies, cloth, soft body, ragdoll |
 //! | [`viewer`] | `oxihuman-viewer` | Real-time rendering: scene graph, camera, materials (feature-gated) |
-//! | [`wasm`] | `oxihuman-wasm` | WebAssembly bindings for browser deployment (feature-gated) |
+//! | `wasm` | `oxihuman-wasm` | WebAssembly bindings for browser deployment (feature-gated) |
 
 // ── Core sub-crates (always available) ──────────────────────────────
 pub use oxihuman_core as core;
-pub use oxihuman_morph as morph;
-pub use oxihuman_mesh as mesh;
 pub use oxihuman_export as export;
+pub use oxihuman_mesh as mesh;
+pub use oxihuman_morph as morph;
 pub use oxihuman_physics as physics;
 
 // ── Optional sub-crates (feature-gated) ─────────────────────────────
@@ -44,9 +44,7 @@ pub use oxihuman_wasm as wasm;
 /// ```
 pub mod prelude {
     // Core infrastructure
-    pub use oxihuman_core::{
-        AssetManifest, EventBus, EventKind, Policy, PolicyProfile,
-    };
+    pub use oxihuman_core::{AssetManifest, EventBus, EventKind, Policy, PolicyProfile};
 
     // Morphology engine
     pub use oxihuman_morph::{HumanEngine, ParamState};

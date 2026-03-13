@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Dynamic property bag: key → typed value.
 
@@ -101,7 +101,7 @@ mod tests {
         let mut bag = new_property_bag();
         let expected = std::f64::consts::PI;
         set_float(&mut bag, "ratio", expected);
-        let v = get_float(&bag, "ratio").unwrap();
+        let v = get_float(&bag, "ratio").expect("should succeed");
         assert!((v - expected).abs() < 1e-9);
     }
 

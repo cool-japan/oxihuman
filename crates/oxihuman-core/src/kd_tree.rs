@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! k-d tree for nearest neighbor search in 2D and 3D.
@@ -168,7 +168,7 @@ mod tests {
             KdPoint3::new(5.0, 5.0, 5.0, 2),
         ];
         let tree = KdTree3::build(pts);
-        let (p, d) = tree.nearest(&[0.1, 0.0, 0.0]).unwrap();
+        let (p, d) = tree.nearest(&[0.1, 0.0, 0.0]).expect("should succeed");
         assert_eq!(p.id, 0);
         assert!(d < 0.2);
     }
@@ -177,7 +177,7 @@ mod tests {
     fn test_nearest_single_point() {
         let pts = vec![KdPoint3::new(3.0, 4.0, 0.0, 0)];
         let tree = KdTree3::build(pts);
-        let (p, d) = tree.nearest(&[3.0, 4.0, 0.0]).unwrap();
+        let (p, d) = tree.nearest(&[3.0, 4.0, 0.0]).expect("should succeed");
         assert_eq!(p.id, 0);
         assert!(d < 1e-5);
     }
@@ -211,7 +211,7 @@ mod tests {
     fn test_new_kd_tree_2d() {
         let pos = vec![[0.0f32, 0.0], [1.0, 1.0], [2.0, 2.0]];
         let tree = new_kd_tree_2d(&pos);
-        let (p, _) = tree.nearest(&[0.9, 0.9, 0.0]).unwrap();
+        let (p, _) = tree.nearest(&[0.9, 0.9, 0.0]).expect("should succeed");
         assert_eq!(p.id, 1);
     }
 
@@ -230,7 +230,7 @@ mod tests {
             .map(|i| KdPoint3::new(i as f32, 0.0, 0.0, i))
             .collect();
         let tree = KdTree3::build(pts);
-        let (p, d) = tree.nearest(&[49.5, 0.0, 0.0]).unwrap();
+        let (p, d) = tree.nearest(&[49.5, 0.0, 0.0]).expect("should succeed");
         assert!(p.id == 49 || p.id == 50);
         assert!(d < 1.0);
     }

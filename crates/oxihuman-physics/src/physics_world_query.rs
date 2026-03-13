@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! World-level spatial queries: ray casts, sphere casts, overlap tests against a body list.
@@ -154,7 +154,7 @@ mod tests {
         w.add_body(make_body(0, [5.0, 0.0, 0.0], 1.0));
         let hit = w.ray_cast([0.0;3], [1.0, 0.0, 0.0], 100.0, 1);
         assert!(hit.is_some());
-        assert_eq!(hit.unwrap().body_id, 0);
+        assert_eq!(hit.expect("should succeed").body_id, 0);
     }
 
     #[test]
@@ -171,7 +171,7 @@ mod tests {
         w.add_body(make_body(0, [10.0, 0.0, 0.0], 1.0));
         w.add_body(make_body(1, [5.0, 0.0, 0.0], 1.0));
         let hit = w.ray_cast([0.0;3], [1.0, 0.0, 0.0], 100.0, 1);
-        assert_eq!(hit.unwrap().body_id, 1);
+        assert_eq!(hit.expect("should succeed").body_id, 1);
     }
 
     #[test]
@@ -229,6 +229,6 @@ mod tests {
     fn test_ray_sphere_fn() {
         let t = ray_sphere([0.0;3], [1.0,0.0,0.0], [5.0,0.0,0.0], 1.0);
         assert!(t.is_some());
-        assert!((t.unwrap() - 4.0).abs() < 0.01);
+        assert!((t.expect("should succeed") - 4.0).abs() < 0.01);
     }
 }

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A single instance with transform, mesh, and material references.
 #[allow(dead_code)]
@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     fn test_transform_at() {
-        let t = instance_transform_at(&sample(), 0).unwrap();
+        let t = instance_transform_at(&sample(), 0).expect("should succeed");
         assert!((t[0] - 1.0).abs() < 1e-5);
         assert!(instance_transform_at(&sample(), 99).is_none());
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! JSON Pointer (RFC 6901) resolver stub.
@@ -106,28 +106,28 @@ mod tests {
     #[test]
     fn test_parse_root() {
         /* root pointer is empty string */
-        let p = JsonPointer::parse("").unwrap();
+        let p = JsonPointer::parse("").expect("should succeed");
         assert!(p.is_root());
     }
 
     #[test]
     fn test_parse_simple() {
         /* parse /foo/bar */
-        let p = JsonPointer::parse("/foo/bar").unwrap();
+        let p = JsonPointer::parse("/foo/bar").expect("should succeed");
         assert_eq!(p.tokens(), &["foo", "bar"]);
     }
 
     #[test]
     fn test_escape_tilde() {
         /* ~ must be escaped as ~0 */
-        let p = JsonPointer::parse("/a~0b").unwrap();
+        let p = JsonPointer::parse("/a~0b").expect("should succeed");
         assert_eq!(p.tokens()[0], "a~b");
     }
 
     #[test]
     fn test_escape_slash() {
         /* / in token must be escaped as ~1 */
-        let p = JsonPointer::parse("/a~1b").unwrap();
+        let p = JsonPointer::parse("/a~1b").expect("should succeed");
         assert_eq!(p.tokens()[0], "a/b");
     }
 
@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn test_depth() {
         /* depth counts tokens */
-        let p = JsonPointer::parse("/a/b/c").unwrap();
+        let p = JsonPointer::parse("/a/b/c").expect("should succeed");
         assert_eq!(p.depth(), 3);
     }
 
@@ -148,29 +148,29 @@ mod tests {
     fn test_roundtrip() {
         /* serialization roundtrip */
         let s = "/foo~0bar/baz~1qux";
-        let p = JsonPointer::parse(s).unwrap();
+        let p = JsonPointer::parse(s).expect("should succeed");
         assert_eq!(p.to_string_repr(), s);
     }
 
     #[test]
     fn test_leaf() {
         /* leaf returns last token */
-        let p = JsonPointer::parse("/x/y/z").unwrap();
+        let p = JsonPointer::parse("/x/y/z").expect("should succeed");
         assert_eq!(pointer_leaf(&p), Some("z"));
     }
 
     #[test]
     fn test_parent() {
         /* parent drops last token */
-        let p = JsonPointer::parse("/a/b").unwrap();
-        let parent = pointer_parent(&p).unwrap();
+        let p = JsonPointer::parse("/a/b").expect("should succeed");
+        let parent = pointer_parent(&p).expect("should succeed");
         assert_eq!(parent.tokens(), &["a"]);
     }
 
     #[test]
     fn test_root_parent_none() {
         /* root has no parent */
-        let p = JsonPointer::parse("").unwrap();
+        let p = JsonPointer::parse("").expect("should succeed");
         assert!(pointer_parent(&p).is_none());
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Face map — named groups of face indices.
@@ -105,7 +105,7 @@ mod tests {
     fn test_get_group() {
         /* get_group returns correct faces */
         let fm = basic_map();
-        let g = fm.get_group("left_arm").unwrap();
+        let g = fm.get_group("left_arm").expect("should succeed");
         assert_eq!(g, &vec![0, 1, 2]);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Slice mesh at multiple Z heights and return 2D contours.
@@ -201,7 +201,7 @@ mod tests {
     fn edge_z_intersect_midpoint() {
         let r = edge_z_intersect([0.0, 0.0, 0.0], [0.0, 0.0, 1.0], 0.5);
         assert!(r.is_some());
-        let pt = r.unwrap();
+        let pt = r.expect("should succeed");
         assert!((pt[0] - 0.0).abs() < 1e-5);
     }
 

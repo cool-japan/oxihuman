@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Skinned mesh animation sequence — joint transform keyframes for skeletal animation.
@@ -179,7 +179,7 @@ mod tests {
         let mut seq = SkinnedAnimSequence::new(1, 24.0);
         seq.push_keyframe(rest_pose_keyframe(1, 0.0));
         seq.push_keyframe(rest_pose_keyframe(1, 1.0));
-        let kf = seq.keyframe_before(0.5).unwrap();
+        let kf = seq.keyframe_before(0.5).expect("should succeed");
         assert!((kf.time - 0.0).abs() < f32::EPSILON);
     }
 }

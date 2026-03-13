@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! PID motor controller for joint drives.
 
@@ -370,6 +370,6 @@ mod tests {
         let id = add_motor_to_bank(&mut bank, "test_motor", default_pid_params());
         let motor = get_motor(&bank, id);
         assert!(motor.is_some());
-        assert_eq!(motor.unwrap().name, "test_motor");
+        assert_eq!(motor.expect("should succeed").name, "test_motor");
     }
 }

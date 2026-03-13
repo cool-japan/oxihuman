@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Split-view layout manager (2×1 or 2×2 viewport panels with independent cameras).
 
@@ -229,7 +229,7 @@ mod tests {
         let mut vp = new_split_viewport(&cfg);
         split_viewport_add_panel(&mut vp, make_panel(0, "Perspective", 0, 0, 1280, 720));
         split_viewport_set_active(&mut vp, 0);
-        let panel = split_viewport_active_panel(&vp).unwrap();
+        let panel = split_viewport_active_panel(&vp).expect("should succeed");
         assert_eq!(panel.camera_label, "Perspective");
     }
 

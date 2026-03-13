@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A single motion capture marker.
@@ -107,7 +107,7 @@ mod tests {
         mocap_add_marker(&mut f, "lhand", [0.5, 1.0, 0.0]);
         let p = mocap_find_marker(&f, "lhand");
         assert!(p.is_some());
-        assert!((p.unwrap()[0] - 0.5).abs() < 1e-6);
+        assert!((p.expect("should succeed")[0] - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -138,7 +138,7 @@ mod tests {
         mocap_add_marker(&mut f1, "foot", [1.0, 0.0, 0.0]);
         let vel = mocap_marker_velocity(&f0, &f1, "foot");
         assert!(vel.is_some());
-        assert!((vel.unwrap()[0] - 1.0).abs() < 1e-5);
+        assert!((vel.expect("should succeed")[0] - 1.0).abs() < 1e-5);
     }
 
     #[test]

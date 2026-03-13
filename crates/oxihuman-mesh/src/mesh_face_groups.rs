@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -107,7 +107,7 @@ mod tests {
     fn test_get_group() {
         let mut s = new_face_group_set();
         let id = fg_add_group(&mut s, "face", 1);
-        let g = fg_get_group(&s, id).unwrap();
+        let g = fg_get_group(&s, id).expect("should succeed");
         assert_eq!(g.name, "face");
         assert_eq!(g.material_index, 1);
     }
@@ -130,7 +130,7 @@ mod tests {
     fn test_find_by_name() {
         let mut s = new_face_group_set();
         fg_add_group(&mut s, "skin", 2);
-        let g = fg_find_by_name(&s, "skin").unwrap();
+        let g = fg_find_by_name(&s, "skin").expect("should succeed");
         assert_eq!(g.material_index, 2);
     }
 

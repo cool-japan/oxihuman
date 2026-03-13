@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Viewport annotation system (labels, arrows, measurements, highlights).
 
@@ -220,7 +220,7 @@ mod tests {
         let id = add_label(&mut layer, [1.0, 2.0, 3.0], "Hello", [1.0; 4]);
         let ann = get_annotation(&layer, id);
         assert!(ann.is_some());
-        let a = ann.unwrap();
+        let a = ann.expect("should succeed");
         assert_eq!(a.id, id);
         assert_eq!(a.world_position, [1.0, 2.0, 3.0]);
     }

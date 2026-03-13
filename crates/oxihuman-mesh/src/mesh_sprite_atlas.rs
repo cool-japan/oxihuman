@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Sprite atlas UV layout — packs sprite frames into a texture atlas grid.
@@ -143,7 +143,7 @@ mod tests {
     fn test_frame_uv_center_first() {
         /* First frame center should be at (col_size/2, row_size/2) */
         let atlas = default_atlas();
-        let frame = atlas.frame(0).unwrap();
+        let frame = atlas.frame(0).expect("should succeed");
         let [cu, cv] = frame_uv_center(frame);
         assert!((cu - 0.125).abs() < 0.001);
         assert!((cv - 0.125).abs() < 0.001);
@@ -159,7 +159,7 @@ mod tests {
             atlas_height: 256,
         };
         let atlas = SpriteAtlas::build(cfg);
-        let f = atlas.frame(0).unwrap();
+        let f = atlas.frame(0).expect("should succeed");
         assert_eq!(f.u_max, 1.0);
         assert_eq!(f.v_max, 1.0);
     }

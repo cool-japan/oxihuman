@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 //! Morph I/O: serialize/deserialize morph weights to/from simple format.
 
@@ -57,7 +57,7 @@ mod tests {
 
     #[test]
     fn test_parse_line() {
-        let r = mio_parse_line("jaw,0.5,1.0").unwrap();
+        let r = mio_parse_line("jaw,0.5,1.0").expect("should succeed");
         assert_eq!(r.name, "jaw");
         assert_eq!(r.weights.len(), 2);
     }

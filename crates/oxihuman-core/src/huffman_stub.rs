@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Real Huffman coding implementation with tree construction, canonical codes,
 //! bit-level encoding/decoding, and length-limited codes (max 15 bits).
@@ -658,7 +658,7 @@ mod tests {
     fn test_decode_symbol_roundtrip() {
         let data = [7u8, 7, 8, 9];
         let t = build_frequency_table(&data);
-        let code = encode_symbol(&t, 7).unwrap();
+        let code = encode_symbol(&t, 7).expect("should succeed");
         assert_eq!(decode_symbol(&t, code), Some(7));
     }
 
@@ -747,7 +747,7 @@ mod tests {
     fn test_tree_single_symbol() {
         let mut freq = [0u64; 256];
         freq[65] = 100; // 'A'
-        let tree = HuffmanTree::build(&freq).unwrap();
+        let tree = HuffmanTree::build(&freq).expect("should succeed");
         let lengths = tree.code_lengths();
         assert_eq!(lengths[65], 1);
         for (i, &l) in lengths.iter().enumerate() {
@@ -762,7 +762,7 @@ mod tests {
         let mut freq = [0u64; 256];
         freq[0] = 10;
         freq[1] = 5;
-        let tree = HuffmanTree::build(&freq).unwrap();
+        let tree = HuffmanTree::build(&freq).expect("should succeed");
         let lengths = tree.code_lengths();
         assert_eq!(lengths[0], 1);
         assert_eq!(lengths[1], 1);
@@ -775,7 +775,7 @@ mod tests {
         freq[1] = 50;
         freq[2] = 25;
         freq[3] = 12;
-        let tree = HuffmanTree::build(&freq).unwrap();
+        let tree = HuffmanTree::build(&freq).expect("should succeed");
         let lengths = tree.code_lengths();
 
         let kraft: f64 = lengths
@@ -855,18 +855,20 @@ mod tests {
     #[test]
     fn test_encode_decode_roundtrip_simple() {
         let data = b"aabbbc";
-        let table = HuffmanCodeTable::from_data(data).unwrap();
-        let (encoded, bit_count) = huffman_encode(data, &table).unwrap();
-        let decoded = huffman_decode(&encoded, bit_count, data.len(), &table).unwrap();
+        let table = HuffmanCodeTable::from_data(data).expect("should succeed");
+        let (encoded, bit_count) = huffman_encode(data, &table).expect("should succeed");
+        let decoded =
+            huffman_decode(&encoded, bit_count, data.len(), &table).expect("should succeed");
         assert_eq!(decoded, data);
     }
 
     #[test]
     fn test_encode_decode_roundtrip_single_symbol() {
         let data = vec![42u8; 100];
-        let table = HuffmanCodeTable::from_data(&data).unwrap();
-        let (encoded, bit_count) = huffman_encode(&data, &table).unwrap();
-        let decoded = huffman_decode(&encoded, bit_count, data.len(), &table).unwrap();
+        let table = HuffmanCodeTable::from_data(&data).expect("should succeed");
+        let (encoded, bit_count) = huffman_encode(&data, &table).expect("should succeed");
+        let decoded =
+            huffman_decode(&encoded, bit_count, data.len(), &table).expect("should succeed");
         assert_eq!(decoded, data);
     }
 
@@ -877,7 +879,7 @@ mod tests {
         data.extend(std::iter::repeat_n(1u8, 30));
         data.extend(std::iter::repeat_n(255u8, 20));
 
-        let table = HuffmanCodeTable::from_data(&data).unwrap();
+        let table = HuffmanCodeTable::from_data(&data).expect("should succeed");
 
         for &(_, len) in &table.codes {
             if len > 0 {
@@ -885,17 +887,19 @@ mod tests {
             }
         }
 
-        let (encoded, bit_count) = huffman_encode(&data, &table).unwrap();
-        let decoded = huffman_decode(&encoded, bit_count, data.len(), &table).unwrap();
+        let (encoded, bit_count) = huffman_encode(&data, &table).expect("should succeed");
+        let decoded =
+            huffman_decode(&encoded, bit_count, data.len(), &table).expect("should succeed");
         assert_eq!(decoded, data);
     }
 
     #[test]
     fn test_encode_decode_roundtrip_two_symbols() {
         let data = vec![0u8, 0, 0, 1, 1, 0, 1, 0, 0, 1];
-        let table = HuffmanCodeTable::from_data(&data).unwrap();
-        let (encoded, bit_count) = huffman_encode(&data, &table).unwrap();
-        let decoded = huffman_decode(&encoded, bit_count, data.len(), &table).unwrap();
+        let table = HuffmanCodeTable::from_data(&data).expect("should succeed");
+        let (encoded, bit_count) = huffman_encode(&data, &table).expect("should succeed");
+        let decoded =
+            huffman_decode(&encoded, bit_count, data.len(), &table).expect("should succeed");
         assert_eq!(decoded, data);
     }
 
@@ -908,9 +912,10 @@ mod tests {
                 data.push(sym);
             }
         }
-        let table = HuffmanCodeTable::from_data(&data).unwrap();
-        let (encoded, bit_count) = huffman_encode(&data, &table).unwrap();
-        let decoded = huffman_decode(&encoded, bit_count, data.len(), &table).unwrap();
+        let table = HuffmanCodeTable::from_data(&data).expect("should succeed");
+        let (encoded, bit_count) = huffman_encode(&data, &table).expect("should succeed");
+        let decoded =
+            huffman_decode(&encoded, bit_count, data.len(), &table).expect("should succeed");
         assert_eq!(decoded, data);
     }
 
@@ -934,8 +939,8 @@ mod tests {
     #[test]
     fn test_decode_unexpected_end() {
         let data = b"ab";
-        let table = HuffmanCodeTable::from_data(data).unwrap();
-        let (encoded, bit_count) = huffman_encode(data, &table).unwrap();
+        let table = HuffmanCodeTable::from_data(data).expect("should succeed");
+        let (encoded, bit_count) = huffman_encode(data, &table).expect("should succeed");
         let result = huffman_decode(&encoded, bit_count, 100, &table);
         assert!(result.is_err());
     }
@@ -947,8 +952,8 @@ mod tests {
             .chain(std::iter::once(2u8))
             .collect();
 
-        let table = HuffmanCodeTable::from_data(&data).unwrap();
-        let (_, bit_count) = huffman_encode(&data, &table).unwrap();
+        let table = HuffmanCodeTable::from_data(&data).expect("should succeed");
+        let (_, bit_count) = huffman_encode(&data, &table).expect("should succeed");
         let original_bits = data.len() * 8;
         assert!(
             bit_count < original_bits,
@@ -961,7 +966,7 @@ mod tests {
         let data: Vec<u8> = (0..10)
             .flat_map(|i| vec![i; (i as usize + 1) * 10])
             .collect();
-        let table = HuffmanCodeTable::from_data(&data).unwrap();
+        let table = HuffmanCodeTable::from_data(&data).expect("should succeed");
         let active: Vec<(u32, u8)> = table
             .codes
             .iter()
@@ -996,7 +1001,7 @@ mod tests {
     #[test]
     fn test_table_lookup() {
         let data = b"aaabbc";
-        let table = HuffmanCodeTable::from_data(data).unwrap();
+        let table = HuffmanCodeTable::from_data(data).expect("should succeed");
         assert!(table.lookup(b'a').is_some());
         assert!(table.lookup(b'z').is_none());
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Strain gauge sensor model.
@@ -208,6 +208,6 @@ mod tests {
             time: 0.7,
             strain_ue: 150.0,
         });
-        assert_eq!(s.latest().unwrap().time, 0.7);
+        assert_eq!(s.latest().expect("should succeed").time, 0.7);
     }
 }

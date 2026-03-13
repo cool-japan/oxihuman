@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Triangular grid with barycentric coordinate lookup.
 
@@ -152,7 +152,7 @@ mod tests {
     #[test]
     fn barycentric_vertex_a() {
         let t = unit_tri();
-        let [u, v, w] = t.barycentric([0.0, 0.0]).unwrap();
+        let [u, v, w] = t.barycentric([0.0, 0.0]).expect("should succeed");
         assert!((u - 1.0).abs() < 1e-5);
         assert!(v.abs() < 1e-5);
         assert!(w.abs() < 1e-5);
@@ -173,7 +173,7 @@ mod tests {
     #[test]
     fn interpolate_at_vertex_a() {
         let t = unit_tri();
-        let bary = t.barycentric([0.0, 0.0]).unwrap();
+        let bary = t.barycentric([0.0, 0.0]).expect("should succeed");
         let val = t.interpolate([3.0, 0.0, 0.0], bary);
         assert!((val - 3.0).abs() < 1e-4);
     }

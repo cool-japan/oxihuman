@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! BVH (Biovision Hierarchy) motion capture file parser and skeleton mapper.
 //!
@@ -700,7 +700,7 @@ Frame Time: 0.033333
     // ── Test 2: joint names ───────────────────────────────────────────────
     #[test]
     fn test_joint_names() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let names = bvh.skeleton.joint_names();
         assert!(names.contains(&"Hips"));
         assert!(names.contains(&"Spine"));
@@ -709,7 +709,7 @@ Frame Time: 0.033333
     // ── Test 3: channel count ─────────────────────────────────────────────
     #[test]
     fn test_channel_count() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         // Hips: 6  +  Spine: 3  = 9
         assert_eq!(bvh.skeleton.channel_count(), 9);
     }
@@ -717,7 +717,7 @@ Frame Time: 0.033333
     // ── Test 4: frame time and fps ────────────────────────────────────────
     #[test]
     fn test_fps() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let fps = bvh.fps();
         assert!((fps - 30.0).abs() < 0.5, "fps ≈ 30, got {fps}");
     }
@@ -725,7 +725,7 @@ Frame Time: 0.033333
     // ── Test 5: duration ──────────────────────────────────────────────────
     #[test]
     fn test_duration() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let dur = bvh.duration_seconds();
         assert!(dur > 0.0);
         assert!((dur - 2.0 * 0.033333_f32).abs() < 1e-4);
@@ -734,14 +734,14 @@ Frame Time: 0.033333
     // ── Test 6: root translation ──────────────────────────────────────────
     #[test]
     fn test_root_translation_frame0() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let t = bvh.root_translation(0);
         assert_eq!(t, [0.0, 0.0, 0.0]);
     }
 
     #[test]
     fn test_root_translation_frame1() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let t = bvh.root_translation(1);
         assert_eq!(t, [1.0, 2.0, 3.0]);
     }
@@ -749,7 +749,7 @@ Frame Time: 0.033333
     // ── Test 7: joint rotation ────────────────────────────────────────────
     #[test]
     fn test_joint_rotation_spine_frame1() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let spine_idx = bvh.skeleton.find_joint("Spine").expect("Spine not found");
         let rot = bvh.joint_rotation(1, spine_idx);
         // Frame 1 Spine channels: Zrotation=4, Xrotation=5, Yrotation=6
@@ -760,7 +760,7 @@ Frame Time: 0.033333
     // ── Test 8: interpolate_frame ─────────────────────────────────────────
     #[test]
     fn test_interpolate_frame_midpoint() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let mid = bvh.interpolate_frame(0, 1, 0.5);
         assert!((mid.values[0] - 0.5).abs() < 1e-5);
         assert!((mid.values[1] - 1.0).abs() < 1e-5);
@@ -769,7 +769,7 @@ Frame Time: 0.033333
     // ── Test 9: sample_at ────────────────────────────────────────────────
     #[test]
     fn test_sample_at_beginning() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let f = bvh.sample_at(0.0);
         assert_eq!(f.values, bvh.frames[0].values);
     }
@@ -777,7 +777,7 @@ Frame Time: 0.033333
     // ── Test 10: write_bvh round-trip ────────────────────────────────────
     #[test]
     fn test_write_bvh_round_trip() {
-        let original = parse_bvh(minimal_bvh()).unwrap();
+        let original = parse_bvh(minimal_bvh()).expect("should succeed");
         let text = write_bvh(&original);
         let reparsed = parse_bvh(&text).expect("re-parse failed");
         assert_eq!(
@@ -790,7 +790,7 @@ Frame Time: 0.033333
     // ── Test 11: retarget_scale ───────────────────────────────────────────
     #[test]
     fn test_retarget_scale() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let frame1 = bvh.frames[1].clone();
         let scaled = retarget_scale(&frame1, 2.0, 3);
         assert!((scaled.values[0] - 2.0).abs() < 1e-5); // 1.0 * 2
@@ -801,7 +801,7 @@ Frame Time: 0.033333
     // ── Test 12: map_bvh_to_oxihuman ─────────────────────────────────────
     #[test]
     fn test_map_bvh_to_oxihuman() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let map = map_bvh_to_oxihuman(&bvh);
         assert_eq!(map.get("Hips").map(|s| s.as_str()), Some("pelvis"));
         assert_eq!(map.get("Spine").map(|s| s.as_str()), Some("spine_01"));
@@ -810,7 +810,7 @@ Frame Time: 0.033333
     // ── Test 13: find_joint ───────────────────────────────────────────────
     #[test]
     fn test_find_joint() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         assert!(bvh.skeleton.find_joint("Hips").is_some());
         assert!(bvh.skeleton.find_joint("DoesNotExist").is_none());
     }
@@ -818,9 +818,9 @@ Frame Time: 0.033333
     // ── Test 14: parent/children ──────────────────────────────────────────
     #[test]
     fn test_parent_children() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
-        let hips_idx = bvh.skeleton.find_joint("Hips").unwrap();
-        let spine_idx = bvh.skeleton.find_joint("Spine").unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
+        let hips_idx = bvh.skeleton.find_joint("Hips").expect("should succeed");
+        let spine_idx = bvh.skeleton.find_joint("Spine").expect("should succeed");
         assert_eq!(bvh.skeleton.parent_of(hips_idx), None);
         assert_eq!(bvh.skeleton.parent_of(spine_idx), Some(hips_idx));
         assert!(bvh.skeleton.children_of(hips_idx).contains(&spine_idx));
@@ -838,7 +838,7 @@ Frame Time: 0.033333
     // ── Test 16: write output to /tmp/ ────────────────────────────────────
     #[test]
     fn test_write_to_tmp() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let text = write_bvh(&bvh);
         std::fs::write("/tmp/test_mocap_bvh_output.bvh", &text)
             .expect("failed to write /tmp/test_mocap_bvh_output.bvh");
@@ -849,7 +849,7 @@ Frame Time: 0.033333
     // ── Test 17: sample_at beyond last frame ──────────────────────────────
     #[test]
     fn test_sample_at_beyond_end() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         // 9999 seconds is way beyond the last frame — should return last frame values
         let f = bvh.sample_at(9999.0);
         assert_eq!(f.values.len(), bvh.frames[0].values.len());
@@ -858,8 +858,8 @@ Frame Time: 0.033333
     // ── Test 18: get_channels helper ─────────────────────────────────────
     #[test]
     fn test_get_channels() {
-        let bvh = parse_bvh(minimal_bvh()).unwrap();
-        let hips_idx = bvh.skeleton.find_joint("Hips").unwrap();
+        let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
+        let hips_idx = bvh.skeleton.find_joint("Hips").expect("should succeed");
         let hips = &bvh.skeleton.joints[hips_idx];
         let ch_offset = bvh.skeleton.channel_offset_for(hips_idx);
         let frame0 = &bvh.frames[0];

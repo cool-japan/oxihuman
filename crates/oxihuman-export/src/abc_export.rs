@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Alembic (.abc) stub export for VFX pipeline integration.
 //!
@@ -397,7 +397,7 @@ mod tests {
     #[test]
     fn sample_at_time_finds_closest() {
         let samples = vec![make_sample(0.0, 3), make_sample(1.0, 3), make_sample(2.0, 3)];
-        let s = sample_at_time(&samples, 0.9).unwrap();
+        let s = sample_at_time(&samples, 0.9).expect("should succeed");
         assert!((s.time - 1.0).abs() < 1e-6);
     }
 

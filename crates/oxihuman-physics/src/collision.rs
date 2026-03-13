@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Geometric collision detection and response for physics primitives.
 //!
@@ -518,7 +518,7 @@ mod tests {
             center: [1.5, 0.0, 0.0],
             radius: 1.0,
         };
-        let contact = sphere_sphere(&a, &b).unwrap();
+        let contact = sphere_sphere(&a, &b).expect("should succeed");
         // Sum of radii = 2.0, distance = 1.5, depth = 0.5
         assert_approx(contact.depth, 0.5, "depth");
     }
@@ -550,7 +550,7 @@ mod tests {
             center: [0.0, 0.5, 0.0],
             radius: 1.0,
         };
-        let contact = sphere_plane(&sphere, &plane).unwrap();
+        let contact = sphere_plane(&sphere, &plane).expect("should succeed");
         // depth = 1.0 - 0.5 = 0.5
         assert_approx(contact.depth, 0.5, "sphere_plane depth");
         assert_approx(contact.normal[1], 1.0, "sphere_plane normal y");
@@ -570,7 +570,7 @@ mod tests {
             radius: 1.0,
         };
         // closest point = [1,0,0], dist = 0.4, depth = 0.6
-        let contact = sphere_aabb(&sphere, &aabb).unwrap();
+        let contact = sphere_aabb(&sphere, &aabb).expect("should succeed");
         assert!(contact.depth > 0.0);
     }
 
@@ -634,7 +634,7 @@ mod tests {
             radius: 0.5,
         };
         // Nearest endpoint at y=0.4, dist=0.4 < radius=0.5 → contact
-        let contact = capsule_plane(&cap, &plane).unwrap();
+        let contact = capsule_plane(&cap, &plane).expect("should succeed");
         assert!(contact.depth > 0.0);
         assert_approx(contact.normal[1], 1.0, "capsule_plane normal y");
     }
@@ -685,7 +685,7 @@ mod tests {
             min: [1.0, 1.0, 1.0],
             max: [3.0, 3.0, 3.0],
         };
-        let contact = aabb_aabb(&a, &b).unwrap();
+        let contact = aabb_aabb(&a, &b).expect("should succeed");
         assert_approx(contact.depth, 1.0, "aabb_aabb depth");
     }
 
@@ -757,7 +757,7 @@ mod tests {
             normal: [0.0, 1.0, 0.0],
             d: 0.0,
         };
-        let contact = aabb_plane(&aabb, &plane).unwrap();
+        let contact = aabb_plane(&aabb, &plane).expect("should succeed");
         assert!(contact.depth > 0.0, "should have positive depth");
         assert_approx(contact.normal[1], 1.0, "normal y");
     }

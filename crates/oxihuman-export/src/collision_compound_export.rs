@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export compound collision shapes (collections of primitive shapes).
@@ -206,7 +206,7 @@ mod tests {
         let mut c = new_compound("c");
         add_sphere(&mut c, [-1.0, 0.0, 0.0], 0.5);
         add_sphere(&mut c, [1.0, 0.0, 0.0], 0.5);
-        let (mn, mx) = aabb_of_centers(&c).unwrap();
+        let (mn, mx) = aabb_of_centers(&c).expect("should succeed");
         assert!((mn[0] - (-1.0)).abs() < 1e-6);
         assert!((mx[0] - 1.0).abs() < 1e-6);
     }

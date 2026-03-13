@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{Context, Result};
 use std::path::Path;
@@ -429,7 +429,7 @@ mod tests {
         idx.add(make_entry("chin-round", TargetCategory::Chin, vec![]));
         let e = idx.by_name("chin-round");
         assert!(e.is_some());
-        assert_eq!(e.unwrap().name, "chin-round");
+        assert_eq!(e.expect("should succeed").name, "chin-round");
     }
 
     #[test]
@@ -466,8 +466,9 @@ mod tests {
         for i in 0..n {
             out.push_str(&format!("{} 0.1 0.2 0.3\n", i));
         }
-        let mut f = fs::File::create(path).unwrap();
-        f.write_all(out.as_bytes()).unwrap();
+        let mut f = fs::File::create(path).expect("failed to create target file");
+        f.write_all(out.as_bytes())
+            .expect("failed to write target file");
     }
 
     #[test]
@@ -476,15 +477,15 @@ mod tests {
         // Create sub-dirs that name the categories.
         let height_dir = tmp.join("height");
         let weight_dir = tmp.join("weight");
-        fs::create_dir_all(&height_dir).unwrap();
-        fs::create_dir_all(&weight_dir).unwrap();
+        fs::create_dir_all(&height_dir).expect("should succeed");
+        fs::create_dir_all(&weight_dir).expect("should succeed");
 
         write_target_file(&height_dir.join("height-up.target"), 5);
         write_target_file(&height_dir.join("height-down.target"), 3);
         write_target_file(&weight_dir.join("weight-high.target"), 7);
 
         let mut idx = TargetIndex::new();
-        let added = idx.scan_dir(&tmp).unwrap();
+        let added = idx.scan_dir(&tmp).expect("should succeed");
         assert_eq!(added, 3);
         assert_eq!(idx.len(), 3);
     }
@@ -493,13 +494,13 @@ mod tests {
     fn scan_dir_parses_category_from_dir_name() {
         let tmp = tempdir();
         let age_dir = tmp.join("age");
-        fs::create_dir_all(&age_dir).unwrap();
+        fs::create_dir_all(&age_dir).expect("should succeed");
         write_target_file(&age_dir.join("young.target"), 2);
 
         let mut idx = TargetIndex::new();
-        idx.scan_dir(&tmp).unwrap();
+        idx.scan_dir(&tmp).expect("should succeed");
 
-        let entry = idx.by_name("young").unwrap();
+        let entry = idx.by_name("young").expect("should succeed");
         assert_eq!(entry.category, TargetCategory::Age);
     }
 
@@ -507,13 +508,13 @@ mod tests {
     fn scan_dir_counts_deltas_correctly() {
         let tmp = tempdir();
         let dir = tmp.join("height");
-        fs::create_dir_all(&dir).unwrap();
+        fs::create_dir_all(&dir).expect("should succeed");
         write_target_file(&dir.join("test.target"), 8);
 
         let mut idx = TargetIndex::new();
-        idx.scan_dir(&tmp).unwrap();
+        idx.scan_dir(&tmp).expect("should succeed");
 
-        let entry = idx.by_name("test").unwrap();
+        let entry = idx.by_name("test").expect("should succeed");
         assert_eq!(entry.delta_count, 8);
     }
 
@@ -533,8 +534,8 @@ mod tests {
         let tmp = tempdir();
         let height_dir = tmp.join("height");
         let weight_dir = tmp.join("weight");
-        fs::create_dir_all(&height_dir).unwrap();
-        fs::create_dir_all(&weight_dir).unwrap();
+        fs::create_dir_all(&height_dir).expect("failed to create height dir");
+        fs::create_dir_all(&weight_dir).expect("failed to create weight dir");
         write_target_file(&height_dir.join("height-up.target"), 4);
         write_target_file(&height_dir.join("height-down.target"), 2);
         write_target_file(&weight_dir.join("weight-high.target"), 6);
@@ -554,14 +555,14 @@ mod tests {
     #[test]
     fn scanner_total_returns_three() {
         let tmp = setup_scanner_dir();
-        let scanner = TargetScanner::new(&tmp).unwrap();
+        let scanner = TargetScanner::new(&tmp).expect("should succeed");
         assert_eq!(scanner.total(), 3, "total() should report 3 .target files");
     }
 
     #[test]
     fn scanner_progress_is_zero_initially() {
         let tmp = setup_scanner_dir();
-        let scanner = TargetScanner::new(&tmp).unwrap();
+        let scanner = TargetScanner::new(&tmp).expect("should succeed");
         assert!(
             (scanner.progress() - 0.0).abs() < f32::EPSILON,
             "progress() should be 0.0 before any processing"
@@ -571,7 +572,7 @@ mod tests {
     #[test]
     fn scanner_progress_is_one_after_collect_all() {
         let tmp = setup_scanner_dir();
-        let scanner = TargetScanner::new(&tmp).unwrap();
+        let scanner = TargetScanner::new(&tmp).expect("should succeed");
         let idx = scanner.collect_all();
         // The scanner is consumed; verify the index has 3 entries as a proxy.
         assert_eq!(idx.len(), 3);
@@ -580,7 +581,7 @@ mod tests {
     #[test]
     fn scanner_next_entry_yields_some_then_none() {
         let tmp = setup_scanner_dir();
-        let mut scanner = TargetScanner::new(&tmp).unwrap();
+        let mut scanner = TargetScanner::new(&tmp).expect("should succeed");
         let mut count = 0usize;
         while scanner.next_entry().is_some() {
             count += 1;
@@ -595,7 +596,7 @@ mod tests {
     #[test]
     fn scanner_collect_all_returns_index_with_three_entries() {
         let tmp = setup_scanner_dir();
-        let scanner = TargetScanner::new(&tmp).unwrap();
+        let scanner = TargetScanner::new(&tmp).expect("should succeed");
         let idx = scanner.collect_all();
         assert_eq!(
             idx.len(),
@@ -607,7 +608,7 @@ mod tests {
     #[test]
     fn scanner_is_done_after_collect_all_via_next_entry() {
         let tmp = setup_scanner_dir();
-        let mut scanner = TargetScanner::new(&tmp).unwrap();
+        let mut scanner = TargetScanner::new(&tmp).expect("should succeed");
         while scanner.next_entry().is_some() {}
         assert!(
             scanner.is_done(),
@@ -619,10 +620,10 @@ mod tests {
     fn target_index_from_dir_matches_scan_dir() {
         let tmp = setup_scanner_dir();
         // from_dir
-        let idx_from_dir = TargetIndex::from_dir(&tmp).unwrap();
+        let idx_from_dir = TargetIndex::from_dir(&tmp).expect("should succeed");
         // scan_dir
         let mut idx_scan = TargetIndex::new();
-        idx_scan.scan_dir(&tmp).unwrap();
+        idx_scan.scan_dir(&tmp).expect("should succeed");
 
         assert_eq!(
             idx_from_dir.len(),
@@ -652,13 +653,20 @@ mod tests {
     // Helper: create a unique temp directory (no extra crate needed).
     // ------------------------------------------------------------------
     fn tempdir() -> std::path::PathBuf {
+        use std::sync::atomic::{AtomicU64, Ordering};
         use std::time::{SystemTime, UNIX_EPOCH};
+        static COUNTER: AtomicU64 = AtomicU64::new(0);
         let nanos = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .subsec_nanos();
-        let path = std::path::PathBuf::from(format!("/tmp/oxihuman_target_index_test_{}", nanos));
-        fs::create_dir_all(&path).unwrap();
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        let pid = std::process::id();
+        let seq = COUNTER.fetch_add(1, Ordering::Relaxed);
+        let path = std::path::PathBuf::from(format!(
+            "/tmp/oxihuman_target_index_test_{}_{}_{}",
+            nanos, pid, seq
+        ));
+        fs::create_dir_all(&path).expect("failed to create temp dir");
         path
     }
 }

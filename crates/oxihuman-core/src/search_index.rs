@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Inverted-index based text search over string-keyed documents.
@@ -193,7 +193,7 @@ mod tests {
     fn get_doc() {
         let mut idx = new_search_index();
         let id = idx.insert("title", "content");
-        let doc = idx.get(id).unwrap();
+        let doc = idx.get(id).expect("should succeed");
         assert_eq!(doc.title, "title");
     }
 

@@ -121,7 +121,7 @@ mod tests {
     fn test_current_expr_state() {
         let mut sm = new_expr_state_machine();
         add_expr_state(&mut sm, "idle", 0.0);
-        let s = current_expr_state(&sm).unwrap();
+        let s = current_expr_state(&sm).expect("should succeed");
         assert_eq!(s.name, "idle");
     }
 
@@ -132,7 +132,7 @@ mod tests {
         add_expr_state(&mut sm, "smile", 0.8);
         set_expr_transition(&mut sm, "idle", "smile");
         assert!(transition_to(&mut sm, "smile"));
-        assert_eq!(current_expr_state(&sm).unwrap().name, "smile");
+        assert_eq!(current_expr_state(&sm).expect("should succeed").name, "smile");
     }
 
     #[test]

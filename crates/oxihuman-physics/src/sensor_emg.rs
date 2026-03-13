@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! EMG (electromyography) muscle signal sensor stub.
@@ -211,6 +211,6 @@ mod tests {
             time: 0.5,
             channels: vec![1.0],
         });
-        assert_eq!(emg.latest().unwrap().time, 0.5);
+        assert_eq!(emg.latest().expect("should succeed").time, 0.5);
     }
 }

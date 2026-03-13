@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -811,7 +811,7 @@ mod tests {
             path,
             b"BAAD\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
         )
-        .unwrap();
+        .expect("should succeed");
         assert!(read_quantized_bin(path).is_err());
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 #[allow(dead_code)]
@@ -87,7 +87,7 @@ mod tests {
         let mut b = new_matrix(2, 2);
         mat_set(&mut a, 0, 0, 1.0);
         mat_set(&mut b, 0, 0, 2.0);
-        let c = mat_add(&a, &b).unwrap();
+        let c = mat_add(&a, &b).expect("should succeed");
         assert!((mat_get(&c, 0, 0) - 3.0).abs() < 1e-10);
     }
 
@@ -108,7 +108,7 @@ mod tests {
         mat_set(&mut a, 1, 1, 4.0);
         mat_set(&mut b, 0, 0, 1.0);
         mat_set(&mut b, 1, 1, 1.0);
-        let c = mat_mul(&a, &b).unwrap();
+        let c = mat_mul(&a, &b).expect("should succeed");
         assert!((mat_get(&c, 0, 0) - 1.0).abs() < 1e-10);
         assert!((mat_get(&c, 1, 1) - 4.0).abs() < 1e-10);
     }

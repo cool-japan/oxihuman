@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Named registry map with category support.
@@ -112,7 +112,7 @@ mod tests {
     fn register_and_get() {
         let mut m: RegistryMap<i32> = new_registry_map();
         assert!(m.register("a", 1, "cat1", "desc a"));
-        assert_eq!(*m.get("a").unwrap(), 1);
+        assert_eq!(*m.get("a").expect("should succeed"), 1);
     }
 
     #[test]

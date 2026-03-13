@@ -65,7 +65,7 @@ mod tests {
     #[test]
     fn test_export() { let e = export_anim_events(vec![ev(0.5)]); assert_eq!(event_count_aee(&e), 1); }
     #[test]
-    fn test_time() { let e = export_anim_events(vec![ev(1.5)]); assert!((event_time(&e, 0).unwrap() - 1.5).abs() < 1e-6); }
+    fn test_time() { let e = export_anim_events(vec![ev(1.5)]); assert!((event_time(&e, 0).expect("should succeed") - 1.5).abs() < 1e-6); }
     #[test]
     fn test_time_none() { let e = export_anim_events(vec![]); assert!(event_time(&e, 0).is_none()); }
     #[test]

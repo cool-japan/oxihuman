@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Simple eigenvalue decomposition for 3x3 symmetric matrices (covariance of point clouds).
@@ -97,7 +97,7 @@ mod tests {
         let m = [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]];
         let e = eigen_decompose_3x3(&m);
         let mut vals = e.eigenvalues.to_vec();
-        vals.sort_by(|a,b| a.partial_cmp(b).unwrap());
+        vals.sort_by(|a,b| a.partial_cmp(b).expect("should succeed"));
         assert!((vals[0] - 1.0).abs() < 0.01);
     }
     #[test] fn test_symmetric() { let c = covariance_matrix(&pts()); assert!((c[0][1] - c[1][0]).abs() < 1e-6); }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Camera pose/intrinsics stub.
@@ -134,7 +134,7 @@ mod tests {
         /* point along z-axis projects to principal point */
         let pose = CameraPose::default();
         let intrinsics = CameraIntrinsics::default();
-        let uv = project_point([0.0, 0.0, 1.0], &pose, &intrinsics).unwrap();
+        let uv = project_point([0.0, 0.0, 1.0], &pose, &intrinsics).expect("should succeed");
         assert!((uv[0] - 320.0).abs() < 1e-3);
         assert!((uv[1] - 240.0).abs() < 1e-3);
     }

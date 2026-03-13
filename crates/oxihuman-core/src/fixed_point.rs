@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A 16.16 fixed-point number for deterministic arithmetic.
@@ -126,7 +126,7 @@ mod tests {
     fn test_div() {
         let a = Fixed32::from_int(10);
         let b = Fixed32::from_int(4);
-        let r = a.checked_div(b).unwrap();
+        let r = a.checked_div(b).expect("should succeed");
         assert!((r.to_f32() - 2.5).abs() < 0.01);
     }
 

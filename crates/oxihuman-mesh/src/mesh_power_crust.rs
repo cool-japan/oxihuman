@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Power Crust surface reconstruction from oriented point clouds.
 //!
@@ -966,7 +966,7 @@ mod tests {
         ];
         let ns = nearest_power_site([0.1, 0.0, 0.0], &sites);
         assert!(ns.is_some());
-        assert!((ns.unwrap().center[0]).abs() < 1.0);
+        assert!((ns.expect("should succeed").center[0]).abs() < 1.0);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! A recursive-descent XML parser supporting elements, attributes, namespaces,
 //! CDATA, comments, processing instructions, and character references.
@@ -658,32 +658,32 @@ mod tests {
 
     #[test]
     fn parse_simple_tag() {
-        let node = parse_xml_simple("<root></root>").unwrap();
+        let node = parse_xml_simple("<root></root>").expect("should succeed");
         assert_eq!(node.tag(), "root");
     }
 
     #[test]
     fn parse_self_closing() {
-        let node = parse_xml_simple("<br/>").unwrap();
+        let node = parse_xml_simple("<br/>").expect("should succeed");
         assert_eq!(node.tag(), "br");
         assert!(node.children().is_empty());
     }
 
     #[test]
     fn parse_attr_value() {
-        let node = parse_xml_simple(r#"<img src="photo.png"/>"#).unwrap();
+        let node = parse_xml_simple(r#"<img src="photo.png"/>"#).expect("should succeed");
         assert_eq!(xml_attr(&node, "src"), Some("photo.png"));
     }
 
     #[test]
     fn xml_attr_missing_returns_none() {
-        let node = parse_xml_simple("<div></div>").unwrap();
+        let node = parse_xml_simple("<div></div>").expect("should succeed");
         assert_eq!(xml_attr(&node, "class"), None);
     }
 
     #[test]
     fn parse_text_content() {
-        let node = parse_xml_simple("<title>Hello World</title>").unwrap();
+        let node = parse_xml_simple("<title>Hello World</title>").expect("should succeed");
         assert!(xml_text(&node).contains("Hello"));
     }
 
@@ -694,25 +694,25 @@ mod tests {
 
     #[test]
     fn node_child_count_zero_for_leaf() {
-        let node = parse_xml_simple("<leaf/>").unwrap();
+        let node = parse_xml_simple("<leaf/>").expect("should succeed");
         assert_eq!(node_child_count(&node), 0);
     }
 
     #[test]
     fn xml_child_found() {
-        let node = parse_xml_simple("<root><child></child></root>").unwrap();
+        let node = parse_xml_simple("<root><child></child></root>").expect("should succeed");
         assert!(xml_child(&node, "child").is_some());
     }
 
     #[test]
     fn xml_child_not_found() {
-        let node = parse_xml_simple("<root></root>").unwrap();
+        let node = parse_xml_simple("<root></root>").expect("should succeed");
         assert!(xml_child(&node, "child").is_none());
     }
 
     #[test]
     fn multiple_attrs() {
-        let node = parse_xml_simple(r#"<rect x="1" y="2"/>"#).unwrap();
+        let node = parse_xml_simple(r#"<rect x="1" y="2"/>"#).expect("should succeed");
         assert_eq!(xml_attr(&node, "x"), Some("1"));
         assert_eq!(xml_attr(&node, "y"), Some("2"));
     }
@@ -720,16 +720,16 @@ mod tests {
     #[test]
     fn parse_nested_elements() {
         let xml = "<a><b><c/></b></a>";
-        let node = parse_xml_simple(xml).unwrap();
-        let b = xml_child(&node, "b").unwrap();
-        let c = xml_child(b, "c").unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
+        let b = xml_child(&node, "b").expect("should succeed");
+        let c = xml_child(b, "c").expect("should succeed");
         assert_eq!(c.tag(), "c");
     }
 
     #[test]
     fn parse_cdata() {
         let xml = "<root><![CDATA[raw <content> & stuff]]></root>";
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         match &node.children()[0] {
             XmlNode::CData(s) => assert_eq!(s, "raw <content> & stuff"),
             other => panic!("expected CData, got {:?}", other),
@@ -739,7 +739,7 @@ mod tests {
     #[test]
     fn parse_comment_node() {
         let xml = "<root><!-- a comment --></root>";
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         match &node.children()[0] {
             XmlNode::Comment(s) => assert_eq!(s, " a comment "),
             other => panic!("expected Comment, got {:?}", other),
@@ -749,7 +749,7 @@ mod tests {
     #[test]
     fn parse_processing_instruction() {
         let xml = "<root><?my-pi some data?></root>";
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         match &node.children()[0] {
             XmlNode::ProcessingInstruction { target, data } => {
                 assert_eq!(target, "my-pi");
@@ -762,29 +762,29 @@ mod tests {
     #[test]
     fn entity_references() {
         let xml = r#"<t>&amp; &lt; &gt; &quot; &apos;</t>"#;
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         assert_eq!(xml_text(&node), "& < > \" '");
     }
 
     #[test]
     fn numeric_char_ref_decimal() {
         let xml = "<t>&#65;</t>";
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         assert_eq!(xml_text(&node), "A");
     }
 
     #[test]
     fn numeric_char_ref_hex() {
         let xml = "<t>&#x41;</t>";
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         assert_eq!(xml_text(&node), "A");
     }
 
     #[test]
     fn namespace_basic() {
         let xml = r#"<root xmlns:ns="http://example.com"><ns:child/></root>"#;
-        let node = parse_xml_simple(xml).unwrap();
-        let child = xml_child(&node, "child").unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
+        let child = xml_child(&node, "child").expect("should succeed");
         match child {
             XmlNode::Element { namespace, .. } => {
                 assert_eq!(namespace.as_deref(), Some("http://example.com"));
@@ -796,15 +796,15 @@ mod tests {
     #[test]
     fn default_namespace() {
         let xml = r#"<root xmlns="http://default.ns"><child/></root>"#;
-        let doc = parse_xml_document(xml).unwrap();
+        let doc = parse_xml_document(xml).expect("should succeed");
         assert!(doc.declaration.is_none());
     }
 
     #[test]
     fn xml_declaration() {
         let xml = r#"<?xml version="1.0" encoding="utf-8"?><root/>"#;
-        let doc = parse_xml_document(xml).unwrap();
-        let decl = doc.declaration.unwrap();
+        let doc = parse_xml_document(xml).expect("should succeed");
+        let decl = doc.declaration.expect("should succeed");
         assert_eq!(decl.version, "1.0");
         assert_eq!(decl.encoding.as_deref(), Some("utf-8"));
     }
@@ -812,7 +812,7 @@ mod tests {
     #[test]
     fn mixed_content() {
         let xml = "<p>Hello <b>world</b>!</p>";
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         assert_eq!(node.children().len(), 3);
         match &node.children()[0] {
             XmlNode::Text(t) => assert_eq!(t, "Hello "),
@@ -837,53 +837,53 @@ mod tests {
 
     #[test]
     fn self_closing_with_space() {
-        let node = parse_xml_simple("<br />").unwrap();
+        let node = parse_xml_simple("<br />").expect("should succeed");
         assert_eq!(node.tag(), "br");
     }
 
     #[test]
     fn attr_with_single_quotes() {
-        let node = parse_xml_simple("<div class='main'/>").unwrap();
+        let node = parse_xml_simple("<div class='main'/>").expect("should succeed");
         assert_eq!(xml_attr(&node, "class"), Some("main"));
     }
 
     #[test]
     fn deeply_nested() {
         let xml = "<a><b><c><d><e>deep</e></d></c></b></a>";
-        let node = parse_xml_simple(xml).unwrap();
-        let b = xml_child(&node, "b").unwrap();
-        let c = xml_child(b, "c").unwrap();
-        let d = xml_child(c, "d").unwrap();
-        let e = xml_child(d, "e").unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
+        let b = xml_child(&node, "b").expect("should succeed");
+        let c = xml_child(b, "c").expect("should succeed");
+        let d = xml_child(c, "d").expect("should succeed");
+        let e = xml_child(d, "e").expect("should succeed");
         assert_eq!(xml_text(e), "deep");
     }
 
     #[test]
     fn multiple_children_same_level() {
         let xml = "<root><a/><b/><c/></root>";
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         assert_eq!(node_child_count(&node), 3);
     }
 
     #[test]
     fn entity_in_attribute() {
         let xml = r#"<t val="a&amp;b"/>"#;
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         assert_eq!(xml_attr(&node, "val"), Some("a&b"));
     }
 
     #[test]
     fn cdata_preserves_entities() {
         let xml = "<t><![CDATA[&amp; not resolved]]></t>";
-        let node = parse_xml_simple(xml).unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
         assert_eq!(xml_text(&node), "&amp; not resolved");
     }
 
     #[test]
     fn namespace_attr() {
         let xml = r#"<root xmlns:x="urn:x"><t x:color="red"/></root>"#;
-        let node = parse_xml_simple(xml).unwrap();
-        let t = xml_child(&node, "t").unwrap();
+        let node = parse_xml_simple(xml).expect("should succeed");
+        let t = xml_child(&node, "t").expect("should succeed");
         let attr = &t.attrs()[0];
         assert_eq!(attr.name, "color");
         assert_eq!(attr.namespace.as_deref(), Some("urn:x"));
@@ -892,7 +892,7 @@ mod tests {
     #[test]
     fn standalone_declaration() {
         let xml = r#"<?xml version="1.0" standalone="yes"?><r/>"#;
-        let doc = parse_xml_document(xml).unwrap();
+        let doc = parse_xml_document(xml).expect("should succeed");
         assert_eq!(
             doc.declaration.as_ref().and_then(|d| d.standalone),
             Some(true)

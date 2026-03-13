@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Wind force field with multiple zones, turbulence, and gusts.
 //!
@@ -352,7 +352,7 @@ mod tests {
         let z = sample_zone();
         let s = wind_at_point(&z, [1.0, 0.0, 0.0], 0.0);
         assert!(s.is_some());
-        assert!(s.unwrap().speed > 0.0);
+        assert!(s.expect("should succeed").speed > 0.0);
     }
 
     #[test]
@@ -365,8 +365,8 @@ mod tests {
     #[test]
     fn test_wind_at_point_center_max_speed() {
         let z = sample_zone();
-        let center = wind_at_point(&z, z.center, 0.0).unwrap();
-        let edge = wind_at_point(&z, [9.0, 0.0, 0.0], 0.0).unwrap();
+        let center = wind_at_point(&z, z.center, 0.0).expect("should succeed");
+        let edge = wind_at_point(&z, [9.0, 0.0, 0.0], 0.0).expect("should succeed");
         // Center should have higher speed than near edge (ignoring turbulence)
         assert!(center.speed >= edge.speed * 0.5);
     }

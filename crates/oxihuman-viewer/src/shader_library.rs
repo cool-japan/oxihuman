@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GLSL/WGSL shader library manager.
 //!
@@ -265,7 +265,7 @@ mod tests {
         register_shader(&mut lib, sample_entry("vert", ShaderStage::Vertex));
         let entry = get_shader(&lib, "vert");
         assert!(entry.is_some());
-        assert_eq!(entry.unwrap().name, "vert");
+        assert_eq!(entry.expect("should succeed").name, "vert");
     }
 
     #[test]

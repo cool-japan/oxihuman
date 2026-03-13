@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A hair clump entry.
@@ -136,7 +136,7 @@ mod tests {
         let mut e = new_hair_clump_export();
         add_hair_clump(&mut e, [0.0; 3], 5, 0.5);
         add_hair_clump(&mut e, [0.0; 3], 20, 0.5);
-        assert_eq!(largest_clump(&e).unwrap().strand_count, 20);
+        assert_eq!(largest_clump(&e).expect("should succeed").strand_count, 20);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export shape key (blend shape) definitions with basis mesh and delta arrays.
 
@@ -240,7 +240,7 @@ mod tests {
         ske_add_key(&mut e, make_key("b", vec![[0.0, 1.0, 0.0]]));
         let cfg = default_shape_key_export_config();
         let bin = ske_to_binary(&mut e, &cfg);
-        let count = u32::from_le_bytes(bin[0..4].try_into().unwrap());
+        let count = u32::from_le_bytes(bin[0..4].try_into().expect("should succeed"));
         assert_eq!(count, 2);
     }
 

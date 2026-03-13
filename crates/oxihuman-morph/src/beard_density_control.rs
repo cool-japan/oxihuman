@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Beard and facial hair density morph parameters.
@@ -165,7 +165,7 @@ mod tests {
             .zones
             .iter()
             .find(|z| z.zone == BeardZone::Mustache)
-            .unwrap();
+            .expect("should succeed");
         assert!((z.density - 1.0).abs() < 1e-6);
     }
 
@@ -198,7 +198,7 @@ mod tests {
             .zones
             .iter()
             .find(|z| z.zone == BeardZone::ChinBeard)
-            .unwrap();
+            .expect("should succeed");
         assert!((z.length - 0.7).abs() < 1e-5);
     }
 

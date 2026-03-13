@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Mesh feature line extraction: ridges, valleys, silhouettes, and sharp edges.
 
@@ -581,10 +581,10 @@ mod tests {
         let indices = vec![0u32, 1, 2, 0, 2, 3];
         let map = build_edge_face_map(&indices);
         // Shared edge 0-2 (canonical form)
-        let shared = map.get(&(0, 2)).unwrap();
+        let shared = map.get(&(0, 2)).expect("should succeed");
         assert_eq!(shared.len(), 2);
         // Boundary edge 0-1
-        let boundary = map.get(&(0, 1)).unwrap();
+        let boundary = map.get(&(0, 1)).expect("should succeed");
         assert_eq!(boundary.len(), 1);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Multiset / frequency map (String → u32).
 
@@ -137,7 +137,7 @@ mod tests {
         let mut s = new_counted_set();
         cs_add_n(&mut s, "rare", 1);
         cs_add_n(&mut s, "common", 10);
-        assert_eq!(cs_most_common(&s).unwrap(), "common");
+        assert_eq!(cs_most_common(&s).expect("should succeed"), "common");
     }
 
     #[test]

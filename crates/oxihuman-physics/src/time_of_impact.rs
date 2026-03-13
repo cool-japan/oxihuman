@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Time of impact (TOI) calculation between swept AABBs.
 
@@ -106,7 +106,7 @@ mod tests {
         // Already overlapping
         let toi = swept_aabb_toi(&a, &b);
         assert!(toi.is_some());
-        assert!(toi.unwrap() <= 1.0);
+        assert!(toi.expect("should succeed") <= 1.0);
     }
 
     #[test]

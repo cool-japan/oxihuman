@@ -393,7 +393,7 @@ mod tests {
         add_impulse_body(&mut solver, [1.0, 2.0, 3.0], 2.0, 0.5);
         let body = impulse_body_by_id(&solver, 0);
         assert!(body.is_some());
-        assert!((body.unwrap().position[0] - 1.0).abs() < 1e-6);
+        assert!((body.expect("should succeed").position[0] - 1.0).abs() < 1e-6);
     }
 
     #[test]

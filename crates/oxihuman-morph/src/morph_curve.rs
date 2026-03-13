@@ -1,7 +1,7 @@
 //! Morph curve — maps a linear input [0,1] through a curve for non-linear morph response.
 
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A single control point on the curve.
 #[allow(dead_code)]

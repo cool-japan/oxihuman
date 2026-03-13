@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Mesh slicing with a plane — cross-section extraction, mesh splitting,
 //! body-measurement circumference, and width-profile utilities.
@@ -837,7 +837,7 @@ mod tests {
     fn write_report(name: &str, text: &str) {
         let path = format!("/tmp/{name}");
         let mut f = std::fs::File::create(&path).expect("open /tmp file");
-        writeln!(f, "{text}").unwrap();
+        writeln!(f, "{text}").expect("should succeed");
     }
 
     // A single triangle that lies exactly in y=0 (XZ plane)
@@ -952,7 +952,7 @@ mod tests {
         let dir = [0.0, 1.0, 0.0];
         let hit = ray_plane_intersect(origin, dir, &plane);
         assert!(hit.is_some(), "ray should intersect horizontal plane");
-        let pt = hit.unwrap();
+        let pt = hit.expect("should succeed");
         assert!((pt[1] - 2.0).abs() < 1e-5, "hit y should be 2.0");
         write_report("test_ray_plane_hit.txt", &format!("{pt:?}"));
     }

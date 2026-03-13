@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Depth camera point cloud sensor stub.
@@ -206,7 +206,7 @@ mod tests {
             time: 0.0,
             depth: vec![1.0; 4],
         };
-        assert!((mean_depth(&frame, &cfg).unwrap() - 1.0).abs() < 1e-6);
+        assert!((mean_depth(&frame, &cfg).expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]
@@ -260,7 +260,7 @@ mod tests {
             time: 1.0,
             depth: vec![],
         });
-        assert_eq!(s.latest().unwrap().frame_index, 3);
+        assert_eq!(s.latest().expect("should succeed").frame_index, 3);
     }
 
     #[test]

@@ -146,10 +146,10 @@ mod tests {
     #[test]
     fn test_alloc_returns_correct_offset() {
         let mut a = make_alloc();
-        let fa = frame_alloc_bytes(&mut a, 64).unwrap();
+        let fa = frame_alloc_bytes(&mut a, 64).expect("should succeed");
         assert_eq!(fa.offset, 0);
         assert_eq!(fa.len, 64);
-        let fb = frame_alloc_bytes(&mut a, 32).unwrap();
+        let fb = frame_alloc_bytes(&mut a, 32).expect("should succeed");
         assert_eq!(fb.offset, 64);
     }
 
@@ -215,6 +215,6 @@ mod tests {
         frame_alloc_reset(&mut a);
         let fa = frame_alloc_bytes(&mut a, 128);
         assert!(fa.is_some());
-        assert_eq!(fa.unwrap().offset, 0);
+        assert_eq!(fa.expect("should succeed").offset, 0);
     }
 }

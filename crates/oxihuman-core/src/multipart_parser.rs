@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Multipart/form-data parser stub — splits parts by boundary.
@@ -160,14 +160,14 @@ mod tests {
     #[test]
     fn test_parse_single_part() {
         let body = "--bound\nContent-Disposition: form-data; name=\"field\"\n\nhello\n--bound--";
-        let result = parse_multipart(body, "bound").unwrap();
+        let result = parse_multipart(body, "bound").expect("should succeed");
         assert_eq!(result.parts.len(), 1);
     }
 
     #[test]
     fn test_find_part_by_name() {
         let body = "--b\nContent-Disposition: form-data; name=\"username\"\n\nalice\n--b--";
-        let result = parse_multipart(body, "b").unwrap();
+        let result = parse_multipart(body, "b").expect("should succeed");
         let part = find_part_by_name(&result, "username");
         assert!(part.is_some());
     }
@@ -197,7 +197,7 @@ mod tests {
     #[test]
     fn test_boundary_appears_in_parsed_body() {
         let body = "--mybound\nContent-Disposition: form-data; name=\"x\"\n\nval\n--mybound--";
-        let result = parse_multipart(body, "mybound").unwrap();
+        let result = parse_multipart(body, "mybound").expect("should succeed");
         assert_eq!(result.boundary, "mybound");
     }
 

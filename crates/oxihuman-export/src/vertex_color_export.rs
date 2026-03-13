@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Vertex color export: per-vertex RGBA/grayscale buffers, AO baking, and encoding.
 
@@ -353,7 +353,7 @@ mod tests {
         set_vertex_color(&mut buf, 2, [0.0, 0.0, 1.0, 1.0]);
         let bytes = encode_to_bytes(&buf);
         assert_eq!(bytes.len(), 12);
-        let decoded = decode_from_bytes(&bytes, VertexColorFormat::Rgba8).unwrap();
+        let decoded = decode_from_bytes(&bytes, VertexColorFormat::Rgba8).expect("should succeed");
         assert_eq!(decoded.colors.len(), 3);
         // Red channel of first vertex should be ~1.0
         assert!((decoded.colors[0][0] - 1.0).abs() < 0.01);
@@ -366,7 +366,7 @@ mod tests {
         set_vertex_color(&mut buf, 1, [0.1, 0.2, 0.3, 1.0]);
         let bytes = encode_to_bytes(&buf);
         assert_eq!(bytes.len(), 24);
-        let decoded = decode_from_bytes(&bytes, VertexColorFormat::RgbF32).unwrap();
+        let decoded = decode_from_bytes(&bytes, VertexColorFormat::RgbF32).expect("should succeed");
         assert!((decoded.colors[0][0] - 0.3).abs() < 1e-5);
         assert!((decoded.colors[1][2] - 0.3).abs() < 1e-5);
     }
@@ -378,7 +378,7 @@ mod tests {
         fill_uniform_color(&mut buf, [0.5, 0.5, 0.5, 1.0]);
         let bytes = encode_to_bytes(&buf);
         assert_eq!(bytes.len(), 2);
-        let decoded = decode_from_bytes(&bytes, VertexColorFormat::Grayscale8).unwrap();
+        let decoded = decode_from_bytes(&bytes, VertexColorFormat::Grayscale8).expect("should succeed");
         assert_eq!(decoded.colors.len(), 2);
     }
 

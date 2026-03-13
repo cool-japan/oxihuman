@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 pub struct DddCommand {
@@ -81,7 +81,7 @@ mod tests {
         let mut l = new_command_log();
         log_dispatch(&mut l, new_ddd_command("First", ""));
         log_dispatch(&mut l, new_ddd_command("Last", ""));
-        let last = log_last_command(&l).unwrap();
+        let last = log_last_command(&l).expect("should succeed");
         assert_eq!(last.name, "Last");
     }
 

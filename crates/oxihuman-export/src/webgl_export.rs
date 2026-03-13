@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! WebGL buffer/shader stub export.
@@ -96,7 +96,7 @@ mod tests {
     fn f32_buffer_correct_byte_size() {
         let mut exp = new_webgl_export();
         add_webgl_f32_buffer(&mut exp, "verts", &[0.0f32; 9]);
-        let b = find_webgl_buffer(&exp, "verts").unwrap();
+        let b = find_webgl_buffer(&exp, "verts").expect("should succeed");
         assert_eq!(b.data.len(), 36 /* 9 * 4 bytes */);
     }
 
@@ -104,7 +104,7 @@ mod tests {
     fn index_buffer_correct_byte_size() {
         let mut exp = new_webgl_export();
         add_webgl_index_buffer(&mut exp, "idx", &[0u16, 1, 2]);
-        let b = find_webgl_buffer(&exp, "idx").unwrap();
+        let b = find_webgl_buffer(&exp, "idx").expect("should succeed");
         assert_eq!(b.data.len(), 6 /* 3 * 2 bytes */);
     }
 
@@ -139,7 +139,7 @@ mod tests {
     fn index_buffer_type_correct() {
         let mut exp = new_webgl_export();
         add_webgl_index_buffer(&mut exp, "i", &[0u16]);
-        let b = find_webgl_buffer(&exp, "i").unwrap();
+        let b = find_webgl_buffer(&exp, "i").expect("should succeed");
         assert_eq!(
             b.buffer_type,
             WebGlBufferType::ElementArrayBuffer /* element buffer */

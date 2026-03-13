@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Physically-based skin color model using the Fitzpatrick phototype scale
 //! and a simplified melanin/hemoglobin reflectance model.

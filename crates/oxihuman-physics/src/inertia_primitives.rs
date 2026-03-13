@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Inertia tensor computation for primitive shapes as [Ixx, Iyy, Izz, Ixy, Ixz, Iyz].
 

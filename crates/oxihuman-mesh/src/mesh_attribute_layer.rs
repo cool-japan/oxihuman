@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Generic mesh attribute layer for per-element data.
@@ -117,7 +117,7 @@ mod tests {
         add_attribute_layer(&mut s, "ao", AttrDomain::Vertex, 3, 1.0);
         let l = get_attribute_layer(&s, "ao");
         assert!(l.is_some() /* found */);
-        assert_eq!(l.unwrap().data.len(), 3 /* three elements */);
+        assert_eq!(l.expect("should succeed").data.len(), 3 /* three elements */);
     }
 
     #[test]
@@ -151,7 +151,7 @@ mod tests {
             l.data[2] = 6.0;
             l.data[3] = 8.0;
         }
-        let avg = attribute_average(&s, "val").unwrap();
+        let avg = attribute_average(&s, "val").expect("should succeed");
         assert!((avg - 5.0).abs() < 1e-6 /* average = 5.0 */);
     }
 

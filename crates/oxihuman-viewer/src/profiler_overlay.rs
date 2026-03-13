@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! ProfilerOverlay — on-screen timing overlay.
 
@@ -95,7 +95,7 @@ mod tests {
     fn test_sample_at_some() {
         let mut o = new_profiler_overlay();
         record_sample(&mut o, "gpu", 5.0);
-        let s = sample_at(&o, 0).unwrap();
+        let s = sample_at(&o, 0).expect("should succeed");
         assert_eq!(s.label, "gpu");
         assert!((s.ms - 5.0).abs() < 1e-6);
     }

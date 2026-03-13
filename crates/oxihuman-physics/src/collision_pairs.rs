@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Collision pair list management (broad-phase results).
 
@@ -136,7 +136,7 @@ mod tests {
         pair_list_add(&mut list, 1, 2, 3.0);
         pair_list_add(&mut list, 3, 4, 0.5);
         pair_list_add(&mut list, 5, 6, 2.0);
-        let closest = pair_list_closest(&list).unwrap();
+        let closest = pair_list_closest(&list).expect("should succeed");
         assert_eq!(closest.a, 3);
         assert_eq!(closest.b, 4);
     }

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Configuration merging and diffing utilities.
 
@@ -121,7 +121,7 @@ mod tests {
         let mut b = HashMap::new();
         b.insert("k".to_string(), "v2".to_string());
         let m = merge_configs(&a, &b);
-        assert_eq!(m.get("k").unwrap(), "v2");
+        assert_eq!(m.get("k").expect("should succeed"), "v2");
     }
 
     #[test]
@@ -158,7 +158,7 @@ mod tests {
         let mut patch = HashMap::new();
         patch.insert("k".to_string(), Some("v".to_string()));
         config_patch(&mut base, &patch);
-        assert_eq!(base.get("k").unwrap(), "v");
+        assert_eq!(base.get("k").expect("should succeed"), "v");
     }
 
     #[test]

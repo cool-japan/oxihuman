@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Kinematic body for animation-driven collision.
 
@@ -266,7 +266,7 @@ mod tests {
             KinematicShape::Sphere { radius: 1.0 },
         );
         move_body(&mut world, id, [2.0, 0.0, 0.0], 1.0);
-        let body = get_body(&world, id).unwrap();
+        let body = get_body(&world, id).expect("should succeed");
         assert!((body.velocity[0] - 2.0).abs() < 1e-5);
     }
 
@@ -279,7 +279,7 @@ mod tests {
             KinematicShape::Sphere { radius: 1.0 },
         );
         move_body(&mut world, id, [3.0, 4.0, 0.0], 0.1);
-        let body = get_body(&world, id).unwrap();
+        let body = get_body(&world, id).expect("should succeed");
         assert!((body.position[0] - 3.0).abs() < 1e-5);
         assert!((body.position[1] - 4.0).abs() < 1e-5);
     }
@@ -314,7 +314,7 @@ mod tests {
         let b = sphere_body(1, [1.5, 0.0, 0.0], 1.0);
         let contact = sphere_sphere_contact(&a, &b);
         assert!(contact.is_some());
-        let c = contact.unwrap();
+        let c = contact.expect("should succeed");
         assert!(c.depth > 0.0);
     }
 
@@ -365,7 +365,7 @@ mod tests {
             .bodies
             .iter_mut()
             .find(|b| b.id == id)
-            .unwrap()
+            .expect("should succeed")
             .enabled = false;
         assert_eq!(enabled_body_count(&world), 1);
     }
@@ -379,6 +379,9 @@ mod tests {
             KinematicShape::Sphere { radius: 1.0 },
         );
         set_layer_mask(&mut world, id, 0x0F);
-        assert_eq!(get_body(&world, id).unwrap().layer_mask, 0x0F);
+        assert_eq!(
+            get_body(&world, id).expect("should succeed").layer_mask,
+            0x0F
+        );
     }
 }

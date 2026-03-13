@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Record and playback expression state over time.
 
@@ -238,7 +238,10 @@ mod tests {
         record_snapshot(&mut rec, 0.0, vec![("brow".to_string(), 0.0)]);
         record_snapshot(&mut rec, 1.0, vec![("brow".to_string(), 1.0)]);
         let weights = playback_at(&rec, 0.5);
-        let brow = weights.iter().find(|(n, _)| n == "brow").unwrap();
+        let brow = weights
+            .iter()
+            .find(|(n, _)| n == "brow")
+            .expect("should succeed");
         assert!((brow.1 - 0.5).abs() < 1e-5);
     }
 

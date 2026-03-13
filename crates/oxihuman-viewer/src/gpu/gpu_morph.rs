@@ -1,10 +1,10 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GPU-accelerated morph target application via wgpu compute shader.
 //!
-//! [`GpuMorphPipeline`] compiles a WGSL compute shader once and reuses it
-//! across frames.  [`MorphComputeBuffers`] holds the per-dispatch GPU buffers
+//! `GpuMorphPipeline` compiles a WGSL compute shader once and reuses it
+//! across frames.  `MorphComputeBuffers` holds the per-dispatch GPU buffers
 //! (base positions, sparse delta list, output, params, staging).
 //!
 //! ## Usage

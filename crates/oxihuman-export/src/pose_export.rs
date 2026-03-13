@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Pose and animation-frame export with keyframe support.
 //!
@@ -399,7 +399,7 @@ mod tests {
     fn test_sample_clip_at_single_frame() {
         let mut clip = new_pose_clip("c", 30.0);
         add_frame(&mut clip, make_frame(0.0, 2));
-        let s = sample_clip_at(&clip, 0.5).unwrap();
+        let s = sample_clip_at(&clip, 0.5).expect("should succeed");
         assert_eq!(s.bone_transforms.len(), 2);
     }
 
@@ -420,7 +420,7 @@ mod tests {
                 bone_transforms: vec![([2.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0])],
             },
         );
-        let s = sample_clip_at(&clip, 0.5).unwrap();
+        let s = sample_clip_at(&clip, 0.5).expect("should succeed");
         assert!((s.bone_transforms[0].0[0] - 1.0).abs() < 1e-4);
     }
 

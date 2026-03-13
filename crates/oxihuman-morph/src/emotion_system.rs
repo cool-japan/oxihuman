@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Emotion-driven facial expression mapping.
 //!
@@ -570,7 +570,7 @@ mod tests {
             );
         }
         // Happy should have at least 3 morph targets.
-        let happy_expr = sys.get_expression(&Emotion::Happy).unwrap();
+        let happy_expr = sys.get_expression(&Emotion::Happy).expect("should succeed");
         assert!(
             happy_expr.weights.len() >= 3,
             "Happy should have at least 3 morph weights"

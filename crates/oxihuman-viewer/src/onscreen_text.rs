@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! On-screen text label renderer for HUD overlays (position, content, color, size).
 
@@ -218,7 +218,7 @@ mod tests {
         let cfg = default_onscreen_text_config();
         let id = text_add_label(&mut s, &cfg, [0.0, 0.0], "Old");
         text_update_label(&mut s, id, [5.0, 5.0], "New");
-        let found = text_find_label(&s, id).unwrap();
+        let found = text_find_label(&s, id).expect("should succeed");
         assert_eq!(found.content, "New");
         assert!((found.position[0] - 5.0).abs() < 1e-6);
     }
@@ -229,7 +229,7 @@ mod tests {
         let cfg = default_onscreen_text_config();
         let id = text_add_label(&mut s, &cfg, [0.0, 0.0], "Label");
         text_set_visible(&mut s, id, false);
-        assert!(!text_find_label(&s, id).unwrap().visible);
+        assert!(!text_find_label(&s, id).expect("should succeed").visible);
     }
 
     #[test]

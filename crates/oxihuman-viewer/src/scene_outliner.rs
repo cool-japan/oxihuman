@@ -172,8 +172,8 @@ mod tests {
         outliner_select_node(&mut o, 1);
         outliner_select_node(&mut o, 2);
         // node 1 should no longer be selected
-        assert!(!o.nodes.iter().find(|n| n.id == 1).unwrap().selected);
-        assert!(o.nodes.iter().find(|n| n.id == 2).unwrap().selected);
+        assert!(!o.nodes.iter().find(|n| n.id == 1).expect("should succeed").selected);
+        assert!(o.nodes.iter().find(|n| n.id == 2).expect("should succeed").selected);
     }
 
     #[test]

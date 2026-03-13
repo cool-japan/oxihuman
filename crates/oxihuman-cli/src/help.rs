@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! CLI help text printer.
 
@@ -31,9 +31,12 @@ pub fn print_help() {
     println!("  anim-bake     Bake animation cache from params JSON array to PC2/MDD");
     println!("  stream-export Stream-export mesh positions in chunks");
     println!("  plugin-list   List built-in plugin descriptors");
-    println!("  remesh         Remesh an OBJ (isotropic, stub)");
-    println!("  physics-export Export physics scene (gltf-physics or openxr)");
-    println!("  camera-info    Print default camera rig JSON");
+    println!("  remesh              Remesh an OBJ (isotropic, stub)");
+    println!("  physics-export      Export physics scene (gltf-physics or openxr)");
+    println!("  camera-info         Print default camera rig JSON");
+    println!("  pack-dist-manifest  Generate SHA-256 distribution manifest for a pack directory");
+    println!("  pack-verify-dist    Verify a pack directory against a distribution manifest");
+    println!("  pack-wizard         Interactive wizard to build an .oxp asset pack step by step");
     println!();
     println!("GENERATE OPTIONS:");
     println!("  --base <PATH>            Base .obj mesh file (required)");
@@ -154,4 +157,11 @@ pub fn print_help() {
     println!("  --targets <DIR>          Directory of .target morph files (required)");
     println!("  --output <BUNDLE>        Output .oxb bundle file (required)");
     println!("  --manifest <TOML>        Optional manifest TOML file");
+    println!();
+    println!("PACK-DIST-MANIFEST OPTIONS:");
+    println!("  --pack-dir <DIR>         Directory to scan (required)");
+    println!();
+    println!("PACK-VERIFY-DIST OPTIONS:");
+    println!("  --manifest <FILE>        Distribution manifest JSON file (required)");
+    println!("  --pack-dir <DIR>         Pack directory to verify (required)");
 }

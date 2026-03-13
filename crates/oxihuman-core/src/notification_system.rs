@@ -237,7 +237,7 @@ mod tests {
         let id = push_notification(&mut sys, "Title", "Msg", NotificationSeverity::Info, 5.0);
         let n = notification_by_id(&sys, id);
         assert!(n.is_some());
-        assert_eq!(n.unwrap().title, "Title");
+        assert_eq!(n.expect("should succeed").title, "Title");
         assert!(notification_by_id(&sys, 999).is_none());
     }
 
@@ -286,7 +286,7 @@ mod tests {
     fn test_push_info() {
         let mut sys = new_notification_system(10);
         let id = push_info(&mut sys, "Hello", "World");
-        let n = notification_by_id(&sys, id).unwrap();
+        let n = notification_by_id(&sys, id).expect("should succeed");
         assert_eq!(n.severity, NotificationSeverity::Info);
         assert!((n.duration_secs - 5.0).abs() < 1e-6);
     }
@@ -295,7 +295,7 @@ mod tests {
     fn test_push_error() {
         let mut sys = new_notification_system(10);
         let id = push_error(&mut sys, "Oops", "Failed");
-        let n = notification_by_id(&sys, id).unwrap();
+        let n = notification_by_id(&sys, id).expect("should succeed");
         assert_eq!(n.severity, NotificationSeverity::Error);
         assert!((n.duration_secs - 10.0).abs() < 1e-6);
     }

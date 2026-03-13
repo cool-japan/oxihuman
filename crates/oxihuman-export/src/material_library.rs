@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Material library serialization and management.
 
@@ -209,7 +209,7 @@ mod tests {
         assert_eq!(idx, 0);
         let found = get_material(&lib, "Gray");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().name, "Gray");
+        assert_eq!(found.expect("should succeed").name, "Gray");
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Mesh shader stub export (DirectX 12 / Vulkan mesh shading pipeline).
@@ -149,7 +149,7 @@ mod tests {
     fn max_vertices_stored() {
         let mut exp = new_mesh_shader_export();
         add_mesh_shader_program(&mut exp, MeshShaderStage::Mesh, "m", "", 128, 84);
-        let p = find_mesh_shader_program(&exp, MeshShaderStage::Mesh).unwrap();
+        let p = find_mesh_shader_program(&exp, MeshShaderStage::Mesh).expect("should succeed");
         assert_eq!(p.max_vertices, 128 /* correct */);
     }
 

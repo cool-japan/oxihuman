@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Compute delta normals for blend shape / morph targets.
 //!
@@ -414,7 +414,7 @@ mod tests {
         assert_eq!(back.count_nonzero(), 2);
 
         // Check specific values
-        let d0 = back.deltas.iter().find(|d| d.vertex_index == 0).unwrap();
+        let d0 = back.deltas.iter().find(|d| d.vertex_index == 0).expect("should succeed");
         assert!((d0.dn[0] - 0.1).abs() < 1e-5);
         assert!((d0.dn[1] - 0.2).abs() < 1e-5);
     }
@@ -586,7 +586,7 @@ mod tests {
         let flat = mnd.to_flat();
         let bytes: Vec<u8> = flat.iter().flat_map(|f| f.to_le_bytes()).collect();
         std::fs::write("/tmp/normal_delta_flat.bin", &bytes).expect("should write to /tmp/");
-        let read_bytes = std::fs::read("/tmp/normal_delta_flat.bin").unwrap();
+        let read_bytes = std::fs::read("/tmp/normal_delta_flat.bin").expect("should succeed");
         assert_eq!(read_bytes.len(), 4 * 3 * 4); // 4 verts * 3 floats * 4 bytes
     }
 }

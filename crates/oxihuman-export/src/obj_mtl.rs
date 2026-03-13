@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! OBJ + MTL material file export with PBR material properties.
 //!
@@ -612,9 +612,9 @@ mod tests {
     fn export_mtl_creates_file() {
         let mats = vec![MtlMaterial::default(), MtlMaterial::skin()];
         let path = std::path::PathBuf::from("/tmp/test_oxihuman.mtl");
-        export_mtl(&mats, &path).unwrap();
+        export_mtl(&mats, &path).expect("should succeed");
         assert!(path.exists());
-        let content = std::fs::read_to_string(&path).unwrap();
+        let content = std::fs::read_to_string(&path).expect("should succeed");
         assert!(content.contains("newmtl default"));
         assert!(content.contains("newmtl skin"));
         std::fs::remove_file(&path).ok();
@@ -724,7 +724,7 @@ mod tests {
             ..Default::default()
         };
         let obj_path = std::path::PathBuf::from("/tmp/test_quad.obj");
-        let stats = export_obj_mtl(&mesh, &obj_path, &mats, &opts).unwrap();
+        let stats = export_obj_mtl(&mesh, &obj_path, &mats, &opts).expect("should succeed");
 
         assert!(obj_path.exists());
         let mtl_path = std::path::PathBuf::from("/tmp/test_quad.mtl");
@@ -745,7 +745,7 @@ mod tests {
         let mats = vec![MtlMaterial::default()];
         let opts = ObjMtlOptions::default();
         let obj_path = std::path::PathBuf::from("/tmp/test_stats.obj");
-        let stats = export_obj_mtl(&mesh, &obj_path, &mats, &opts).unwrap();
+        let stats = export_obj_mtl(&mesh, &obj_path, &mats, &opts).expect("should succeed");
 
         assert_eq!(stats.vertex_count, 3);
         assert_eq!(stats.normal_count, 3);

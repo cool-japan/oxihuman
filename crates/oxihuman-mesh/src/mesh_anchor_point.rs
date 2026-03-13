@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Mesh anchor/pin point for simulation — marks vertices as fixed constraints.
@@ -118,7 +118,7 @@ mod tests {
         /* find_anchor should return the entry for vertex 3 */
         let mut s = new_anchor_set();
         add_anchor(&mut s, 3, "mid");
-        let a = find_anchor(&s, 3).unwrap();
+        let a = find_anchor(&s, 3).expect("should succeed");
         assert_eq!(a.vertex_index, 3);
     }
 

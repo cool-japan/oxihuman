@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Billboard/sprite rendering.
 
@@ -143,7 +143,7 @@ mod tests {
     fn test_get_valid() {
         let mut r = new_sprite_renderer();
         sprite_add(&mut r, make_sprite(42, [0.0, 1.0, 0.0]));
-        assert_eq!(sprite_get(&r, 0).unwrap().texture_id, 42);
+        assert_eq!(sprite_get(&r, 0).expect("should succeed").texture_id, 42);
     }
 
     #[test]

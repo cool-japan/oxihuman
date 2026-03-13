@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Procedural noise texture generation: value noise, fractal Brownian motion,
 //! wood, marble, and Voronoi-like textures. All math done from scratch — no external crates.

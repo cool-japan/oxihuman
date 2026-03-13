@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Optimize morph target parameter space via dimensionality reduction and
 //! redundancy elimination.
@@ -399,7 +399,10 @@ mod tests {
     fn test_normalize_param_samples_range() {
         let mut samples = make_samples(&[("x", vec![1.0, 5.0, 3.0])]);
         normalize_param_samples(&mut samples);
-        let vals: Vec<f32> = samples.iter().map(|s| *s.get("x").unwrap()).collect();
+        let vals: Vec<f32> = samples
+            .iter()
+            .map(|s| *s.get("x").expect("should succeed"))
+            .collect();
         let min = vals.iter().cloned().fold(f32::MAX, f32::min);
         let max = vals.iter().cloned().fold(f32::MIN, f32::max);
         assert!((min - 0.0).abs() < 1e-5, "min should be 0, got {min}");

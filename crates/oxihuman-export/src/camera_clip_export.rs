@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Camera clip plane export.
@@ -180,7 +180,7 @@ mod tests {
         let mut anim = new_clip_animation();
         add_clip_keyframe(&mut anim, 0.0, 0.1, 100.0);
         add_clip_keyframe(&mut anim, 2.0, 0.1, 200.0);
-        let (_, far) = sample_clip_at(&anim, 1.0).unwrap();
+        let (_, far) = sample_clip_at(&anim, 1.0).expect("should succeed");
         assert!((far - 150.0).abs() < 1e-3);
     }
 

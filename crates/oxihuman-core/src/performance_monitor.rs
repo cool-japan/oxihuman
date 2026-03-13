@@ -298,7 +298,7 @@ mod tests {
         record_frame(&mut mon, 10.0, 5.0, 5.0);
         record_frame(&mut mon, 50.0, 30.0, 20.0);
         record_frame(&mut mon, 20.0, 10.0, 10.0);
-        let worst = worst_frame(&mon).unwrap();
+        let worst = worst_frame(&mon).expect("should succeed");
         assert!((worst.frame_ms - 50.0).abs() < 1e-4);
     }
 

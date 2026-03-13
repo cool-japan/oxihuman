@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -118,7 +118,7 @@ mod tests {
         oh_add_node(&mut e, 1, "Parent", "EMPTY");
         oh_add_node(&mut e, 2, "Child", "MESH");
         oh_set_parent(&mut e, 2, 1);
-        let child = oh_get_node(&e, 2).unwrap();
+        let child = oh_get_node(&e, 2).expect("should succeed");
         assert_eq!(child.parent_id, Some(1));
     }
 

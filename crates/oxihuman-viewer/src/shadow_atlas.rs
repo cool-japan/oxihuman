@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Shadow atlas texture packing.
@@ -128,7 +128,7 @@ mod tests {
     #[test]
     fn test_region_starts_at_origin() {
         let mut a = new_shadow_atlas(512, 512);
-        let r = sa_allocate(&mut a, 128).unwrap();
+        let r = sa_allocate(&mut a, 128).expect("should succeed");
         assert_eq!(r.x, 0);
         assert_eq!(r.y, 0);
     }

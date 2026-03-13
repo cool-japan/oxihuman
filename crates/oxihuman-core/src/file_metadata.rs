@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! File metadata (size, mtime) reader stub.
@@ -142,7 +142,7 @@ mod tests {
             FileMetadata::new("/b", 500, 0),
             FileMetadata::new("/c", 200, 0),
         ];
-        let l = largest_file(&metas).unwrap();
+        let l = largest_file(&metas).expect("should succeed");
         assert_eq!(l.path, "/b");
     }
 
@@ -152,7 +152,7 @@ mod tests {
             FileMetadata::new("/a", 0, 1000),
             FileMetadata::new("/b", 0, 9000),
         ];
-        let n = newest_file(&metas).unwrap();
+        let n = newest_file(&metas).expect("should succeed");
         assert_eq!(n.path, "/b");
     }
 

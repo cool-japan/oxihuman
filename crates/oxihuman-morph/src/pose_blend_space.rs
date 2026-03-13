@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A sample in a 2D blend space.
@@ -151,7 +151,7 @@ mod tests {
     fn closest_single() {
         let mut s = new_pose_blend_space();
         add_blend_sample(&mut s, "run", 1.0, 0.0);
-        assert_eq!(closest_sample(&s, 0.5, 0.0).unwrap(), "run");
+        assert_eq!(closest_sample(&s, 0.5, 0.0).expect("should succeed"), "run");
     }
 
     #[test]

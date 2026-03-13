@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Parametric face model with FACS action units and expression composition.
 
@@ -376,7 +376,10 @@ mod tests {
     #[test]
     fn test_apply_action_unit_scales() {
         let aus = standard_face_action_units();
-        let au12 = aus.iter().find(|au| au.au_id == 12).unwrap();
+        let au12 = aus
+            .iter()
+            .find(|au| au.au_id == 12)
+            .expect("should succeed");
         let mut model = FaceModel::new();
         model.apply_action_unit(au12, 0.5);
         // AU12 drives smile_l with weight 1.0 × 0.5 = 0.5
@@ -467,9 +470,15 @@ mod tests {
     #[test]
     fn test_bilateral_param_symmetric_flag() {
         let params = standard_face_params();
-        let jaw = params.iter().find(|p| p.name == "jaw_open").unwrap();
+        let jaw = params
+            .iter()
+            .find(|p| p.name == "jaw_open")
+            .expect("should succeed");
         assert!(jaw.symmetric, "jaw_open should be symmetric");
-        let brow_l = params.iter().find(|p| p.name == "brow_raise_l").unwrap();
+        let brow_l = params
+            .iter()
+            .find(|p| p.name == "brow_raise_l")
+            .expect("should succeed");
         assert!(!brow_l.symmetric, "brow_raise_l should not be symmetric");
     }
 
@@ -477,7 +486,10 @@ mod tests {
     #[test]
     fn test_action_unit_bilateral_flag() {
         let aus = standard_face_action_units();
-        let au12 = aus.iter().find(|au| au.au_id == 12).unwrap();
+        let au12 = aus
+            .iter()
+            .find(|au| au.au_id == 12)
+            .expect("should succeed");
         assert!(au12.bilateral);
     }
 

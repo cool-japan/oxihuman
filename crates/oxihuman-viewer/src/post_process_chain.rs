@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Post-processing effects chain (bloom, sharpen, SSAO stub, tone map, etc.).
 //!
@@ -327,7 +327,7 @@ mod tests {
         assert!(set_effect_param(&mut chain, 0, "intensity", 0.5));
         let v = get_effect_param(&chain, 0, "intensity");
         assert!(v.is_some());
-        assert!((v.unwrap() - 0.5).abs() < 1e-6);
+        assert!((v.expect("should succeed") - 0.5).abs() < 1e-6);
     }
 
     // 8 – get_effect_param missing key

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Huffman encoding/decoding (frequency-based).
 
@@ -162,7 +162,7 @@ mod tests {
     fn test_encode_decode_roundtrip() {
         let data = b"aabbbcccc";
         let freq = build_freq_table(data);
-        let tree = build_tree(&freq).unwrap();
+        let tree = build_tree(&freq).expect("should succeed");
         let codes = build_code_table(&tree);
         let bits = encode(data, &codes);
         let decoded = decode(&bits, &tree);
@@ -180,7 +180,7 @@ mod tests {
     fn test_single_symbol() {
         let data = b"aaaa";
         let freq = build_freq_table(data);
-        let tree = build_tree(&freq).unwrap();
+        let tree = build_tree(&freq).expect("should succeed");
         let codes = build_code_table(&tree);
         let bits = encode(data, &codes);
         let decoded = decode(&bits, &tree);
@@ -196,7 +196,7 @@ mod tests {
     #[test]
     fn test_code_length_shorter_for_frequent() {
         let freq = build_freq_table(b"aaaabbbc");
-        let tree = build_tree(&freq).unwrap();
+        let tree = build_tree(&freq).expect("should succeed");
         let codes = build_code_table(&tree);
         let len_a = codes[&b'a'].len();
         let len_c = codes[&b'c'].len();
@@ -207,7 +207,7 @@ mod tests {
     fn test_avg_code_length() {
         let data = b"aabbbb";
         let freq = build_freq_table(data);
-        let tree = build_tree(&freq).unwrap();
+        let tree = build_tree(&freq).expect("should succeed");
         let codes = build_code_table(&tree);
         let avg = avg_code_length(&freq, &codes);
         assert!(avg > 0.0 && avg <= 8.0);
@@ -217,7 +217,7 @@ mod tests {
     fn test_all_unique_symbols() {
         let data = b"abcdef";
         let freq = build_freq_table(data);
-        let tree = build_tree(&freq).unwrap();
+        let tree = build_tree(&freq).expect("should succeed");
         let codes = build_code_table(&tree);
         assert_eq!(codes.len(), 6);
     }
@@ -225,7 +225,7 @@ mod tests {
     #[test]
     fn test_tree_freq_root() {
         let freq = build_freq_table(b"aabbcc");
-        let tree = build_tree(&freq).unwrap();
+        let tree = build_tree(&freq).expect("should succeed");
         assert_eq!(tree.freq(), 6);
     }
 
@@ -233,7 +233,7 @@ mod tests {
     fn test_encode_produces_bits() {
         let data = b"abc";
         let freq = build_freq_table(data);
-        let tree = build_tree(&freq).unwrap();
+        let tree = build_tree(&freq).expect("should succeed");
         let codes = build_code_table(&tree);
         let bits = encode(data, &codes);
         assert!(!bits.is_empty());
@@ -242,7 +242,7 @@ mod tests {
     #[test]
     fn test_decode_empty_bits() {
         let freq = build_freq_table(b"a");
-        let tree = build_tree(&freq).unwrap();
+        let tree = build_tree(&freq).expect("should succeed");
         let decoded = decode(&[], &tree);
         assert!(decoded.is_empty());
     }

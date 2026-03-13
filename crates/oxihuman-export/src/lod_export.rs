@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Multi-LOD GLB export: decimate a mesh at several ratios and write one GLB per level.
 
@@ -188,7 +188,7 @@ mod tests {
 
     fn tmp_dir(name: &str) -> PathBuf {
         let p = PathBuf::from(format!("/tmp/test_lod_export_{}", name));
-        std::fs::create_dir_all(&p).unwrap();
+        std::fs::create_dir_all(&p).expect("should succeed");
         p
     }
 
@@ -212,7 +212,7 @@ mod tests {
     fn export_lod_pack_creates_files() {
         let mesh = suited_grid_mesh();
         let dir = tmp_dir("creates_files");
-        let paths = export_lod_pack(&mesh, "human", &dir, &default_lod_levels()).unwrap();
+        let paths = export_lod_pack(&mesh, "human", &dir, &default_lod_levels()).expect("should succeed");
         for p in &paths {
             assert!(p.exists(), "expected file to exist: {}", p.display());
         }
@@ -224,7 +224,7 @@ mod tests {
         let mesh = suited_grid_mesh();
         let dir = tmp_dir("correct_count");
         let levels = default_lod_levels();
-        let paths = export_lod_pack(&mesh, "human", &dir, &levels).unwrap();
+        let paths = export_lod_pack(&mesh, "human", &dir, &levels).expect("should succeed");
         assert_eq!(paths.len(), levels.len());
     }
 
@@ -233,11 +233,11 @@ mod tests {
     fn export_lod_pack_files_are_valid_glb() {
         let mesh = suited_grid_mesh();
         let dir = tmp_dir("valid_glb");
-        let paths = export_lod_pack(&mesh, "human", &dir, &default_lod_levels()).unwrap();
+        let paths = export_lod_pack(&mesh, "human", &dir, &default_lod_levels()).expect("should succeed");
         // GLB magic: 0x46546C67 in little-endian bytes "glTF"
         let magic: [u8; 4] = [0x67, 0x6C, 0x54, 0x46];
         for p in &paths {
-            let data = std::fs::read(p).unwrap();
+            let data = std::fs::read(p).expect("should succeed");
             assert!(data.len() >= 4, "file too short: {}", p.display());
             assert_eq!(&data[0..4], &magic, "bad GLB magic in {}", p.display());
         }
@@ -248,7 +248,7 @@ mod tests {
     fn export_default_lod_pack_creates_three_files() {
         let mesh = suited_grid_mesh();
         let dir = tmp_dir("default_three");
-        let paths = export_default_lod_pack(&mesh, "human", &dir).unwrap();
+        let paths = export_default_lod_pack(&mesh, "human", &dir).expect("should succeed");
         assert_eq!(paths.len(), 3);
         for p in &paths {
             assert!(p.exists());
@@ -274,7 +274,7 @@ mod tests {
         let mesh = suited_grid_mesh();
         let dir = tmp_dir("stats_count");
         let levels = default_lod_levels();
-        let stats = export_lod_pack_with_stats(&mesh, "human", &dir, &levels).unwrap();
+        let stats = export_lod_pack_with_stats(&mesh, "human", &dir, &levels).expect("should succeed");
         assert_eq!(stats.levels.len(), levels.len());
     }
 
@@ -284,7 +284,7 @@ mod tests {
         let mesh = suited_grid_mesh();
         let dir = tmp_dir("total_size");
         let stats =
-            export_lod_pack_with_stats(&mesh, "human", &dir, &default_lod_levels()).unwrap();
+            export_lod_pack_with_stats(&mesh, "human", &dir, &default_lod_levels()).expect("should succeed");
         assert!(stats.total_size_bytes() > 0, "total size must be > 0");
     }
 
@@ -294,7 +294,7 @@ mod tests {
         let mesh = suited_grid_mesh();
         let dir = tmp_dir("size_ordering");
         let stats =
-            export_lod_pack_with_stats(&mesh, "human", &dir, &default_lod_levels()).unwrap();
+            export_lod_pack_with_stats(&mesh, "human", &dir, &default_lod_levels()).expect("should succeed");
         // LOD0 should be >= LOD2 in file size
         let lod0_size = stats.levels[0].file_size_bytes;
         let lod2_size = stats.levels[2].file_size_bytes;

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Multi-link pendulum chain simulation.
 //!
@@ -360,7 +360,7 @@ mod tests {
     fn tip_position_matches_last_link() {
         let chain = simple_chain();
         let tip = pendulum_tip_position(&chain);
-        let last = chain.links.last().unwrap().position;
+        let last = chain.links.last().expect("should succeed").position;
         assert!((tip[0] - last[0]).abs() < 1e-6);
         assert!((tip[1] - last[1]).abs() < 1e-6);
     }

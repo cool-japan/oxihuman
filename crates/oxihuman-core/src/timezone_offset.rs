@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Timezone offset calculator stub.
@@ -112,19 +112,19 @@ mod tests {
 
     #[test]
     fn test_parse_offset_utc() {
-        let tz = parse_offset("UTC").unwrap();
+        let tz = parse_offset("UTC").expect("should succeed");
         assert_eq!(tz.minutes, 0);
     }
 
     #[test]
     fn test_parse_offset_positive() {
-        let tz = parse_offset("+09:00").unwrap();
+        let tz = parse_offset("+09:00").expect("should succeed");
         assert_eq!(tz.minutes, 540);
     }
 
     #[test]
     fn test_parse_offset_negative() {
-        let tz = parse_offset("-05:00").unwrap();
+        let tz = parse_offset("-05:00").expect("should succeed");
         assert_eq!(tz.minutes, -300);
     }
 

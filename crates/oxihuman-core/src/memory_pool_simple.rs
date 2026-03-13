@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Fixed-size block memory pool (pre-allocated).
 
@@ -76,8 +76,8 @@ mod tests {
     #[test]
     fn alloc_sequential() {
         let mut pool = new_mem_pool_simple(16, 4);
-        let a = pool_alloc(&mut pool).unwrap();
-        let b = pool_alloc(&mut pool).unwrap();
+        let a = pool_alloc(&mut pool).expect("should succeed");
+        let b = pool_alloc(&mut pool).expect("should succeed");
         assert_ne!(a, b);
         assert_eq!(pool_used_count(&pool), 2);
     }
@@ -85,7 +85,7 @@ mod tests {
     #[test]
     fn free_releases_block() {
         let mut pool = new_mem_pool_simple(16, 4);
-        let idx = pool_alloc(&mut pool).unwrap();
+        let idx = pool_alloc(&mut pool).expect("should succeed");
         pool_free(&mut pool, idx);
         assert_eq!(pool_used_count(&pool), 0);
         assert_eq!(pool_free_count(&pool), 4);
@@ -103,7 +103,7 @@ mod tests {
     #[test]
     fn reuse_after_free() {
         let mut pool = new_mem_pool_simple(8, 2);
-        let idx = pool_alloc(&mut pool).unwrap();
+        let idx = pool_alloc(&mut pool).expect("should succeed");
         pool_free(&mut pool, idx);
         let reused = pool_alloc(&mut pool);
         assert!(reused.is_some());
@@ -125,7 +125,7 @@ mod tests {
     #[test]
     fn free_zeroes_data() {
         let mut pool = new_mem_pool_simple(4, 2);
-        let idx = pool_alloc(&mut pool).unwrap();
+        let idx = pool_alloc(&mut pool).expect("should succeed");
         pool.blocks[idx].data[0] = 42;
         pool_free(&mut pool, idx);
         assert_eq!(pool.blocks[idx].data[0], 0);

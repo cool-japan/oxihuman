@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Drag and drop state.
 
@@ -102,7 +102,7 @@ mod tests {
         begin_drag(&mut s, 1, 42, "Mesh", [10.0, 20.0]);
         assert!(s.active);
         assert!(s.payload.is_some());
-        let p = s.payload.as_ref().unwrap();
+        let p = s.payload.as_ref().expect("should succeed");
         assert_eq!(p.id, 42);
         assert_eq!(p.label, "Mesh");
     }
@@ -128,7 +128,7 @@ mod tests {
         begin_drag(&mut s, 2, 7, "Bone", [5.0, 5.0]);
         let payload = end_drag(&mut s);
         assert!(payload.is_some());
-        assert_eq!(payload.unwrap().id, 7);
+        assert_eq!(payload.expect("should succeed").id, 7);
         assert!(!s.active);
     }
 
@@ -162,6 +162,6 @@ mod tests {
     fn test_payload_type_stored() {
         let mut s = default_drag_drop();
         begin_drag(&mut s, 5, 1, "T", [0.0, 0.0]);
-        assert_eq!(s.payload.as_ref().unwrap().payload_type, 5);
+        assert_eq!(s.payload.as_ref().expect("should succeed").payload_type, 5);
     }
 }

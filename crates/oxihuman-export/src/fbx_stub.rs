@@ -166,6 +166,11 @@ pub fn fbx_connections(scene: &FbxScene) -> String {
 }
 
 #[allow(dead_code)]
+#[deprecated(
+    since = "0.1.1",
+    note = "ASCII FBX export is superseded by the binary writer; \
+            use fbx_binary::export_mesh_fbx_binary instead"
+)]
 pub fn export_fbx_ascii(scene: &FbxScene) -> FbxExport {
     let version = 7400u32;
     let mut content = fbx_header(version);
@@ -234,6 +239,7 @@ pub fn fbx_export_size_estimate(export: &FbxExport) -> usize {
 }
 
 #[cfg(test)]
+#[allow(deprecated)]
 mod tests {
     use super::*;
 

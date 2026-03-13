@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -325,7 +325,7 @@ mod tests {
     fn evaluate_at_zero_returns_base() {
         let pat = make_pattern("test", "arm", &[], &[("a", 0.2)], &[("a", 0.8)]);
         let result = pat.evaluate(0.0);
-        let v = *result.get("a").unwrap();
+        let v = *result.get("a").expect("should succeed");
         assert!((v - 0.2).abs() < 1e-5, "expected 0.2, got {v}");
     }
 
@@ -333,7 +333,7 @@ mod tests {
     fn evaluate_at_one_returns_max() {
         let pat = make_pattern("test", "arm", &[], &[("a", 0.2)], &[("a", 0.8)]);
         let result = pat.evaluate(1.0);
-        let v = *result.get("a").unwrap();
+        let v = *result.get("a").expect("should succeed");
         assert!((v - 0.8).abs() < 1e-5, "expected 0.8, got {v}");
     }
 
@@ -341,7 +341,7 @@ mod tests {
     fn evaluate_at_half_is_midpoint() {
         let pat = make_pattern("test", "leg", &[], &[("x", 0.0)], &[("x", 1.0)]);
         let result = pat.evaluate(0.5);
-        let v = *result.get("x").unwrap();
+        let v = *result.get("x").expect("should succeed");
         assert!((v - 0.5).abs() < 1e-5);
     }
 
@@ -349,7 +349,7 @@ mod tests {
     fn evaluate_clamps_t_above_one() {
         let pat = make_pattern("test", "leg", &[], &[("x", 0.0)], &[("x", 1.0)]);
         let result = pat.evaluate(2.0);
-        let v = *result.get("x").unwrap();
+        let v = *result.get("x").expect("should succeed");
         assert!((v - 1.0).abs() < 1e-5, "should clamp to 1.0");
     }
 
@@ -357,7 +357,7 @@ mod tests {
     fn evaluate_clamps_t_below_zero() {
         let pat = make_pattern("test", "leg", &[], &[("x", 0.0)], &[("x", 1.0)]);
         let result = pat.evaluate(-1.0);
-        let v = *result.get("x").unwrap();
+        let v = *result.get("x").expect("should succeed");
         assert!((v - 0.0).abs() < 1e-5, "should clamp to 0.0");
     }
 
@@ -366,7 +366,7 @@ mod tests {
         let pat = make_pattern("test", "face", &[], &[("base_only", 0.3)], &[]);
         let result = pat.evaluate(0.5);
         // base_only stays at 0.3 (no max entry → lerp(0.3, 0.3, 0.5))
-        let v = *result.get("base_only").unwrap();
+        let v = *result.get("base_only").expect("should succeed");
         assert!((v - 0.3).abs() < 1e-5);
     }
 
@@ -396,7 +396,7 @@ mod tests {
     fn find_pattern_returns_correct_region() {
         let mut sys = SkinDeformSystem::new();
         sys.add_pattern(make_pattern("elbow", "forearm", &[], &[], &[]));
-        let found = sys.find_pattern("elbow").unwrap();
+        let found = sys.find_pattern("elbow").expect("should succeed");
         assert_eq!(found.region(), "forearm");
     }
 
@@ -412,7 +412,7 @@ mod tests {
         ));
         let params = make_param(0.0, 0.0, 0.0); // age=0 → t=0
         let result = sys.evaluate_all(&params);
-        let v = *result.get("neck_crease").unwrap();
+        let v = *result.get("neck_crease").expect("should succeed");
         assert!((v - 0.1).abs() < 1e-5, "expected base=0.1, got {v}");
     }
 
@@ -428,7 +428,7 @@ mod tests {
         ));
         let params = make_param(1.0, 0.5, 0.5);
         let result = sys.evaluate_all(&params);
-        let v = *result.get("bicep_bulge").unwrap();
+        let v = *result.get("bicep_bulge").expect("should succeed");
         assert!((v - 1.0).abs() < 1e-5);
     }
 
@@ -437,14 +437,14 @@ mod tests {
     #[test]
     fn wrinkle_weights_zero_bend_is_zero() {
         let w = wrinkle_weights(0.0, 180.0, "elbow_wrinkle");
-        let inner = *w.get("elbow_wrinkle_inner").unwrap();
+        let inner = *w.get("elbow_wrinkle_inner").expect("should succeed");
         assert!(inner.abs() < 1e-6);
     }
 
     #[test]
     fn wrinkle_weights_full_bend_inner_is_one() {
         let w = wrinkle_weights(180.0, 180.0, "elbow_wrinkle");
-        let inner = *w.get("elbow_wrinkle_inner").unwrap();
+        let inner = *w.get("elbow_wrinkle_inner").expect("should succeed");
         assert!((inner - 1.0).abs() < 1e-5);
     }
 
@@ -459,14 +459,14 @@ mod tests {
     #[test]
     fn bulge_weights_zero_activation() {
         let w = bulge_weights(0.0, "bicep");
-        let b = *w.get("bicep_bulge").unwrap();
+        let b = *w.get("bicep_bulge").expect("should succeed");
         assert!(b.abs() < 1e-6);
     }
 
     #[test]
     fn bulge_weights_full_activation_clamps_to_one() {
         let w = bulge_weights(1.0, "bicep");
-        let b = *w.get("bicep_bulge").unwrap();
+        let b = *w.get("bicep_bulge").expect("should succeed");
         assert!(b <= 1.0 + 1e-6);
     }
 
@@ -475,7 +475,7 @@ mod tests {
     #[test]
     fn sag_weights_zero_params_minimal_sag() {
         let w = sag_weights(0.0, 0.0, 0);
-        let sag = *w.get("belly_sag_down").unwrap();
+        let sag = *w.get("belly_sag_down").expect("should succeed");
         assert!(sag.abs() < 1e-6);
     }
 

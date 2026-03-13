@@ -1,0 +1,58 @@
+[package]
+name = "oxihuman-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[[bin]]
+name = "fuzz_target_parser"
+path = "fuzz_targets/fuzz_target_parser.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_oxp_reader"
+path = "fuzz_targets/fuzz_oxp_reader.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_usda_write"
+path = "fuzz_targets/fuzz_usda_write.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_morph_params"
+path = "fuzz_targets/fuzz_morph_params.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_glb_reader"
+path = "fuzz_targets/fuzz_glb_reader.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_mesh_normals"
+path = "fuzz_targets/fuzz_mesh_normals.rs"
+test = false
+doc = false
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+oxihuman-export = { path = "../crates/oxihuman-export" }
+oxihuman-core = { path = "../crates/oxihuman-core" }
+oxihuman-morph = { path = "../crates/oxihuman-morph" }
+oxihuman-mesh = { path = "../crates/oxihuman-mesh" }
+
+[profile.release]
+debug = true
+
+# Standalone workspace — intentionally excluded from the root workspace.
+[workspace]

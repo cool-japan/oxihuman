@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -915,12 +915,12 @@ mod tests {
         labels.set(1, BodyRegion::Head);
         labels.set(2, BodyRegion::Torso);
         let positions = vec![[0.0, 0.0, 0.0], [2.0, 4.0, 0.0], [1.0, 1.0, 0.0]];
-        let (mn, mx) = labels.region_bbox(BodyRegion::Head, &positions).unwrap();
+        let (mn, mx) = labels.region_bbox(BodyRegion::Head, &positions).expect("should succeed");
         assert!((mn[0] - 0.0).abs() < 1e-6);
         assert!((mx[1] - 4.0).abs() < 1e-6);
         let c = labels
             .region_centroid(BodyRegion::Head, &positions)
-            .unwrap();
+            .expect("should succeed");
         assert!((c[0] - 1.0).abs() < 1e-6);
         assert!((c[1] - 2.0).abs() < 1e-6);
         assert!(labels

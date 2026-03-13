@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{bail, Result};
 
@@ -193,7 +193,7 @@ f 1/1/1 2/2/1 3/3/1 4/4/1
 
     #[test]
     fn parse_simple_quad() {
-        let mesh = parse_obj(SIMPLE_OBJ).unwrap();
+        let mesh = parse_obj(SIMPLE_OBJ).expect("should succeed");
         assert_eq!(mesh.positions.len(), 4);
         assert_eq!(mesh.indices.len(), 6); // quad → 2 triangles
     }
@@ -202,7 +202,7 @@ f 1/1/1 2/2/1 3/3/1 4/4/1
     fn parse_base_obj() {
         let path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
         if let Ok(src) = std::fs::read_to_string(path) {
-            let mesh = parse_obj(&src).unwrap();
+            let mesh = parse_obj(&src).expect("should succeed");
             // MakeHuman base mesh has ~19,158 unique base positions
             assert!(
                 mesh.positions.len() > 10_000,

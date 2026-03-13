@@ -1,10 +1,10 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! WGSL shader source strings for the OxiHuman wgpu render pipeline.
 //!
 //! All shaders are embedded as `pub const &str` and compiled at pipeline creation
-//! time via [`wgpu::Device::create_shader_module`].
+//! time via `wgpu::Device::create_shader_module`.
 
 // ── PBR Vertex Shader ─────────────────────────────────────────────────────────
 

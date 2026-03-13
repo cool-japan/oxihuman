@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Simple directed graph for dependency resolution via Kahn's topological sort.
@@ -107,7 +107,7 @@ mod tests {
         let c = dep_add_node(&mut g, "c");
         dep_add_edge(&mut g, a, b);
         dep_add_edge(&mut g, b, c);
-        let order = dep_topo_sort(&g).unwrap();
+        let order = dep_topo_sort(&g).expect("should succeed");
         assert_eq!(order, vec![a, b, c]);
     }
 
@@ -139,7 +139,7 @@ mod tests {
         let mut g = new_dep_graph();
         dep_add_node(&mut g, "x");
         dep_add_node(&mut g, "y");
-        let order = dep_topo_sort(&g).unwrap();
+        let order = dep_topo_sort(&g).expect("should succeed");
         assert_eq!(order.len(), 2);
     }
 
@@ -162,11 +162,11 @@ mod tests {
         dep_add_edge(&mut g, a, c);
         dep_add_edge(&mut g, b, d);
         dep_add_edge(&mut g, c, d);
-        let order = dep_topo_sort(&g).unwrap();
+        let order = dep_topo_sort(&g).expect("should succeed");
         assert_eq!(order.len(), 4);
         /* a must come before b, c, d */
-        let pos_a = order.iter().position(|&x| x == a).unwrap();
-        let pos_d = order.iter().position(|&x| x == d).unwrap();
+        let pos_a = order.iter().position(|&x| x == a).expect("should succeed");
+        let pos_d = order.iter().position(|&x| x == d).expect("should succeed");
         assert!(pos_a < pos_d);
     }
 }

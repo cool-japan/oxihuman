@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Custom property panel view.
@@ -123,7 +123,7 @@ mod tests {
     fn test_get_value() {
         let mut v = new_custom_property_view();
         custom_prop_add(&mut v, "y", 3.0, 0.0, 10.0);
-        assert!((custom_prop_get(&v, "y").unwrap() - 3.0).abs() < 1e-6 /* retrieved */);
+        assert!((custom_prop_get(&v, "y").expect("should succeed") - 3.0).abs() < 1e-6 /* retrieved */);
     }
 
     #[test]

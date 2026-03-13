@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{bail, Context, Result};
 
@@ -118,7 +118,7 @@ verts 2
 
     #[test]
     fn parse_basic_mhclo() {
-        let b = parse_mhclo(SAMPLE).unwrap();
+        let b = parse_mhclo(SAMPLE).expect("should succeed");
         assert_eq!(b.uuid, "9776b2e4-test");
         assert_eq!(b.basemesh, "hm08");
         assert_eq!(b.vertex_map.len(), 2);

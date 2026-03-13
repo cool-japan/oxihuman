@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Binary animated geometry cache format (Alembic-inspired, custom binary format).
 //!
@@ -592,7 +592,7 @@ mod tests {
     fn test_add_frame_success() {
         let mut cache = GeoCache::new("A", 24.0, 2);
         let f = make_frame(0, 0.0, vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], None);
-        cache.add_frame(f).unwrap();
+        cache.add_frame(f).expect("should succeed");
         assert_eq!(cache.frame_count(), 1);
     }
 
@@ -621,7 +621,7 @@ mod tests {
             vec![[0.0; 3], [1.0; 3]],
             Some(vec![[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]),
         );
-        cache.add_frame(f0).unwrap();
+        cache.add_frame(f0).expect("should succeed");
         // Adding a frame with normals when the first had none should fail
         assert!(cache.add_frame(f1).is_err());
     }
@@ -636,10 +636,10 @@ mod tests {
         assert_eq!(cache.duration_seconds(), 0.0);
         cache
             .add_frame(make_frame(0, 0.0, vec![[0.0; 3]], None))
-            .unwrap();
+            .expect("should succeed");
         cache
             .add_frame(make_frame(1, 1.0 / 25.0, vec![[1.0; 3]], None))
-            .unwrap();
+            .expect("should succeed");
         let expected = 1.0f32 / 25.0;
         assert!((cache.duration_seconds() - expected).abs() < 1e-6);
     }
@@ -653,8 +653,8 @@ mod tests {
         let mut cache = GeoCache::new("G", 24.0, 1);
         cache
             .add_frame(make_frame(0, 0.0, vec![[1.0, 2.0, 3.0]], None))
-            .unwrap();
-        let f = cache.get_frame(0).unwrap();
+            .expect("should succeed");
+        let f = cache.get_frame(0).expect("should succeed");
         assert_eq!(f.positions[0], [1.0, 2.0, 3.0]);
         assert!(cache.get_frame(1).is_none());
     }
@@ -668,12 +668,12 @@ mod tests {
         let mut cache = GeoCache::new("S", 24.0, 1);
         cache
             .add_frame(make_frame(0, 0.0, vec![[0.0, 0.0, 0.0]], None))
-            .unwrap();
+            .expect("should succeed");
         cache
             .add_frame(make_frame(1, 1.0, vec![[10.0, 20.0, 30.0]], None))
-            .unwrap();
+            .expect("should succeed");
 
-        let mid = cache.sample(0.5).unwrap();
+        let mid = cache.sample(0.5).expect("should succeed");
         let eps = 1e-4;
         assert!((mid[0][0] - 5.0).abs() < eps);
         assert!((mid[0][1] - 10.0).abs() < eps);
@@ -689,17 +689,17 @@ mod tests {
         let mut cache = GeoCache::new("S", 24.0, 1);
         cache
             .add_frame(make_frame(0, 0.0, vec![[1.0, 2.0, 3.0]], None))
-            .unwrap();
+            .expect("should succeed");
         cache
             .add_frame(make_frame(1, 1.0, vec![[4.0, 5.0, 6.0]], None))
-            .unwrap();
+            .expect("should succeed");
 
         // Before start -> clamp to first frame
-        let before = cache.sample(-5.0).unwrap();
+        let before = cache.sample(-5.0).expect("should succeed");
         assert_eq!(before[0], [1.0, 2.0, 3.0]);
 
         // After end -> clamp to last frame
-        let after = cache.sample(100.0).unwrap();
+        let after = cache.sample(100.0).expect("should succeed");
         assert_eq!(after[0], [4.0, 5.0, 6.0]);
     }
 
@@ -728,7 +728,7 @@ mod tests {
                 vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
                 None,
             ))
-            .unwrap();
+            .expect("should succeed");
         cache
             .add_frame(make_frame(
                 1,
@@ -736,10 +736,10 @@ mod tests {
                 vec![[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]],
                 None,
             ))
-            .unwrap();
+            .expect("should succeed");
 
-        export_geo_cache(&cache, path).unwrap();
-        let loaded = load_geo_cache(path).unwrap();
+        export_geo_cache(&cache, path).expect("should succeed");
+        let loaded = load_geo_cache(path).expect("should succeed");
 
         assert_eq!(loaded.name, "RoundTrip");
         assert_eq!(loaded.fps, 30.0);
@@ -773,7 +773,7 @@ mod tests {
                 vec![[0.0; 3], [1.0; 3]],
                 Some(nrm0.clone()),
             ))
-            .unwrap();
+            .expect("should succeed");
         cache
             .add_frame(make_frame(
                 1,
@@ -781,14 +781,14 @@ mod tests {
                 vec![[2.0; 3], [3.0; 3]],
                 Some(nrm1.clone()),
             ))
-            .unwrap();
+            .expect("should succeed");
 
-        export_geo_cache(&cache, path).unwrap();
-        let loaded = load_geo_cache(path).unwrap();
+        export_geo_cache(&cache, path).expect("should succeed");
+        let loaded = load_geo_cache(path).expect("should succeed");
 
         assert_eq!(loaded.frame_count(), 2);
-        assert_eq!(loaded.frames[0].normals.as_ref().unwrap(), &nrm0);
-        assert_eq!(loaded.frames[1].normals.as_ref().unwrap(), &nrm1);
+        assert_eq!(loaded.frames[0].normals.as_ref().expect("should succeed"), &nrm0);
+        assert_eq!(loaded.frames[1].normals.as_ref().expect("should succeed"), &nrm1);
     }
 
     // -----------------------------------------------------------------------
@@ -801,8 +801,8 @@ mod tests {
         let mut cache = GeoCache::new("Valid", 25.0, 3);
         cache
             .add_frame(make_frame(0, 0.0, vec![[0.0; 3], [1.0; 3], [2.0; 3]], None))
-            .unwrap();
-        export_geo_cache(&cache, path).unwrap();
+            .expect("should succeed");
+        export_geo_cache(&cache, path).expect("should succeed");
         assert!(GeoCache::validate(path).is_ok());
     }
 
@@ -815,7 +815,7 @@ mod tests {
         let path = std::path::Path::new("/tmp/test_oxgc_bad_magic.oxgc");
         let mut data = vec![0u8; HEADER_SIZE];
         data[..4].copy_from_slice(b"BAAD");
-        std::fs::write(path, &data).unwrap();
+        std::fs::write(path, &data).expect("should succeed");
         let result = GeoCache::validate(path);
         assert!(result.is_err());
         let msg = format!("{}", result.unwrap_err());
@@ -849,10 +849,10 @@ mod tests {
         let mut cache = GeoCache::new("Methods", 60.0, 1);
         cache
             .add_frame(make_frame(0, 0.0, vec![[9.0, 8.0, 7.0]], None))
-            .unwrap();
+            .expect("should succeed");
 
-        cache.write(path).unwrap();
-        let loaded = GeoCache::read(path).unwrap();
+        cache.write(path).expect("should succeed");
+        let loaded = GeoCache::read(path).expect("should succeed");
         assert_eq!(loaded.name, "Methods");
         assert_eq!(loaded.frames[0].positions[0], [9.0, 8.0, 7.0]);
     }
@@ -867,10 +867,10 @@ mod tests {
         let mut cache = GeoCache::new("Wrap", 12.0, 1);
         cache
             .add_frame(make_frame(0, 0.0, vec![[3.0, 2.71, 1.41]], None))
-            .unwrap();
-        export_geo_cache(&cache, path).unwrap();
+            .expect("should succeed");
+        export_geo_cache(&cache, path).expect("should succeed");
 
-        let loaded = load_geo_cache(path).unwrap();
+        let loaded = load_geo_cache(path).expect("should succeed");
         let eps = 1e-5;
         assert!((loaded.frames[0].positions[0][0] - 3.0).abs() < eps);
     }
@@ -883,8 +883,8 @@ mod tests {
     fn test_name_padding() {
         let path = std::path::Path::new("/tmp/test_oxgc_name.oxgc");
         let cache = GeoCache::new("Short", 1.0, 0);
-        export_geo_cache(&cache, path).unwrap();
-        let loaded = load_geo_cache(path).unwrap();
+        export_geo_cache(&cache, path).expect("should succeed");
+        let loaded = load_geo_cache(path).expect("should succeed");
         assert_eq!(loaded.name, "Short");
     }
 
@@ -913,9 +913,9 @@ mod tests {
         let mut cache = GeoCache::new("Idx", 24.0, 1);
         cache
             .add_frame(make_frame(42, 0.0, vec![[0.0; 3]], None))
-            .unwrap();
-        export_geo_cache(&cache, path).unwrap();
-        let loaded = load_geo_cache(path).unwrap();
+            .expect("should succeed");
+        export_geo_cache(&cache, path).expect("should succeed");
+        let loaded = load_geo_cache(path).expect("should succeed");
         assert_eq!(loaded.frames[0].frame_index, 42);
     }
 
@@ -927,8 +927,8 @@ mod tests {
     fn test_empty_cache_round_trip() {
         let path = std::path::Path::new("/tmp/test_oxgc_empty.oxgc");
         let cache = GeoCache::new("Empty", 24.0, 100);
-        export_geo_cache(&cache, path).unwrap();
-        let loaded = load_geo_cache(path).unwrap();
+        export_geo_cache(&cache, path).expect("should succeed");
+        let loaded = load_geo_cache(path).expect("should succeed");
         assert_eq!(loaded.frame_count(), 0);
         assert_eq!(loaded.vertex_count, 100);
     }
@@ -947,8 +947,8 @@ mod tests {
                 vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
                 None,
             ))
-            .unwrap();
-        let result = cache.sample(99.0).unwrap();
+            .expect("should succeed");
+        let result = cache.sample(99.0).expect("should succeed");
         assert_eq!(result[0], [1.0, 2.0, 3.0]);
         assert_eq!(result[1], [4.0, 5.0, 6.0]);
     }
@@ -964,10 +964,10 @@ mod tests {
         let mut cache = GeoCache::new("Sz", 1.0, 1);
         cache
             .add_frame(make_frame(0, 0.0, vec![[1.0, 2.0, 3.0]], None))
-            .unwrap();
-        export_geo_cache(&cache, path).unwrap();
+            .expect("should succeed");
+        export_geo_cache(&cache, path).expect("should succeed");
 
-        let data = std::fs::read(path).unwrap();
+        let data = std::fs::read(path).expect("should succeed");
         // Header = 96 bytes, frame = 4+4+12 = 20 bytes
         assert_eq!(data.len(), HEADER_SIZE + 20);
     }
@@ -980,9 +980,9 @@ mod tests {
     fn test_header_struct_fields() {
         let path = std::path::Path::new("/tmp/test_oxgc_hdr_fields.oxgc");
         let cache = GeoCache::new("Hdr", 48.0, 5);
-        export_geo_cache(&cache, path).unwrap();
-        let mut file = std::fs::File::open(path).unwrap();
-        let hdr = read_header(&mut file).unwrap();
+        export_geo_cache(&cache, path).expect("should succeed");
+        let mut file = std::fs::File::open(path).expect("should succeed");
+        let hdr = read_header(&mut file).expect("should succeed");
         assert_eq!(hdr.magic, OXGC_MAGIC);
         assert_eq!(hdr.version, OXGC_VERSION);
         assert_eq!(hdr.vertex_count, 5);

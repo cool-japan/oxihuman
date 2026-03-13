@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Object picking via ray cast from screen coordinates.
 
@@ -203,7 +203,7 @@ mod tests {
         let r1 = PickResult { hit: true, object_id: 1, distance: 10.0, position: [0.0; 3] };
         let r2 = PickResult { hit: true, object_id: 2, distance: 5.0, position: [0.0; 3] };
         let results = vec![r1, r2];
-        let closest = picking_closest(&results).unwrap();
+        let closest = picking_closest(&results).expect("should succeed");
         assert_eq!(closest.object_id, 2);
     }
 

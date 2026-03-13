@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Network I/O stub for future streaming and collaboration features.
 //!
@@ -293,8 +293,8 @@ mod tests {
     #[test]
     fn send_increments_count() {
         let mut s = connected_stub();
-        send_packet(&mut s, "data", vec![42]).unwrap();
-        send_packet(&mut s, "data", vec![43]).unwrap();
+        send_packet(&mut s, "data", vec![42]).expect("should succeed");
+        send_packet(&mut s, "data", vec![43]).expect("should succeed");
         assert_eq!(packet_count_sent(&s), 2);
     }
 

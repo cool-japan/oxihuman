@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Impulse warm-starting for iterative solvers.
@@ -151,7 +151,7 @@ mod tests {
         let mut imp = WarmImpulse::new(0, 1);
         imp.normal_impulse = 3.0;
         cache.store(imp);
-        let found = cache.find(0, 1).unwrap();
+        let found = cache.find(0, 1).expect("should succeed");
         assert!((found.normal_impulse - 3.0).abs() < 1e-5);
     }
 
@@ -189,7 +189,7 @@ mod tests {
         imp2.normal_impulse = 5.0;
         cache.store(imp2);
         assert_eq!(cache.len(), 1);
-        assert!((cache.find(0, 1).unwrap().normal_impulse - 5.0).abs() < 1e-5);
+        assert!((cache.find(0, 1).expect("should succeed").normal_impulse - 5.0).abs() < 1e-5);
     }
 
     #[test]
@@ -225,9 +225,9 @@ mod tests {
     fn find_mut_works() {
         let mut cache = WarmStartCache::new(5);
         cache.store(WarmImpulse::new(0, 1));
-        let e = cache.find_mut(0, 1).unwrap();
+        let e = cache.find_mut(0, 1).expect("should succeed");
         e.normal_impulse = 42.0;
-        assert!((cache.find(0, 1).unwrap().normal_impulse - 42.0).abs() < 1e-5);
+        assert!((cache.find(0, 1).expect("should succeed").normal_impulse - 42.0).abs() < 1e-5);
     }
 
     #[test]

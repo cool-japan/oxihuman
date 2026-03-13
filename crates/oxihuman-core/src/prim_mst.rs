@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Prim's minimum spanning tree algorithm.
@@ -107,23 +107,23 @@ mod tests {
         prim_add_edge(&mut g, 0, 1, 1.0);
         prim_add_edge(&mut g, 1, 2, 2.0);
         prim_add_edge(&mut g, 0, 2, 5.0);
-        let edges = prim_mst(&g).unwrap();
+        let edges = prim_mst(&g).expect("should succeed");
         assert_eq!(edges.len(), 2);
-        let w = prim_mst_weight(&g).unwrap();
+        let w = prim_mst_weight(&g).expect("should succeed");
         assert!((w - 3.0).abs() < 1e-6);
     }
 
     #[test]
     fn test_single_node() {
         let g = new_prim_graph(1);
-        let edges = prim_mst(&g).unwrap();
+        let edges = prim_mst(&g).expect("should succeed");
         assert!(edges.is_empty());
     }
 
     #[test]
     fn test_empty_graph() {
         let g = new_prim_graph(0);
-        let edges = prim_mst(&g).unwrap();
+        let edges = prim_mst(&g).expect("should succeed");
         assert!(edges.is_empty());
     }
 
@@ -135,7 +135,7 @@ mod tests {
         prim_add_edge(&mut g, 1, 2, 1.0);
         prim_add_edge(&mut g, 2, 3, 1.0);
         prim_add_edge(&mut g, 3, 4, 1.0);
-        let edges = prim_mst(&g).unwrap();
+        let edges = prim_mst(&g).expect("should succeed");
         assert_eq!(edges.len(), 4);
     }
 
@@ -145,7 +145,7 @@ mod tests {
         prim_add_edge(&mut g, 0, 1, 10.0);
         prim_add_edge(&mut g, 0, 1, 1.0); /* cheaper parallel edge via adj */
         prim_add_edge(&mut g, 1, 2, 1.0);
-        let w = prim_mst_weight(&g).unwrap();
+        let w = prim_mst_weight(&g).expect("should succeed");
         assert!(w <= 11.0);
     }
 
@@ -177,7 +177,7 @@ mod tests {
         for i in 1..5 {
             prim_add_edge(&mut g, 0, i, i as f32);
         }
-        let edges = prim_mst(&g).unwrap();
+        let edges = prim_mst(&g).expect("should succeed");
         assert_eq!(edges.len(), 4);
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A network of spring-damper elements connecting simulated nodes.
@@ -215,7 +215,7 @@ mod tests {
     fn fixed_node() {
         let mut net = new_damper_network();
         let id = dn_add_node(&mut net, 0.0, 0.0);
-        assert!(net.node(id).unwrap().is_fixed());
+        assert!(net.node(id).expect("should succeed").is_fixed());
     }
 
     #[test]
@@ -234,11 +234,11 @@ mod tests {
         let b = dn_add_node(&mut net, 2.0, 1.0); // rest len = 2.0 → displaced to 2.0 initially, no force
         dn_add_link(&mut net, a, b, 100.0, 0.5);
         // displace b
-        net.node_mut(b).unwrap().pos = 3.0;
-        let old_pos = net.node(b).unwrap().pos;
+        net.node_mut(b).expect("should succeed").pos = 3.0;
+        let old_pos = net.node(b).expect("should succeed").pos;
         dn_step(&mut net, 0.01);
         // b should move toward a
-        assert!(net.node(b).unwrap().pos < old_pos);
+        assert!(net.node(b).expect("should succeed").pos < old_pos);
     }
 
     #[test]
@@ -248,7 +248,7 @@ mod tests {
         let b = dn_add_node(&mut net, 2.0, 1.0);
         dn_add_link(&mut net, a, b, 100.0, 0.0);
         dn_step(&mut net, 0.01);
-        assert_eq!(net.node(a).unwrap().pos, 0.0);
+        assert_eq!(net.node(a).expect("should succeed").pos, 0.0);
     }
 
     #[test]
@@ -266,7 +266,7 @@ mod tests {
         let a = dn_add_node(&mut net, 0.0, 0.0);
         let b = dn_add_node(&mut net, 2.0, 1.0);
         dn_add_link(&mut net, a, b, 100.0, 0.0);
-        net.node_mut(b).unwrap().pos = 3.0;
+        net.node_mut(b).expect("should succeed").pos = 3.0;
         dn_step(&mut net, 0.01);
         assert!(net.kinetic_energy() > 0.0);
     }

@@ -189,7 +189,7 @@ mod tests {
         zip_add_entry(&mut bundle, "model.obj", 512, vec![42u8; 10]);
         let found = zip_find_entry(&bundle, "model.obj");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().size_bytes, 512);
+        assert_eq!(found.expect("should succeed").size_bytes, 512);
     }
 
     #[test]

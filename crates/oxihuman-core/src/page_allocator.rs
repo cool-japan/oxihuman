@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Fixed-size page allocator backed by a Vec of pages.
@@ -132,7 +132,7 @@ mod tests {
         let mut a = new_page_allocator(8);
         let idx = pa_alloc(&mut a);
         pa_write(&mut a, idx, &[1, 2, 3, 4]);
-        let data = pa_read(&a, idx).unwrap();
+        let data = pa_read(&a, idx).expect("should succeed");
         assert_eq!(&data[..4], &[1, 2, 3, 4]);
     }
     #[test]

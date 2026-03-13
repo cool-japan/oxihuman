@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Simple token stream for lexing / parsing utilities.
@@ -124,7 +124,7 @@ mod tests {
     fn test_push_and_peek() {
         let mut ts = new_token_stream();
         tks_push(&mut ts, TokenKind::Ident, "hello", 0);
-        let tok = tks_peek(&ts).unwrap();
+        let tok = tks_peek(&ts).expect("should succeed");
         assert_eq!(tok.text, "hello".to_string());
     }
 
@@ -132,7 +132,7 @@ mod tests {
     fn test_next_consumes() {
         let mut ts = new_token_stream();
         tks_push(&mut ts, TokenKind::Number, "42", 0);
-        let tok = tks_next(&mut ts).unwrap();
+        let tok = tks_next(&mut ts).expect("should succeed");
         assert_eq!(tok.kind, TokenKind::Number);
         assert!(tks_is_empty(&ts));
     }
@@ -171,7 +171,7 @@ mod tests {
         tks_push(&mut ts, TokenKind::Ident, "b", 1);
         tks_push(&mut ts, TokenKind::Number, "1", 2);
         tks_skip_while(&mut ts, |t| t.kind == TokenKind::Ident);
-        let tok = tks_peek(&ts).unwrap();
+        let tok = tks_peek(&ts).expect("should succeed");
         assert_eq!(tok.kind, TokenKind::Number);
     }
 

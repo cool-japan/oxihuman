@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Streaming morph delta application for incremental updates.
 
@@ -366,7 +366,10 @@ mod tests {
         );
         let flat = stream_to_flat_deltas(&stream);
         assert!(!flat.is_empty());
-        let v0 = flat.iter().find(|(vi, _)| *vi == 0).unwrap();
+        let v0 = flat
+            .iter()
+            .find(|(vi, _)| *vi == 0)
+            .expect("should succeed");
         assert!((v0.1[0] - 2.0).abs() < 1e-5);
     }
 

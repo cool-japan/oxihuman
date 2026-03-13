@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GPU-less CPU texture baking pipeline.
 
@@ -843,7 +843,7 @@ mod tests {
         let v2 = [0.0f32, 1.0, 0.0];
         let result = ray_triangle_intersect(origin, dir, v0, v1, v2);
         assert!(result.is_some());
-        assert!((result.unwrap() - 1.0).abs() < 1e-4);
+        assert!((result.expect("should succeed") - 1.0).abs() < 1e-4);
     }
 
     #[test]

@@ -301,7 +301,7 @@ mod tests {
         let mut cb = new_clipboard(10);
         copy_text(&mut cb, "first");
         copy_text(&mut cb, "second");
-        let entry = get_history_entry(&cb, 0).unwrap();
+        let entry = get_history_entry(&cb, 0).expect("should succeed");
         assert_eq!(entry.content, ClipboardContent::Text("first".to_string()));
     }
 
@@ -312,7 +312,7 @@ mod tests {
         copy_text(&mut cb, "beta");
         let ok = undo_paste(&mut cb);
         assert!(ok);
-        let content = paste_from_clipboard(&cb).unwrap();
+        let content = paste_from_clipboard(&cb).expect("should succeed");
         assert_eq!(content, ClipboardContent::Text("alpha".to_string()));
     }
 

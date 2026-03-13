@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Dissolve selected edges: merge the two faces sharing each selected edge into one quad or n-gon.
@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn dissolve_edge_reduces_face_count() {
         let idx = two_tris_shared_edge();
-        let out = dissolve_edge(&idx, 0, 2).unwrap();
+        let out = dissolve_edge(&idx, 0, 2).expect("should succeed");
         /* 2 removed + 2 added = same count, but diagonal is different */
         assert_eq!(out.len() / 3, idx.len() / 3);
     }

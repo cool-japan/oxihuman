@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Contact manifold reduction (keep best N contacts).
 
@@ -127,7 +127,7 @@ mod tests {
             make_contact([0.0; 3], 0.1),
             make_contact([1.0, 0.0, 0.0], 0.8),
         ];
-        let d = deepest_contact(&pts).unwrap();
+        let d = deepest_contact(&pts).expect("should succeed");
         assert!((d.depth - 0.8).abs() < 1e-5);
     }
 

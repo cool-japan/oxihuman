@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Distributed trace context propagation.
@@ -119,7 +119,7 @@ mod tests {
     fn test_from_traceparent_roundtrip() {
         let ctx = new_trace_context(0xdeadbeef, 0xcafe, true);
         let h = trace_to_header(&ctx);
-        let parsed = trace_from_header(&h).unwrap();
+        let parsed = trace_from_header(&h).expect("should succeed");
         assert_eq!(parsed.trace_id, 0xdeadbeef);
         assert_eq!(parsed.span_id, 0xcafe);
         assert!(parsed.sampled);

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Compute principal axes from an inertia tensor stub.
@@ -179,7 +179,7 @@ mod tests {
         let pa = compute_principal_axes(&t);
         /* Moments should be close to diagonal values */
         let mut moments = pa.moments;
-        moments.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        moments.sort_by(|a, b| a.partial_cmp(b).expect("should succeed"));
         assert!((moments[0] - 1.0).abs() < 0.1 /* smallest moment ≈ 1 */);
     }
 

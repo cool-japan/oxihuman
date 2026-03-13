@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Self-collision detection for deformable meshes.
 //!
@@ -824,7 +824,7 @@ mod tests {
 
     #[test]
     fn test_spatial_hash_basic() {
-        let mut hash = SpatialHash::new(1.0).unwrap();
+        let mut hash = SpatialHash::new(1.0).expect("should succeed");
         hash.insert(0, &[0.5, 0.5, 0.5]);
         hash.insert(1, &[1.5, 0.5, 0.5]);
         hash.insert(2, &[10.0, 10.0, 10.0]);
@@ -909,10 +909,12 @@ mod tests {
             [3.0, 2.0, 1.0],  // 5
         ];
         let triangles = vec![[0, 1, 2], [3, 4, 5]];
-        let adjacency = build_adjacency(6, &triangles).unwrap();
+        let adjacency = build_adjacency(6, &triangles).expect("should succeed");
 
-        let mut detector = SelfCollisionDetector::new(0.1, 0.5).unwrap();
-        let contacts = detector.detect(&positions, &triangles, &adjacency).unwrap();
+        let mut detector = SelfCollisionDetector::new(0.1, 0.5).expect("should succeed");
+        let contacts = detector
+            .detect(&positions, &triangles, &adjacency)
+            .expect("should succeed");
 
         // Vertex 3 should collide with triangle [0,1,2]
         assert!(!contacts.is_empty());
@@ -933,10 +935,12 @@ mod tests {
             [0.0, 1.0, 10.0],
         ];
         let triangles = vec![[0, 1, 2], [3, 4, 5]];
-        let adjacency = build_adjacency(6, &triangles).unwrap();
+        let adjacency = build_adjacency(6, &triangles).expect("should succeed");
 
-        let mut detector = SelfCollisionDetector::new(0.1, 1.0).unwrap();
-        let contacts = detector.detect(&positions, &triangles, &adjacency).unwrap();
+        let mut detector = SelfCollisionDetector::new(0.1, 1.0).expect("should succeed");
+        let contacts = detector
+            .detect(&positions, &triangles, &adjacency)
+            .expect("should succeed");
         assert!(contacts.is_empty());
     }
 
@@ -951,10 +955,12 @@ mod tests {
             [0.5, -1.0, 0.001], // very close to first triangle, but shares edge 0-1
         ];
         let triangles = vec![[0, 1, 2], [0, 1, 3]];
-        let adjacency = build_adjacency(4, &triangles).unwrap();
+        let adjacency = build_adjacency(4, &triangles).expect("should succeed");
 
-        let mut detector = SelfCollisionDetector::new(0.1, 1.0).unwrap();
-        let contacts = detector.detect(&positions, &triangles, &adjacency).unwrap();
+        let mut detector = SelfCollisionDetector::new(0.1, 1.0).expect("should succeed");
+        let contacts = detector
+            .detect(&positions, &triangles, &adjacency)
+            .expect("should succeed");
 
         // Vertex 3 is adjacent to triangle 0 through shared vertices 0 and 1,
         // but our adjacency check uses the triangle index list:
@@ -999,7 +1005,8 @@ mod tests {
         }];
 
         let z_before = positions[3][2];
-        SelfCollisionDetector::resolve_contacts(&contacts, &mut positions, &inv_masses).unwrap();
+        SelfCollisionDetector::resolve_contacts(&contacts, &mut positions, &inv_masses)
+            .expect("should succeed");
         let z_after = positions[3][2];
 
         // Vertex should have moved upward
@@ -1025,7 +1032,8 @@ mod tests {
         }];
 
         let tri_before = [positions[0], positions[1], positions[2]];
-        SelfCollisionDetector::resolve_contacts(&contacts, &mut positions, &inv_masses).unwrap();
+        SelfCollisionDetector::resolve_contacts(&contacts, &mut positions, &inv_masses)
+            .expect("should succeed");
 
         // Triangle vertices should not move (inv_mass = 0)
         for i in 0..3 {
@@ -1040,7 +1048,7 @@ mod tests {
     #[test]
     fn test_build_adjacency() {
         let triangles = vec![[0, 1, 2], [1, 2, 3]];
-        let adj = build_adjacency(4, &triangles).unwrap();
+        let adj = build_adjacency(4, &triangles).expect("should succeed");
         assert_eq!(adj[0], vec![0]);
         assert_eq!(adj[1], vec![0, 1]);
         assert_eq!(adj[2], vec![0, 1]);
@@ -1069,9 +1077,11 @@ mod tests {
         // Triangles that create the edges we care about
         let triangles = vec![[0, 1, 2], [3, 4, 5]];
 
-        let mut detector = SelfCollisionDetector::new(0.05, 1.0).unwrap();
+        let mut detector = SelfCollisionDetector::new(0.05, 1.0).expect("should succeed");
         detector.populate_hash(&positions);
-        let ee_contacts = detector.detect_edge_edge(&positions, &triangles).unwrap();
+        let ee_contacts = detector
+            .detect_edge_edge(&positions, &triangles)
+            .expect("should succeed");
 
         // Edge [0,1] and edge [3,4] cross at distance 0 => contact
         let crossing = ee_contacts.iter().find(|c| {
@@ -1091,12 +1101,12 @@ mod tests {
             [3.0, 2.0, 1.0],
         ];
         let triangles = vec![[0, 1, 2], [3, 4, 5]];
-        let adjacency = build_adjacency(6, &triangles).unwrap();
+        let adjacency = build_adjacency(6, &triangles).expect("should succeed");
 
-        let mut detector = SelfCollisionDetector::new(0.1, 0.5).unwrap();
+        let mut detector = SelfCollisionDetector::new(0.1, 0.5).expect("should succeed");
         let (vt, ee) = detector
             .detect_all(&positions, &triangles, &adjacency)
-            .unwrap();
+            .expect("should succeed");
 
         // Should have at least the vertex-triangle contact
         assert!(!vt.is_empty());
@@ -1124,7 +1134,7 @@ mod tests {
         }];
 
         SelfCollisionDetector::resolve_edge_contacts(&contacts, &mut positions, &inv_masses)
-            .unwrap();
+            .expect("should succeed");
 
         // Edge A endpoints should have moved in +Y, edge B in -Y
         assert!(positions[0][1] > 0.0 || positions[1][1] > 0.0);

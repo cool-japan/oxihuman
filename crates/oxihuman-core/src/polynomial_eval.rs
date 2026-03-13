@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Polynomial evaluation (Horner's method) and Newton root-finding.
@@ -136,7 +136,7 @@ mod tests {
     fn test_newton_root_sqrt2() {
         /* x^2 - 2 has root sqrt(2) */
         let p = new_polynomial(vec![-2.0, 0.0, 1.0]);
-        let root = p.newton_root(1.5, 50, 1e-10).unwrap();
+        let root = p.newton_root(1.5, 50, 1e-10).expect("should succeed");
         assert!((root - 2.0f64.sqrt()).abs() < 1e-8);
     }
 

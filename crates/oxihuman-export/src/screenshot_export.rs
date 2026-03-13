@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Screenshot capture to PNG-like byte buffer (simple PPM/raw/TGA format, no external deps).
 
@@ -272,7 +272,7 @@ mod tests {
     fn test_encode_ppm_starts_with_p6() {
         let buf = new_screenshot_buffer(2, 2);
         let ppm = encode_ppm(&buf);
-        let header = std::str::from_utf8(&ppm[..2]).unwrap();
+        let header = std::str::from_utf8(&ppm[..2]).expect("should succeed");
         assert_eq!(header, "P6");
     }
 

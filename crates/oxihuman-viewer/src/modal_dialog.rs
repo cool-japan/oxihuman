@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Modal dialog state.
 
@@ -139,7 +139,7 @@ mod tests {
         let d = confirm_dialog();
         let default_btn = d.buttons.iter().find(|b| b.is_default);
         assert!(default_btn.is_some());
-        assert_eq!(default_btn.unwrap().id, 1);
+        assert_eq!(default_btn.expect("should succeed").id, 1);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Minimal key=value / flag argument parser.
 
@@ -149,7 +149,7 @@ mod tests {
     #[test]
     fn arg_get_f64_valid() {
         let args = parse_args(&["x=2.5"]);
-        let v = arg_get_f64(&args, "x").unwrap();
+        let v = arg_get_f64(&args, "x").expect("should succeed");
         assert!((v - 2.5).abs() < 1e-9);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! d-ary heap — generalized heap where each node has d children.
@@ -121,7 +121,7 @@ mod tests {
         let mut h: DAryHeap<u32, u32> = DAryHeap::new(2);
         h.insert(5, 50);
         h.insert(2, 20);
-        let (k, _) = h.peek_min().unwrap();
+        let (k, _) = h.peek_min().expect("should succeed");
         assert_eq!(*k, 2 /* min with d=2 */);
     }
 
@@ -130,7 +130,7 @@ mod tests {
         let mut h: DAryHeap<u32, u32> = DAryHeap::new(4);
         h.insert(7, 70);
         h.insert(1, 10);
-        let (k, _) = h.peek_min().unwrap();
+        let (k, _) = h.peek_min().expect("should succeed");
         assert_eq!(*k, 1 /* min with d=4 */);
     }
 
@@ -140,7 +140,7 @@ mod tests {
         h.insert(9, 9);
         h.insert(3, 3);
         h.insert(6, 6);
-        let (k, _) = h.extract_min().unwrap();
+        let (k, _) = h.extract_min().expect("should succeed");
         assert_eq!(k, 3 /* min extracted */);
     }
 

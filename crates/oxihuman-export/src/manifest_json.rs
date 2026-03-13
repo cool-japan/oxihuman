@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -589,7 +589,7 @@ mod tests {
         // All entries should have non-empty sha256
         for e in &manifest.entries {
             assert!(e.sha256.is_some());
-            assert!(!e.sha256.as_ref().unwrap().is_empty());
+            assert!(!e.sha256.as_ref().expect("should succeed").is_empty());
         }
 
         // Find glb entry

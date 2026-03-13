@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Fluid simulation cache export stub.
 
@@ -113,7 +113,7 @@ mod tests {
     fn test_get_frame() {
         let mut exp = new_fluid_cache_export(default_fluid_export_config());
         fluid_add_frame(&mut exp, make_frame(5, 4));
-        assert_eq!(fluid_get_frame(&exp, 0).unwrap().frame, 5);
+        assert_eq!(fluid_get_frame(&exp, 0).expect("should succeed").frame, 5);
         assert!(fluid_get_frame(&exp, 1).is_none());
     }
 

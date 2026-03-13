@@ -123,13 +123,13 @@ mod tests {
     #[test]
     fn test_mesomorph_preset() {
         let p = mesomorph_preset();
-        assert!(*p.params.get("muscle").unwrap() > 0.5);
+        assert!(*p.params.get("muscle").expect("should succeed") > 0.5);
     }
 
     #[test]
     fn test_endomorph_preset() {
         let p = endomorph_preset();
-        assert!(*p.params.get("fat").unwrap() > 0.5);
+        assert!(*p.params.get("fat").expect("should succeed") > 0.5);
     }
 
     #[test]
@@ -151,8 +151,8 @@ mod tests {
         let a = ectomorph_preset();
         let b = endomorph_preset();
         let blended = blend_body_types(&a, &b, 0.0);
-        let av = a.params.get("muscle").unwrap();
-        let bv = blended.get("muscle").unwrap();
+        let av = a.params.get("muscle").expect("should succeed");
+        let bv = blended.get("muscle").expect("should succeed");
         assert!((av - bv).abs() < 1e-6);
     }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A dynamically-typed tagged value, useful for config entries and property bags.
@@ -87,7 +87,7 @@ mod tests {
     fn test_float() {
         let v = TaggedValue::Float(1.234);
         assert!(v.is_float());
-        assert!((v.as_float().unwrap() - 1.234).abs() < 0.001);
+        assert!((v.as_float().expect("should succeed") - 1.234).abs() < 0.001);
     }
 
     #[test]
@@ -108,7 +108,7 @@ mod tests {
     fn test_list() {
         let v = TaggedValue::List(vec![TaggedValue::Int(1), TaggedValue::Int(2)]);
         assert!(v.is_list());
-        assert_eq!(v.as_list().unwrap().len(), 2);
+        assert_eq!(v.as_list().expect("should succeed").len(), 2);
     }
 
     #[test]

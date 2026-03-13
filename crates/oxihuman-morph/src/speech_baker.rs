@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Bake a phoneme event sequence into a morph weight track for lip sync.
 
@@ -423,7 +423,7 @@ mod tests {
         let vm = build_default_viseme_map();
         let contributions = vec![("AA".to_string(), 1.0_f32)];
         let weights = blend_viseme_weights(&contributions, &vm);
-        let aa = vm.get("AA").unwrap();
+        let aa = vm.get("AA").expect("should succeed");
         for (k, &v) in aa {
             assert!((weights[k] - v).abs() < 1e-5, "key {} mismatch", k);
         }

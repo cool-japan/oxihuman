@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Camera animation export.
 
@@ -141,7 +141,7 @@ mod tests {
     fn interpolate_at_exact() {
         let mut exp = new_camera_anim_export("cam", 24.0);
         ca_add_keyframe(&mut exp, make_kf(1.0));
-        let kf = ca_interpolate_at(&exp, 1.0).unwrap();
+        let kf = ca_interpolate_at(&exp, 1.0).expect("should succeed");
         assert!((kf.time - 1.0).abs() < 1e-5);
     }
 
@@ -150,7 +150,7 @@ mod tests {
         let mut exp = new_camera_anim_export("cam", 24.0);
         ca_add_keyframe(&mut exp, make_kf(0.0));
         ca_add_keyframe(&mut exp, make_kf(2.0));
-        let kf = ca_interpolate_at(&exp, 1.0).unwrap();
+        let kf = ca_interpolate_at(&exp, 1.0).expect("should succeed");
         // position.z should be ~1.0 (midpoint)
         assert!((kf.position[2] - 1.0).abs() < 1e-5);
     }

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Min-priority queue (simple sorted vec).
 
@@ -113,8 +113,8 @@ mod tests {
         let mut pq = new_priority_queue_simple();
         pqs_push(&mut pq, "first", 5);
         pqs_push(&mut pq, "second", 5);
-        let a = pqs_pop(&mut pq).unwrap();
-        let b = pqs_pop(&mut pq).unwrap();
+        let a = pqs_pop(&mut pq).expect("should succeed");
+        let b = pqs_pop(&mut pq).expect("should succeed");
         // Both should be returned
         assert!(a == "first" || a == "second");
         assert!(b == "first" || b == "second");
@@ -142,7 +142,7 @@ mod tests {
             pqs_push(&mut pq, &i.to_string(), i);
         }
         assert_eq!(pqs_len(&pq), 10);
-        let first = pqs_pop(&mut pq).unwrap();
+        let first = pqs_pop(&mut pq).expect("should succeed");
         assert_eq!(first, "0");
     }
 }

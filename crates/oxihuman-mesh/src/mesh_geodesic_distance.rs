@@ -347,8 +347,8 @@ mod tests {
         let result = compute_geodesic_distances(&verts, &faces, 0, &cfg);
         let path = geodesic_path(&result, 3);
         assert!(!path.is_empty());
-        assert_eq!(*path.first().unwrap(), 0, "path must start at source");
-        assert_eq!(*path.last().unwrap(), 3, "path must end at target");
+        assert_eq!(*path.first().expect("should succeed"), 0, "path must start at source");
+        assert_eq!(*path.last().expect("should succeed"), 3, "path must end at target");
     }
 
     #[test]

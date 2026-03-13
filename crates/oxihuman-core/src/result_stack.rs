@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Stack of operation results for accumulating and inspecting outcomes.
@@ -219,6 +219,6 @@ mod tests {
         let mut s = new_result_stack();
         s.push_ok("first");
         s.push_err("second", 2);
-        assert_eq!(s.peek().unwrap().kind, ResultKind::Err);
+        assert_eq!(s.peek().expect("should succeed").kind, ResultKind::Err);
     }
 }

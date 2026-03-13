@@ -377,9 +377,9 @@ mod tests {
     fn test_apply_wind_to_chain() {
         let mut chain = simple_chain(3);
         pin_chain_root(&mut chain);
-        let orig_tip = chain_tip_position(&chain).unwrap();
+        let orig_tip = chain_tip_position(&chain).expect("should succeed");
         apply_wind_to_chain(&mut chain, [1.0, 0.0, 0.0], 0.016);
-        let new_tip = chain_tip_position(&chain).unwrap();
+        let new_tip = chain_tip_position(&chain).expect("should succeed");
         // Tip (non-pinned) should move in wind direction
         assert!(new_tip[0] > orig_tip[0]);
     }

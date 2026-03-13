@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -344,7 +344,7 @@ mod tests {
         });
         let found = lib.find("test");
         assert!(found.is_some());
-        assert!((found.unwrap().heads_tall - 7.0).abs() < 1e-6);
+        assert!((found.expect("should succeed").heads_tall - 7.0).abs() < 1e-6);
     }
 
     #[test]
@@ -385,7 +385,7 @@ mod tests {
     #[test]
     fn vitruvian_schema_values() {
         let lib = standard_schemas();
-        let s = lib.find("vitruvian").unwrap();
+        let s = lib.find("vitruvian").expect("should succeed");
         assert!((s.heads_tall - 8.0).abs() < 1e-6);
         assert!((s.shoulder_ratio - 1.5).abs() < 1e-6);
         assert!((s.hip_ratio - 1.3).abs() < 1e-6);
@@ -396,16 +396,16 @@ mod tests {
     #[test]
     fn fashion_schema_is_tallest() {
         let lib = standard_schemas();
-        let fashion = lib.find("fashion").unwrap();
-        let vitruvian = lib.find("vitruvian").unwrap();
+        let fashion = lib.find("fashion").expect("should succeed");
+        let vitruvian = lib.find("vitruvian").expect("should succeed");
         assert!(fashion.heads_tall > vitruvian.heads_tall);
     }
 
     #[test]
     fn heroic_schema_has_widest_shoulders() {
         let lib = standard_schemas();
-        let heroic = lib.find("heroic").unwrap();
-        let vitruvian = lib.find("vitruvian").unwrap();
+        let heroic = lib.find("heroic").expect("should succeed");
+        let vitruvian = lib.find("vitruvian").expect("should succeed");
         assert!(heroic.shoulder_ratio > vitruvian.shoulder_ratio);
     }
 
@@ -457,7 +457,7 @@ mod tests {
     fn proportion_score_exact_match_is_zero() {
         // Build params that exactly map to vitruvian
         let lib = standard_schemas();
-        let schema = lib.find("vitruvian").unwrap();
+        let schema = lib.find("vitruvian").expect("should succeed");
         let mut p = ParamState::default();
         normalize_to_schema(&mut p, schema);
         let score = proportion_score(&p, schema);
@@ -468,7 +468,7 @@ mod tests {
     #[test]
     fn proportion_score_different_params_is_nonzero() {
         let lib = standard_schemas();
-        let schema = lib.find("heroic").unwrap();
+        let schema = lib.find("heroic").expect("should succeed");
         let p = ParamState::new(0.0, 0.0, 0.0, 0.0); // child-like params
         let score = proportion_score(&p, schema);
         assert!(score > 0.0, "expected non-zero score");
@@ -483,7 +483,7 @@ mod tests {
         let lib = standard_schemas();
         // height=0.0, weight=0.0, muscle=0.0, age=0.0 → child-like
         let p = ParamState::new(0.0, 0.0, 0.0, 0.0);
-        let closest = lib.closest(&p).unwrap();
+        let closest = lib.closest(&p).expect("should succeed");
         assert_eq!(closest.name, "child_6yr");
     }
 
@@ -492,7 +492,7 @@ mod tests {
         let lib = standard_schemas();
         // height=1.0, muscle=1.0 → heroic proportions
         let p = ParamState::new(1.0, 0.0, 1.0, 1.0);
-        let closest = lib.closest(&p).unwrap();
+        let closest = lib.closest(&p).expect("should succeed");
         assert!(
             closest.name == "heroic" || closest.name == "fashion",
             "unexpected schema: {}",
@@ -515,7 +515,7 @@ mod tests {
     fn analyze_returns_correct_schema_name() {
         let lib = standard_schemas();
         let p = default_params();
-        let analysis = lib.analyze(&p, "vitruvian").unwrap();
+        let analysis = lib.analyze(&p, "vitruvian").expect("should succeed");
         assert_eq!(analysis.schema_name, "vitruvian");
     }
 
@@ -523,7 +523,7 @@ mod tests {
     fn analyze_deviations_has_all_keys() {
         let lib = standard_schemas();
         let p = default_params();
-        let analysis = lib.analyze(&p, "realistic").unwrap();
+        let analysis = lib.analyze(&p, "realistic").expect("should succeed");
         for key in &[
             "heads_tall",
             "shoulder_ratio",
@@ -539,7 +539,7 @@ mod tests {
     fn analyze_rms_deviation_nonnegative() {
         let lib = standard_schemas();
         let p = default_params();
-        let analysis = lib.analyze(&p, "fashion").unwrap();
+        let analysis = lib.analyze(&p, "fashion").expect("should succeed");
         assert!(analysis.rms_deviation >= 0.0);
     }
 
@@ -558,7 +558,7 @@ mod tests {
     fn normalize_to_schema_then_score_is_low() {
         let lib = standard_schemas();
         for name in &["vitruvian", "fashion", "heroic", "child_6yr", "realistic"] {
-            let schema = lib.find(name).unwrap();
+            let schema = lib.find(name).expect("should succeed");
             let mut p = ParamState::default();
             normalize_to_schema(&mut p, schema);
             let score = proportion_score(&p, schema);
@@ -607,7 +607,7 @@ mod tests {
     #[test]
     fn golden_ratio_params_close_to_vitruvian() {
         let lib = standard_schemas();
-        let vitruvian = lib.find("vitruvian").unwrap();
+        let vitruvian = lib.find("vitruvian").expect("should succeed");
         let p = golden_ratio_params();
         let score = proportion_score(&p, vitruvian);
         // Should be reasonably close to vitruvian proportions

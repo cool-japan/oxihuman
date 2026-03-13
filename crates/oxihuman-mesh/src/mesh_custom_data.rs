@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Custom data block management for mesh elements.
@@ -93,7 +93,7 @@ mod tests {
         set_custom_entry(&mut b, "speed", CustomDataValue::Float(2.71));
         let v = get_custom_entry(&b, "speed");
         assert!(v.is_some() /* found */);
-        if let CustomDataValue::Float(f) = v.unwrap() {
+        if let CustomDataValue::Float(f) = v.expect("should succeed") {
             assert!((f - 2.71).abs() < 1e-5 /* correct value */);
         }
     }
@@ -104,7 +104,7 @@ mod tests {
         set_custom_entry(&mut b, "x", CustomDataValue::Int(1));
         set_custom_entry(&mut b, "x", CustomDataValue::Int(2));
         assert_eq!(custom_entry_count(&b), 1 /* no duplicate */);
-        if let CustomDataValue::Int(i) = get_custom_entry(&b, "x").unwrap() {
+        if let CustomDataValue::Int(i) = get_custom_entry(&b, "x").expect("should succeed") {
             assert_eq!(*i, 2 /* updated */);
         }
     }
@@ -152,7 +152,7 @@ mod tests {
     fn vec3_entry_stored() {
         let mut b = new_custom_data_block();
         set_custom_entry(&mut b, "normal", CustomDataValue::Vec3([0.0, 1.0, 0.0]));
-        if let CustomDataValue::Vec3(v) = get_custom_entry(&b, "normal").unwrap() {
+        if let CustomDataValue::Vec3(v) = get_custom_entry(&b, "normal").expect("should succeed") {
             assert!((v[1] - 1.0).abs() < 1e-6 /* Y = 1 */);
         }
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Rig control/handle export.
 
@@ -126,7 +126,7 @@ mod tests {
         rc_add_control(&mut exp, make_ctrl("blend_ctrl", ControlType::Blend));
         let ok = rc_set_value(&mut exp, "blend_ctrl", 0.75);
         assert!(ok);
-        assert!((rc_get_control(&exp, "blend_ctrl").unwrap().value - 0.75).abs() < 1e-6);
+        assert!((rc_get_control(&exp, "blend_ctrl").expect("should succeed").value - 0.75).abs() < 1e-6);
     }
 
     #[test]

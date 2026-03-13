@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Particle-object collision detection and response.
 //!
@@ -441,7 +441,7 @@ mod tests {
         // Particle at y=-0.5 with radius 0.1 → penetrating floor
         let result = test_particle_vs_collider([0.0, -0.5, 0.0], 0.1, &collider);
         assert!(result.is_some());
-        let (depth, _normal) = result.unwrap();
+        let (depth, _normal) = result.expect("should succeed");
         assert!(depth > 0.0);
     }
 

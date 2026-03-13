@@ -323,7 +323,7 @@ mod tests {
         let mut scene = new_pbrt_scene(&cfg);
         pbrt_set_camera(&mut scene, [0.0, 1.0, -5.0], [0.0, 0.0, 0.0], 60.0);
         assert!(scene.camera.is_some());
-        let cam = scene.camera.as_ref().unwrap();
+        let cam = scene.camera.as_ref().expect("should succeed");
         assert!((cam.fov_deg - 60.0).abs() < 1e-5);
     }
 

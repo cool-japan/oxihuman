@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Maps non-overlapping intervals [lo, hi) to values.
@@ -144,7 +144,7 @@ mod tests {
         let mut m = IntervalMap::new();
         m.insert(5.0, 10.0, 1);
         m.insert(0.0, 5.0, 2);
-        let (lo, hi) = m.span().unwrap();
+        let (lo, hi) = m.span().expect("should succeed");
         assert!((lo - 0.0).abs() < 1e-9);
         assert!((hi - 10.0).abs() < 1e-9);
     }

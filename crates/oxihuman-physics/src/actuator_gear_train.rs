@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Gear train reduction model stub — multi-stage gear reduction.
@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn test_single_stage_ratio() {
         let g = make_2x_gear();
-        let r = stage_ratio(&g, 0).unwrap();
+        let r = stage_ratio(&g, 0).expect("should succeed");
         assert!((r - 2.0).abs() < 1e-5);
     }
 

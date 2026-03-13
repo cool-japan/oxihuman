@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Skin cluster export: joint influence data per vertex.
@@ -157,7 +157,7 @@ mod tests {
         sc_add_joint(&mut e, "a");
         sc_add_joint(&mut e, "b");
         sc_add_vertex(&mut e, &[(0, 0.3), (1, 0.7)]);
-        let infs = sc_get_influences(&e, 0).unwrap();
+        let infs = sc_get_influences(&e, 0).expect("should succeed");
         assert_eq!(infs.len(), 2);
         assert!((infs[0].weight - 0.7).abs() < 1e-6);
     }
@@ -172,7 +172,7 @@ mod tests {
             &mut e,
             &[(0, 0.1), (1, 0.2), (2, 0.3), (3, 0.25), (4, 0.15)],
         );
-        let infs = sc_get_influences(&e, 0).unwrap();
+        let infs = sc_get_influences(&e, 0).expect("should succeed");
         assert_eq!(infs.len(), 2);
     }
 
@@ -183,7 +183,7 @@ mod tests {
         sc_add_joint(&mut e, "b");
         sc_add_vertex(&mut e, &[(0, 2.0), (1, 3.0)]);
         sc_normalize_weights(&mut e);
-        let infs = sc_get_influences(&e, 0).unwrap();
+        let infs = sc_get_influences(&e, 0).expect("should succeed");
         let total: f32 = infs.iter().map(|i| i.weight).sum();
         assert!((total - 1.0).abs() < 1e-6);
     }

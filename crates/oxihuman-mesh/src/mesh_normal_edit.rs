@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Normal editing: custom normal overrides per vertex.
 
@@ -126,7 +126,7 @@ mod tests {
     fn set_and_get_normal() {
         let mut layer = new_normal_edit_layer();
         set_custom_normal(&mut layer, 2, [0.0, 1.0, 0.0]);
-        let n = get_custom_normal(&layer, 2).unwrap();
+        let n = get_custom_normal(&layer, 2).expect("should succeed");
         assert!((n[1] - 1.0).abs() < 1e-5);
     }
 
@@ -142,7 +142,7 @@ mod tests {
         set_custom_normal(&mut layer, 0, [1.0, 0.0, 0.0]);
         set_custom_normal(&mut layer, 0, [0.0, 0.0, 1.0]);
         assert_eq!(edit_count(&layer), 1);
-        let n = get_custom_normal(&layer, 0).unwrap();
+        let n = get_custom_normal(&layer, 0).expect("should succeed");
         assert!((n[2] - 1.0).abs() < 1e-5);
     }
 

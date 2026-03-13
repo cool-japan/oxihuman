@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Curve sampling utilities: uniform, adaptive, and curvature-based sampling.
@@ -149,7 +149,7 @@ mod tests {
     #[test]
     fn last_sample_t_one() {
         let s = sample_uniform(line_curve, 5);
-        assert!((s.last().unwrap().t - 1.0).abs() < 1e-5);
+        assert!((s.last().expect("should succeed").t - 1.0).abs() < 1e-5);
     }
 
     #[test]

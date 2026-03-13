@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Named vertex weight groups for mesh deformation.
@@ -143,7 +143,7 @@ mod tests {
     fn test_get_weight() {
         /* get_weight returns stored value */
         let s = build_set();
-        let g = s.groups.get("bones").unwrap();
+        let g = s.groups.get("bones").expect("should succeed");
         assert!((g.get_weight(0) - 0.8).abs() < 1e-6);
     }
 

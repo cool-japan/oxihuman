@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Sliding window median filter.
@@ -138,13 +138,15 @@ mod tests {
     #[test]
     fn test_slice_median_odd() {
         /* slice_median of [1,2,3,4,5] = 3 */
-        assert!((slice_median(&[1.0, 2.0, 3.0, 4.0, 5.0]).unwrap() - 3.0).abs() < 1e-5);
+        assert!(
+            (slice_median(&[1.0, 2.0, 3.0, 4.0, 5.0]).expect("should succeed") - 3.0).abs() < 1e-5
+        );
     }
 
     #[test]
     fn test_slice_median_even() {
         /* slice_median of [1,2,3,4] = 2.5 */
-        assert!((slice_median(&[1.0, 2.0, 3.0, 4.0]).unwrap() - 2.5).abs() < 1e-5);
+        assert!((slice_median(&[1.0, 2.0, 3.0, 4.0]).expect("should succeed") - 2.5).abs() < 1e-5);
     }
 
     #[test]

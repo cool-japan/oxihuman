@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Octree spatial index for fast 3-D point queries.
 
@@ -396,7 +396,7 @@ mod tests {
                 let d = sq_dist(query, p);
                 (i, d)
             })
-            .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+            .min_by(|a, b| a.1.partial_cmp(&b.1).expect("should succeed"))
     }
 
     fn sq_dist(a: [f32; 3], b: [f32; 3]) -> f32 {
@@ -427,7 +427,7 @@ mod tests {
     #[test]
     fn octree_aabb_from_points_correct_bounds() {
         let pts = vec![[-1.0_f32, 0.0, 2.0], [3.0, -4.0, 1.0], [0.0, 5.0, -3.0]];
-        let aabb = OctreeAabb::from_points(&pts).unwrap();
+        let aabb = OctreeAabb::from_points(&pts).expect("should succeed");
         assert!((aabb.min[0] - -1.0).abs() < 1e-6);
         assert!((aabb.min[1] - -4.0).abs() < 1e-6);
         assert!((aabb.min[2] - -3.0).abs() < 1e-6);
@@ -466,7 +466,7 @@ mod tests {
     fn octree_nearest_single_point_returns_it() {
         let pts = vec![[1.0_f32, 2.0, 3.0]];
         let tree = Octree::build(&pts, 8, 16);
-        let (idx, sq) = tree.nearest([0.0, 0.0, 0.0]).unwrap();
+        let (idx, sq) = tree.nearest([0.0, 0.0, 0.0]).expect("should succeed");
         assert_eq!(idx, 0);
         // sq_dist([0,0,0], [1,2,3]) = 1+4+9 = 14
         assert!((sq - 14.0).abs() < 1e-4, "sq={sq}");
@@ -477,7 +477,7 @@ mod tests {
         let pts = vec![[0.0_f32, 0.0, 0.0], [10.0, 0.0, 0.0], [5.0, 0.0, 0.0]];
         let tree = Octree::build(&pts, 8, 16);
         // Query near index 1
-        let (idx, _) = tree.nearest([9.9, 0.0, 0.0]).unwrap();
+        let (idx, _) = tree.nearest([9.9, 0.0, 0.0]).expect("should succeed");
         assert_eq!(idx, 1);
     }
 
@@ -502,8 +502,8 @@ mod tests {
         ];
 
         for q in queries {
-            let (tree_idx, tree_sq) = tree.nearest(q).unwrap();
-            let (bf_idx, bf_sq) = brute_nearest(&pts, q).unwrap();
+            let (tree_idx, tree_sq) = tree.nearest(q).expect("should succeed");
+            let (bf_idx, bf_sq) = brute_nearest(&pts, q).expect("should succeed");
             // The squared distances must be equal (not just the indices, in case
             // of ties).
             assert!(
@@ -561,8 +561,8 @@ mod tests {
             vec![[0.0, 0.0, 0.0], [500.0, 500.0, 500.0], [999.0, 1.0, 500.0]];
 
         for q in queries {
-            let (tree_idx, tree_sq) = tree.nearest(q).unwrap();
-            let (bf_idx, bf_sq) = brute_nearest(&pts, q).unwrap();
+            let (tree_idx, tree_sq) = tree.nearest(q).expect("should succeed");
+            let (bf_idx, bf_sq) = brute_nearest(&pts, q).expect("should succeed");
             assert!(
                 (tree_sq - bf_sq).abs() < 1e-2,
                 "query={q:?}: tree sq={tree_sq} (idx={tree_idx}) vs brute sq={bf_sq} (idx={bf_idx})"

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Cubic Bezier path with eval, split, and length approximation.
 
@@ -216,7 +216,7 @@ mod tests {
         let mut path = new_bezier_path();
         let b = new_cubic_bezier([0.0, 0.0], [0.0, 0.0], [1.0, 0.0], [1.0, 0.0]);
         path_add_segment(&mut path, b);
-        let pt = path_eval(&path, 0.0).unwrap();
+        let pt = path_eval(&path, 0.0).expect("should succeed");
         assert!((pt[0] - 0.0).abs() < 1e-5);
     }
 

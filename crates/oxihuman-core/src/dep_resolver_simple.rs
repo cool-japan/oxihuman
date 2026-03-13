@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -105,11 +105,11 @@ mod tests {
         let c = dep_add_node(&mut g, "C");
         dep_add_edge(&mut g, b, a); // B depends on A
         dep_add_edge(&mut g, c, b); // C depends on B
-        let sorted = topo_sort(&g).unwrap();
+        let sorted = topo_sort(&g).expect("should succeed");
         // A must appear before B, B before C
-        let pa = sorted.iter().position(|&x| x == a).unwrap();
-        let pb = sorted.iter().position(|&x| x == b).unwrap();
-        let pc = sorted.iter().position(|&x| x == c).unwrap();
+        let pa = sorted.iter().position(|&x| x == a).expect("should succeed");
+        let pb = sorted.iter().position(|&x| x == b).expect("should succeed");
+        let pc = sorted.iter().position(|&x| x == c).expect("should succeed");
         assert!(pa < pb);
         assert!(pb < pc);
     }
@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn empty_graph_topo_sort() {
         let g = new_dep_graph();
-        let sorted = topo_sort(&g).unwrap();
+        let sorted = topo_sort(&g).expect("should succeed");
         assert!(sorted.is_empty());
     }
 
@@ -163,7 +163,7 @@ mod tests {
     fn single_node_topo_sort() {
         let mut g = new_dep_graph();
         dep_add_node(&mut g, "Solo");
-        let sorted = topo_sort(&g).unwrap();
+        let sorted = topo_sort(&g).expect("should succeed");
         assert_eq!(sorted.len(), 1);
     }
 
@@ -173,7 +173,7 @@ mod tests {
         dep_add_node(&mut g, "X");
         dep_add_node(&mut g, "Y");
         dep_add_node(&mut g, "Z");
-        let sorted = topo_sort(&g).unwrap();
+        let sorted = topo_sort(&g).expect("should succeed");
         assert_eq!(sorted.len(), 3);
     }
 

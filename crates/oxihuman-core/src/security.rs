@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Security validation utilities for OxiHuman.
@@ -395,13 +395,13 @@ mod tests {
 
     #[test]
     fn sanitize_path_valid_relative() {
-        let result = sanitize_path("models/human.glb").unwrap();
+        let result = sanitize_path("models/human.glb").expect("should succeed");
         assert_eq!(result, PathBuf::from("models/human.glb"));
     }
 
     #[test]
     fn sanitize_path_valid_nested() {
-        let result = sanitize_path("assets/v1/mesh.obj").unwrap();
+        let result = sanitize_path("assets/v1/mesh.obj").expect("should succeed");
         assert_eq!(result, PathBuf::from("assets/v1/mesh.obj"));
     }
 
@@ -525,13 +525,13 @@ mod tests {
 
     #[test]
     fn checked_stride_offset_ok() {
-        let result = checked_stride_offset(3, 4, 20).unwrap();
+        let result = checked_stride_offset(3, 4, 20).expect("should succeed");
         assert_eq!(result, 12);
     }
 
     #[test]
     fn checked_stride_offset_zero_index() {
-        let result = checked_stride_offset(0, 8, 100).unwrap();
+        let result = checked_stride_offset(0, 8, 100).expect("should succeed");
         assert_eq!(result, 0);
     }
 
@@ -551,7 +551,7 @@ mod tests {
     #[test]
     fn checked_stride_offset_exact_boundary_ok() {
         // index=4, stride=4, total=20 → 16 < 20 → ok
-        let result = checked_stride_offset(4, 4, 20).unwrap();
+        let result = checked_stride_offset(4, 4, 20).expect("should succeed");
         assert_eq!(result, 16);
     }
 

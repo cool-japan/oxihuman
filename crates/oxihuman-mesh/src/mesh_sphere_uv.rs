@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! UV sphere mesh generation.
 
@@ -162,7 +162,7 @@ mod tests {
         // North pole
         assert!((verts[0][1] - 1.0).abs() < 1e-5);
         // South pole
-        let last = verts.last().unwrap();
+        let last = verts.last().expect("should succeed");
         assert!((last[1] + 1.0).abs() < 1e-5);
     }
 }

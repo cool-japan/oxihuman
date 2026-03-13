@@ -322,7 +322,7 @@ mod tests {
         let rig = default_facial_rig();
         let bone = get_bone(&rig, "jaw");
         assert!(bone.is_some());
-        assert_eq!(bone.unwrap().name, "jaw");
+        assert_eq!(bone.expect("should succeed").name, "jaw");
     }
 
     #[test]
@@ -349,7 +349,7 @@ mod tests {
         let rot = [0.0, 0.0, 0.707, 0.707];
         let ok = set_bone_rotation(&mut rig, "jaw", rot);
         assert!(ok);
-        let bone = get_bone(&rig, "jaw").unwrap();
+        let bone = get_bone(&rig, "jaw").expect("should succeed");
         assert_eq!(bone.rotation, rot);
     }
 

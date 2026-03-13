@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -202,8 +202,8 @@ mod tests {
     fn test_export_vertices_csv() {
         let mesh = two_tri_mesh();
         let path = Path::new("/tmp/test_oxihuman_vertices.csv");
-        export_vertices_csv(&mesh, path).unwrap();
-        let content = std::fs::read_to_string(path).unwrap();
+        export_vertices_csv(&mesh, path).expect("should succeed");
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.starts_with("index,x,y,z\n"));
         let lines: Vec<&str> = content.trim_end().lines().collect();
         assert_eq!(lines.len(), 5);
@@ -213,8 +213,8 @@ mod tests {
     fn test_export_faces_csv() {
         let mesh = two_tri_mesh();
         let path = Path::new("/tmp/test_oxihuman_faces.csv");
-        export_faces_csv(&mesh, path).unwrap();
-        let content = std::fs::read_to_string(path).unwrap();
+        export_faces_csv(&mesh, path).expect("should succeed");
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.starts_with("face_index,v0,v1,v2\n"));
         let lines: Vec<&str> = content.trim_end().lines().collect();
         assert_eq!(lines.len(), 3);
@@ -224,8 +224,8 @@ mod tests {
     fn test_export_normals_csv() {
         let mesh = two_tri_mesh();
         let path = Path::new("/tmp/test_oxihuman_normals.csv");
-        export_normals_csv(&mesh, path).unwrap();
-        let content = std::fs::read_to_string(path).unwrap();
+        export_normals_csv(&mesh, path).expect("should succeed");
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.starts_with("index,nx,ny,nz\n"));
         // 4 normals
         let lines: Vec<&str> = content.trim_end().lines().collect();
@@ -237,8 +237,8 @@ mod tests {
     fn test_export_uvs_csv() {
         let mesh = two_tri_mesh();
         let path = Path::new("/tmp/test_oxihuman_uvs.csv");
-        export_uvs_csv(&mesh, path).unwrap();
-        let content = std::fs::read_to_string(path).unwrap();
+        export_uvs_csv(&mesh, path).expect("should succeed");
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.starts_with("index,u,v\n"));
         let lines: Vec<&str> = content.trim_end().lines().collect();
         // header + 4 uv rows
@@ -250,8 +250,8 @@ mod tests {
     fn test_export_stats_csv() {
         let mesh = two_tri_mesh();
         let path = Path::new("/tmp/test_oxihuman_stats.csv");
-        export_stats_csv(&mesh, path).unwrap();
-        let content = std::fs::read_to_string(path).unwrap();
+        export_stats_csv(&mesh, path).expect("should succeed");
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.starts_with("vertex_count,face_count,has_normals,has_uvs\n"));
         assert!(content.contains("4,2,true,true"));
     }
@@ -262,8 +262,8 @@ mod tests {
         data.insert("height".to_string(), 1.75_f32);
         data.insert("weight".to_string(), 70.0_f32);
         let path = Path::new("/tmp/test_oxihuman_map.csv");
-        export_map_csv(&data, path).unwrap();
-        let content = std::fs::read_to_string(path).unwrap();
+        export_map_csv(&data, path).expect("should succeed");
+        let content = std::fs::read_to_string(path).expect("should succeed");
         assert!(content.starts_with("key,value\n"));
         assert!(content.contains("height,"));
         assert!(content.contains("weight,"));
@@ -273,7 +273,7 @@ mod tests {
     fn test_export_mesh_csv() {
         let mesh = two_tri_mesh();
         let dir = Path::new("/tmp/test_oxihuman_mesh_csv");
-        let report = export_mesh_csv(&mesh, dir).unwrap();
+        let report = export_mesh_csv(&mesh, dir).expect("should succeed");
         assert_eq!(report.vertex_count, 4);
         assert_eq!(report.face_count, 2);
         assert!(report.vertices_path.exists());
@@ -287,8 +287,8 @@ mod tests {
         let mesh = two_tri_mesh();
         let v_csv = vertices_to_csv_string(&mesh);
         let f_csv = faces_to_csv_string(&mesh);
-        assert_eq!(v_csv.lines().next().unwrap(), "index,x,y,z");
-        assert_eq!(f_csv.lines().next().unwrap(), "face_index,v0,v1,v2");
+        assert_eq!(v_csv.lines().next().expect("should succeed"), "index,x,y,z");
+        assert_eq!(f_csv.lines().next().expect("should succeed"), "face_index,v0,v1,v2");
     }
 
     #[test]
@@ -301,8 +301,8 @@ mod tests {
         assert_eq!(f_csv.trim_end().lines().count(), 1);
 
         let stats_path = Path::new("/tmp/test_oxihuman_empty_stats.csv");
-        export_stats_csv(&mesh, stats_path).unwrap();
-        let content = std::fs::read_to_string(stats_path).unwrap();
+        export_stats_csv(&mesh, stats_path).expect("should succeed");
+        let content = std::fs::read_to_string(stats_path).expect("should succeed");
         assert!(content.contains("0,0,false,false"));
     }
 
@@ -313,8 +313,8 @@ mod tests {
         data.insert("apple".to_string(), 1.0_f32);
         data.insert("mango".to_string(), 2.0_f32);
         let path = Path::new("/tmp/test_oxihuman_map_sorted.csv");
-        export_map_csv(&data, path).unwrap();
-        let content = std::fs::read_to_string(path).unwrap();
+        export_map_csv(&data, path).expect("should succeed");
+        let content = std::fs::read_to_string(path).expect("should succeed");
         let lines: Vec<&str> = content.lines().collect();
         // lines[0] = header, [1] = apple, [2] = mango, [3] = zebra
         assert_eq!(lines.len(), 4);

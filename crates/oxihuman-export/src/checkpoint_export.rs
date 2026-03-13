@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Generic model checkpoint stub export.
@@ -141,7 +141,7 @@ mod tests {
         let e = sample_export();
         let loss = find_checkpoint_metric(&e, "loss");
         assert!(loss.is_some());
-        assert!((loss.unwrap() - 1.23).abs() < 1e-9);
+        assert!((loss.expect("should succeed") - 1.23).abs() < 1e-9);
     }
 
     #[test]

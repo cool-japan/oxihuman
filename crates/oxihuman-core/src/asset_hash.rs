@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Content-addressed asset tracking using a rolling FNV-inspired hash.
 
@@ -233,7 +233,7 @@ mod tests {
     fn test_from_hex_roundtrip() {
         let h = hash_bytes(b"roundtrip test");
         let hex = h.to_hex();
-        let h2 = AssetHash::from_hex(&hex).unwrap();
+        let h2 = AssetHash::from_hex(&hex).expect("should succeed");
         assert_eq!(h, h2);
     }
 
@@ -254,7 +254,7 @@ mod tests {
         let h = reg.register("mesh/body.obj", b"obj data", "mesh");
         let found = reg.find_by_hash(&h);
         assert!(found.is_some());
-        assert_eq!(found.unwrap().path, "mesh/body.obj");
+        assert_eq!(found.expect("should succeed").path, "mesh/body.obj");
     }
 
     #[test]
@@ -263,7 +263,7 @@ mod tests {
         reg.register("tex/skin.png", b"png data", "texture");
         let found = reg.find_by_path("tex/skin.png");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().kind, "texture");
+        assert_eq!(found.expect("should succeed").kind, "texture");
     }
 
     #[test]

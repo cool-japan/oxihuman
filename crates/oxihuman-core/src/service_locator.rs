@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A service locator registry that maps type-tagged names to boxed trait objects.
@@ -125,7 +125,7 @@ mod tests {
     fn register_and_lookup() {
         let mut loc = new_service_locator();
         loc.register("logger", "Logger", 1, "{}");
-        let d = loc.lookup("logger").unwrap();
+        let d = loc.lookup("logger").expect("should succeed");
         assert_eq!(d.name, "logger");
     }
 

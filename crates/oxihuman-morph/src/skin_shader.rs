@@ -349,7 +349,7 @@ mod tests {
         let mut preset = new_skin_preset("test");
         let ok = set_zone_tint(&mut preset, SkinZone::Arms, [0.5, 0.6, 0.7]);
         assert!(ok);
-        let p = zone_params(&preset, SkinZone::Arms).unwrap();
+        let p = zone_params(&preset, SkinZone::Arms).expect("should succeed");
         assert!((p.tint[0] - 0.5).abs() < 1e-6);
     }
 

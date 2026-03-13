@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export with animation retargeting metadata (GLTF-style JSON output).
 
@@ -408,7 +408,7 @@ mod tests {
         add_retarget_frame(&mut anim, make_frame(1.0));
         let f = frame_at_time(&anim, 0.4);
         assert!(f.is_some());
-        assert!((f.unwrap().time - 0.0).abs() < 1e-6);
+        assert!((f.expect("should succeed").time - 0.0).abs() < 1e-6);
     }
 
     #[test]
@@ -432,7 +432,7 @@ mod tests {
             .bone_transforms
             .iter()
             .find(|(n, _, _)| n == "Hips")
-            .unwrap();
+            .expect("should succeed");
         assert!((hips_trans.2[1] - 1.5).abs() < 1e-5);
     }
 

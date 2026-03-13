@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use oxihuman_mesh::measurements::{compute_measurements, BodyMeasurements};
 use oxihuman_mesh::mesh::MeshBuffers;
@@ -86,7 +86,7 @@ mod tests {
     fn round_trip_params() {
         let p = ParamState::new(0.7, 0.3, 0.5, 0.2);
         let val = export_params(&p);
-        let p2 = import_params(&val).unwrap();
+        let p2 = import_params(&val).expect("should succeed");
         assert!((p.height - p2.height).abs() < 1e-5);
         assert!((p.weight - p2.weight).abs() < 1e-5);
         assert!((p.muscle - p2.muscle).abs() < 1e-5);
@@ -133,7 +133,7 @@ mod tests {
             use oxihuman_morph::params::ParamState;
             let p = ParamState::new(h, w, m, a);
             let val = super::export_params(&p);
-            let p2 = super::import_params(&val).unwrap();
+            let p2 = super::import_params(&val).expect("should succeed");
             prop_assert!((p.height - p2.height).abs() < 1e-4);
             prop_assert!((p.weight - p2.weight).abs() < 1e-4);
             prop_assert!((p.muscle - p2.muscle).abs() < 1e-4);

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Variable-length integer encoding (LEB128 style).
 
@@ -92,7 +92,7 @@ mod tests {
 
     #[test]
     fn decode_zero() {
-        let (val, n) = decode_varint_u32(&[0]).unwrap();
+        let (val, n) = decode_varint_u32(&[0]).expect("should succeed");
         assert_eq!(val, 0);
         assert_eq!(n, 1);
     }
@@ -101,7 +101,7 @@ mod tests {
     fn roundtrip_u32_small() {
         for v in [0u32, 1, 63, 127, 128, 300, 16383, 16384, 0xFFFF] {
             let enc = encode_varint_u32(v);
-            let (dec, _) = decode_varint_u32(&enc).unwrap();
+            let (dec, _) = decode_varint_u32(&enc).expect("should succeed");
             assert_eq!(dec, v);
         }
     }
@@ -110,7 +110,7 @@ mod tests {
     fn roundtrip_u32_large() {
         let v = u32::MAX;
         let enc = encode_varint_u32(v);
-        let (dec, _) = decode_varint_u32(&enc).unwrap();
+        let (dec, _) = decode_varint_u32(&enc).expect("should succeed");
         assert_eq!(dec, v);
     }
 
@@ -118,7 +118,7 @@ mod tests {
     fn roundtrip_i32_positive() {
         for v in [0i32, 1, 100, 32767, i32::MAX] {
             let enc = encode_varint_i32(v);
-            let (dec, _) = decode_varint_i32(&enc).unwrap();
+            let (dec, _) = decode_varint_i32(&enc).expect("should succeed");
             assert_eq!(dec, v);
         }
     }
@@ -127,7 +127,7 @@ mod tests {
     fn roundtrip_i32_negative() {
         for v in [-1i32, -100, -32768, i32::MIN] {
             let enc = encode_varint_i32(v);
-            let (dec, _) = decode_varint_i32(&enc).unwrap();
+            let (dec, _) = decode_varint_i32(&enc).expect("should succeed");
             assert_eq!(dec, v);
         }
     }

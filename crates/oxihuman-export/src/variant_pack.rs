@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export multiple character mesh variants as a named pack with a JSON manifest.
 
@@ -318,7 +318,7 @@ mod tests {
         let manifest = build_manifest("P", vec![v]);
         let found = find_variant_by_id(&manifest, "abc");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().name, "ABC");
+        assert_eq!(found.expect("should succeed").name, "ABC");
     }
 
     #[test]

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Procedural texture generation: RGBA pixel buffers for skin tones,
 //! checker patterns, gradient maps, UV visualization, and normal maps.

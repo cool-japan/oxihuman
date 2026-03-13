@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Export a cache manifest describing asset dependencies and versions.
@@ -108,7 +108,7 @@ mod tests {
         cache_add_entry(&mut m, "tex.png", 2, 500);
         let e = cache_find_entry(&m, "tex.png");
         assert!(e.is_some());
-        assert_eq!(e.unwrap().version, 2);
+        assert_eq!(e.expect("should succeed").version, 2);
     }
 
     #[test]

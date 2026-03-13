@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Mesh centroid computation stub.
@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn test_vertex_centroid_symmetric() {
         let verts = vec![[1.0f32, 0.0, 0.0], [-1.0, 0.0, 0.0]];
-        let c = vertex_centroid(&verts).unwrap();
+        let c = vertex_centroid(&verts).expect("should succeed");
         assert!(c[0].abs() < 1e-5 /* symmetric → centroid at x=0 */);
     }
 
@@ -150,7 +150,7 @@ mod tests {
     fn test_surface_centroid_single_triangle() {
         let verts = vec![[0.0f32, 0.0, 0.0], [3.0, 0.0, 0.0], [0.0, 3.0, 0.0]];
         let tris = vec![[0u32, 1, 2]];
-        let c = surface_centroid(&verts, &tris).unwrap();
+        let c = surface_centroid(&verts, &tris).expect("should succeed");
         assert!((c[0] - 1.0).abs() < 1e-5 /* x centroid = 1 */);
         assert!((c[1] - 1.0).abs() < 1e-5 /* y centroid = 1 */);
     }
@@ -171,7 +171,7 @@ mod tests {
     fn test_center_mesh_at_centroid() {
         let verts = vec![[1.0f32, 0.0, 0.0], [-1.0, 0.0, 0.0]];
         let centered = center_mesh_at_centroid(&verts);
-        let c = vertex_centroid(&centered).unwrap();
+        let c = vertex_centroid(&centered).expect("should succeed");
         assert!(c[0].abs() < 1e-5 /* centered at origin */);
     }
 
@@ -184,7 +184,7 @@ mod tests {
     #[test]
     fn test_vertex_centroid_single() {
         let verts = vec![[3.0f32, 7.0, -2.0]];
-        let c = vertex_centroid(&verts).unwrap();
+        let c = vertex_centroid(&verts).expect("should succeed");
         assert_eq!(
             c,
             [3.0, 7.0, -2.0] /* single vertex centroid equals itself */

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A register of named boolean flags stored as a bitmask.
@@ -130,7 +130,7 @@ mod tests {
     #[test]
     fn test_set_and_check() {
         let mut fr = FlagRegister::new();
-        let idx = fr.register("f").unwrap();
+        let idx = fr.register("f").expect("should succeed");
         fr.set(idx);
         assert!(fr.is_set(idx));
     }
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn test_clear_flag() {
         let mut fr = FlagRegister::new();
-        let idx = fr.register("f").unwrap();
+        let idx = fr.register("f").expect("should succeed");
         fr.set(idx);
         fr.clear_flag(idx);
         assert!(!fr.is_set(idx));
@@ -147,7 +147,7 @@ mod tests {
     #[test]
     fn test_toggle() {
         let mut fr = FlagRegister::new();
-        let idx = fr.register("f").unwrap();
+        let idx = fr.register("f").expect("should succeed");
         fr.toggle(idx);
         assert!(fr.is_set(idx));
         fr.toggle(idx);

@@ -98,7 +98,7 @@ mod tests {
     #[test]
     fn test_keyframe_time_at() {
         let kf = sample();
-        assert!((keyframe_time_at(&kf, 1).unwrap() - 0.5).abs() < 1e-6);
+        assert!((keyframe_time_at(&kf, 1).expect("should succeed") - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -110,7 +110,7 @@ mod tests {
     #[test]
     fn test_keyframe_value_at() {
         let kf = sample();
-        assert!((keyframe_value_at(&kf, 2).unwrap() - 1.0).abs() < 1e-6);
+        assert!((keyframe_value_at(&kf, 2).expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]

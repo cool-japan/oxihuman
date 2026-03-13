@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! GLTF 2.0 morph animation keyframe export.
 
@@ -351,9 +351,9 @@ mod tests {
         let base = make_base(4);
         let targets = vec![make_target(&base, 0.1)];
         let clip = two_keyframe_clip(1);
-        let json_str = export_animation_gltf(&base, &targets, &clip).unwrap();
+        let json_str = export_animation_gltf(&base, &targets, &clip).expect("should succeed");
         let val: Value = serde_json::from_str(&json_str).expect("must parse as JSON");
-        assert_eq!(val["asset"]["version"].as_str().unwrap(), "2.0");
+        assert_eq!(val["asset"]["version"].as_str().expect("should succeed"), "2.0");
     }
 
     // ── Test 2 ────────────────────────────────────────────────────────────────
@@ -364,11 +364,11 @@ mod tests {
         let targets: Vec<Vec<[f32; 3]>> =
             (0..3).map(|i| make_target(&base, i as f32 * 0.1)).collect();
         let clip = two_keyframe_clip(3);
-        let json_str = export_animation_gltf(&base, &targets, &clip).unwrap();
-        let val: Value = serde_json::from_str(&json_str).unwrap();
+        let json_str = export_animation_gltf(&base, &targets, &clip).expect("should succeed");
+        let val: Value = serde_json::from_str(&json_str).expect("should succeed");
         let tgt_arr = val["meshes"][0]["primitives"][0]["targets"]
             .as_array()
-            .unwrap();
+            .expect("should succeed");
         assert_eq!(tgt_arr.len(), 3);
     }
 
@@ -391,14 +391,14 @@ mod tests {
                 })
                 .collect(),
         };
-        let json_str = export_animation_gltf(&base, &targets, &clip).unwrap();
-        let val: Value = serde_json::from_str(&json_str).unwrap();
+        let json_str = export_animation_gltf(&base, &targets, &clip).expect("should succeed");
+        let val: Value = serde_json::from_str(&json_str).expect("should succeed");
 
         // The weights accessor is the last one.
-        let accessors = val["accessors"].as_array().unwrap();
-        let weights_acc = accessors.last().unwrap();
+        let accessors = val["accessors"].as_array().expect("should succeed");
+        let weights_acc = accessors.last().expect("should succeed");
         assert_eq!(
-            weights_acc["count"].as_u64().unwrap(),
+            weights_acc["count"].as_u64().expect("should succeed"),
             (n_keyframes * n_targets) as u64
         );
     }
@@ -413,9 +413,9 @@ mod tests {
             name: "Empty".to_string(),
             keyframes: vec![],
         };
-        let json_str = export_animation_gltf(&base, &targets, &clip).unwrap();
-        let val: Value = serde_json::from_str(&json_str).unwrap();
-        let anim = val["animations"].as_array().unwrap();
+        let json_str = export_animation_gltf(&base, &targets, &clip).expect("should succeed");
+        let val: Value = serde_json::from_str(&json_str).expect("should succeed");
+        let anim = val["animations"].as_array().expect("should succeed");
         assert!(anim.is_empty(), "animations should be empty for empty clip");
     }
 
@@ -459,21 +459,21 @@ mod tests {
             ],
         };
 
-        let json_str = export_animation_gltf(&base, &targets, &clip).unwrap();
-        let val: Value = serde_json::from_str(&json_str).unwrap();
+        let json_str = export_animation_gltf(&base, &targets, &clip).expect("should succeed");
+        let val: Value = serde_json::from_str(&json_str).expect("should succeed");
 
         // Extract buffer URI and decode base64
-        let uri = val["buffers"][0]["uri"].as_str().unwrap();
+        let uri = val["buffers"][0]["uri"].as_str().expect("should succeed");
         let b64_data = uri
             .strip_prefix("data:application/octet-stream;base64,")
-            .unwrap();
+            .expect("should succeed");
         let raw = decode_base64(b64_data);
 
         // Find weights bufferView (last bufferView)
-        let bvs = val["bufferViews"].as_array().unwrap();
-        let weights_bv = bvs.last().unwrap();
-        let offset = weights_bv["byteOffset"].as_u64().unwrap() as usize;
-        let length = weights_bv["byteLength"].as_u64().unwrap() as usize;
+        let bvs = val["bufferViews"].as_array().expect("should succeed");
+        let weights_bv = bvs.last().expect("should succeed");
+        let offset = weights_bv["byteOffset"].as_u64().expect("should succeed") as usize;
+        let length = weights_bv["byteLength"].as_u64().expect("should succeed") as usize;
 
         let weights_bytes = &raw[offset..offset + length];
 
@@ -490,7 +490,12 @@ mod tests {
         const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         let mut out = Vec::new();
         let bytes: Vec<u8> = s.bytes().filter(|&b| b != b'=').collect();
-        let lookup = |c: u8| CHARS.iter().position(|&x| x == c).unwrap() as u32;
+        let lookup = |c: u8| {
+            CHARS
+                .iter()
+                .position(|&x| x == c)
+                .expect("invalid base64 character") as u32
+        };
         let mut i = 0;
         // Count actual padding
         let pad = s.bytes().filter(|&b| b == b'=').count();

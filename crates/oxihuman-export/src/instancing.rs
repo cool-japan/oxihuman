@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use anyhow::Result;
 use bytemuck::cast_slice;
@@ -238,7 +238,7 @@ mod tests {
     fn export_single_instance() {
         let mesh = tri_mesh();
         let path = tmp_path("test_instancing_single.glb");
-        export_instanced_glb(&mesh, &[InstanceTransform::identity()], &path).unwrap();
+        export_instanced_glb(&mesh, &[InstanceTransform::identity()], &path).expect("should succeed");
         assert!(path.exists());
     }
 
@@ -247,10 +247,10 @@ mod tests {
         let mesh = tri_mesh();
         let path = tmp_path("test_instancing_five.glb");
         let instances = row_instances(5, 1.5);
-        export_instanced_glb(&mesh, &instances, &path).unwrap();
+        export_instanced_glb(&mesh, &instances, &path).expect("should succeed");
         assert!(path.exists());
         // Verify file has content (valid GLB has at least 12 byte header)
-        let metadata = std::fs::metadata(&path).unwrap();
+        let metadata = std::fs::metadata(&path).expect("should succeed");
         assert!(metadata.len() > 12);
     }
 
@@ -258,10 +258,10 @@ mod tests {
     fn glb_header_valid() {
         let mesh = tri_mesh();
         let path = tmp_path("test_instancing_header.glb");
-        export_instanced_glb(&mesh, &[InstanceTransform::identity()], &path).unwrap();
-        let mut f = std::fs::File::open(&path).unwrap();
+        export_instanced_glb(&mesh, &[InstanceTransform::identity()], &path).expect("should succeed");
+        let mut f = std::fs::File::open(&path).expect("should succeed");
         let mut buf = [0u8; 4];
-        f.read_exact(&mut buf).unwrap();
+        f.read_exact(&mut buf).expect("should succeed");
         // "glTF" magic: 0x46546C67 in little-endian = [0x67, 0x6C, 0x54, 0x46]
         assert_eq!(buf, [0x67, 0x6C, 0x54, 0x46]);
     }

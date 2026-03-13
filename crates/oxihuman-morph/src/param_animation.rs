@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -723,7 +723,7 @@ mod tests {
     #[test]
     fn breathing_clip_loops() {
         let clip = breathing_clip(1.0); // 1Hz = 1s period
-        let track = clip.find_track("chest_expand").unwrap();
+        let track = clip.find_track("chest_expand").expect("should succeed");
         assert_eq!(track.loop_mode, LoopMode::Loop);
         // At t=0 and t=1 (one full loop), values should be equal
         let v0 = track.evaluate(0.0);
@@ -770,8 +770,9 @@ mod tests {
             lines.push(format!("frame {i}: brow={v:.4}"));
         }
         let output = lines.join("\n");
-        fs::write("/tmp/param_animation_bake_test.txt", &output).unwrap();
-        let read_back = fs::read_to_string("/tmp/param_animation_bake_test.txt").unwrap();
+        fs::write("/tmp/param_animation_bake_test.txt", &output).expect("should succeed");
+        let read_back =
+            fs::read_to_string("/tmp/param_animation_bake_test.txt").expect("should succeed");
         assert!(read_back.contains("brow="));
     }
 

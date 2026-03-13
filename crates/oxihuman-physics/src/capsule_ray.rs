@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Capsule-ray intersection tests.
@@ -253,7 +253,7 @@ mod tests {
             origin: [0.0, 0.0, 0.0],
             direction: [1.0, 0.0, 0.0],
         };
-        let t = ray_capsule_intersect(&ray, &cap).unwrap();
+        let t = ray_capsule_intersect(&ray, &cap).expect("should succeed");
         assert!(t > 0.0);
     }
 
@@ -265,7 +265,7 @@ mod tests {
             radius: 0.5,
         };
         let ray = ray_along_x(0.0);
-        let t = ray_capsule_intersect(&ray, &cap).unwrap();
+        let t = ray_capsule_intersect(&ray, &cap).expect("should succeed");
         assert!((t - 2.5_f32).abs() < 1e-4);
     }
 }

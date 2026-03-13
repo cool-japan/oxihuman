@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! JWT encode/decode stub — header.payload.signature (base64url, no crypto).
@@ -141,7 +141,7 @@ mod tests {
             jti: None,
         };
         let tok = jwt_encode(&header, &claims, "s");
-        let decoded = jwt_decode(&tok).unwrap();
+        let decoded = jwt_decode(&tok).expect("should succeed");
         assert!(!decoded.signature.is_empty());
     }
 
@@ -193,7 +193,7 @@ mod tests {
     #[test]
     fn test_decode_preserves_signature_part() {
         let tok = "aaa.bbb.ccc";
-        let decoded = jwt_decode(tok).unwrap();
+        let decoded = jwt_decode(tok).expect("should succeed");
         assert_eq!(decoded.signature, "ccc");
     }
 }

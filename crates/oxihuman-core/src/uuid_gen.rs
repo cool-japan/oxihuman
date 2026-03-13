@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 #[allow(dead_code)]
@@ -61,7 +61,7 @@ mod tests {
     fn test_parse_counter() {
         let mut gen = new_uuid_gen("obj");
         let id = ug_next(&mut gen); /* counter was 0 before ug_next */
-        let c = ug_parse_counter(&id, "obj").unwrap();
+        let c = ug_parse_counter(&id, "obj").expect("should succeed");
         assert_eq!(c, 0);
     }
 

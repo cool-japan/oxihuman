@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! UV coordinate export utilities.
@@ -108,7 +108,7 @@ mod tests {
     fn test_get() {
         let mut e = new_uv_coord_export(0);
         uvc_add(&mut e, [0.1, 0.9]);
-        let uv = uvc_get(&e, 0).unwrap();
+        let uv = uvc_get(&e, 0).expect("should succeed");
         assert!((uv[0] - 0.1).abs() < 1e-6);
     }
 

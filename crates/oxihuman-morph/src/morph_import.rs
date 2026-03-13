@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// An imported morph target with per-vertex offsets.
@@ -109,7 +109,7 @@ mod tests {
     #[test]
     fn parse_morph_csv_valid() {
         let csv = "smile,0,0.1,0.2,0.3\nsmile,1,0.4,0.5,0.6";
-        let m = parse_morph_csv(csv).unwrap();
+        let m = parse_morph_csv(csv).expect("should succeed");
         assert_eq!(m.name, "smile");
         assert_eq!(m.vertex_count, 2);
     }

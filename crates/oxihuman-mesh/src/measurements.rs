@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Body measurement extraction from a MeshBuffers.
 //!
@@ -171,7 +171,7 @@ mod tests {
     #[test]
     fn aabb_unit_cube() {
         let m = unit_cube_verts();
-        let aabb = compute_aabb(&m).unwrap();
+        let aabb = compute_aabb(&m).expect("should succeed");
         assert!((aabb.height() - 1.0).abs() < 1e-6);
         assert!((aabb.width() - 1.0).abs() < 1e-6);
         assert!((aabb.depth() - 1.0).abs() < 1e-6);
@@ -180,7 +180,7 @@ mod tests {
     #[test]
     fn aabb_center() {
         let m = unit_cube_verts();
-        let aabb = compute_aabb(&m).unwrap();
+        let aabb = compute_aabb(&m).expect("should succeed");
         let c = aabb.center();
         assert!((c[0] - 0.5).abs() < 1e-6);
         assert!((c[1] - 0.5).abs() < 1e-6);
@@ -203,7 +203,7 @@ mod tests {
     #[test]
     fn measurements_non_negative() {
         let m = unit_cube_verts();
-        let meas = compute_measurements(&m).unwrap();
+        let meas = compute_measurements(&m).expect("should succeed");
         assert!(meas.total_height > 0.0);
         assert!(meas.max_width > 0.0);
         assert!(meas.shoulder_width >= 0.0);
@@ -225,7 +225,7 @@ mod tests {
                     has_suit: false,
                 };
                 let mesh = MyMesh::from_morph(morph_buf);
-                let meas = compute_measurements(&mesh).unwrap();
+                let meas = compute_measurements(&mesh).expect("should succeed");
                 // MakeHuman base mesh is roughly 1.7m tall in its units
                 assert!(
                     meas.total_height > 1.0,

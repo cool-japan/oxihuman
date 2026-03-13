@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Simple performance profiler with named sections.
 
@@ -288,7 +288,7 @@ mod tests {
         let frame = make_frame_with_span("physics", 100, 200);
         let span = span_by_name(&frame, "physics");
         assert!(span.is_some());
-        assert_eq!(span.unwrap().name, "physics");
+        assert_eq!(span.expect("should succeed").name, "physics");
         assert!(span_by_name(&frame, "missing").is_none());
     }
 
@@ -329,7 +329,7 @@ mod tests {
             frame_number: 0,
             total_ns: 210,
         };
-        let hot = hottest_span(&frame).unwrap();
+        let hot = hottest_span(&frame).expect("should succeed");
         assert_eq!(hot.name, "b");
     }
 
@@ -402,8 +402,8 @@ mod tests {
         end_span(&mut p);
         end_span(&mut p);
         end_frame(&mut p);
-        let frame = last_frame(&p).unwrap();
-        let inner = span_by_name(frame, "inner").unwrap();
+        let frame = last_frame(&p).expect("should succeed");
+        let inner = span_by_name(frame, "inner").expect("should succeed");
         assert_eq!(inner.depth, 1);
     }
 }

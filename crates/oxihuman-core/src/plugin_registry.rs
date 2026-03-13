@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Plugin registration system for extensible asset loaders and target providers.
 
@@ -228,7 +228,7 @@ mod tests {
     fn duplicate_id_is_rejected() {
         let mut reg = PluginRegistry::new();
         reg.register(make_desc("dup", PluginKind::AssetLoader, &["obj"]))
-            .unwrap();
+            .expect("should succeed");
         let result = reg.register(make_desc("dup", PluginKind::Exporter, &["glb"]));
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("dup"));
@@ -238,7 +238,7 @@ mod tests {
     fn unregister_removes_plugin() {
         let mut reg = PluginRegistry::new();
         reg.register(make_desc("to_remove", PluginKind::Validator, &[]))
-            .unwrap();
+            .expect("should succeed");
         assert_eq!(reg.count(), 1);
         let removed = reg.unregister("to_remove");
         assert!(removed);
@@ -255,7 +255,7 @@ mod tests {
     fn find_by_id_found() {
         let mut reg = PluginRegistry::new();
         reg.register(make_desc("finder", PluginKind::AssetLoader, &["obj"]))
-            .unwrap();
+            .expect("should succeed");
         assert!(reg.find_by_id("finder").is_some());
     }
 
@@ -269,9 +269,9 @@ mod tests {
     fn find_by_extension_obj() {
         let mut reg = PluginRegistry::new();
         reg.register(make_desc("obj_l", PluginKind::AssetLoader, &["obj"]))
-            .unwrap();
+            .expect("should succeed");
         reg.register(make_desc("glb_l", PluginKind::AssetLoader, &["glb"]))
-            .unwrap();
+            .expect("should succeed");
         let results = reg.find_by_extension("obj");
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].id, "obj_l");
@@ -281,11 +281,11 @@ mod tests {
     fn find_by_kind_count() {
         let mut reg = PluginRegistry::new();
         reg.register(make_desc("l1", PluginKind::AssetLoader, &[]))
-            .unwrap();
+            .expect("should succeed");
         reg.register(make_desc("l2", PluginKind::AssetLoader, &[]))
-            .unwrap();
+            .expect("should succeed");
         reg.register(make_desc("e1", PluginKind::Exporter, &[]))
-            .unwrap();
+            .expect("should succeed");
         let loaders = reg.find_by_kind(&PluginKind::AssetLoader);
         assert_eq!(loaders.len(), 2);
     }
@@ -295,7 +295,7 @@ mod tests {
         let mut reg = PluginRegistry::new();
         for i in 0..5 {
             reg.register(make_desc(&format!("p{}", i), PluginKind::Validator, &[]))
-                .unwrap();
+                .expect("should succeed");
         }
         assert_eq!(reg.count(), 5);
     }
@@ -308,7 +308,7 @@ mod tests {
             PluginKind::Exporter,
             &["glb"],
         ))
-        .unwrap();
+        .expect("should succeed");
         let json = reg.to_json();
         assert!(json.contains("json_test_plugin"));
     }
@@ -347,9 +347,9 @@ mod tests {
     fn all_returns_slice_of_plugins() {
         let mut reg = PluginRegistry::new();
         reg.register(make_desc("a1", PluginKind::AssetLoader, &[]))
-            .unwrap();
+            .expect("should succeed");
         reg.register(make_desc("a2", PluginKind::AssetLoader, &[]))
-            .unwrap();
+            .expect("should succeed");
         assert_eq!(reg.all().len(), 2);
     }
 }

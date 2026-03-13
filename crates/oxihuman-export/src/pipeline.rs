@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! End-to-end pipeline: base mesh + targets + params → GLB file.
 
@@ -164,7 +164,7 @@ mod tests {
         let config = PipelineConfig::new(BASE_OBJ, out.clone());
         let mesh = run_pipeline(config).expect("pipeline (no targets) failed");
         assert!(!mesh.positions.is_empty());
-        verify_glb_header(&out).unwrap();
+        verify_glb_header(&out).expect("should succeed");
         std::fs::remove_file(&out).ok();
     }
 
@@ -182,7 +182,7 @@ mod tests {
             params: ParamState::new(1.0, 1.0, 1.0, 1.0),
             output_path: out.clone(),
         };
-        let mesh = run_pipeline(config).unwrap();
+        let mesh = run_pipeline(config).expect("should succeed");
         for pos in &mesh.positions {
             assert!(pos[0].is_finite(), "non-finite x at {:?}", pos);
             assert!(pos[1].is_finite(), "non-finite y at {:?}", pos);
@@ -205,7 +205,7 @@ mod tests {
             // Use a simple in-memory OBJ (not the 19k vertex one — too slow for proptest)
             use oxihuman_core::parser::obj::parse_obj;
             let simple_obj = "v 0 0 0\nv 1 0 0\nv 0 1 0\nvt 0 0\nvt 1 0\nvt 0 1\nvn 0 0 1\nf 1/1/1 2/2/1 3/3/1\n";
-            let base = parse_obj(simple_obj).unwrap();
+            let base = parse_obj(simple_obj).expect("should succeed");
 
             use oxihuman_morph::engine::HumanEngine;
             use oxihuman_core::policy::{Policy, PolicyProfile};
@@ -382,9 +382,10 @@ impl ExportPipeline {
         let has_colors = self.include_colors && mesh.colors.is_some();
         let color_offset = cursor;
         if has_colors {
-            let cols = mesh.colors.as_ref().unwrap();
-            let cb: &[u8] = cast_slice(cols.as_slice());
-            cursor += cb.len();
+            if let Some(cols) = mesh.colors.as_ref() {
+                let cb: &[u8] = cast_slice(cols.as_slice());
+                cursor += cb.len();
+            }
         }
 
         // Blend shape delta blocks
@@ -405,9 +406,10 @@ impl ExportPipeline {
             bin_data.extend_from_slice(tb);
         }
         if has_colors {
-            let cols = mesh.colors.as_ref().unwrap();
-            let cb: &[u8] = cast_slice(cols.as_slice());
-            bin_data.extend_from_slice(cb);
+            if let Some(cols) = mesh.colors.as_ref() {
+                let cb: &[u8] = cast_slice(cols.as_slice());
+                bin_data.extend_from_slice(cb);
+            }
         }
         for shape in &self.blend_shapes {
             let db: &[u8] = cast_slice(&shape.position_deltas);
@@ -501,8 +503,7 @@ impl ExportPipeline {
         };
 
         // Optional COLOR_0
-        let color_acc: Option<usize> = if has_colors {
-            let cols = mesh.colors.as_ref().unwrap();
+        let color_acc: Option<usize> = if let (true, Some(cols)) = (has_colors, mesh.colors.as_ref()) {
             let cb: &[u8] = cast_slice(cols.as_slice());
             buffer_views.push(json!({
                 "buffer": 0,
@@ -720,7 +721,7 @@ mod export_pipeline_tests {
             .export(&mesh, path)
             .expect("meta export failed");
         assert!(path.exists(), "GLB file not created");
-        let bytes = std::fs::read(path).unwrap();
+        let bytes = std::fs::read(path).expect("should succeed");
         assert!(bytes.len() >= 4);
         assert_eq!(&bytes[0..4], b"glTF", "invalid GLB magic");
         std::fs::remove_file(path).ok();

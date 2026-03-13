@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashMap;
 
@@ -713,7 +713,7 @@ mod tests {
         assert_eq!(loops.len(), 1, "exactly one loop");
         let lp = &loops[0];
         // Closed: first == last
-        assert_eq!(lp[0], *lp.last().unwrap());
+        assert_eq!(lp[0], *lp.last().expect("should succeed"));
     }
 
     // -----------------------------------------------------------------------

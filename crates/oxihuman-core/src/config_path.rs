@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Dot-separated configuration path for hierarchical config access.
@@ -113,7 +113,7 @@ mod tests {
     #[test]
     fn test_parent() {
         let p = ConfigPath::new("a.b.c");
-        let parent = p.parent().unwrap();
+        let parent = p.parent().expect("should succeed");
         assert_eq!(parent.to_dotted(), "a.b");
     }
 

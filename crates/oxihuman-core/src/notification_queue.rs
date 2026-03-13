@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Notification queue with priority.
@@ -133,7 +133,7 @@ mod tests {
     fn test_pop_returns_item() {
         let mut q = new_notification_queue();
         nq_push(&mut q, NotifPriority::Normal, "T", "B");
-        let n = nq_pop(&mut q).unwrap();
+        let n = nq_pop(&mut q).expect("should succeed");
         assert_eq!(n.title, "T");
     }
 
@@ -144,7 +144,7 @@ mod tests {
         nq_push(&mut q, NotifPriority::Low, "low", "");
         nq_push(&mut q, NotifPriority::Critical, "crit", "");
         nq_push(&mut q, NotifPriority::Normal, "norm", "");
-        let first = nq_pop(&mut q).unwrap();
+        let first = nq_pop(&mut q).expect("should succeed");
         assert_eq!(first.priority, NotifPriority::Critical);
     }
 
@@ -190,7 +190,7 @@ mod tests {
         let mut q = new_notification_queue();
         nq_push(&mut q, NotifPriority::Normal, "n", "");
         nq_push(&mut q, NotifPriority::High, "h", "");
-        let first = nq_pop(&mut q).unwrap();
+        let first = nq_pop(&mut q).expect("should succeed");
         assert_eq!(first.priority, NotifPriority::High);
     }
 }

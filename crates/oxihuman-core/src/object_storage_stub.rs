@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Object storage (S3-like) stub.
@@ -173,7 +173,7 @@ mod tests {
     fn test_upload_download() {
         let mut s = new_object_storage("bucket");
         upload(&mut s, "file.bin", &[1, 2, 3]);
-        let data = download(&s, "file.bin").unwrap();
+        let data = download(&s, "file.bin").expect("should succeed");
         assert_eq!(data, vec![1, 2, 3]);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Simple number parsing utilities.
 
@@ -72,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_parse_f32_valid() {
-        let v = parse_f32("1.5").unwrap();
+        let v = parse_f32("1.5").expect("should succeed");
         assert!((v - 1.5f32).abs() < 1e-5);
     }
 
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn test_parse_vec3_valid() {
-        let v = parse_vec3("1.0,2.0,3.0").unwrap();
+        let v = parse_vec3("1.0,2.0,3.0").expect("should succeed");
         assert!((v[0] - 1.0f32).abs() < 1e-5);
         assert!((v[1] - 2.0f32).abs() < 1e-5);
         assert!((v[2] - 3.0f32).abs() < 1e-5);

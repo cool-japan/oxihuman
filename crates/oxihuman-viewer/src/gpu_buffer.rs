@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 //! GPU buffer abstraction for vertex/index/uniform data.
@@ -111,7 +111,7 @@ mod tests {
     fn test_buffer_read() {
         let mut b = new_gpu_buffer(BufferUsage::Index, 16);
         buffer_write(&mut b, 0, &[10, 20, 30]);
-        let data = buffer_read(&b, 0, 3).unwrap();
+        let data = buffer_read(&b, 0, 3).expect("should succeed");
         assert_eq!(data, &[10, 20, 30]);
     }
 
@@ -138,7 +138,7 @@ mod tests {
         let mut b = new_gpu_buffer(BufferUsage::Vertex, 8);
         buffer_write(&mut b, 0, &[1, 2, 3, 4, 5, 6, 7, 8]);
         buffer_clear(&mut b);
-        let data = buffer_read(&b, 0, 4).unwrap();
+        let data = buffer_read(&b, 0, 4).expect("should succeed");
         assert_eq!(data, &[0, 0, 0, 0]);
     }
 

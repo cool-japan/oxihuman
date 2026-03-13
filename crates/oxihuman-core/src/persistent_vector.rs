@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Persistent vector stub — uses path-copying to produce new versions on
@@ -124,7 +124,7 @@ mod tests {
     fn test_set() {
         let mut v: PersistentVector<i32> = PersistentVector::new();
         v.push(1);
-        let new_ver = v.set(0, 99).unwrap();
+        let new_ver = v.set(0, 99).expect("should succeed");
         assert_eq!(v.get_at(new_ver, 0), Some(&99)); /* updated */
         assert_eq!(v.get_at(1, 0), Some(&1)); /* old version unchanged */
     }

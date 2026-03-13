@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Min-heap priority queue.
 
@@ -127,7 +127,7 @@ mod tests {
         pq_push(&mut pq, 1, 3.0);
         pq_push(&mut pq, 2, 1.0);
         pq_push(&mut pq, 3, 2.0);
-        let first = pq_pop(&mut pq).unwrap();
+        let first = pq_pop(&mut pq).expect("should succeed");
         assert_eq!(first.key, 2);
         assert!((first.priority - 1.0).abs() < 1e-6);
     }

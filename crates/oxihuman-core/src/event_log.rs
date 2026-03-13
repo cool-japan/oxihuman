@@ -249,7 +249,7 @@ mod tests {
         let mut log = new_event_log(100);
         log_event(&mut log, LogLevel::Info, "c", "first");
         log_event(&mut log, LogLevel::Error, "c", "last");
-        let last = last_event(&log).unwrap();
+        let last = last_event(&log).expect("should succeed");
         assert_eq!(last.message, "last");
     }
 
@@ -300,7 +300,7 @@ mod tests {
             "test",
             vec![("key1".to_string(), "val1".to_string())],
         );
-        let e = last_event(&log).unwrap();
+        let e = last_event(&log).expect("should succeed");
         assert_eq!(e.data.len(), 1);
         assert_eq!(e.data[0].0, "key1");
     }

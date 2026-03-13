@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! LAZ compressed point cloud export stub.
@@ -111,7 +111,7 @@ mod tests {
         let mut exp = new_laz_export();
         laz_add_point(&mut exp, -1.0, -2.0, -3.0, 0);
         laz_add_point(&mut exp, 1.0, 2.0, 3.0, 0);
-        let (mn, mx) = laz_bounds(&exp).unwrap();
+        let (mn, mx) = laz_bounds(&exp).expect("should succeed");
         assert!((mn[0] - (-1.0)).abs() < 1e-9);
         assert!((mx[2] - 3.0).abs() < 1e-9);
     }

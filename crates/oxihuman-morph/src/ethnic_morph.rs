@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Ethnic morphology variation presets and blend system.
 //!
@@ -484,7 +484,7 @@ mod tests {
         let weights = apply_ethnic_to_face(&config);
         assert_eq!(weights.len(), 10);
         let ea = new_ethnic_preset(EthnicGroup::EastAsian);
-        let eye = weights.iter().find(|(k, _)| k == "ethnic_eye_shape").unwrap();
+        let eye = weights.iter().find(|(k, _)| k == "ethnic_eye_shape").expect("should succeed");
         assert!((eye.1 - ea.eye_shape).abs() < 1e-5);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Ray–triangle intersection using the Möller–Trumbore algorithm.
 
@@ -190,7 +190,7 @@ mod tests {
     fn test_t_value() {
         let ray = unit_ray();
         let (v0, v1, v2) = front_tri();
-        let hit = ray_triangle(&ray, v0, v1, v2, 0).unwrap();
+        let hit = ray_triangle(&ray, v0, v1, v2, 0).expect("should succeed");
         assert!((hit.t - 5.0).abs() < 1e-4);
     }
 
@@ -198,7 +198,7 @@ mod tests {
     fn test_uv_valid() {
         let ray = unit_ray();
         let (v0, v1, v2) = front_tri();
-        let hit = ray_triangle(&ray, v0, v1, v2, 0).unwrap();
+        let hit = ray_triangle(&ray, v0, v1, v2, 0).expect("should succeed");
         assert!(hit.u >= 0.0 && hit.v >= 0.0 && hit.u + hit.v <= 1.0);
     }
 
@@ -224,7 +224,7 @@ mod tests {
     fn test_hit_point() {
         let ray = unit_ray();
         let (v0, v1, v2) = front_tri();
-        let hit = ray_triangle(&ray, v0, v1, v2, 0).unwrap();
+        let hit = ray_triangle(&ray, v0, v1, v2, 0).expect("should succeed");
         let pt = hit_point(&ray, &hit);
         assert!((pt[2]).abs() < 1e-4);
     }

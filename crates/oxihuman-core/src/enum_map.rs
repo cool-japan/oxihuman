@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A fixed-size map backed by an array, indexed by enum variant ordinals.
@@ -129,7 +129,7 @@ mod tests {
     fn test_set_get_by_label() {
         let mut m = EnumMap::<2>::new(["w", "h"]);
         assert!(m.set_by_label("w", 10.0));
-        assert!((m.get_by_label("w").unwrap() - 10.0).abs() < 1e-9);
+        assert!((m.get_by_label("w").expect("should succeed") - 10.0).abs() < 1e-9);
         assert!(!m.set_by_label("z", 1.0));
     }
 

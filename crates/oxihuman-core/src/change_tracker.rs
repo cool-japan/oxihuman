@@ -1,7 +1,7 @@
 //! Change tracker — records which fields/properties have been modified since the last flush.
 
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 /// A record of a single field change.
 #[allow(dead_code)]

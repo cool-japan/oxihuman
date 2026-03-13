@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Constraint batch / island management.
 
@@ -119,7 +119,7 @@ mod tests {
     fn test_get_island() {
         let mut b = new_constraint_batch();
         batch_add_island(&mut b, make_island(&[5], &[10]));
-        let is = batch_get_island(&b, 0).unwrap();
+        let is = batch_get_island(&b, 0).expect("should succeed");
         assert_eq!(is.particle_ids, &[5]);
     }
 

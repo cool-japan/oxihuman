@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Vertex color layer management.
@@ -150,7 +150,7 @@ mod tests {
             l.colors[0] = [1.0, 0.0, 0.0, 1.0];
             l.colors[1] = [0.0, 0.0, 0.0, 1.0];
         }
-        let avg = layer_average_color(&set, "col").unwrap();
+        let avg = layer_average_color(&set, "col").expect("should succeed");
         assert!((avg[0] - 0.5).abs() < 1e-6 /* average R = 0.5 */);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Vertex animation export: sequence of mesh frames as GLTF morph target animation.
 
@@ -676,7 +676,7 @@ mod tests {
         let path = Path::new("/tmp/test_vertex_anim_pair.glb");
         export_morph_pair_glb(&mesh_a, &mesh_b, 1.0, path).expect("export failed");
         assert!(path.exists(), "GLB file was not created");
-        let meta = std::fs::metadata(path).unwrap();
+        let meta = std::fs::metadata(path).expect("should succeed");
         assert!(meta.len() > 0, "GLB file is empty");
         std::fs::remove_file(path).ok();
     }
@@ -688,12 +688,12 @@ mod tests {
         let mesh_b = triangle_b();
         let path = Path::new("/tmp/test_vertex_anim_pair_header.glb");
         export_morph_pair_glb(&mesh_a, &mesh_b, 2.0, path).expect("export failed");
-        let bytes = std::fs::read(path).unwrap();
+        let bytes = std::fs::read(path).expect("should succeed");
         assert!(bytes.len() >= 12, "file too short");
         // GLB magic: "glTF" = 0x46546C67 LE
         assert_eq!(&bytes[0..4], &[0x67, 0x6C, 0x54, 0x46], "wrong GLB magic");
         // Version = 2
-        let version = u32::from_le_bytes(bytes[4..8].try_into().unwrap());
+        let version = u32::from_le_bytes(bytes[4..8].try_into().expect("should succeed"));
         assert_eq!(version, 2);
         std::fs::remove_file(Path::new("/tmp/test_vertex_anim_pair_header.glb")).ok();
     }
@@ -714,7 +714,7 @@ mod tests {
         let path = Path::new("/tmp/test_vertex_anim_seq.glb");
         export_vertex_anim_glb(&base_mesh, &anim, path).expect("export failed");
         assert!(path.exists(), "GLB file was not created");
-        let meta = std::fs::metadata(path).unwrap();
+        let meta = std::fs::metadata(path).expect("should succeed");
         assert!(meta.len() > 0, "GLB file is empty");
         std::fs::remove_file(path).ok();
     }
@@ -734,10 +734,10 @@ mod tests {
         ));
         let path = Path::new("/tmp/test_vertex_anim_seq_header.glb");
         export_vertex_anim_glb(&base_mesh, &anim, path).expect("export failed");
-        let bytes = std::fs::read(path).unwrap();
+        let bytes = std::fs::read(path).expect("should succeed");
         assert!(bytes.len() >= 12);
         assert_eq!(&bytes[0..4], &[0x67, 0x6C, 0x54, 0x46], "wrong GLB magic");
-        let version = u32::from_le_bytes(bytes[4..8].try_into().unwrap());
+        let version = u32::from_le_bytes(bytes[4..8].try_into().expect("should succeed"));
         assert_eq!(version, 2);
         std::fs::remove_file(path).ok();
     }
@@ -753,7 +753,7 @@ mod tests {
         let mesh_b = triangle_b();
         let pair_path = Path::new("/tmp/test_vertex_anim_larger_pair.glb");
         export_morph_pair_glb(&base_mesh, &mesh_b, 1.0, pair_path).expect("pair export failed");
-        let pair_size = std::fs::metadata(pair_path).unwrap().len();
+        let pair_size = std::fs::metadata(pair_path).expect("should succeed").len();
 
         // Export multi-frame vertex anim (3 frames = more data)
         let mut anim = VertexAnimation::new("multi", 24.0);
@@ -769,7 +769,7 @@ mod tests {
         }
         let seq_path = Path::new("/tmp/test_vertex_anim_larger_seq.glb");
         export_vertex_anim_glb(&base_mesh, &anim, seq_path).expect("seq export failed");
-        let seq_size = std::fs::metadata(seq_path).unwrap().len();
+        let seq_size = std::fs::metadata(seq_path).expect("should succeed").len();
 
         // The 3-frame animation has 3 morph targets + 3x3 weight matrix,
         // whereas the pair has 1 morph target + 2 weights; seq must be larger.

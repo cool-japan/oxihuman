@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Fixed-capacity string (stack allocated up to 64 bytes).
 
@@ -86,7 +86,7 @@ mod tests {
 
     #[test]
     fn test_from_str_ok() {
-        let fs = fixed_string64_from_str("hello").unwrap();
+        let fs = fixed_string64_from_str("hello").expect("should succeed");
         assert_eq!(fixed_string64_as_str(&fs), "hello");
     }
 
@@ -105,19 +105,19 @@ mod tests {
 
     #[test]
     fn test_push_overflow() {
-        let mut fs = fixed_string64_from_str(&"a".repeat(64)).unwrap();
+        let mut fs = fixed_string64_from_str(&"a".repeat(64)).expect("should succeed");
         assert!(!fixed_string64_push(&mut fs, 'B'));
     }
 
     #[test]
     fn test_len() {
-        let fs = fixed_string64_from_str("abc").unwrap();
+        let fs = fixed_string64_from_str("abc").expect("should succeed");
         assert_eq!(fixed_string64_len(&fs), 3);
     }
 
     #[test]
     fn test_clear() {
-        let mut fs = fixed_string64_from_str("data").unwrap();
+        let mut fs = fixed_string64_from_str("data").expect("should succeed");
         fixed_string64_clear(&mut fs);
         assert_eq!(fixed_string64_len(&fs), 0);
         assert_eq!(fixed_string64_as_str(&fs), "");
@@ -133,6 +133,6 @@ mod tests {
         let s = "a".repeat(64);
         let fs = fixed_string64_from_str(&s);
         assert!(fs.is_some());
-        assert_eq!(fixed_string64_len(&fs.unwrap()), 64);
+        assert_eq!(fixed_string64_len(&fs.expect("should succeed")), 64);
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -184,7 +184,7 @@ mod tests {
     fn test_get_entry() {
         let mut dt = DispatchTable::new();
         dt.register("x", 42);
-        let entry = dt.get_entry("x").unwrap();
+        let entry = dt.get_entry("x").expect("should succeed");
         assert_eq!(entry.priority, 42);
     }
 }

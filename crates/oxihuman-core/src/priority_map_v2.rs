@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Priority-keyed hash map: each key carries a numeric priority.
@@ -159,7 +159,7 @@ mod tests {
     fn test_remove() {
         let mut m = new_priority_map_v2::<&str, i32>();
         m.insert("a", 7, 10);
-        let e = pm_remove(&mut m, &"a").unwrap();
+        let e = pm_remove(&mut m, &"a").expect("should succeed");
         assert_eq!(e.value, 7 /* removed value */);
         assert!(m.is_empty());
     }

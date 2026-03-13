@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Post-processing settings export.
 
@@ -114,7 +114,7 @@ mod tests {
         let mut exp = new_post_process_export();
         pp_add_effect(&mut exp, make_effect("vignette", 0, false));
         pp_set_enabled(&mut exp, "vignette", true);
-        assert!(pp_get_effect(&exp, "vignette").unwrap().enabled);
+        assert!(pp_get_effect(&exp, "vignette").expect("should succeed").enabled);
     }
 
     #[test]

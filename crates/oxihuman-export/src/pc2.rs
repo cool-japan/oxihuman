@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! PC2 (Point Cache 2) binary point cache format — used by Blender.
 //!
@@ -245,7 +245,7 @@ mod tests {
     fn roundtrip_basic() {
         let cache = two_point_cache();
         let bytes = write_pc2(&cache);
-        let back = read_pc2(&bytes).unwrap();
+        let back = read_pc2(&bytes).expect("should succeed");
         assert_eq!(back.header.point_count, 2);
         assert_eq!(back.header.sample_count, 2);
         assert_eq!(back.frames[0], vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
@@ -257,7 +257,7 @@ mod tests {
     fn roundtrip_metadata() {
         let mut c = Pc2Cache::new(1, 1.5, 30.0);
         c.add_frame(vec![[0.0, 0.0, 0.0]]);
-        let back = read_pc2(&write_pc2(&c)).unwrap();
+        let back = read_pc2(&write_pc2(&c)).expect("should succeed");
         assert!((back.header.start_time - 1.5).abs() < 1e-6);
         assert!((back.header.sample_rate - 30.0).abs() < 1e-6);
     }
@@ -275,7 +275,7 @@ mod tests {
     fn version_field_is_one() {
         let cache = two_point_cache();
         let bytes = write_pc2(&cache);
-        let ver = i32::from_le_bytes(bytes[12..16].try_into().unwrap());
+        let ver = i32::from_le_bytes(bytes[12..16].try_into().expect("should succeed"));
         assert_eq!(ver, 1);
     }
 
@@ -292,7 +292,7 @@ mod tests {
     fn empty_frames() {
         let c = Pc2Cache::new(5, 0.0, 24.0);
         let bytes = write_pc2(&c);
-        let back = read_pc2(&bytes).unwrap();
+        let back = read_pc2(&bytes).expect("should succeed");
         assert_eq!(back.header.sample_count, 0);
         assert!(back.frames.is_empty());
     }
@@ -330,7 +330,7 @@ mod tests {
     fn mesh_sequence_positions_preserved() {
         let frames = vec![vec![[1.0_f32, 2.0, 3.0]], vec![[4.0_f32, 5.0, 6.0]]];
         let cache = mesh_sequence_to_pc2(&frames, 0.0, 24.0);
-        let back = read_pc2(&write_pc2(&cache)).unwrap();
+        let back = read_pc2(&write_pc2(&cache)).expect("should succeed");
         assert_eq!(back.frames[0][0], [1.0, 2.0, 3.0]);
         assert_eq!(back.frames[1][0], [4.0, 5.0, 6.0]);
     }

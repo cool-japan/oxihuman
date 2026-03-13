@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Render pass descriptors for multi-pass rendering.
 //!
@@ -496,7 +496,7 @@ mod rpl_tests {
         rpl_add_pass(&mut l, default_render_pass_config(RenderPassStage::UI));
         let p = rpl_get(&l, 0);
         assert!(p.is_some());
-        assert_eq!(p.unwrap().stage, RenderPassStage::UI);
+        assert_eq!(p.expect("should succeed").stage, RenderPassStage::UI);
     }
 
     #[test]

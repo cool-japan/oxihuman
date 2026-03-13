@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Project workspace management.
 
@@ -332,7 +332,7 @@ mod tests {
         ws.add_asset("tex.png", "texture", "deadbeef", 512);
         let found = ws.find_asset("tex.png");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().kind, "texture");
+        assert_eq!(found.expect("should succeed").kind, "texture");
     }
 
     #[test]
@@ -376,7 +376,12 @@ mod tests {
         let ws2 = Workspace::from_json(&json).expect("round-trip parse failed");
         assert_eq!(ws2.config.name, "roundtrip");
         assert_eq!(ws2.asset_count(), 1);
-        assert_eq!(ws2.find_asset("mesh.glb").unwrap().size_bytes, 4096);
+        assert_eq!(
+            ws2.find_asset("mesh.glb")
+                .expect("should succeed")
+                .size_bytes,
+            4096
+        );
     }
 
     #[test]

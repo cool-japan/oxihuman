@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashMap;
 
@@ -305,7 +305,7 @@ mod tests {
         map.add(VertexGroup::new("feet", vec![1]));
         let json = map.to_json();
         assert!(json.is_object());
-        let obj = json.as_object().unwrap();
+        let obj = json.as_object().expect("should succeed");
         assert!(obj.contains_key("head"));
         assert!(obj.contains_key("feet"));
     }

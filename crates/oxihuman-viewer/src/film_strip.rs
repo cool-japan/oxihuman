@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -146,7 +146,7 @@ mod tests {
         let mut s = new_film_strip(10, 30.0);
         capture_frame(&mut s, 0.0, 128, 72);
         capture_frame(&mut s, 1.0, 128, 72);
-        let f = frame_at_time(&s, 0.8).unwrap();
+        let f = frame_at_time(&s, 0.8).expect("should succeed");
         assert!((f.time - 1.0).abs() < 1e-6);
     }
 

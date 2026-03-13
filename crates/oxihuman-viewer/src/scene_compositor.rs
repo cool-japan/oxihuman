@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Multi-layer scene compositing for the viewer.
 
@@ -301,8 +301,8 @@ mod tests {
         add_layer(&mut c, make_solid_layer("a", 4, 4, [1.0; 4], 0));
         add_layer(&mut c, make_solid_layer("b", 4, 4, [1.0; 4], 1));
         assert!(move_layer_to_top(&mut c, "a"));
-        let az = c.layers.iter().find(|l| l.name == "a").unwrap().z_order;
-        let bz = c.layers.iter().find(|l| l.name == "b").unwrap().z_order;
+        let az = c.layers.iter().find(|l| l.name == "a").expect("should succeed").z_order;
+        let bz = c.layers.iter().find(|l| l.name == "b").expect("should succeed").z_order;
         assert!(az > bz);
     }
 
@@ -311,7 +311,7 @@ mod tests {
         let mut c = new_scene_compositor(4, 4);
         add_layer(&mut c, make_solid_layer("l", 4, 4, [1.0; 4], 0));
         assert!(set_layer_opacity(&mut c, "l", 0.5));
-        let op = c.layers.iter().find(|l| l.name == "l").unwrap().opacity;
+        let op = c.layers.iter().find(|l| l.name == "l").expect("should succeed").opacity;
         assert!((op - 0.5).abs() < 1e-6);
     }
 

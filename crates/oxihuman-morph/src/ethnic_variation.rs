@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Statistical body shape variation presets based on anthropometric population data.
 //!
@@ -608,7 +608,9 @@ mod tests {
     #[test]
     fn test_anthroprofile_sample_deterministic() {
         let lib = AnthroLibrary::who_reference();
-        let profile = lib.find("WHO_Adult_Global_Reference").unwrap();
+        let profile = lib
+            .find("WHO_Adult_Global_Reference")
+            .expect("should succeed");
         let a = profile.sample(42);
         let b = profile.sample(42);
         assert_eq!(a.height_m, b.height_m);
@@ -623,7 +625,7 @@ mod tests {
     fn test_anthroprofile_to_params_all_in_range() {
         let lib = AnthroLibrary::who_reference();
         for name in lib.names() {
-            let profile = lib.find(name).unwrap();
+            let profile = lib.find(name).expect("should succeed");
             let params = profile.to_params();
             for (k, v) in &params {
                 assert!(
@@ -668,8 +670,12 @@ mod tests {
     #[test]
     fn test_blend_profiles() {
         let lib = AnthroLibrary::who_reference();
-        let a = lib.find("WHO_Adult_Global_Reference").unwrap();
-        let b = lib.find("WHO_Adult_HighStature_Reference").unwrap();
+        let a = lib
+            .find("WHO_Adult_Global_Reference")
+            .expect("should succeed");
+        let b = lib
+            .find("WHO_Adult_HighStature_Reference")
+            .expect("should succeed");
 
         let mid = AnthroLibrary::blend_profiles(a, b, 0.5);
         assert!(

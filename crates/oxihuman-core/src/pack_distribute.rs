@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Pack distribution pipeline for OxiHuman asset packages (.oxp).
 //!
@@ -511,7 +511,7 @@ mod tests {
     #[test]
     fn build_empty_package() {
         let b = make_basic_builder();
-        let data = b.build().unwrap();
+        let data = b.build().expect("should succeed");
         assert!(data.len() > OXP_MAGIC.len() + INTEGRITY_HASH_LEN);
         assert_eq!(&data[..4], OXP_MAGIC);
     }
@@ -521,9 +521,9 @@ mod tests {
     fn build_and_verify_one_file() {
         let mut b = make_basic_builder();
         b.add_target_file("model.dat", "meshes", b"triangle-data")
-            .unwrap();
-        let data = b.build().unwrap();
-        let manifest = PackVerifier::verify_integrity(&data).unwrap();
+            .expect("should succeed");
+        let data = b.build().expect("should succeed");
+        let manifest = PackVerifier::verify_integrity(&data).expect("should succeed");
         assert_eq!(manifest.name, "test-pack");
         assert_eq!(manifest.targets.len(), 1);
         assert_eq!(manifest.targets[0].name, "model.dat");
@@ -533,11 +533,14 @@ mod tests {
     #[test]
     fn build_multiple_files() {
         let mut b = make_basic_builder();
-        b.add_target_file("a.bin", "cat_a", b"alpha").unwrap();
-        b.add_target_file("b.bin", "cat_b", b"beta").unwrap();
-        b.add_target_file("c.bin", "cat_a", b"gamma").unwrap();
-        let data = b.build().unwrap();
-        let manifest = PackVerifier::verify_integrity(&data).unwrap();
+        b.add_target_file("a.bin", "cat_a", b"alpha")
+            .expect("should succeed");
+        b.add_target_file("b.bin", "cat_b", b"beta")
+            .expect("should succeed");
+        b.add_target_file("c.bin", "cat_a", b"gamma")
+            .expect("should succeed");
+        let data = b.build().expect("should succeed");
+        let manifest = PackVerifier::verify_integrity(&data).expect("should succeed");
         assert_eq!(manifest.targets.len(), 3);
     }
 
@@ -545,8 +548,9 @@ mod tests {
     #[test]
     fn integrity_fails_on_tampered_data() {
         let mut b = make_basic_builder();
-        b.add_target_file("x.bin", "cat", b"data").unwrap();
-        let mut data = b.build().unwrap();
+        b.add_target_file("x.bin", "cat", b"data")
+            .expect("should succeed");
+        let mut data = b.build().expect("should succeed");
         // Tamper a byte in the middle
         let mid = data.len() / 2;
         data[mid] ^= 0xFF;
@@ -559,9 +563,9 @@ mod tests {
         let key = b"my-secret-key";
         let mut b = make_basic_builder();
         b.add_target_file("asset.glb", "models", b"glb-content")
-            .unwrap();
-        let data = b.build_signed(key).unwrap();
-        let ok = PackVerifier::verify_signature(&data, key).unwrap();
+            .expect("should succeed");
+        let data = b.build_signed(key).expect("should succeed");
+        let ok = PackVerifier::verify_signature(&data, key).expect("should succeed");
         assert!(ok);
     }
 
@@ -569,9 +573,10 @@ mod tests {
     #[test]
     fn wrong_key_fails_signature() {
         let mut b = make_basic_builder();
-        b.add_target_file("f.bin", "cat", b"stuff").unwrap();
-        let data = b.build_signed(b"correct-key").unwrap();
-        let ok = PackVerifier::verify_signature(&data, b"wrong-key").unwrap();
+        b.add_target_file("f.bin", "cat", b"stuff")
+            .expect("should succeed");
+        let data = b.build_signed(b"correct-key").expect("should succeed");
+        let ok = PackVerifier::verify_signature(&data, b"wrong-key").expect("should succeed");
         assert!(!ok);
     }
 
@@ -579,8 +584,9 @@ mod tests {
     #[test]
     fn unsigned_package_signature_check_fails() {
         let mut b = make_basic_builder();
-        b.add_target_file("f.bin", "cat", b"stuff").unwrap();
-        let data = b.build().unwrap();
+        b.add_target_file("f.bin", "cat", b"stuff")
+            .expect("should succeed");
+        let data = b.build().expect("should succeed");
         assert!(PackVerifier::verify_signature(&data, b"any-key").is_err());
     }
 
@@ -589,11 +595,12 @@ mod tests {
     fn extract_file_by_path() {
         let mut b = make_basic_builder();
         b.add_target_file("mesh.obj", "models", b"obj-content")
-            .unwrap();
+            .expect("should succeed");
         b.add_target_file("tex.png", "textures", b"png-bytes")
-            .unwrap();
-        let data = b.build().unwrap();
-        let extracted = PackVerifier::extract_file(&data, "textures/tex.png").unwrap();
+            .expect("should succeed");
+        let data = b.build().expect("should succeed");
+        let extracted =
+            PackVerifier::extract_file(&data, "textures/tex.png").expect("should succeed");
         assert_eq!(extracted, b"png-bytes");
     }
 
@@ -601,7 +608,7 @@ mod tests {
     #[test]
     fn extract_missing_file() {
         let b = make_basic_builder();
-        let data = b.build().unwrap();
+        let data = b.build().expect("should succeed");
         assert!(PackVerifier::extract_file(&data, "no/such/file").is_err());
     }
 
@@ -609,10 +616,12 @@ mod tests {
     #[test]
     fn list_files_returns_targets() {
         let mut b = make_basic_builder();
-        b.add_target_file("a.bin", "cat_a", b"aaa").unwrap();
-        b.add_target_file("b.bin", "cat_b", b"bbb").unwrap();
-        let data = b.build().unwrap();
-        let files = PackVerifier::list_files(&data).unwrap();
+        b.add_target_file("a.bin", "cat_a", b"aaa")
+            .expect("should succeed");
+        b.add_target_file("b.bin", "cat_b", b"bbb")
+            .expect("should succeed");
+        let data = b.build().expect("should succeed");
+        let files = PackVerifier::list_files(&data).expect("should succeed");
         assert_eq!(files.len(), 2);
     }
 
@@ -621,8 +630,8 @@ mod tests {
     fn read_manifest_metadata() {
         let mut b = make_basic_builder();
         b.add_dependency("base-pack", ">=1.0");
-        let data = b.build().unwrap();
-        let manifest = PackVerifier::read_manifest(&data).unwrap();
+        let data = b.build().expect("should succeed");
+        let manifest = PackVerifier::read_manifest(&data).expect("should succeed");
         assert_eq!(manifest.version, "1.0.0");
         assert_eq!(manifest.author, "tester");
         assert_eq!(manifest.license, "MIT");
@@ -659,7 +668,7 @@ mod tests {
         assert!(reg.find("my-pack").is_some());
         assert!(reg.find("nonexistent").is_none());
         assert_eq!(reg.list_all().len(), 1);
-        reg.unregister("my-pack").unwrap();
+        reg.unregister("my-pack").expect("should succeed");
         assert!(reg.find("my-pack").is_none());
         assert_eq!(reg.list_all().len(), 0);
     }
@@ -769,7 +778,7 @@ mod tests {
     #[test]
     fn wrong_magic_rejected() {
         let b = make_basic_builder();
-        let mut data = b.build().unwrap();
+        let mut data = b.build().expect("should succeed");
         data[0] = b'Z';
         // This will fail at integrity or magic check
         assert!(PackVerifier::read_manifest(&data).is_err());
@@ -780,9 +789,10 @@ mod tests {
     fn large_file_round_trip() {
         let mut b = make_basic_builder();
         let large_data = vec![0xABu8; 100_000];
-        b.add_target_file("big.bin", "data", &large_data).unwrap();
-        let pkg = b.build().unwrap();
-        let extracted = PackVerifier::extract_file(&pkg, "data/big.bin").unwrap();
+        b.add_target_file("big.bin", "data", &large_data)
+            .expect("should succeed");
+        let pkg = b.build().expect("should succeed");
+        let extracted = PackVerifier::extract_file(&pkg, "data/big.bin").expect("should succeed");
         assert_eq!(extracted.len(), 100_000);
         assert!(extracted.iter().all(|&b| b == 0xAB));
     }
@@ -791,11 +801,13 @@ mod tests {
     #[test]
     fn manifest_hash_deterministic() {
         let mut b1 = make_basic_builder();
-        b1.add_target_file("a.bin", "cat", b"data").unwrap();
+        b1.add_target_file("a.bin", "cat", b"data")
+            .expect("should succeed");
         let hash1 = b1.compute_manifest_hash();
 
         let mut b2 = make_basic_builder();
-        b2.add_target_file("a.bin", "cat", b"data").unwrap();
+        b2.add_target_file("a.bin", "cat", b"data")
+            .expect("should succeed");
         let hash2 = b2.compute_manifest_hash();
 
         assert_eq!(hash1, hash2);
@@ -813,9 +825,10 @@ mod tests {
     fn target_entry_sha256_matches() {
         let mut b = make_basic_builder();
         let file_data = b"hello oxihuman";
-        b.add_target_file("hello.txt", "text", file_data).unwrap();
-        let pkg = b.build().unwrap();
-        let manifest = PackVerifier::read_manifest(&pkg).unwrap();
+        b.add_target_file("hello.txt", "text", file_data)
+            .expect("should succeed");
+        let pkg = b.build().expect("should succeed");
+        let manifest = PackVerifier::read_manifest(&pkg).expect("should succeed");
         let expected = sha256_hex(file_data);
         assert_eq!(manifest.targets[0].sha256, expected);
     }
@@ -831,9 +844,10 @@ mod tests {
     #[test]
     fn integrity_field_populated() {
         let mut b = make_basic_builder();
-        b.add_target_file("f.bin", "cat", b"d").unwrap();
-        let pkg = b.build().unwrap();
-        let manifest = PackVerifier::read_manifest(&pkg).unwrap();
+        b.add_target_file("f.bin", "cat", b"d")
+            .expect("should succeed");
+        let pkg = b.build().expect("should succeed");
+        let manifest = PackVerifier::read_manifest(&pkg).expect("should succeed");
         assert_eq!(manifest.integrity.algorithm, "sha256");
         assert!(!manifest.integrity.manifest_hash.is_empty());
         assert!(manifest.integrity.signature.is_none());
@@ -843,9 +857,10 @@ mod tests {
     #[test]
     fn signed_manifest_has_signature() {
         let mut b = make_basic_builder();
-        b.add_target_file("f.bin", "cat", b"d").unwrap();
-        let pkg = b.build_signed(b"key").unwrap();
-        let manifest = PackVerifier::read_manifest(&pkg).unwrap();
+        b.add_target_file("f.bin", "cat", b"d")
+            .expect("should succeed");
+        let pkg = b.build_signed(b"key").expect("should succeed");
+        let manifest = PackVerifier::read_manifest(&pkg).expect("should succeed");
         assert!(manifest.integrity.signature.is_some());
     }
 
@@ -856,8 +871,8 @@ mod tests {
         b.add_dependency("dep-a", ">=1.0");
         b.add_dependency("dep-b", ">=2.0");
         b.add_dependency("dep-c", ">=0.1");
-        let pkg = b.build().unwrap();
-        let manifest = PackVerifier::read_manifest(&pkg).unwrap();
+        let pkg = b.build().expect("should succeed");
+        let manifest = PackVerifier::read_manifest(&pkg).expect("should succeed");
         assert_eq!(manifest.dependencies.len(), 3);
     }
 }

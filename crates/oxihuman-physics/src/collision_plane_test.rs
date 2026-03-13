@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Plane collision tests: plane-point, plane-sphere, plane-AABB, plane-ray.
@@ -149,7 +149,7 @@ mod tests {
     fn test_ray() {
         let plane = TestPlane::new([0.0, 1.0, 0.0], 0.0);
         let t = plane.ray_test([0.0, 5.0, 0.0], [0.0, -1.0, 0.0]);
-        assert!((t.unwrap() - 5.0).abs() < 0.01);
+        assert!((t.expect("should succeed") - 5.0).abs() < 0.01);
     }
 
     #[test]

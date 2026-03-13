@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Catmull-Rom spline evaluation (uniform parameterization).
 
@@ -159,7 +159,7 @@ mod tests {
     fn spline_evaluate_start_near_p1() {
         let pts = vec![[0.0f32, 0.0], [1.0, 1.0], [2.0, 0.0], [3.0, 1.0]];
         let s = CatmullRomSpline2D::new(pts, false);
-        let v = s.evaluate(0.0).unwrap();
+        let v = s.evaluate(0.0).expect("should succeed");
         assert!((v[0] - 1.0).abs() < 1e-4 && (v[1] - 1.0).abs() < 1e-4);
     }
 

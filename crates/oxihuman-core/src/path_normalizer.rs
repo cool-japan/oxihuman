@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Path resolution and normalization utilities.
@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn test_normalized_path_parent() {
         let p = NormalizedPath::new("/a/b/c");
-        let parent = p.parent().unwrap();
+        let parent = p.parent().expect("should succeed");
         assert_eq!(parent.as_str(), "/a/b");
     }
 }

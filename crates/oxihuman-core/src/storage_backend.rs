@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Abstract in-memory storage backend with namespaced key-value buckets.
@@ -156,7 +156,7 @@ mod tests {
     fn put_and_get() {
         let mut sb = new_storage_backend();
         sb_put(&mut sb, "assets", "mesh.bin", vec![1, 2, 3]);
-        let data = sb_get(&mut sb, "assets", "mesh.bin").unwrap();
+        let data = sb_get(&mut sb, "assets", "mesh.bin").expect("should succeed");
         assert_eq!(data, &[1, 2, 3]);
     }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -584,7 +584,7 @@ mod tests {
         let la = square_loop_bottom(&mut mesh);
         let lt = square_loop_top(&mut mesh);
         let cfg = BridgeConfig::default();
-        let result = bridge_loops(&mesh, &la, &lt, &cfg).unwrap();
+        let result = bridge_loops(&mesh, &la, &lt, &cfg).expect("should succeed");
         // 4 quads → 8 triangles
         assert_eq!(result.face_count, 8);
     }
@@ -598,7 +598,7 @@ mod tests {
         let la = square_loop_bottom(&mut mesh);
         let lt = square_loop_top(&mut mesh);
         let cfg = BridgeConfig::default();
-        let result = bridge_loops(&mesh, &la, &lt, &cfg).unwrap();
+        let result = bridge_loops(&mesh, &la, &lt, &cfg).expect("should succeed");
         // 2 rows × 4 verts = 8 verts
         assert_eq!(result.vertex_count, 8);
     }
@@ -615,7 +615,7 @@ mod tests {
             segments: 3,
             ..BridgeConfig::default()
         };
-        let result = bridge_loops(&mesh, &la, &lt, &cfg).unwrap();
+        let result = bridge_loops(&mesh, &la, &lt, &cfg).expect("should succeed");
         // 4 rows × 4 verts = 16 verts
         assert_eq!(result.vertex_count, 16);
         // 3 segs × 4 pairs × 2 tris = 24 tris
@@ -682,8 +682,8 @@ mod tests {
             interpolation: BridgeInterpolation::Smooth,
             ..BridgeConfig::default()
         };
-        let r_lin = bridge_loops(&mesh, &la, &lt, &cfg_lin).unwrap();
-        let r_smo = bridge_loops(&mesh, &la, &lt, &cfg_smo).unwrap();
+        let r_lin = bridge_loops(&mesh, &la, &lt, &cfg_lin).expect("should succeed");
+        let r_smo = bridge_loops(&mesh, &la, &lt, &cfg_smo).expect("should succeed");
         // Same topology
         assert_eq!(r_lin.face_count, r_smo.face_count);
         assert_eq!(r_lin.vertex_count, r_smo.vertex_count);
@@ -712,7 +712,7 @@ mod tests {
             interpolation: BridgeInterpolation::Bezier,
             ..BridgeConfig::default()
         };
-        let result = bridge_loops(&mesh, &la, &lt, &cfg).unwrap();
+        let result = bridge_loops(&mesh, &la, &lt, &cfg).expect("should succeed");
         assert_eq!(result.vertex_count, 3 * 4); // 3 rows × 4 verts
         assert_eq!(result.face_count, 2 * 4 * 2); // 2 segs × 4 pairs × 2 tris
     }
@@ -731,8 +731,8 @@ mod tests {
             twist: std::f32::consts::PI / 4.0, // 45 degrees
             ..BridgeConfig::default()
         };
-        let r_no = bridge_loops(&mesh, &la, &lt, &cfg_no).unwrap();
-        let r_tw = bridge_loops(&mesh, &la, &lt, &cfg_tw).unwrap();
+        let r_no = bridge_loops(&mesh, &la, &lt, &cfg_no).expect("should succeed");
+        let r_tw = bridge_loops(&mesh, &la, &lt, &cfg_tw).expect("should succeed");
         // Top row positions (row 1) should differ due to twist
         let p_no = r_no.mesh.positions[4]; // row 1, vert 0
         let p_tw = r_tw.mesh.positions[4];
@@ -758,8 +758,8 @@ mod tests {
             flip_loop_b: true,
             ..BridgeConfig::default()
         };
-        let r_no = bridge_loops(&mesh, &la, &lt, &cfg_no).unwrap();
-        let r_fl = bridge_loops(&mesh, &la, &lt, &cfg_fl).unwrap();
+        let r_no = bridge_loops(&mesh, &la, &lt, &cfg_no).expect("should succeed");
+        let r_fl = bridge_loops(&mesh, &la, &lt, &cfg_fl).expect("should succeed");
         // Same topology counts
         assert_eq!(r_no.face_count, r_fl.face_count);
         // But top row positions differ (reversed order changes which verts land where)
@@ -900,7 +900,7 @@ mod tests {
             segments: 2,
             ..BridgeConfig::default()
         };
-        let result = bridge_loops(&mesh, &la, &lt, &cfg).unwrap();
+        let result = bridge_loops(&mesh, &la, &lt, &cfg).expect("should succeed");
         let vc = result.vertex_count as u32;
         for &idx in &result.mesh.indices {
             assert!(idx < vc, "index {} out of range (vertex_count={})", idx, vc);
@@ -927,7 +927,7 @@ mod tests {
             closed: false,
         };
         let cfg = BridgeConfig::default();
-        let result = bridge_loops(&mesh, &la, &lb, &cfg).unwrap();
+        let result = bridge_loops(&mesh, &la, &lb, &cfg).expect("should succeed");
         // 2 rows × 2 verts = 4 verts, 1 seg × 2 pairs × 2 tris = 4 tris
         assert_eq!(result.vertex_count, 4);
         assert_eq!(result.face_count, 4);
@@ -942,7 +942,7 @@ mod tests {
         let la = square_loop_bottom(&mut mesh);
         let lt = square_loop_top(&mut mesh);
         let cfg = BridgeConfig::default();
-        let result = bridge_loops(&mesh, &la, &lt, &cfg).unwrap();
+        let result = bridge_loops(&mesh, &la, &lt, &cfg).expect("should succeed");
         for n_vec in &result.mesh.normals {
             let len = (n_vec[0] * n_vec[0] + n_vec[1] * n_vec[1] + n_vec[2] * n_vec[2]).sqrt();
             assert!(

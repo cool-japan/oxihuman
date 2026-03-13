@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Mesh-to-SDF (Signed Distance Field) generation.
 //!
@@ -680,7 +680,7 @@ mod tests {
             resolution: [16, 16, 16],
             padding: 0.5,
         };
-        let sdf = SdfGrid::from_mesh(&v, &t, &n, &cfg).unwrap();
+        let sdf = SdfGrid::from_mesh(&v, &t, &n, &cfg).expect("should succeed");
         // A point well outside should be positive
         let val = sdf.sample(&[2.0, 0.0, 0.0]);
         assert!(val > 0.0, "expected positive outside, got {val}");
@@ -693,7 +693,7 @@ mod tests {
             resolution: [16, 16, 16],
             padding: 0.5,
         };
-        let sdf = SdfGrid::from_mesh(&v, &t, &n, &cfg).unwrap();
+        let sdf = SdfGrid::from_mesh(&v, &t, &n, &cfg).expect("should succeed");
         // Origin is inside the unit cube
         let val = sdf.sample(&[0.0, 0.0, 0.0]);
         assert!(val < 0.0, "expected negative inside, got {val}");
@@ -706,7 +706,7 @@ mod tests {
             resolution: [32, 32, 32],
             padding: 0.5,
         };
-        let sdf = SdfGrid::from_mesh(&v, &t, &n, &cfg).unwrap();
+        let sdf = SdfGrid::from_mesh(&v, &t, &n, &cfg).expect("should succeed");
         let p = [0.8, 0.0, 0.0];
         let g = sdf.gradient(&p);
         // Gradient should point roughly in +X direction
@@ -720,7 +720,7 @@ mod tests {
             resolution: [32, 32, 32],
             padding: 0.5,
         };
-        let sdf = SdfGrid::from_mesh(&v, &t, &n, &cfg).unwrap();
+        let sdf = SdfGrid::from_mesh(&v, &t, &n, &cfg).expect("should succeed");
         let p = [1.0, 0.0, 0.0];
         let cp = sdf.closest_surface_point(&p);
         // Should be near x=0.5 face

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Light probe v2 — SH9 irradiance probes with blending and spatial lookup.
@@ -229,7 +229,7 @@ mod tests {
         let mut s = new_light_probe_set_v2();
         lp2_add(&mut s, 1, [0.0, 0.0, 0.0], 10.0);
         lp2_add(&mut s, 2, [5.0, 0.0, 0.0], 10.0);
-        let p = lp2_nearest(&s, [1.0, 0.0, 0.0]).unwrap();
+        let p = lp2_nearest(&s, [1.0, 0.0, 0.0]).expect("should succeed");
         assert_eq!(p.id, 1);
     }
 

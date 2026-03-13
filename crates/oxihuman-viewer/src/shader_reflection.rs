@@ -60,7 +60,7 @@ mod tests {
     use super::*;
     #[test] fn test_new() { let r = new_shader_reflection(); assert_eq!(binding_count_sr(&r), 0); }
     #[test] fn test_add() { let mut r = new_shader_reflection(); add_binding(&mut r, "ubo", 0, 0); assert_eq!(binding_count_sr(&r), 1); }
-    #[test] fn test_at() { let mut r = new_shader_reflection(); add_binding(&mut r, "tex", 0, 1); assert_eq!(binding_at(&r, 0).unwrap().name, "tex"); }
+    #[test] fn test_at() { let mut r = new_shader_reflection(); add_binding(&mut r, "tex", 0, 1); assert_eq!(binding_at(&r, 0).expect("should succeed").name, "tex"); }
     #[test] fn test_at_none() { let r = new_shader_reflection(); assert!(binding_at(&r, 0).is_none()); }
     #[test] fn test_name() { let mut r = new_shader_reflection(); add_binding(&mut r, "x", 0, 0); assert_eq!(binding_name_sr(&r, 0), "x"); }
     #[test] fn test_name_oob() { let r = new_shader_reflection(); assert_eq!(binding_name_sr(&r, 0), ""); }

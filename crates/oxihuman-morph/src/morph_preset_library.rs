@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// A single named morph preset with category and weight pairs.
@@ -104,21 +104,21 @@ mod tests {
     fn preset_name_stored_correctly() {
         let mut lib = new_preset_library();
         add_preset(&mut lib, "surprised", "face", vec![]);
-        assert_eq!(find_preset(&lib, "surprised").unwrap().name, "surprised");
+        assert_eq!(find_preset(&lib, "surprised").expect("should succeed").name, "surprised");
     }
 
     #[test]
     fn preset_category_stored_correctly() {
         let mut lib = new_preset_library();
         add_preset(&mut lib, "run", "pose", vec![]);
-        assert_eq!(find_preset(&lib, "run").unwrap().category, "pose");
+        assert_eq!(find_preset(&lib, "run").expect("should succeed").category, "pose");
     }
 
     #[test]
     fn preset_weights_stored_correctly() {
         let mut lib = new_preset_library();
         add_preset(&mut lib, "test", "face", vec![("jaw".to_string(), 0.5)]);
-        let p = find_preset(&lib, "test").unwrap();
+        let p = find_preset(&lib, "test").expect("should succeed");
         assert!(!p.weights.is_empty());
         assert!((p.weights[0].1 - 0.5).abs() < 1e-6);
     }

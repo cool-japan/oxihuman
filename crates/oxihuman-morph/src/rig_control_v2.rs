@@ -109,7 +109,7 @@ mod tests {
     fn test_get_default() {
         let mut r = new_rig_control_v2();
         rcv2_add_param(&mut r, "jaw", 0.5, 0.0, 1.0);
-        assert!((rcv2_get(&r, "jaw").unwrap() - 0.5).abs() < 1e-6);
+        assert!((rcv2_get(&r, "jaw").expect("should succeed") - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -117,7 +117,7 @@ mod tests {
         let mut r = new_rig_control_v2();
         rcv2_add_param(&mut r, "jaw", 0.0, 0.0, 1.0);
         rcv2_set(&mut r, "jaw", 2.0);
-        assert!((rcv2_get(&r, "jaw").unwrap() - 1.0).abs() < 1e-6);
+        assert!((rcv2_get(&r, "jaw").expect("should succeed") - 1.0).abs() < 1e-6);
     }
 
     #[test]
@@ -126,7 +126,7 @@ mod tests {
         rcv2_add_param(&mut r, "blink", 0.0, 0.0, 1.0);
         rcv2_set(&mut r, "blink", 0.8);
         rcv2_reset_all(&mut r);
-        assert!((rcv2_get(&r, "blink").unwrap() - 0.0).abs() < 1e-6);
+        assert!((rcv2_get(&r, "blink").expect("should succeed") - 0.0).abs() < 1e-6);
     }
 
     #[test]
@@ -135,7 +135,7 @@ mod tests {
         rcv2_add_param(&mut r, "blink", 0.0, 0.0, 1.0);
         rcv2_set(&mut r, "blink", 0.8);
         rcv2_reset_param(&mut r, "blink");
-        assert!((rcv2_get(&r, "blink").unwrap() - 0.0).abs() < 1e-6);
+        assert!((rcv2_get(&r, "blink").expect("should succeed") - 0.0).abs() < 1e-6);
     }
 
     #[test]

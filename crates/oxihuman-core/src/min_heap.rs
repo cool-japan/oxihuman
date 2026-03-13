@@ -149,9 +149,9 @@ mod tests {
         heap_push(&mut h, 3.0, 3);
         heap_push(&mut h, 1.0, 1);
         heap_push(&mut h, 2.0, 2);
-        let first = heap_pop(&mut h).unwrap();
+        let first = heap_pop(&mut h).expect("should succeed");
         assert!((first.key - 1.0).abs() < 1e-6);
-        let second = heap_pop(&mut h).unwrap();
+        let second = heap_pop(&mut h).expect("should succeed");
         assert!((second.key - 2.0).abs() < 1e-6);
     }
 

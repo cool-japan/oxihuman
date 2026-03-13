@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
@@ -107,7 +107,7 @@ mod tests {
         vp_add_layer(&mut m, "Col", 3);
         let red = VertexColor { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
         vp_set_color(&mut m, 0, 1, red.clone());
-        let c = vp_get_color(&m, 0, 1).unwrap();
+        let c = vp_get_color(&m, 0, 1).expect("should succeed");
         assert!((c.r - 1.0).abs() < 1e-6);
         assert!(c.g.abs() < 1e-6);
     }
@@ -125,7 +125,7 @@ mod tests {
         let blue = VertexColor { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
         vp_fill_layer(&mut m, 0, blue);
         for i in 0..4 {
-            let c = vp_get_color(&m, 0, i).unwrap();
+            let c = vp_get_color(&m, 0, i).expect("should succeed");
             assert!((c.b - 1.0).abs() < 1e-6);
         }
     }

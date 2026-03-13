@@ -255,7 +255,7 @@ mod tests {
         let mut q = new_command_queue();
         enqueue(&mut q, "first", CommandPriority::Normal);
         enqueue(&mut q, "second", CommandPriority::Normal);
-        let c = dequeue(&mut q).unwrap();
+        let c = dequeue(&mut q).expect("should succeed");
         assert_eq!(c.label, "first");
     }
 
@@ -271,7 +271,7 @@ mod tests {
         enqueue(&mut q, "low", CommandPriority::Low);
         enqueue(&mut q, "critical", CommandPriority::Critical);
         enqueue(&mut q, "normal", CommandPriority::Normal);
-        let c = dequeue(&mut q).unwrap();
+        let c = dequeue(&mut q).expect("should succeed");
         assert_eq!(c.label, "critical");
     }
 
@@ -280,7 +280,7 @@ mod tests {
         let mut q = new_command_queue();
         assert!(peek_next(&q).is_none());
         enqueue(&mut q, "peek_me", CommandPriority::High);
-        let p = peek_next(&q).unwrap();
+        let p = peek_next(&q).expect("should succeed");
         assert_eq!(p.label, "peek_me");
         assert_eq!(command_count(&q), 1); // not removed
     }
@@ -381,8 +381,8 @@ mod tests {
         enqueue(&mut q, "high1", CommandPriority::High);
         enqueue(&mut q, "high2", CommandPriority::High);
         enqueue(&mut q, "high3", CommandPriority::High);
-        let c1 = dequeue(&mut q).unwrap();
-        let c2 = dequeue(&mut q).unwrap();
+        let c1 = dequeue(&mut q).expect("should succeed");
+        let c2 = dequeue(&mut q).expect("should succeed");
         assert_eq!(c1.label, "high1");
         assert_eq!(c2.label, "high2");
     }

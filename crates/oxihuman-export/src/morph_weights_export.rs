@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Export morph target weight arrays in compact binary or JSON format.
 
@@ -205,7 +205,7 @@ mod tests {
         mwe_add_frame(&mut r, sample_frame(1.0));
         let cfg = default_morph_weights_export_config();
         let bin = mwe_export_binary(&r, &cfg);
-        let count = u32::from_le_bytes(bin[0..4].try_into().unwrap());
+        let count = u32::from_le_bytes(bin[0..4].try_into().expect("should succeed"));
         assert_eq!(count, 2);
     }
 
@@ -239,8 +239,8 @@ mod tests {
         cfg.clamp_weights = true;
         let bin = mwe_export_binary(&r, &cfg);
         // skip header (4) + time (4) + count (4) = offset 12
-        let w0 = f32::from_le_bytes(bin[12..16].try_into().unwrap());
-        let w1 = f32::from_le_bytes(bin[16..20].try_into().unwrap());
+        let w0 = f32::from_le_bytes(bin[12..16].try_into().expect("should succeed"));
+        let w1 = f32::from_le_bytes(bin[16..20].try_into().expect("should succeed"));
         assert!((w0 - 0.0).abs() < 1e-6, "clamped below 0");
         assert!((w1 - 1.0).abs() < 1e-6, "clamped above 1");
     }

@@ -70,7 +70,7 @@ mod tests {
         let mut q = new_collapse_queue();
         push_collapse(&mut q, (0, 1), 2.0);
         push_collapse(&mut q, (1, 2), 0.5);
-        let e = pop_collapse(&mut q).unwrap();
+        let e = pop_collapse(&mut q).expect("should succeed");
         assert!((e.cost - 0.5).abs() < 1e-6);
     }
     #[test]
@@ -110,7 +110,7 @@ mod tests {
         push_collapse(&mut q, (0, 1), 3.0);
         push_collapse(&mut q, (1, 2), 1.0);
         push_collapse(&mut q, (2, 3), 2.0);
-        let e = peek_collapse(&q).unwrap();
+        let e = peek_collapse(&q).expect("should succeed");
         assert!((e.cost - 1.0).abs() < 1e-6);
     }
     #[test]

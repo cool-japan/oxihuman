@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Key-value access tracking map that records read/write counts per key.
@@ -134,7 +134,7 @@ mod tests {
         m.record_read("a");
         m.record_read("b");
         m.record_read("b");
-        let (k, c) = m.most_read().unwrap();
+        let (k, c) = m.most_read().expect("should succeed");
         assert_eq!(k, "b");
         assert_eq!(c, 2);
     }

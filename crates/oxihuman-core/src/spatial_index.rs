@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -661,7 +661,7 @@ mod tests {
     fn test_nearest_neighbor_exact() {
         let pts = vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]];
         let oct = build_octree(&pts, 4, 4);
-        let (idx, dist) = nearest_neighbor(&oct, [1.0, 0.0, 0.0]).unwrap();
+        let (idx, dist) = nearest_neighbor(&oct, [1.0, 0.0, 0.0]).expect("should succeed");
         assert_eq!(idx, 1);
         assert!(dist < 1e-5);
     }

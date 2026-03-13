@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 pub struct EntityId {
@@ -68,7 +68,7 @@ mod tests {
     #[test]
     fn test_parse() {
         /* parse kind:value string */
-        let id = entity_id_parse("item:123").unwrap();
+        let id = entity_id_parse("item:123").expect("should succeed");
         assert_eq!(entity_id_kind(&id), "item");
         assert_eq!(entity_id_value(&id), 123);
     }
@@ -102,7 +102,7 @@ mod tests {
         /* parse(to_string()) roundtrip */
         let id = new_entity_id("thing", 7);
         let s = entity_id_to_string(&id);
-        let id2 = entity_id_parse(&s).unwrap();
+        let id2 = entity_id_parse(&s).expect("should succeed");
         assert_eq!(entity_id_value(&id2), 7);
     }
 }

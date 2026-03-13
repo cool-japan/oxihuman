@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Real Aho-Corasick multi-pattern string search automaton.
@@ -414,7 +414,7 @@ mod tests {
         /* first match returns earliest occurrence */
         let m = ac_stub_first_match("abcdef", &["def", "abc"]);
         assert!(m.is_some());
-        assert_eq!(m.unwrap().1, 0); // "abc" at position 0 comes first
+        assert_eq!(m.expect("should succeed").1, 0); // "abc" at position 0 comes first
     }
 
     #[test]
@@ -485,7 +485,7 @@ mod tests {
         let ac = AcStubAutomaton::new(&["xyz", "abc"]);
         let m = ac.first_match("___abc___xyz");
         assert!(m.is_some());
-        let m = m.unwrap();
+        let m = m.expect("should succeed");
         assert_eq!(m.pattern_id, 1);
         assert_eq!(m.start, 3);
     }

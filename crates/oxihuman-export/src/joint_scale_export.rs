@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Per-joint non-uniform scale export for skeleton rigs.
@@ -145,7 +145,7 @@ mod tests {
         let mut exp = new_joint_scale_export();
         add_joint_scale(&mut exp, "knee", [1.0; 3]);
         set_scale(&mut exp, "knee", [2.0, 2.0, 2.0]);
-        let e = find_joint_scale(&exp, "knee").unwrap();
+        let e = find_joint_scale(&exp, "knee").expect("should succeed");
         assert!((e.scale[0] - 2.0).abs() < 1e-5);
     }
 

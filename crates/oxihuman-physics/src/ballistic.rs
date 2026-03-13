@@ -336,7 +336,7 @@ mod tests {
         let proj = new_projectile([0.0, 5.0, 0.0], [5.0, 0.0, 0.0], 1.0, 0.05);
         let impact = impact_point_on_plane(&proj, &cfg, 0.0);
         assert!(impact.is_some());
-        let pt = impact.unwrap();
+        let pt = impact.expect("should succeed");
         assert!((pt[1]).abs() < 0.01); // near y=0
     }
 
@@ -414,7 +414,7 @@ mod tests {
         let cfg = default_ballistic_config();
         let vel = launch_velocity_for_target([0.0; 3], [10.0, 5.0, 0.0], 20.0, &cfg);
         assert!(vel.is_some());
-        let v = vel.unwrap();
+        let v = vel.expect("should succeed");
         let speed = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
         assert!((speed - 20.0).abs() < 0.1);
     }

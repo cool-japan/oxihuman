@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -86,7 +86,7 @@ mod tests {
     fn archive_and_retrieve() {
         let mut a = new_expression_archive();
         archive_expression(&mut a, "smile", vec![0.5, 0.3]);
-        let w = retrieve_expression(&a, "smile").unwrap();
+        let w = retrieve_expression(&a, "smile").expect("should succeed");
         assert!((w[0] - 0.5).abs() < 1e-6);
     }
 
@@ -143,7 +143,7 @@ mod tests {
         let mut a = new_expression_archive();
         archive_expression(&mut a, "x", vec![0.1]);
         archive_expression(&mut a, "x", vec![0.9]);
-        let w = retrieve_expression(&a, "x").unwrap();
+        let w = retrieve_expression(&a, "x").expect("should succeed");
         assert!((w[0] - 0.9).abs() < 1e-6);
     }
 

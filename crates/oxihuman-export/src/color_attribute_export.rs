@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Vertex color attribute export.
 
@@ -110,7 +110,7 @@ mod tests {
     fn test_set_and_get_color() {
         let mut export = new_color_attribute_export(default_color_attribute_config(), 4);
         ca_set_color(&mut export, 0, [1.0, 0.0, 0.0, 1.0]);
-        let c = ca_get_color(&export, 0).unwrap();
+        let c = ca_get_color(&export, 0).expect("should succeed");
         assert_eq!(c[0], 1.0);
         assert_eq!(c[1], 0.0);
     }

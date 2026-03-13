@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! IK influence weight export per joint.
@@ -137,7 +137,7 @@ mod tests {
         let mut exp = new_ik_weight_export();
         add_ik_weight(&mut exp, "wrist", 0.0, 1.0);
         set_ik_fk_blend(&mut exp, "wrist", 0.8);
-        let e = find_ik_entry(&exp, "wrist").unwrap();
+        let e = find_ik_entry(&exp, "wrist").expect("should succeed");
         assert!((e.ik_weight - 0.8).abs() < 1e-5);
     }
 

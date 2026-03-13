@@ -557,8 +557,8 @@ mod tests {
         let adj = simple_adjacency(pos.len(), &idx);
         let seeds = vec![0, 4, 8];
         let diagram = voronoi_from_seeds(&pos, &adj, &seeds);
-        let lc = largest_cell(&diagram).unwrap();
-        let sc = smallest_cell(&diagram).unwrap();
+        let lc = largest_cell(&diagram).expect("should succeed");
+        let sc = smallest_cell(&diagram).expect("should succeed");
         assert!(lc.member_vertices.len() >= sc.member_vertices.len());
     }
 

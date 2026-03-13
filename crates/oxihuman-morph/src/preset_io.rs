@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! JSON file I/O for [`BodyPreset`].
 
@@ -78,7 +78,7 @@ mod tests {
     #[test]
     fn preset_from_json_string_roundtrip() {
         for name in BodyPreset::all_names() {
-            let preset = BodyPreset::from_name(name).unwrap();
+            let preset = BodyPreset::from_name(name).expect("should succeed");
             let s = preset_to_json_string(&preset).expect("serialize failed");
             let back = preset_from_json_string(&s).expect("deserialize failed");
             assert_eq!(preset, back, "roundtrip failed for {}", name);
@@ -128,7 +128,7 @@ mod tests {
     fn library_preserves_count() {
         let presets: Vec<BodyPreset> = BodyPreset::all_names()
             .iter()
-            .map(|n| BodyPreset::from_name(n).unwrap())
+            .map(|n| BodyPreset::from_name(n).expect("should succeed"))
             .collect();
         let n = presets.len();
         let path = tmp_path("count");
@@ -172,7 +172,7 @@ mod tests {
     fn load_library_wrong_schema_errors() {
         // A JSON that is a single string, not an array — should fail for load_library
         let path = tmp_path("wrong_schema");
-        std::fs::write(&path, "\"Athletic\"").unwrap();
+        std::fs::write(&path, "\"Athletic\"").expect("should succeed");
         let result = load_preset_library_json(&path);
         assert!(result.is_err(), "expected Err when JSON is not an array");
     }
@@ -180,7 +180,7 @@ mod tests {
     #[test]
     fn save_and_load_all_variants() {
         for name in BodyPreset::all_names() {
-            let preset = BodyPreset::from_name(name).unwrap();
+            let preset = BodyPreset::from_name(name).expect("should succeed");
             let path = tmp_path(&format!("all_variants_{}", name));
             save_preset_json(&preset, &path).expect("save failed");
             let loaded = load_preset_json(&path).expect("load failed");

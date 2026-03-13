@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 use std::f32::consts::{PI, TAU};
@@ -147,7 +147,7 @@ mod tests {
         /* ray along +z hitting sphere at origin */
         let t = ray_sphere_intersect([0.0, 0.0, -5.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0], 1.0);
         assert!(t.is_some());
-        let t = t.unwrap();
+        let t = t.expect("should succeed");
         assert!((t - 4.0).abs() < 1e-4);
     }
 
@@ -163,7 +163,7 @@ mod tests {
         /* ray along +y hitting y=5 plane */
         let t = ray_plane_intersect([0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0], 5.0);
         assert!(t.is_some());
-        assert!((t.unwrap() - 5.0).abs() < 1e-5);
+        assert!((t.expect("should succeed") - 5.0).abs() < 1e-5);
     }
 
     #[test]

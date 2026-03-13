@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -421,7 +421,7 @@ mod tests {
         let a = single_weight("smile", 0.0);
         let b = single_weight("smile", 1.0);
         let mid = lerp_weights(&a, &b, 0.5);
-        assert!(approx(*mid.get("smile").unwrap(), 0.5));
+        assert!(approx(*mid.get("smile").expect("should succeed"), 0.5));
     }
 
     #[test]
@@ -429,7 +429,7 @@ mod tests {
         let a = single_weight("anger", 0.8);
         let b: ExprWeights = HashMap::new();
         let result = lerp_weights(&a, &b, 0.5);
-        assert!(approx(*result.get("anger").unwrap(), 0.4));
+        assert!(approx(*result.get("anger").expect("should succeed"), 0.4));
     }
 
     #[test]
@@ -437,7 +437,7 @@ mod tests {
         let a: ExprWeights = HashMap::new();
         let b = single_weight("joy", 1.0);
         let result = lerp_weights(&a, &b, 0.5);
-        assert!(approx(*result.get("joy").unwrap(), 0.5));
+        assert!(approx(*result.get("joy").expect("should succeed"), 0.5));
     }
 
     #[test]
@@ -445,7 +445,7 @@ mod tests {
         let a = single_weight("fear", 0.6);
         let b = single_weight("fear", 0.0);
         let result = lerp_weights(&a, &b, 0.0);
-        assert!(approx(*result.get("fear").unwrap(), 0.6));
+        assert!(approx(*result.get("fear").expect("should succeed"), 0.6));
     }
 
     // --- ExprTrack -----------------------------------------------------------
@@ -517,7 +517,7 @@ mod tests {
             hold_duration: 0.0,
         });
         let w = track.evaluate(0.0);
-        assert!(approx(*w.get("smile").unwrap(), 0.0));
+        assert!(approx(*w.get("smile").expect("should succeed"), 0.0));
     }
 
     #[test]
@@ -536,7 +536,7 @@ mod tests {
             hold_duration: 0.0,
         });
         let w = track.evaluate(1.0);
-        assert!(approx(*w.get("smile").unwrap(), 1.0));
+        assert!(approx(*w.get("smile").expect("should succeed"), 1.0));
     }
 
     #[test]
@@ -555,7 +555,7 @@ mod tests {
             hold_duration: 0.0,
         });
         let w = track.evaluate(1.0);
-        assert!(approx(*w.get("brow").unwrap(), 0.5));
+        assert!(approx(*w.get("brow").expect("should succeed"), 0.5));
     }
 
     #[test]
@@ -576,7 +576,7 @@ mod tests {
         });
         // At t=1.5 with loop (dur=1), maps to t=0.5 → 0.5
         let w = track.evaluate(1.5);
-        assert!(approx(*w.get("x").unwrap(), 0.5));
+        assert!(approx(*w.get("x").expect("should succeed"), 0.5));
     }
 
     #[test]
@@ -597,7 +597,7 @@ mod tests {
         });
         // PingPong: dur=1, cycle=2. At t=1.5, pos=1.5 > 1 → cycle-pos=0.5 → y=0.5
         let w = track.evaluate(1.5);
-        assert!(approx(*w.get("y").unwrap(), 0.5));
+        assert!(approx(*w.get("y").expect("should succeed"), 0.5));
     }
 
     #[test]
@@ -617,10 +617,10 @@ mod tests {
         });
         // At t=0.5 we should still be in the hold window → weight = 1.0
         let w = track.evaluate(0.5);
-        assert!(approx(*w.get("sad").unwrap(), 1.0));
+        assert!(approx(*w.get("sad").expect("should succeed"), 1.0));
         // At t=1.5 transition is half-way (from t=1..t=2) → weight ≈ 0.5
         let w2 = track.evaluate(1.5);
-        assert!(approx(*w2.get("sad").unwrap(), 0.5));
+        assert!(approx(*w2.get("sad").expect("should succeed"), 0.5));
     }
 
     // --- ExprSequencer -------------------------------------------------------
@@ -658,7 +658,7 @@ mod tests {
 
         let w = seq.evaluate_all(0.0);
         // 0.8 + 0.6 = 1.4 → clamped to 1.0
-        assert!(approx(*w.get("smile").unwrap(), 1.0));
+        assert!(approx(*w.get("smile").expect("should succeed"), 1.0));
     }
 
     // --- blink_track ---------------------------------------------------------

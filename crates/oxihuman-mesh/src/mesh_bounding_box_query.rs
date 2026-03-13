@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Tight axis-aligned bounding box query for meshes stub.
@@ -183,7 +183,7 @@ mod tests {
     #[test]
     fn test_compute_tight_aabb_values() {
         let verts = vec![[0.0f32, 1.0, 2.0], [3.0, 0.0, -1.0]];
-        let aabb = compute_tight_aabb(&verts).unwrap();
+        let aabb = compute_tight_aabb(&verts).expect("should succeed");
         assert_eq!(aabb.min, [0.0, 0.0, -1.0] /* correct min */);
         assert_eq!(aabb.max, [3.0, 1.0, 2.0] /* correct max */);
     }

@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 /// Visualize mesh poles (vertices with 3 or 5+ edge connections).
@@ -111,7 +111,7 @@ mod tests {
     fn test_color_n_pole() {
         /* n-pole returns n_pole_color */
         let v = new_pole_visualizer();
-        let c = pv_color_for_valence(&v, 3).unwrap();
+        let c = pv_color_for_valence(&v, 3).expect("should succeed");
         assert!((c[0] - 1.0).abs() < 1e-6);
     }
 

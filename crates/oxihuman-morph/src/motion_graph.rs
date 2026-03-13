@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 #![allow(dead_code)]
 
@@ -567,7 +567,7 @@ mod tests {
     use std::fs;
 
     fn write_tmp(name: &str, content: &str) {
-        fs::write(format!("/tmp/{}", name), content).unwrap();
+        fs::write(format!("/tmp/{}", name), content).expect("should succeed");
     }
 
     // 1. build locomotion graph – state count
@@ -604,7 +604,7 @@ mod tests {
     #[test]
     fn test_get_state_clip_name() {
         let g = build_locomotion_graph();
-        let state = g.get_state("walk").unwrap();
+        let state = g.get_state("walk").expect("should succeed");
         assert_eq!(state.clip_name, "anim_walk");
         write_tmp("mg_get_state_clip.txt", &state.clip_name);
     }
@@ -808,7 +808,7 @@ mod tests {
     #[test]
     fn test_expression_graph_morph_weights() {
         let g = build_expression_graph();
-        let happy = g.get_state("happy").unwrap();
+        let happy = g.get_state("happy").expect("should succeed");
         assert!(happy.morph_weights.contains_key("mouth_smile"));
         write_tmp(
             "mg_expr_morph_weights.txt",

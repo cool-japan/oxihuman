@@ -121,7 +121,7 @@ mod tests {
         let mut s = new_timestamp_query_set(1_000_000_000);
         tqs_record(&mut s, "t");
         tqs_resolve(&mut s, "t", 2_000_000_000);
-        let entry = s.entries.iter().find(|e| e.label == "t").unwrap();
+        let entry = s.entries.iter().find(|e| e.label == "t").expect("should succeed");
         assert_eq!(entry.timestamp_ns, 2_000_000_000);
     }
 
@@ -145,7 +145,7 @@ mod tests {
         tqs_resolve(&mut s, "b", 16_000_000);
         let ms = tqs_duration_ms(&s, "a", "b");
         assert!(ms.is_some());
-        assert!(ms.unwrap() > 0.0);
+        assert!(ms.expect("should succeed") > 0.0);
     }
 
     #[test]

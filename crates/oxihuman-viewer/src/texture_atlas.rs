@@ -113,7 +113,7 @@ mod tests {
     fn test_region_uv_rect() {
         let mut a = new_texture_atlas(100, 100);
         add_atlas_region(&mut a, "r", 10, 20, 30, 40);
-        let uv = region_uv_rect(&a, 0).unwrap();
+        let uv = region_uv_rect(&a, 0).expect("should succeed");
         assert!((uv[0] - 0.1).abs() < 1e-6);
         assert!((uv[1] - 0.2).abs() < 1e-6);
     }
@@ -165,7 +165,7 @@ mod tests {
     fn test_region_by_name_returns_data() {
         let mut a = new_texture_atlas(100, 100);
         add_atlas_region(&mut a, "test", 5, 10, 20, 30);
-        let r = region_by_name(&a, "test").unwrap();
+        let r = region_by_name(&a, "test").expect("should succeed");
         assert_eq!(r.x, 5);
         assert_eq!(r.w, 20);
     }

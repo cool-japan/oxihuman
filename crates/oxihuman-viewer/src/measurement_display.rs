@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Body measurement display overlay.
 
@@ -322,7 +322,7 @@ mod tests {
         assert!(!measurements.is_empty(), "should return some measurements");
         let height = measurements.iter().find(|(n, _)| n == "Height");
         assert!(height.is_some());
-        let (_, h) = height.unwrap();
+        let (_, h) = height.expect("should succeed");
         assert!((h - 1.75).abs() < 1e-4);
     }
 }

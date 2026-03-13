@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 #[allow(dead_code)]
@@ -72,7 +72,7 @@ mod tests {
         spm_add_phase(&mut m, 1000.0, 0.001, 1);
         let phase = spm_get_phase(&m, 1);
         assert!(phase.is_some());
-        assert!((phase.unwrap().density_0 - 1000.0).abs() < 0.1);
+        assert!((phase.expect("should succeed").density_0 - 1000.0).abs() < 0.1);
     }
 
     #[test]

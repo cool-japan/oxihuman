@@ -1,4 +1,4 @@
-// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (C) 2026 COOLJAPAN OU (Team KitaSan) / SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! A slab allocator that manages fixed-size slots with O(1) alloc/free using a free list.
@@ -210,7 +210,7 @@ mod tests {
     fn test_get_mut() {
         let mut slab = SlabAllocator::new();
         let k = slab.insert(100);
-        *slab.get_mut(k).unwrap() = 200;
+        *slab.get_mut(k).expect("should succeed") = 200;
         assert_eq!(slab.get(k), Some(&200));
     }
 

@@ -187,7 +187,7 @@ mod tests {
         register_type(&mut r, make_meta("Bar", "mesh", false));
         let found = get_type(&r, "Bar");
         assert!(found.is_some());
-        assert_eq!(found.unwrap().category, "mesh");
+        assert_eq!(found.expect("should succeed").category, "mesh");
     }
 
     #[test]

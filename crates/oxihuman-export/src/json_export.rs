@@ -217,7 +217,7 @@ mod tests {
         let mut doc = new_json_document(&cfg);
         json_set_field(&mut doc, "name", JsonValue::Str("Alice".to_string()));
         assert_eq!(json_field_count(&doc), 1);
-        let val = json_get_field(&doc, "name").unwrap();
+        let val = json_get_field(&doc, "name").expect("should succeed");
         if let JsonValue::Str(s) = val {
             assert_eq!(s, "Alice");
         } else {

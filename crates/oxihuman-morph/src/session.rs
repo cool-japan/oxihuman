@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //! Morph session serialization.
 //!
@@ -149,8 +149,8 @@ mod tests {
     #[test]
     fn session_round_trip_json() {
         let session = sample_session();
-        let json = session.to_json().unwrap();
-        let restored = MorphSession::from_json(&json).unwrap();
+        let json = session.to_json().expect("should succeed");
+        let restored = MorphSession::from_json(&json).expect("should succeed");
         assert!((restored.params.height - 0.7).abs() < 1e-5);
         assert!((restored.params.muscle - 0.8).abs() < 1e-5);
         assert_eq!(restored.loaded_target_names.len(), 3);
@@ -170,8 +170,8 @@ mod tests {
             .with_label("test session")
             .with_targets_dir("/tmp/targets");
         let path = std::path::PathBuf::from("/tmp/test_oxihuman_session.json");
-        session.save(&path).unwrap();
-        let loaded = MorphSession::load(&path).unwrap();
+        session.save(&path).expect("should succeed");
+        let loaded = MorphSession::load(&path).expect("should succeed");
         assert_eq!(loaded.label, Some("test session".to_string()));
         assert!((loaded.params.weight - 0.3).abs() < 1e-5);
         std::fs::remove_file(&path).ok();
@@ -190,8 +190,8 @@ mod tests {
         let mut p = ParamState::default();
         p.extra.insert("expression".to_string(), 0.4);
         let session = MorphSession::new(&p);
-        let json = session.to_json().unwrap();
-        let restored = MorphSession::from_json(&json).unwrap();
+        let json = session.to_json().expect("should succeed");
+        let restored = MorphSession::from_json(&json).expect("should succeed");
         assert_eq!(restored.params.extra.get("expression").copied(), Some(0.4));
     }
 

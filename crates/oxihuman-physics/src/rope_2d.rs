@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! 2D rope/chain simulation stub (Verlet integration + distance constraints).
@@ -153,9 +153,9 @@ mod tests {
     #[test]
     fn test_gravity_moves_tip() {
         let mut rope = Rope2d::make_hanging([0.0, 10.0], 4, 1.0, 9.81);
-        let tip_y0 = rope.tip().unwrap()[1];
+        let tip_y0 = rope.tip().expect("should succeed")[1];
         rope.step(0.1);
-        let tip_y1 = rope.tip().unwrap()[1];
+        let tip_y1 = rope.tip().expect("should succeed")[1];
         assert!(
             tip_y1 < tip_y0 || (tip_y1 - tip_y0).abs() < 0.5,
             /* tip moves down or constraint holds it */

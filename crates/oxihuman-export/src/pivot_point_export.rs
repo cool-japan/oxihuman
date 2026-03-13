@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Pivot point export: object pivot/origin point data.
@@ -132,7 +132,7 @@ mod tests {
     fn test_add_with_orientation() {
         let mut e = new_pivot_point_export();
         pp_add_with_orientation(&mut e, "hand", [1.0, 0.0, 0.0], [0.0, 0.707, 0.0, 0.707]);
-        let p = pp_get(&e, 0).unwrap();
+        let p = pp_get(&e, 0).expect("should succeed");
         assert!((p.orientation[1] - 0.707).abs() < 1e-3);
     }
 
@@ -140,7 +140,7 @@ mod tests {
     fn test_get() {
         let mut e = new_pivot_point_export();
         pp_add(&mut e, "hip", [0.0, 1.0, 0.0]);
-        let p = pp_get(&e, 0).unwrap();
+        let p = pp_get(&e, 0).expect("should succeed");
         assert_eq!(p.name, "hip");
     }
 
@@ -163,7 +163,7 @@ mod tests {
         let mut e = new_pivot_point_export();
         pp_add(&mut e, "root", [0.0; 3]);
         pp_set_position(&mut e, 0, [5.0, 6.0, 7.0]);
-        assert!((pp_get(&e, 0).unwrap().position[0] - 5.0).abs() < 1e-6);
+        assert!((pp_get(&e, 0).expect("should succeed").position[0] - 5.0).abs() < 1e-6);
     }
 
     #[test]

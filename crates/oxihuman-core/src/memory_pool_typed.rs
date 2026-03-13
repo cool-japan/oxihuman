@@ -1,5 +1,5 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
 //! Typed object memory pool — pre-allocates a fixed number of typed slots
@@ -77,17 +77,17 @@ mod tests {
     #[test]
     fn test_alloc_and_get() {
         let mut pool: MemoryPoolTyped<i32> = MemoryPoolTyped::new(8);
-        let idx = pool.alloc(42).unwrap();
+        let idx = pool.alloc(42).expect("should succeed");
         assert_eq!(pool.get(idx), Some(&42)); /* value stored correctly */
     }
 
     #[test]
     fn test_free_and_reuse() {
         let mut pool: MemoryPoolTyped<i32> = MemoryPoolTyped::new(4);
-        let idx = pool.alloc(10).unwrap();
+        let idx = pool.alloc(10).expect("should succeed");
         pool.free_slot(idx);
         assert_eq!(pool.get(idx), None); /* slot cleared after free */
-        let idx2 = pool.alloc(20).unwrap();
+        let idx2 = pool.alloc(20).expect("should succeed");
         assert_eq!(idx2, idx); /* slot was reused */
     }
 
@@ -117,8 +117,8 @@ mod tests {
     #[test]
     fn test_get_mut() {
         let mut pool: MemoryPoolTyped<i32> = MemoryPoolTyped::new(4);
-        let idx = pool.alloc(5).unwrap();
-        *pool.get_mut(idx).unwrap() = 99;
+        let idx = pool.alloc(5).expect("should succeed");
+        *pool.get_mut(idx).expect("should succeed") = 99;
         assert_eq!(pool.get(idx), Some(&99)); /* mutation visible */
     }
 
