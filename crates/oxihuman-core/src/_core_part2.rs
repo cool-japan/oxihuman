@@ -774,8 +774,8 @@ pub use url_encode::{
     url_decode, url_encode as url_encode_str, url_encode_query, url_is_safe, url_roundtrip_ok,
 };
 
-#[path = "url_parser_stub.rs"]
-pub mod url_parser_stub;
+#[path = "url_parser.rs"]
+pub mod url_parser;
 
 #[path = "html_escape.rs"]
 pub mod html_escape;
@@ -865,13 +865,13 @@ pub use avro_codec::{
     type_name as avro_type_name, AvroError, AvroField, AvroType, AvroValue,
 };
 
-#[path = "flatbuffer_stub.rs"]
-pub mod flatbuffer_stub;
-pub use flatbuffer_stub::{padded_size, read_u32 as flatbuf_read_u32, FlatBuilder, FlatError};
+#[path = "flatbuffer.rs"]
+pub mod flatbuffer;
+pub use flatbuffer::{padded_size, read_u32 as flatbuf_read_u32, FlatBuilder, FlatError};
 
-#[path = "capnproto_stub.rs"]
-pub mod capnproto_stub;
-pub use capnproto_stub::{
+#[path = "capnproto.rs"]
+pub mod capnproto;
+pub use capnproto::{
     message_is_empty, serialize_message, traversal_limit_words, CapnMessage, CapnSegment,
 };
 
@@ -901,9 +901,9 @@ pub use http_parser::{
     HttpMethod, HttpRequest, HttpResponse,
 };
 
-#[path = "oauth2_stub.rs"]
-pub mod oauth2_stub;
-pub use oauth2_stub::{
+#[path = "oauth2.rs"]
+pub mod oauth2;
+pub use oauth2::{
     build_authorization_url, exchange_code_for_token, generate_pkce_challenge,
     refresh_token as oauth2_refresh_token, OAuth2Client, OAuth2Config, OAuth2Token, PkceChallenge,
 };
@@ -1007,4 +1007,23 @@ pub mod cookie_jar;
 pub use cookie_jar::{
     delete_cookie, get_cookie, jar_size, new_cookie_jar, purge_expired_cookies,
     serialize_set_cookie, set_cookie, Cookie, CookieJar,
+};
+
+#[path = "image_codec.rs"]
+pub mod image_codec;
+pub use image_codec::{
+    bmp_decode, bmp_encode_rgb, bmp_encode_rgba, decode_stub as image_decode_stub,
+    default_encode_config, detect_format, encode_stub as image_encode_stub, image_byte_size,
+    image_format_name, image_header_to_json, pixel_format_bytes_per_pixel, png_decode,
+    png_encode_rgb, DecodeResult as ImageDecodeResult, EncodeConfig, ImageError, ImageFormat,
+    ImageHeader, PixelFormat, RawDecodeResult,
+};
+
+#[path = "network.rs"]
+pub mod network;
+pub use network::{
+    connect_stub, connection_state, default_network_config, disconnect_stub, flush_receive_buffer,
+    network_stub_to_json, new_network_stub, packet_count_received, packet_count_sent,
+    push_to_recv_buffer, receive_packet, send_packet, set_latency_ms, simulate_packet_loss,
+    ConnectionState, NetworkConfig, NetworkError, NetworkPacket, NetworkStub,
 };

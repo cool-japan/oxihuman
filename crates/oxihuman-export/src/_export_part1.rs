@@ -218,8 +218,8 @@ pub use alembic_ogawa_export::{
     translation_matrix, unit_cube_polymesh, validate_ogawa_magic, AbcCamera, AbcObject,
     AbcObjectKind, AbcPolyMesh, AbcSubD, AbcXform, AlembicWriter,
 };
-pub mod alembic_stub;
-pub use alembic_stub::{
+pub mod alembic;
+pub use alembic::{
     archive_to_ogawa_stub, build_animated_archive, build_single_mesh_archive, parse_ogawa_stub,
     validate_archive, AlembicArchive, AlembicObject, AlembicSample, AlembicSchema,
 };
@@ -309,9 +309,9 @@ pub use animation_curve_export::{
 pub mod fbx_binary;
 pub use fbx_binary::{export_mesh_fbx_binary, FbxBinaryWriter, FbxNode as FbxBinaryNode, FbxProperty};
 
-pub mod fbx_stub;
+pub mod fbx;
 #[allow(deprecated)]
-pub use fbx_stub::{
+pub use fbx::{
     add_fbx_mesh, add_fbx_node, export_fbx_ascii, fbx_connections, fbx_export_size_estimate,
     fbx_header, fbx_identity_matrix, fbx_mesh_to_string, fbx_node_to_string, mesh_count_fbx,
     new_fbx_scene, node_count_fbx, validate_fbx_scene, FbxExport, FbxMesh, FbxNode, FbxScene,

@@ -36,7 +36,7 @@ pub fn new_lod_switch_export(hysteresis: f32) -> LodSwitchExport {
 #[allow(dead_code)]
 pub fn add_lod_switch(export: &mut LodSwitchExport, entry: LodSwitchEntry) {
     export.entries.push(entry);
-    export.entries.sort_by(|a, b| a.level.cmp(&b.level));
+    export.entries.sort_by_key(|a| a.level);
 }
 
 /// Count entries.

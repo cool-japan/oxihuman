@@ -14,8 +14,8 @@ proptest! {
 
     #[test]
     fn lz77_roundtrip(data in proptest::collection::vec(any::<u8>(), 0..512)) {
-        let tokens = oxihuman_core::lz77_stub::compress(&data);
-        let recovered = oxihuman_core::lz77_stub::decompress(&tokens);
+        let tokens = oxihuman_core::lz77::compress(&data);
+        let recovered = oxihuman_core::lz77::decompress(&tokens);
         prop_assert_eq!(&recovered, &data,
             "LZ77 roundtrip failed for input of length {}", data.len());
     }
@@ -26,8 +26,8 @@ proptest! {
         window in 64usize..4096,
         max_match in 3usize..258,
     ) {
-        let tokens = oxihuman_core::lz77_stub::compress_with_params(&data, window, max_match);
-        let recovered = oxihuman_core::lz77_stub::decompress(&tokens);
+        let tokens = oxihuman_core::lz77::compress_with_params(&data, window, max_match);
+        let recovered = oxihuman_core::lz77::decompress(&tokens);
         prop_assert_eq!(&recovered, &data,
             "LZ77 roundtrip with params (w={}, m={}) failed", window, max_match);
     }
@@ -43,17 +43,17 @@ proptest! {
     #[test]
     fn huffman_roundtrip(data in proptest::collection::vec(any::<u8>(), 1..256)) {
         // Build table from data
-        let table = oxihuman_core::huffman_stub::HuffmanCodeTable::from_data(&data);
+        let table = oxihuman_core::huffman::HuffmanCodeTable::from_data(&data);
         let table = match table {
             Some(t) => t,
             None => return Ok(()), // empty data edge case
         };
 
         // Encode
-        let (encoded_bytes, bit_count) = oxihuman_core::huffman_stub::huffman_encode(&data, &table).expect("should succeed");
+        let (encoded_bytes, bit_count) = oxihuman_core::huffman::huffman_encode(&data, &table).expect("should succeed");
 
         // Decode
-        let decoded = oxihuman_core::huffman_stub::huffman_decode(
+        let decoded = oxihuman_core::huffman::huffman_decode(
             &encoded_bytes,
             bit_count,
             data.len(),

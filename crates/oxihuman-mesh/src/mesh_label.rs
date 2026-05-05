@@ -1147,8 +1147,9 @@ mod tests {
             labels.set(vi, BodyRegion::from_u8((vi % 16) as u8));
         }
         let bytes = labels.to_bytes();
-        std::fs::write("/tmp/oxihuman_mesh_label_test.bin", &bytes).expect("write failed");
-        let read_back = std::fs::read("/tmp/oxihuman_mesh_label_test.bin").expect("read failed");
+        let tmp = std::env::temp_dir().join("oxihuman_mesh_label_test.bin");
+        std::fs::write(&tmp, &bytes).expect("write failed");
+        let read_back = std::fs::read(&tmp).expect("read failed");
         let restored = MeshLabels::from_bytes(&read_back);
         for vi in 0..8 {
             assert_eq!(restored.get(vi), labels.get(vi));

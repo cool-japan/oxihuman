@@ -96,7 +96,7 @@ pub fn lod_levels_sorted(exp: &LodMeshExport) -> bool {
 #[allow(dead_code)]
 pub fn sort_lod_levels(exp: &mut LodMeshExport) {
     exp.levels
-        .sort_by(|a, b| b.triangle_count.cmp(&a.triangle_count));
+        .sort_by_key(|b| std::cmp::Reverse(b.triangle_count));
 }
 
 #[cfg(test)]

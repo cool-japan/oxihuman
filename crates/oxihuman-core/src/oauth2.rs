@@ -4,6 +4,8 @@
 
 //! OAuth2 token stub — PKCE flow and token exchange helpers.
 
+use sha2::{Digest, Sha256};
+
 /// PKCE code verifier and challenge pair.
 #[derive(Clone, Debug)]
 pub struct PkceChallenge {
@@ -36,12 +38,35 @@ pub struct OAuth2Client {
     pending_verifier: Option<String>,
 }
 
-/// Generates a stub PKCE challenge from a verifier string.
+/// Encodes bytes as base64url without padding (RFC 4648 §5 / RFC 7636 §4.2).
+fn base64url_no_pad(bytes: &[u8]) -> String {
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let mut out = String::with_capacity((bytes.len() * 4).div_ceil(3));
+    for chunk in bytes.chunks(3) {
+        let b0 = chunk[0] as u32;
+        let b1 = chunk.get(1).copied().unwrap_or(0) as u32;
+        let b2 = chunk.get(2).copied().unwrap_or(0) as u32;
+        let v = (b0 << 16) | (b1 << 8) | b2;
+        out.push(ALPHABET[(v >> 18) as usize & 63] as char);
+        out.push(ALPHABET[(v >> 12) as usize & 63] as char);
+        if chunk.len() > 1 {
+            out.push(ALPHABET[(v >> 6) as usize & 63] as char);
+        }
+        if chunk.len() > 2 {
+            out.push(ALPHABET[v as usize & 63] as char);
+        }
+    }
+    out
+}
+
+/// Generates a real RFC 7636 PKCE challenge from a verifier string.
+/// The code_challenge is SHA-256(verifier) encoded as base64url without padding.
 pub fn generate_pkce_challenge(verifier: &str) -> PkceChallenge {
-    let challenge = format!("sha256:{}", &verifier[..verifier.len().min(32)]);
+    let hash = Sha256::digest(verifier.as_bytes());
+    let code_challenge = base64url_no_pad(&hash);
     PkceChallenge {
         code_verifier: verifier.to_owned(),
-        code_challenge: challenge,
+        code_challenge,
     }
 }
 
@@ -58,6 +83,7 @@ pub fn build_authorization_url(
 }
 
 /// Stub: exchanges an authorization code for an OAuth2 token.
+/// The access token is the base64url-encoded SHA-256 of "client_id|code".
 pub fn exchange_code_for_token(
     cfg: &OAuth2Config,
     code: &str,
@@ -69,8 +95,11 @@ pub fn exchange_code_for_token(
     if verifier.is_empty() {
         return Err("empty code verifier".into());
     }
+    let raw = format!("{}|{}", cfg.client_id, code);
+    let token_bytes = Sha256::digest(raw.as_bytes());
+    let access_token = base64url_no_pad(&token_bytes);
     Ok(OAuth2Token {
-        access_token: format!("at_{}", code),
+        access_token,
         token_type: "Bearer".into(),
         expires_in_secs: 3600,
         refresh_token: Some(format!("rt_{}", cfg.client_id)),
@@ -119,10 +148,17 @@ impl OAuth2Client {
 mod tests {
     use super::*;
 
+    // --- updated pre-existing tests ---
+
     #[test]
-    fn test_pkce_challenge_contains_verifier_prefix() {
+    fn test_pkce_challenge_is_base64url() {
+        // Previously checked for "sha256:" prefix; now checks the real RFC 7636 contract:
+        // 43-char base64url (SHA-256 = 32 bytes), no padding, URL-safe charset.
         let ch = generate_pkce_challenge("my-verifier-string");
-        assert!(ch.code_challenge.contains("sha256:"));
+        assert_eq!(ch.code_challenge.len(), 43);
+        assert!(!ch.code_challenge.contains('='));
+        assert!(!ch.code_challenge.contains('+'));
+        assert!(!ch.code_challenge.contains('/'));
     }
 
     #[test]
@@ -158,14 +194,21 @@ mod tests {
 
     #[test]
     fn test_exchange_valid_code_returns_token() {
+        // Previously checked access_token.contains("code123"); now it's a base64url hash.
+        // Check non-empty, URL-safe, and deterministic.
         let cfg = OAuth2Config {
             client_id: "cid".into(),
             redirect_uri: "".into(),
             auth_endpoint: "".into(),
             token_endpoint: "".into(),
         };
-        let tok = exchange_code_for_token(&cfg, "code123", "verifier").expect("should succeed");
-        assert!(tok.access_token.contains("code123"));
+        let tok1 = exchange_code_for_token(&cfg, "code123", "verifier").expect("should succeed");
+        let tok2 = exchange_code_for_token(&cfg, "code123", "verifier").expect("should succeed");
+        assert!(!tok1.access_token.is_empty());
+        assert_eq!(tok1.access_token, tok2.access_token);
+        assert!(!tok1.access_token.contains('+'));
+        assert!(!tok1.access_token.contains('/'));
+        assert!(!tok1.access_token.contains('='));
     }
 
     #[test]
@@ -216,5 +259,56 @@ mod tests {
         };
         let mut client = OAuth2Client::new(cfg);
         assert!(client.complete_flow("code").is_err());
+    }
+
+    // --- new tests ---
+
+    #[test]
+    fn test_pkce_known_vector() {
+        // RFC 7636 Appendix B test vector
+        let verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+        let challenge_obj = generate_pkce_challenge(verifier);
+        assert_eq!(
+            challenge_obj.code_challenge,
+            "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+        );
+    }
+
+    #[test]
+    fn test_pkce_deterministic() {
+        let a = generate_pkce_challenge("test-verifier-abc123");
+        let b = generate_pkce_challenge("test-verifier-abc123");
+        assert_eq!(a.code_challenge, b.code_challenge);
+    }
+
+    #[test]
+    fn test_base64url_no_pad_basic() {
+        // 0xFF → "_w" (two chars, no padding)
+        assert_eq!(base64url_no_pad(&[0xffu8]), "_w");
+        // Empty input → empty output
+        assert_eq!(base64url_no_pad(&[]), "");
+        // SHA-256 produces 32 bytes → ceil(32*4/3) = 43 base64url chars
+        let hash = Sha256::digest(b"abc");
+        let encoded = base64url_no_pad(&hash);
+        assert_eq!(encoded.len(), 43);
+        assert!(!encoded.contains('='));
+        assert!(!encoded.contains('+'));
+        assert!(!encoded.contains('/'));
+    }
+
+    #[test]
+    fn test_token_exchange_deterministic() {
+        let cfg = OAuth2Config {
+            client_id: "client-x".into(),
+            redirect_uri: "".into(),
+            auth_endpoint: "".into(),
+            token_endpoint: "".into(),
+        };
+        let tok1 = exchange_code_for_token(&cfg, "auth-code-42", "v").expect("ok");
+        let tok2 = exchange_code_for_token(&cfg, "auth-code-42", "v").expect("ok");
+        assert_eq!(tok1.access_token, tok2.access_token);
+        // Different code → different token
+        let tok3 = exchange_code_for_token(&cfg, "auth-code-99", "v").expect("ok");
+        assert_ne!(tok1.access_token, tok3.access_token);
     }
 }

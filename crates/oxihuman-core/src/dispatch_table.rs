@@ -90,7 +90,7 @@ impl DispatchTable {
 
     pub fn by_priority(&self) -> Vec<&HandlerEntry> {
         let mut entries: Vec<&HandlerEntry> = self.handlers.values().collect();
-        entries.sort_by(|a, b| b.priority.cmp(&a.priority));
+        entries.sort_by_key(|b| std::cmp::Reverse(b.priority));
         entries
     }
 

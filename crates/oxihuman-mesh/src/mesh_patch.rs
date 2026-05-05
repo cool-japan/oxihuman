@@ -1189,10 +1189,11 @@ mod tests {
             result.mesh.face_count(),
         );
 
-        std::fs::write("/tmp/mesh_patch_report.txt", &report).ok();
+        let tmp = std::env::temp_dir().join("mesh_patch_report.txt");
+        std::fs::write(&tmp, &report).ok();
 
         // Verify the file was written
-        let content = std::fs::read_to_string("/tmp/mesh_patch_report.txt").expect("should succeed");
+        let content = std::fs::read_to_string(&tmp).expect("should succeed");
         assert!(content.contains("holes_filled"));
     }
 }

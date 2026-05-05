@@ -200,8 +200,13 @@ f 1/1/1 2/2/1 3/3/1 4/4/1
 
     #[test]
     fn parse_base_obj() {
-        let path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
-        if let Ok(src) = std::fs::read_to_string(path) {
+        let path = {
+            std::env::var("MAKEHUMAN_DATA_DIR")
+                .map(std::path::PathBuf::from)
+                .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+                .join("3dobjs/base.obj")
+        };
+        if let Ok(src) = std::fs::read_to_string(&path) {
             let mesh = parse_obj(&src).expect("should succeed");
             // MakeHuman base mesh has ~19,158 unique base positions
             assert!(

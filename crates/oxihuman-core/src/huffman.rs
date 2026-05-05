@@ -578,7 +578,7 @@ pub fn build_frequency_table(data: &[u8]) -> HuffmanTable {
     }
 
     // Sort by frequency descending (legacy behavior).
-    symbols.sort_by(|a, b| b.frequency.cmp(&a.frequency));
+    symbols.sort_by_key(|b| std::cmp::Reverse(b.frequency));
 
     HuffmanTable { symbols }
 }

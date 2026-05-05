@@ -1,7 +1,7 @@
 # OxiHuman TODO
 
-> Last updated: 2026-03-13
-> Version: 0.1.1
+> Last updated: 2026-05-05
+> Version: 0.1.2
 > Total SLoC: ~943,000 Rust (5,330 source files)
 
 ---
@@ -178,7 +178,7 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 
 ## Release Milestones
 
-### v0.1.1 (current) — Foundation Release
+### v0.1.1 — Foundation Release
 - [x] All 8 workspace crates compile with `--all-features`
 - [x] Core morph engine functional
 - [x] 50+ export format support
@@ -198,7 +198,77 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 - [x] Demo website (demo/ — index.html + app.js WebGPU/wireframe fallback + sw.js service worker)
 - [x] OxiRS adapter layer (oxirs_adapter.rs - rigid bodies, ray cast, contacts, BodyRigMapper)
 - [x] All stubs replaced with real implementations (0 todo!(), 0 unimplemented!())
-- [x] Comprehensive test coverage (32,644 tests across all crates — 0 failures)
+- [x] Comprehensive test coverage (32,791 tests across all crates — 0 failures)
 - [x] Performance benchmarks (SIMD morph, incremental dirty, GPU compute, 11 physics benchmarks)
 - [x] Full documentation (rustdoc, user guide, developer guide, TypeScript examples)
 - [x] Security audit complete (security.rs: path sanitization, checked arithmetic, magic bytes; 1 low advisory)
+
+### v0.1.2 (current) — Maintenance Release
+- [x] Version bump to 0.1.2
+- [x] Replace miniz_oxide with oxiarc-deflate (COOLJAPAN compression policy)
+- [x] Fix rustdoc broken intra-doc links in capnproto.rs (bit-range notation)
+- [x] Fix invalid HTML tag in arena_allocator.rs docs
+- [x] Bump rayon 1.11.0 → 1.12.0, proptest 1.10.0 → 1.11.0
+- [x] All 32,791 tests passing
+- [ ] Publish to crates.io (awaiting approval)
+
+---
+
+## 0.1.2 Quality Pass (2026-05-04)
+
+- [x] Wire real `AtomicCounter`, retire the non-atomic stub (2026-05-04)
+  - **Goal:** `oxihuman_core::AtomicCounter` backed by `AtomicI64` + `Ordering::SeqCst`; concurrent callers see correct counts. Zero `*_stub` references in the atomic counter module surface.
+  - **Design:** Expand `atomic_counter.rs` to add `counter_get`/`counter_compare_and_swap`/`new_atomic_counter_with` compatibility shims; re-point `_core_part3.rs:714-719` from stub to real; delete stub; update any `&mut`-taking call sites to `&`; update `new_atomic_counter(N)` call sites to `new_atomic_counter_with(N)`.
+  - **Files:** `crates/oxihuman-core/src/atomic_counter.rs`, `crates/oxihuman-core/src/_core_part3.rs`, `crates/oxihuman-core/src/atomic_counter_stub.rs` (deleted).
+  - **Tests:** Single-thread ops, `compare_and_swap` happy/contention, thread-safety regression (8 threads × 10_000 increments via `Arc<AtomicCounter>`), `proptest` for `counter_add` associativity.
+  - **Risk:** API divergence from stub may break hidden call sites; `cargo clippy -D warnings` surfaces them.
+
+- [x] Resolve `arena_allocator` orphan files (2026-05-04)
+  - **Goal:** No orphan `arena_*` files in `oxihuman-core/src/`; the merged `arena_allocator` module is registered and tested.
+  - **Design:** Merge alignment-aware `arena_alloc_bytes_aligned(arena, size, align)` from `arena_alloc_stub.rs` into `arena_allocator.rs`; register in `_core_part3.rs` near the other arena registrations; delete `arena_alloc_stub.rs`; drop `#![allow(dead_code)]`.
+  - **Files:** `crates/oxihuman-core/src/arena_allocator.rs`, `crates/oxihuman-core/src/_core_part3.rs`, `crates/oxihuman-core/src/arena_alloc_stub.rs` (deleted).
+  - **Tests:** `alloc_simple`, `alloc_aligned`, `reset_clears`, OOM detection, property test for monotonic offsets.
+  - **Risk:** No callers exist (both files orphaned); merge only adds capability.
+
+- [x] Document `MAKEHUMAN_DATA_DIR` / `OXIHUMAN_ASSETS_DIR` env vars (2026-05-04)
+  - **Goal:** The new env vars introduced by the in-progress test-portability refactor are documented before any CI runner is surprised.
+  - **Design:** Add `## [Unreleased]` → `### Changed` bullet in `CHANGELOG.md`; add `### Test fixtures` subsection in `README.md` near development/testing section. Leave the 12 WIP test files untouched.
+  - **Files:** `CHANGELOG.md`, `README.md`.
+  - **Tests:** None; verify Markdown is valid (no header-level skips).
+  - **Risk:** None; additive doc change.
+
+- [x] Add backlog entries to root `TODO.md` (2026-05-04)
+  - **Goal:** Audit findings not implemented this run are tracked; the next `/ultra` pass or contributor can start from here.
+  - **Design:** Append `## Backlog (post-0.1.1)` section with 5 `[ ]` items. *(Done inline in this writer step.)*
+  - **Files:** `TODO.md`.
+
+## Backlog (post-0.1.1)
+
+- [x] Implement real Cap'n Proto wire format
+  - Replace `crates/oxihuman-core/src/capnproto_stub.rs` (self-described stub, raw little-endian, no segment table) with proper Cap'n Proto encoding: segment table, struct/list pointer encoding, far pointers, traversal-limit enforcement. Aim for round-trip compatibility with reference messages. See capnproto.org spec. Split into: (1) segments+header, (2) struct/list pointers, (3) traversal limit, (4) far pointers.
+
+- [x] Wire SIMD into `oxihuman-morph` hot loops
+  - The `simd` feature on `oxihuman-morph` (`crates/oxihuman-morph/Cargo.toml`) is declared but gates nothing. Add `wide` (Pure Rust stable SIMD) as a workspace dep, gate acceleration of target-application inner loops (`engine.rs` MorphEngine hot paths) behind `#[cfg(feature = "simd")]`. Benchmark via `morph_bench` before/after. Keep default features = no `wide` dep.
+
+- [ ] Extract shared `oxihuman-test-utils` crate (publish=false)
+  - Once the 0.1.2 env-var refactor is committed, extract `makehuman_data_dir()` / `targets_dir()` / `base_obj()` helpers into `crates/oxihuman-test-utils/` (`publish = false`) as a `[dev-dependencies]` dep, or add a `dev-utils` feature to `oxihuman-core` exposing the same helpers.
+
+- [ ] Audit + rename remaining `*_stub.rs` files (39 total on branch 0.1.2)
+  - 39 files still carry the `_stub` suffix despite TODO.md claiming "44 stubs replaced." Most are functionally complete — rename to drop `_stub` and update `#[path = "..."]` directives in `_core_part{1,2,3}.rs`. Genuine stubs (e.g., `capnproto_stub.rs`) get individual implementation tasks.
+
+- [x] Reconcile CLI subcommand count — Verified via dispatcher in main.rs: 35 subcommands wired across 7 modules. Updated README.md (was 32) and crates/oxihuman-cli/README.md (was 34) to 35.
+  - `README.md` claims 32 CLI subcommands; only 7 command files in `crates/oxihuman-cli/src/commands/`. Either expand `commands/` to match the documented 32 subcommands (per IMPLEMENT POLICY), or update README to reflect the actual count.
+
+- [x] Implement real Lua interpreter in `lua_stub.rs` — full tree-walk interpreter (lexer + parser + evaluator) in `lua.rs` + `lua_interp.rs`; tables, closures, math/string builtins, timeout + depth limits. `lua_execute` now parses and runs actual Lua 5.x syntax.
+  - **Goal:** `lua_execute(script, globals)` runs actual Lua 5.x syntax and returns correct values.
+  - **Why:** Scripting support is declared in the public API but silently returns nothing.
+  - **How to apply:** Only attempt in a dedicated `/ultra` pass after evaluating `piccolo` maturity.
+
+- [x] Wire real `tokio::net` into `network_stub.rs` — `network.rs` now uses `tokio::net::TcpStream` with real connect/send/receive, length-prefix framing, and sync wrapper API. `send_packet`/`receive_packet` route over actual TCP sockets.
+  - **Goal:** `send_packet(channel, payload)` routes over an actual TCP or UDP socket via `tokio::net` (Pure Rust).
+  - **Why:** Network collaboration features are declared in the public API but produce no actual I/O.
+  - **How to apply:** Requires redesigning the API to be `async`; can be done in a dedicated `/ultra` pass that adds `tokio` to workspace deps.
+
+- [x] Cap'n Proto traversal & depth limits — implement message-size traversal counter and pointer-depth cap per spec ("Security Considerations" section). Builds on the wire-format pointer kinds landed in 0.1.2.
+- [x] Cap'n Proto far pointers + composite list tag (element_size = 7) — needed for cross-segment references and list-of-struct. Builds on the segment table + pointer encoding from the 0.1.2 wire-format slice.
+- [x] Rename `capnproto_stub.rs` → `capnproto.rs` once the deferred Cap'n Proto sub-slices (traversal limits, far pointers, composite lists) land.

@@ -124,22 +124,28 @@ mod tests {
     use crate::glb::verify_glb_header;
     use oxihuman_morph::params::ParamState;
     use proptest::prelude::*;
-    use std::path::Path;
 
-    const BASE_OBJ: &str =
-        "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
-    const TARGETS_DIR: &str =
-        "/media/kitasan/Backup/resource/makehuman/makehuman/data/targets/bodyshapes";
+    fn makehuman_data_dir() -> std::path::PathBuf {
+        std::env::var("MAKEHUMAN_DATA_DIR")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+    }
+    fn base_obj() -> std::path::PathBuf {
+        makehuman_data_dir().join("3dobjs/base.obj")
+    }
+    fn targets_dir() -> std::path::PathBuf {
+        makehuman_data_dir().join("targets/bodyshapes")
+    }
 
     #[test]
     fn pipeline_produces_valid_glb() {
-        if !Path::new(BASE_OBJ).exists() {
+        if !base_obj().exists() {
             return; // skip in CI without assets
         }
         let out = std::path::PathBuf::from("/tmp/oxihuman_pipeline_test.glb");
         let config = PipelineConfig {
-            base_obj_path: std::path::PathBuf::from(BASE_OBJ),
-            targets_dir: Some(std::path::PathBuf::from(TARGETS_DIR)),
+            base_obj_path: base_obj(),
+            targets_dir: Some(targets_dir()),
             max_targets: Some(5),
             policy: Policy::new(PolicyProfile::Standard),
             params: ParamState::new(0.6, 0.4, 0.5, 0.3),
@@ -157,11 +163,11 @@ mod tests {
 
     #[test]
     fn pipeline_no_targets_still_works() {
-        if !Path::new(BASE_OBJ).exists() {
+        if !base_obj().exists() {
             return;
         }
         let out = std::path::PathBuf::from("/tmp/oxihuman_notargets.glb");
-        let config = PipelineConfig::new(BASE_OBJ, out.clone());
+        let config = PipelineConfig::new(base_obj(), out.clone());
         let mesh = run_pipeline(config).expect("pipeline (no targets) failed");
         assert!(!mesh.positions.is_empty());
         verify_glb_header(&out).expect("should succeed");
@@ -170,13 +176,13 @@ mod tests {
 
     #[test]
     fn pipeline_vertex_positions_finite() {
-        if !Path::new(BASE_OBJ).exists() {
+        if !base_obj().exists() {
             return;
         }
         let out = std::path::PathBuf::from("/tmp/oxihuman_finite.glb");
         let config = PipelineConfig {
-            base_obj_path: std::path::PathBuf::from(BASE_OBJ),
-            targets_dir: Some(std::path::PathBuf::from(TARGETS_DIR)),
+            base_obj_path: base_obj(),
+            targets_dir: Some(targets_dir()),
             max_targets: Some(10),
             policy: Policy::new(PolicyProfile::Standard),
             params: ParamState::new(1.0, 1.0, 1.0, 1.0),
@@ -199,7 +205,7 @@ mod tests {
             m in 0.0f32..=1.0f32,
             a in 0.0f32..=1.0f32,
         ) {
-            let base_obj_path = std::path::PathBuf::from(BASE_OBJ);
+            let base_obj_path = base_obj();
             if !base_obj_path.exists() { return Ok(()); }
 
             // Use a simple in-memory OBJ (not the 19k vertex one — too slow for proptest)

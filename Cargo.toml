@@ -14,7 +14,7 @@ members = [
 ]
 
 [workspace.package]
-version       = "0.1.1"
+version       = "0.1.2"
 edition       = "2021"
 authors       = ["COOLJAPAN OU (Team KitaSan)"]
 license       = "Apache-2.0"
@@ -37,34 +37,52 @@ toml        = "1.0.6"
 sha2        = "0.10"
 hex         = "0.4.3"
 
+# Font rendering (Pure Rust)
+fontdue     = "0.9.3"
+
 # Byte casting for GLB binary output
 bytemuck    = { version = "1.25.0", features = ["derive"] }
 
-# zlib compression for FBX binary array encoding
-miniz_oxide = "0.9.1"
+# Pure-Rust portable SIMD (wide::f32x4 etc.) — enabled via oxihuman-morph's `simd` feature
+wide        = "1.3.0"
+
+# zlib compression for FBX binary array encoding (COOLJAPAN: use oxiarc-deflate, not miniz_oxide)
+oxiarc-deflate = "0.2"
+
+# PNG encode/decode (Pure Rust)
+zune-png    = "0.5.2"
+zune-core   = "0.5.1"
 
 # WASM / browser support (non-optional in workspace; mark optional per-crate)
 wasm-bindgen            = "0.2.114"
 js-sys                  = "0.3.91"
 console_error_panic_hook = "0.1.7"
 
+# Async runtime (TCP networking)
+tokio       = { version = "1.52.2", features = ["rt", "rt-multi-thread", "net", "time", "io-util"] }
+
 # Parallelism
-rayon       = "1.11.0"
+rayon       = "1.12.0"
+
+# GPU rendering (optional; used by oxihuman-viewer)
+pollster = "0.4"
+wgpu     = "28"
+winit    = "0.30"
 
 # Testing
 criterion   = { version = "0.8.2", features = ["html_reports"] }
-proptest    = "1.10.0"
+proptest    = "1.11.0"
 
 # Intra-workspace
-oxihuman         = { path = "crates/oxihuman",         version = "0.1.1" }
-oxihuman-core    = { path = "crates/oxihuman-core",    version = "0.1.1" }
-oxihuman-morph   = { path = "crates/oxihuman-morph",   version = "0.1.1" }
-oxihuman-mesh    = { path = "crates/oxihuman-mesh",    version = "0.1.1" }
-oxihuman-export  = { path = "crates/oxihuman-export",  version = "0.1.1" }
-oxihuman-physics = { path = "crates/oxihuman-physics", version = "0.1.1" }
-oxihuman-viewer  = { path = "crates/oxihuman-viewer",  version = "0.1.1" }
-oxihuman-wasm    = { path = "crates/oxihuman-wasm",    version = "0.1.1" }
-oxihuman-cli     = { path = "crates/oxihuman-cli",     version = "0.1.1" }
+oxihuman         = { path = "crates/oxihuman",         version = "0.1.2" }
+oxihuman-core    = { path = "crates/oxihuman-core",    version = "0.1.2" }
+oxihuman-morph   = { path = "crates/oxihuman-morph",   version = "0.1.2" }
+oxihuman-mesh    = { path = "crates/oxihuman-mesh",    version = "0.1.2" }
+oxihuman-export  = { path = "crates/oxihuman-export",  version = "0.1.2" }
+oxihuman-physics = { path = "crates/oxihuman-physics", version = "0.1.2" }
+oxihuman-viewer  = { path = "crates/oxihuman-viewer",  version = "0.1.2" }
+oxihuman-wasm    = { path = "crates/oxihuman-wasm",    version = "0.1.2" }
+oxihuman-cli     = { path = "crates/oxihuman-cli",     version = "0.1.2" }
 
 [workspace.lints.rust]
 dead_code = "allow"

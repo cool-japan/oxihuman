@@ -947,10 +947,9 @@ mod tests {
     fn write_expression_names_to_tmp() {
         let lib = ExpressionLibrary::default_library();
         let names = lib.list_names().join("\n");
-        std::fs::write("/tmp/oxihuman_expression_library_names.txt", &names)
-            .expect("write to /tmp/ must succeed");
-        let read_back = std::fs::read_to_string("/tmp/oxihuman_expression_library_names.txt")
-            .expect("should succeed");
+        let tmp = std::env::temp_dir().join("oxihuman_expression_library_names.txt");
+        std::fs::write(&tmp, &names).expect("write to temp dir must succeed");
+        let read_back = std::fs::read_to_string(&tmp).expect("should succeed");
         assert_eq!(read_back, names);
     }
 

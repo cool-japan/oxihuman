@@ -2,7 +2,7 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Version:** 0.1.1 | **Status:** Stable | **Updated:** 2026-03-13
+**Version:** 0.1.2 | **Status:** Stable | **Updated:** 2026-05-05
 
 | Metric | Value |
 |--------|-------|
@@ -25,7 +25,7 @@ No feature flags are required. All modules are compiled unconditionally; stub mo
 
 ```toml
 [dependencies]
-oxihuman-physics = "0.1.1"
+oxihuman-physics = "0.1.2"
 ```
 
 ### Workspace dependencies

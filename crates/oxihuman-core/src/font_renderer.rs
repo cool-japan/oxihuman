@@ -1,7 +1,8 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
 // SPDX-License-Identifier: Apache-2.0
 
-//! Font rendering stub providing glyph metrics, text layout, and bounding box utilities.
+//! Font rendering providing glyph metrics, text layout, and bounding box utilities.
+//! Backed by fontdue for real TTF/OTF rendering with a stub fallback when no font is loaded.
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -35,6 +36,75 @@ pub struct TextLayout {
 pub struct FontRendererStub {
     pub config: FontConfig,
     pub glyph_cache_size: usize,
+}
+
+/// Error types for font rendering operations.
+#[derive(Debug, thiserror::Error)]
+pub enum FontError {
+    #[error("Failed to parse font: {0}")]
+    ParseError(String),
+    #[error("Glyph not found for character: {0}")]
+    GlyphNotFound(char),
+}
+
+/// Font renderer backed by a real TTF/OTF via fontdue.
+/// Falls back to approximate metrics when no font is loaded.
+pub struct FontRenderer {
+    inner: Option<fontdue::Font>,
+}
+
+impl FontRenderer {
+    /// Create a stub renderer with no underlying font.
+    /// Glyph metrics are approximated from character properties.
+    pub fn new_stub() -> Self {
+        FontRenderer { inner: None }
+    }
+
+    /// Create a renderer from raw TTF/OTF font bytes.
+    pub fn from_font_bytes(bytes: &[u8]) -> Result<Self, FontError> {
+        let font = fontdue::Font::from_bytes(bytes, fontdue::FontSettings::default())
+            .map_err(|e| FontError::ParseError(e.to_string()))?;
+        Ok(FontRenderer { inner: Some(font) })
+    }
+
+    /// Measure a single glyph at the given pixel size.
+    /// Uses real fontdue metrics if a font is loaded, otherwise approximates.
+    pub fn measure_glyph(&self, c: char, px_size: f32) -> GlyphMetrics {
+        if let Some(ref font) = self.inner {
+            let m = font.metrics(c, px_size);
+            GlyphMetrics {
+                advance: m.advance_width,
+                bearing_x: m.xmin as f32,
+                bearing_y: m.ymin as f32,
+                width: m.width as u32,
+                height: m.height as u32,
+            }
+        } else {
+            // Stub fallback: approximate widths from character properties
+            let advance = if c.is_alphabetic() {
+                px_size * 0.6
+            } else {
+                px_size * 0.5
+            };
+            GlyphMetrics {
+                advance,
+                bearing_x: 0.0,
+                bearing_y: px_size * 0.8,
+                width: (advance as u32).max(1),
+                height: px_size as u32,
+            }
+        }
+    }
+
+    /// Rasterize a single glyph at the given pixel size.
+    /// Returns `(width, height, alpha_bitmap)` where the bitmap contains
+    /// 8-bit alpha coverage values (one byte per pixel).
+    /// Returns `None` if no font is loaded.
+    pub fn rasterize(&self, c: char, px_size: f32) -> Option<(usize, usize, Vec<u8>)> {
+        let font = self.inner.as_ref()?;
+        let (metrics, bitmap) = font.rasterize(c, px_size);
+        Some((metrics.width, metrics.height, bitmap))
+    }
 }
 
 #[allow(dead_code)]
@@ -188,5 +258,47 @@ mod tests {
         let g_normal = measure_glyph(&r_normal, 'A');
         let g_bold = measure_glyph(&r_bold, 'A');
         assert!(g_bold.advance > g_normal.advance);
+    }
+
+    // --- FontRenderer (fontdue-backed) tests ---
+
+    #[test]
+    fn test_stub_fallback_no_font() {
+        let renderer = FontRenderer::new_stub();
+        let m = renderer.measure_glyph('A', 16.0);
+        assert!(m.advance > 0.0);
+    }
+
+    #[test]
+    fn test_layout_accumulates() {
+        let renderer = FontRenderer::new_stub();
+        let glyphs: Vec<f32> = "hello"
+            .chars()
+            .map(|c| renderer.measure_glyph(c, 16.0).advance)
+            .collect();
+        let total: f32 = glyphs.iter().sum();
+        assert!(total > 0.0);
+        assert_eq!(glyphs.len(), 5);
+    }
+
+    #[test]
+    fn test_real_font_metrics() {
+        let font_path = match std::env::var("OXIHUMAN_FONT_DATA") {
+            Ok(p) => p,
+            Err(_) => return, // skip if not set
+        };
+        let bytes = std::fs::read(&font_path).expect("read font file");
+        let renderer = FontRenderer::from_font_bytes(&bytes).expect("parse font");
+        let m = renderer.measure_glyph('A', 16.0);
+        assert!(
+            m.advance > 0.0,
+            "advance should be positive for 'A' at 16px"
+        );
+    }
+
+    #[test]
+    fn test_rasterize_returns_none_without_font() {
+        let renderer = FontRenderer::new_stub();
+        assert!(renderer.rasterize('A', 16.0).is_none());
     }
 }

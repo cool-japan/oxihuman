@@ -131,9 +131,9 @@ pub use multiferroic_model::{
     me_voltage_coefficient, stress_modulated_coupling, MultiferroicConfig,
 };
 
-#[path = "topological_insulator_stub.rs"]
-pub mod topological_insulator_stub;
-pub use topological_insulator_stub::{
+#[path = "topological_insulator.rs"]
+pub mod topological_insulator;
+pub use topological_insulator::{
     anomalous_hall_conductance_stub, chern_number, fermi_wavevector, is_in_bulk_gap,
     mean_free_path, spin_angle, surface_dispersion, surface_dos, z2_invariant, TopoInsulatorConfig,
 };
@@ -265,9 +265,9 @@ pub use cell_migration_model::{
     Cell as MigratingCell,
 };
 
-#[path = "tumor_growth_stub.rs"]
-pub mod tumor_growth_stub;
-pub use tumor_growth_stub::{
+#[path = "tumor_growth.rs"]
+pub mod tumor_growth;
+pub use tumor_growth::{
     new_tumor, tumor_apply_treatment, tumor_doubling_time_days, tumor_is_detectable, tumor_step,
     tumor_viable_volume, Tumor,
 };
@@ -328,9 +328,9 @@ pub use reflex_arc::{
     reflex_reset_fatigue, reflex_response, ReflexArc,
 };
 
-#[path = "proprioception_stub.rs"]
-pub mod proprioception_stub;
-pub use proprioception_stub::{
+#[path = "proprioception.rs"]
+pub mod proprioception;
+pub use proprioception::{
     gto_firing, new_muscle_sensor, sensor_is_overloaded, sensor_update, spindle_II_firing,
     spindle_Ia_firing, MuscleSensor,
 };

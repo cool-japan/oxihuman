@@ -12,6 +12,7 @@ use oxihuman_mesh::suit::apply_suit_flag;
 use oxihuman_morph::engine::HumanEngine;
 use oxihuman_morph::params::ParamState;
 use oxihuman_morph::weight_curves::auto_weight_fn_for_target;
+use oxihuman_physics::{BodyProxies, ClothSim, WindConfig, WindField};
 
 use crate::buffer::serialize_quantized_to_bytes;
 use crate::pack::scan_zip_local_entries;
@@ -59,6 +60,12 @@ pub struct WasmEngine {
     pub(crate) anim_accum: f32,
     // -- Particle system --
     pub(crate) particle_sys: Option<ParticleSystem>,
+    // -- Physics --
+    pub(crate) wind_config: Option<WindConfig>,
+    pub(crate) cloth_sim: Option<ClothSim>,
+    pub(crate) body_proxies: Option<BodyProxies>,
+    /// Accumulated simulation time (seconds), used for wind field sampling.
+    pub(crate) sim_time: f32,
 }
 
 impl WasmEngine {
@@ -79,6 +86,10 @@ impl WasmEngine {
             anim_playing: false,
             anim_accum: 0.0,
             particle_sys: None,
+            wind_config: None,
+            cloth_sim: None,
+            body_proxies: None,
+            sim_time: 0.0,
         })
     }
 
@@ -99,6 +110,10 @@ impl WasmEngine {
             anim_playing: false,
             anim_accum: 0.0,
             particle_sys: None,
+            wind_config: None,
+            cloth_sim: None,
+            body_proxies: None,
+            sim_time: 0.0,
         })
     }
 
@@ -394,24 +409,102 @@ impl WasmEngine {
         }
     }
 
-    /// Physics step placeholder.
-    pub fn step_physics(&mut self, _dt: f32) {
-        // placeholder physics integration
+    /// Advance the physics simulation by `dt` seconds.
+    ///
+    /// - Clamps `dt` to at most 1/30 s to prevent large instability.
+    /// - Steps the cloth simulation (gravity is built into [`ClothSim::step`]).
+    /// - Applies the current wind field to cloth particles.
+    /// - Lazily generates body proxies from `last_mesh` when not yet available.
+    pub fn step_physics(&mut self, dt: f32) {
+        let dt = dt.clamp(0.0, 1.0 / 30.0);
+        self.sim_time += dt;
+
+        // Lazily build body proxies from the last mesh.
+        if self.body_proxies.is_none() {
+            if let Some(ref mesh) = self.last_mesh {
+                self.body_proxies = oxihuman_physics::generate_proxies(mesh);
+            }
+        }
+
+        if let Some(ref mut sim) = self.cloth_sim {
+            // Apply wind forces before the Verlet step.
+            if let Some(ref cfg) = self.wind_config {
+                let wind_field = WindField::new(cfg.clone());
+                oxihuman_physics::apply_wind_to_cloth(sim, &wind_field, self.sim_time, dt);
+            }
+            // Verlet integration with gravity already in ClothSim.
+            sim.step(dt, 4);
+        }
     }
 
-    /// Return placeholder cloth state as JSON.
+    /// Return current cloth simulation state as JSON.
+    ///
+    /// Format: `{"cloth_positions":[[x,y,z], ...]}`.
+    /// Returns an empty array when no cloth is initialised.
     pub fn get_cloth_state(&self) -> String {
-        r#"{"cloth_positions":[]}"#.to_string()
+        match self.cloth_sim {
+            None => r#"{"cloth_positions":[]}"#.to_string(),
+            Some(ref sim) => {
+                let positions = sim.positions();
+                let mut out = String::with_capacity(positions.len() * 30 + 32);
+                out.push_str("{\"cloth_positions\":[");
+                for (i, p) in positions.iter().enumerate() {
+                    if i > 0 {
+                        out.push(',');
+                    }
+                    out.push_str(&format!("[{},{},{}]", p[0], p[1], p[2]));
+                }
+                out.push_str("]}");
+                out
+            }
+        }
     }
 
-    /// Return placeholder physics proxy data as JSON.
+    /// Return physics proxy data as JSON.
+    ///
+    /// Wraps [`oxihuman_physics::proxies_to_json`] output under a `"proxies"` key
+    /// to preserve backward compatibility with callers expecting that key.
+    /// Falls back to `{"proxies":[]}` when no proxies are available.
     pub fn get_physics_proxy_json(&self) -> String {
-        r#"{"proxies":[]}"#.to_string()
+        match self.body_proxies {
+            None => r#"{"proxies":[]}"#.to_string(),
+            Some(ref proxies) => {
+                let inner = oxihuman_physics::proxies_to_json(proxies);
+                format!("{{\"proxies\":{inner}}}")
+            }
+        }
     }
 
-    /// Set wind vector (stored but not yet simulated in placeholder).
-    pub fn set_wind(&mut self, _x: f32, _y: f32, _z: f32) {
-        // placeholder: wind stored externally when physics is wired up
+    /// Set the wind vector for physics simulation.
+    ///
+    /// Normalises the vector internally and stores a [`WindConfig`].
+    /// Passing a zero vector disables wind.
+    pub fn set_wind(&mut self, x: f32, y: f32, z: f32) {
+        let speed = (x * x + y * y + z * z).sqrt();
+        if speed < 1e-6 {
+            self.wind_config = None;
+            return;
+        }
+        self.wind_config = Some(WindConfig {
+            base_direction: [x / speed, y / speed, z / speed],
+            base_speed: speed,
+            turbulence: 0.3,
+            gust_frequency: 0.5,
+            vortex_strength: 0.2,
+            seed: 42,
+        });
+    }
+
+    /// Initialise a cloth simulation from the last built mesh.
+    ///
+    /// Does nothing when no mesh has been built yet.
+    /// `stiffness` is forwarded directly to all springs (0 = limp, 1 = rigid).
+    pub fn init_cloth(&mut self, stiffness: f32) {
+        if let Some(ref mesh) = self.last_mesh {
+            let positions: Vec<[f32; 3]> = mesh.positions.clone();
+            let indices: Vec<u32> = mesh.indices.clone();
+            self.cloth_sim = Some(ClothSim::from_mesh(&positions, &indices, stiffness));
+        }
     }
 
     /// Number of vertices in the current base mesh.
@@ -426,5 +519,165 @@ impl WasmEngine {
         }
         // Fall back: build and cache
         0
+    }
+}
+
+// ── Physics unit tests ─────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SIMPLE_OBJ: &[u8] = b"\
+v 0.0 0.0 0.0\n\
+v 1.0 0.0 0.0\n\
+v 0.0 1.0 0.0\n\
+vt 0.0 0.0\n\
+vt 1.0 0.0\n\
+vt 0.0 1.0\n\
+vn 0.0 0.0 1.0\n\
+f 1/1/1 2/2/1 3/3/1\n";
+
+    #[test]
+    fn test_set_wind_stores_config() {
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        engine.set_wind(1.0, 0.0, 0.0);
+        assert!(engine.wind_config.is_some());
+    }
+
+    #[test]
+    fn test_set_wind_zero_clears() {
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        engine.set_wind(1.0, 0.0, 0.0);
+        engine.set_wind(0.0, 0.0, 0.0);
+        assert!(engine.wind_config.is_none());
+    }
+
+    #[test]
+    fn test_set_wind_normalises_direction() {
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        engine.set_wind(3.0, 0.0, 4.0);
+        let cfg = engine
+            .wind_config
+            .as_ref()
+            .expect("wind_config must be Some");
+        // Direction should be normalised: magnitude == 1
+        let mag = (cfg.base_direction[0].powi(2)
+            + cfg.base_direction[1].powi(2)
+            + cfg.base_direction[2].powi(2))
+        .sqrt();
+        assert!(
+            (mag - 1.0).abs() < 1e-5,
+            "direction magnitude should be 1, got {mag}"
+        );
+        // Base speed should be the original magnitude: sqrt(9+16) = 5
+        assert!(
+            (cfg.base_speed - 5.0).abs() < 1e-5,
+            "base_speed should be 5, got {}",
+            cfg.base_speed
+        );
+    }
+
+    #[test]
+    fn test_step_physics_no_cloth_no_op() {
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        // Must not panic
+        engine.step_physics(1.0 / 60.0);
+    }
+
+    #[test]
+    fn test_step_physics_advances_sim_time() {
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        engine.step_physics(0.1);
+        assert!(engine.sim_time > 0.0, "sim_time should advance");
+    }
+
+    #[test]
+    fn test_cloth_state_empty_before_init() {
+        let engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        assert!(engine.get_cloth_state().contains("cloth_positions"));
+    }
+
+    #[test]
+    fn test_cloth_state_empty_json_before_init() {
+        let engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        let v: serde_json::Value =
+            serde_json::from_str(&engine.get_cloth_state()).expect("must be valid JSON");
+        let arr = v["cloth_positions"].as_array().expect("must be array");
+        assert!(arr.is_empty(), "no cloth sim yet, array should be empty");
+    }
+
+    #[test]
+    fn test_init_cloth_requires_built_mesh() {
+        // init_cloth silently does nothing when last_mesh is None.
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        engine.init_cloth(0.5);
+        assert!(
+            engine.cloth_sim.is_none(),
+            "cloth_sim should remain None without a built mesh"
+        );
+    }
+
+    #[test]
+    fn test_init_cloth_then_step() {
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        // Build a mesh first so init_cloth has something to work from.
+        let _ = engine.build_mesh_bytes();
+        engine.init_cloth(0.5);
+        assert!(
+            engine.cloth_sim.is_some(),
+            "cloth_sim should be Some after init_cloth"
+        );
+
+        // Step 5 frames — must not panic.
+        for _ in 0..5 {
+            engine.step_physics(1.0 / 60.0);
+        }
+
+        // Cloth state should now have positions.
+        let v: serde_json::Value =
+            serde_json::from_str(&engine.get_cloth_state()).expect("must be valid JSON");
+        let arr = v["cloth_positions"].as_array().expect("must be array");
+        assert!(
+            !arr.is_empty(),
+            "cloth_positions should be non-empty after init"
+        );
+    }
+
+    #[test]
+    fn test_init_cloth_with_wind_no_panic() {
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        let _ = engine.build_mesh_bytes();
+        engine.init_cloth(0.8);
+        engine.set_wind(1.0, 0.0, 0.5);
+        for _ in 0..10 {
+            engine.step_physics(1.0 / 60.0);
+        }
+        // All particle positions must be finite.
+        if let Some(ref sim) = engine.cloth_sim {
+            for p in sim.positions() {
+                assert!(
+                    p[0].is_finite() && p[1].is_finite() && p[2].is_finite(),
+                    "particle position is not finite: {p:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_step_physics_dt_clamp() {
+        let mut engine = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+        let _ = engine.build_mesh_bytes();
+        engine.init_cloth(0.5);
+        // Very large dt should be clamped and not cause a NaN cascade.
+        engine.step_physics(100.0);
+        if let Some(ref sim) = engine.cloth_sim {
+            for p in sim.positions() {
+                assert!(
+                    p[0].is_finite() && p[1].is_finite() && p[2].is_finite(),
+                    "particle position is not finite after large dt: {p:?}"
+                );
+            }
+        }
     }
 }

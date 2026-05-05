@@ -13,9 +13,12 @@ keywords    = ["human", "morphing", "blendshape", "makehuman", "body"]
 categories  = ["science", "simulation", "algorithms"]
 exclude     = ["target/", "tests/fixtures/", "*.wasm", "benches/data/"]
 
+[lints]
+workspace = true
+
 [features]
 default = []
-simd    = []
+simd    = ["dep:wide"]
 
 [dependencies]
 anyhow.workspace      = true
@@ -24,6 +27,7 @@ serde       = { workspace = true, features = ["derive"] }
 serde_json.workspace  = true
 oxihuman-core.workspace = true
 rayon.workspace       = true
+wide        = { workspace = true, optional = true }
 
 [dev-dependencies]
 proptest.workspace    = true

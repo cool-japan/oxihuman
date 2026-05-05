@@ -81,7 +81,7 @@ impl SignalHandler {
                 }
             })
             .collect();
-        sorted.sort_by(|a, b| b.0.cmp(&a.0));
+        sorted.sort_by_key(|b| std::cmp::Reverse(b.0));
         for (_, name) in sorted {
             if let Some(h) = self.handlers.get_mut(&name) {
                 h.call_count += 1;

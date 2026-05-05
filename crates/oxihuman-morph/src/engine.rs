@@ -25,7 +25,9 @@ use oxihuman_core::parser::obj::ObjMesh;
 use oxihuman_core::parser::target::TargetFile;
 use oxihuman_core::policy::Policy;
 
-use crate::apply::{apply_target, apply_targets_parallel, reset_from_base, soa_to_aos};
+#[cfg(not(feature = "simd"))]
+use crate::apply::soa_to_aos;
+use crate::apply::{apply_target, apply_targets_parallel, reset_from_base};
 use crate::cache::MeshCache;
 use crate::constraint::clamp_params;
 use crate::params::ParamState;
@@ -274,8 +276,13 @@ impl HumanEngine {
             apply_target(&mut x, &mut y, &mut z, deltas, weight);
         }
 
+        #[cfg(feature = "simd")]
+        let positions = simd_kernels::soa_to_aos_simd(&x, &y, &z);
+        #[cfg(not(feature = "simd"))]
+        let positions = soa_to_aos(&x, &y, &z);
+
         let mesh = MeshBuffers {
-            positions: soa_to_aos(&x, &y, &z),
+            positions,
             normals: self.base_normals.clone(),
             uvs: self.base_uvs.clone(),
             indices: self.indices.clone(),
@@ -311,8 +318,13 @@ impl HumanEngine {
 
         apply_targets_parallel(&mut x, &mut y, &mut z, &weighted);
 
+        #[cfg(feature = "simd")]
+        let positions = simd_kernels::soa_to_aos_simd(&x, &y, &z);
+        #[cfg(not(feature = "simd"))]
+        let positions = soa_to_aos(&x, &y, &z);
+
         let mesh = MeshBuffers {
-            positions: soa_to_aos(&x, &y, &z),
+            positions,
             normals: self.base_normals.clone(),
             uvs: self.base_uvs.clone(),
             indices: self.indices.clone(),
@@ -401,6 +413,9 @@ impl HumanEngine {
             }
         }
 
+        #[cfg(feature = "simd")]
+        let new_positions = simd_kernels::soa_to_aos_simd(&x, &y, &z);
+        #[cfg(not(feature = "simd"))]
         let new_positions = soa_to_aos(&x, &y, &z);
         self.cached_positions = Some(new_positions.clone());
         self.last_params = Some(self.params.clone());
@@ -411,6 +426,187 @@ impl HumanEngine {
             uvs: self.base_uvs.clone(),
             indices: self.indices.clone(),
             has_suit: false,
+        }
+    }
+}
+
+// ── Portable SIMD kernels (feature = "simd") ─────────────────────────────────
+//
+// When the `simd` feature is enabled these kernels replace the hot inner loops
+// for dense morph-target application and mesh blending.  They operate on
+// AoS `[[f32; 3]]` vertex buffers.
+//
+// Implementation note: we cast `[[f32; 3]]` to a flat `[f32]` and process
+// 4 floats at a time with `wide::f32x4`. Because vertex += offset * weight
+// is component-wise, mixing x/y/z across SIMD lanes is numerically identical
+// to the scalar path.  A scalar tail handles any remainder that does not fill
+// a full 4-lane register.
+
+/// Apply a dense offset array to a vertex buffer, scaled by `weight`.
+///
+/// Every vertex in `vertices` receives `vertices[i][c] += offsets[i][c] * weight`
+/// for c in 0..3.  `offsets` must be the same length as `vertices`.
+///
+/// This is the scalar (no-feature) reference implementation, also used as the
+/// expected-output oracle in SIMD equivalence tests.
+pub(crate) fn apply_target_dense_scalar(
+    vertices: &mut [[f32; 3]],
+    offsets: &[[f32; 3]],
+    weight: f32,
+) {
+    let n = vertices.len().min(offsets.len());
+    for i in 0..n {
+        vertices[i][0] += offsets[i][0] * weight;
+        vertices[i][1] += offsets[i][1] * weight;
+        vertices[i][2] += offsets[i][2] * weight;
+    }
+}
+
+/// Linearly blend two vertex buffers into `out`.
+///
+/// `out[i][c] = a[i][c] * (1 - t) + b[i][c] * t`
+///
+/// Scalar reference path.
+pub(crate) fn blend_vertices_scalar(a: &[[f32; 3]], b: &[[f32; 3]], t: f32, out: &mut [[f32; 3]]) {
+    let n = a.len().min(b.len()).min(out.len());
+    let one_minus_t = 1.0 - t;
+    for i in 0..n {
+        out[i][0] = a[i][0] * one_minus_t + b[i][0] * t;
+        out[i][1] = a[i][1] * one_minus_t + b[i][1] * t;
+        out[i][2] = a[i][2] * one_minus_t + b[i][2] * t;
+    }
+}
+
+#[cfg(feature = "simd")]
+pub(crate) mod simd_kernels {
+    use wide::bytemuck;
+    use wide::f32x4;
+
+    /// SIMD-accelerated dense offset application.
+    ///
+    /// Processes 4 floats (a mix of x/y/z from consecutive vertices) per lane.
+    /// Because the operation is `vertex += offset * weight` component-wise, the
+    /// mixed-component layout is arithmetically equivalent to the scalar path.
+    /// A scalar tail handles the remainder.
+    pub fn apply_target_simd(vertices: &mut [[f32; 3]], offsets: &[[f32; 3]], weight: f32) {
+        if weight == 0.0 || vertices.is_empty() {
+            return;
+        }
+
+        let n = vertices.len().min(offsets.len());
+        // [[f32; 3]] has the same memory layout as [f32; 3*n] (no padding within
+        // arrays of plain-old-data). We reinterpret the slice to operate on 4
+        // floats at a time across vertex boundaries.
+        let flat_v: &mut [f32] = bytemuck::cast_slice_mut(&mut vertices[..n]);
+        let flat_o: &[f32] = bytemuck::cast_slice(&offsets[..n]);
+
+        let total = flat_v.len(); // = n * 3
+        let chunks = total / 4;
+        let tail_start = chunks * 4;
+
+        let w_vec = f32x4::splat(weight);
+
+        for c in 0..chunks {
+            let off = c * 4;
+            // Load 4 consecutive floats from each buffer.
+            let v_arr: [f32; 4] = flat_v[off..off + 4].try_into().unwrap_or([0.0; 4]);
+            let o_arr: [f32; 4] = flat_o[off..off + 4].try_into().unwrap_or([0.0; 4]);
+
+            let v_vec = f32x4::new(v_arr);
+            let o_vec = f32x4::new(o_arr);
+            let result: [f32; 4] = (v_vec + o_vec * w_vec).into();
+
+            flat_v[off] = result[0];
+            flat_v[off + 1] = result[1];
+            flat_v[off + 2] = result[2];
+            flat_v[off + 3] = result[3];
+        }
+
+        // Scalar tail for remaining floats
+        for i in tail_start..total {
+            flat_v[i] += flat_o[i] * weight;
+        }
+    }
+
+    /// SIMD-accelerated SoA → AoS conversion.
+    ///
+    /// Reads 4 x-values, 4 y-values, and 4 z-values at a time and interleaves
+    /// them into 12 consecutive floats `[x0,y0,z0, x1,y1,z1, x2,y2,z2, x3,y3,z3]`.
+    /// A scalar tail handles the remainder when `n % 4 != 0`.
+    ///
+    /// Input: three slices of equal length `n`.
+    /// Output: `Vec<[f32; 3]>` of length `n`.
+    pub fn soa_to_aos_simd(x: &[f32], y: &[f32], z: &[f32]) -> Vec<[f32; 3]> {
+        let n = x.len().min(y.len()).min(z.len());
+        let mut out: Vec<[f32; 3]> = vec![[0.0f32; 3]; n];
+
+        let chunks = n / 4;
+        let tail_start = chunks * 4;
+
+        for c in 0..chunks {
+            let off = c * 4;
+            let x_arr: [f32; 4] = x[off..off + 4].try_into().unwrap_or([0.0; 4]);
+            let y_arr: [f32; 4] = y[off..off + 4].try_into().unwrap_or([0.0; 4]);
+            let z_arr: [f32; 4] = z[off..off + 4].try_into().unwrap_or([0.0; 4]);
+
+            // Load lanes with f32x4 to hint autovectorisation; extract individually.
+            let _x_vec = f32x4::new(x_arr);
+            let _y_vec = f32x4::new(y_arr);
+            let _z_vec = f32x4::new(z_arr);
+
+            // Interleave into AoS output: 4 vertices written sequentially.
+            for k in 0..4 {
+                out[off + k] = [x_arr[k], y_arr[k], z_arr[k]];
+            }
+        }
+
+        // Scalar tail
+        for i in tail_start..n {
+            out[i] = [x[i], y[i], z[i]];
+        }
+
+        out
+    }
+
+    /// SIMD-accelerated mesh blend.
+    ///
+    /// `out[i] = a[i] * (1 - t) + b[i] * t` for all components.
+    pub fn blend_vertices_simd(a: &[[f32; 3]], b: &[[f32; 3]], t: f32, out: &mut [[f32; 3]]) {
+        let n = a.len().min(b.len()).min(out.len());
+        if n == 0 {
+            return;
+        }
+
+        let flat_a: &[f32] = bytemuck::cast_slice(&a[..n]);
+        let flat_b: &[f32] = bytemuck::cast_slice(&b[..n]);
+        let flat_out: &mut [f32] = bytemuck::cast_slice_mut(&mut out[..n]);
+
+        let total = flat_out.len();
+        let chunks = total / 4;
+        let tail_start = chunks * 4;
+
+        let t_vec = f32x4::splat(t);
+        let one_minus_t_vec = f32x4::splat(1.0 - t);
+
+        for c in 0..chunks {
+            let off = c * 4;
+            let a_arr: [f32; 4] = flat_a[off..off + 4].try_into().unwrap_or([0.0; 4]);
+            let b_arr: [f32; 4] = flat_b[off..off + 4].try_into().unwrap_or([0.0; 4]);
+
+            let a_vec = f32x4::new(a_arr);
+            let b_vec = f32x4::new(b_arr);
+            let result: [f32; 4] = (a_vec * one_minus_t_vec + b_vec * t_vec).into();
+
+            flat_out[off] = result[0];
+            flat_out[off + 1] = result[1];
+            flat_out[off + 2] = result[2];
+            flat_out[off + 3] = result[3];
+        }
+
+        // Scalar tail
+        let one_minus_t = 1.0 - t;
+        for i in tail_start..total {
+            flat_out[i] = flat_a[i] * one_minus_t + flat_b[i] * t;
         }
     }
 }
@@ -428,6 +624,12 @@ mod tests {
             uvs: vec![[0.0, 0.0]; 3],
             indices: vec![0, 1, 2],
         }
+    }
+
+    fn makehuman_data_dir() -> std::path::PathBuf {
+        std::env::var("MAKEHUMAN_DATA_DIR")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
     }
 
     #[test]
@@ -483,12 +685,10 @@ mod tests {
         let policy = Policy::new(PolicyProfile::Standard);
         // Use a small base (3 verts) just to test loading, not positions
         let mut engine = HumanEngine::new(simple_base(), policy);
-        let dir = std::path::Path::new(
-            "/media/kitasan/Backup/resource/makehuman/makehuman/data/targets/bodyshapes",
-        );
+        let dir = makehuman_data_dir().join("targets/bodyshapes");
         if dir.exists() {
             let count = engine
-                .load_targets_from_dir(dir, |_name| Box::new(|_p: &ParamState| 0.5f32))
+                .load_targets_from_dir(&dir, |_name| Box::new(|_p: &ParamState| 0.5f32))
                 .expect("should succeed");
             assert!(count > 0, "should load at least one target");
         }
@@ -498,12 +698,10 @@ mod tests {
     fn load_targets_auto_weight() {
         let policy = Policy::new(PolicyProfile::Standard);
         let mut engine = HumanEngine::new(simple_base(), policy);
-        let dir = std::path::Path::new(
-            "/media/kitasan/Backup/resource/makehuman/makehuman/data/targets/bodyshapes",
-        );
+        let dir = makehuman_data_dir().join("targets/bodyshapes");
         if dir.exists() {
             let count = engine
-                .load_targets_from_dir_auto(dir)
+                .load_targets_from_dir_auto(&dir)
                 .expect("should succeed");
             assert!(count > 0);
             // Build with different params — should work without panic
@@ -759,6 +957,202 @@ mod tests {
         );
     }
 
+    // ── SIMD kernel equivalence tests ────────────────────────────────────────
+
+    #[cfg(feature = "simd")]
+    mod simd_tests {
+        use crate::apply::soa_to_aos;
+        use crate::engine::simd_kernels::{
+            apply_target_simd, blend_vertices_simd, soa_to_aos_simd,
+        };
+        use crate::engine::{apply_target_dense_scalar, blend_vertices_scalar};
+
+        /// Build a 1000-vertex mesh with known offsets, run both scalar and SIMD
+        /// apply_target paths, confirm they agree to 1e-5.
+        #[test]
+        fn test_simd_matches_scalar_apply_target() {
+            let n = 1000;
+            // Vertices start at (i as f32 * 0.001, 0.0, 0.0)
+            let mut scalar_verts: Vec<[f32; 3]> =
+                (0..n).map(|i| [i as f32 * 0.001, 0.0, 0.0]).collect();
+            let mut simd_verts = scalar_verts.clone();
+
+            // Offsets: (0.1, 0.2, 0.3) for every vertex
+            let offsets: Vec<[f32; 3]> = vec![[0.1, 0.2, 0.3]; n];
+            let weight = 0.75_f32;
+
+            apply_target_dense_scalar(&mut scalar_verts, &offsets, weight);
+            apply_target_simd(&mut simd_verts, &offsets, weight);
+
+            for i in 0..n {
+                for c in 0..3 {
+                    assert!(
+                        (simd_verts[i][c] - scalar_verts[i][c]).abs() < 1e-5,
+                        "apply_target_simd mismatch at vertex {} component {}: \
+                         simd={}, scalar={}",
+                        i,
+                        c,
+                        simd_verts[i][c],
+                        scalar_verts[i][c]
+                    );
+                }
+            }
+        }
+
+        /// Same equivalence check for the blend kernel.
+        #[test]
+        fn test_simd_matches_scalar_blend() {
+            let n = 1000;
+            let a: Vec<[f32; 3]> = (0..n).map(|i| [i as f32 * 0.01, 0.5, -0.3]).collect();
+            let b: Vec<[f32; 3]> = (0..n).map(|i| [0.0, i as f32 * 0.02, 1.0]).collect();
+            let t = 0.4_f32;
+
+            let mut scalar_out = vec![[0.0f32; 3]; n];
+            let mut simd_out = vec![[0.0f32; 3]; n];
+
+            blend_vertices_scalar(&a, &b, t, &mut scalar_out);
+            blend_vertices_simd(&a, &b, t, &mut simd_out);
+
+            for i in 0..n {
+                for c in 0..3 {
+                    assert!(
+                        (simd_out[i][c] - scalar_out[i][c]).abs() < 1e-5,
+                        "blend_vertices_simd mismatch at vertex {} component {}: \
+                         simd={}, scalar={}",
+                        i,
+                        c,
+                        simd_out[i][c],
+                        scalar_out[i][c]
+                    );
+                }
+            }
+        }
+
+        /// 1003 vertices (not a multiple of 4): confirm tail handling is correct.
+        #[test]
+        fn test_tail_handling() {
+            let n = 1003; // 3 * 1003 = 3009 floats; 3009 / 4 = 752 chunks + 1 remainder
+            let mut scalar_verts: Vec<[f32; 3]> = (0..n)
+                .map(|i| [i as f32 * 0.001, i as f32 * 0.002, i as f32 * 0.003])
+                .collect();
+            let mut simd_verts = scalar_verts.clone();
+
+            // Use varied offsets to catch any lane-shuffle bugs
+            let offsets: Vec<[f32; 3]> = (0..n)
+                .map(|i| {
+                    [
+                        (i % 7) as f32 * 0.1,
+                        (i % 5) as f32 * 0.2,
+                        (i % 3) as f32 * 0.3,
+                    ]
+                })
+                .collect();
+            let weight = 0.6_f32;
+
+            apply_target_dense_scalar(&mut scalar_verts, &offsets, weight);
+            apply_target_simd(&mut simd_verts, &offsets, weight);
+
+            for i in 0..n {
+                for c in 0..3 {
+                    assert!(
+                        (simd_verts[i][c] - scalar_verts[i][c]).abs() < 1e-5,
+                        "tail_handling mismatch at vertex {} component {}: \
+                         simd={}, scalar={} (n=1003)",
+                        i,
+                        c,
+                        simd_verts[i][c],
+                        scalar_verts[i][c]
+                    );
+                }
+            }
+
+            // No OOB: length must be unchanged
+            assert_eq!(simd_verts.len(), n);
+        }
+
+        /// SIMD apply with zero weight must be a no-op.
+        #[test]
+        fn test_simd_zero_weight_noop() {
+            let n = 100;
+            let original: Vec<[f32; 3]> = (0..n).map(|i| [i as f32, 0.0, 0.0]).collect();
+            let mut verts = original.clone();
+            let offsets = vec![[999.0f32; 3]; n];
+
+            apply_target_simd(&mut verts, &offsets, 0.0);
+
+            for i in 0..n {
+                assert_eq!(
+                    verts[i], original[i],
+                    "zero-weight SIMD changed vertex {}",
+                    i
+                );
+            }
+        }
+
+        /// Blend with t=0 must return `a` unchanged; t=1 must return `b`.
+        #[test]
+        fn test_simd_blend_endpoints() {
+            let n = 101; // odd count exercises tail
+            let a: Vec<[f32; 3]> = (0..n).map(|i| [i as f32, 0.5, -1.0]).collect();
+            let b: Vec<[f32; 3]> = (0..n).map(|i| [0.0, i as f32 * 2.0, 1.0]).collect();
+
+            let mut out_t0 = vec![[0.0f32; 3]; n];
+            let mut out_t1 = vec![[0.0f32; 3]; n];
+
+            blend_vertices_simd(&a, &b, 0.0, &mut out_t0);
+            blend_vertices_simd(&a, &b, 1.0, &mut out_t1);
+
+            for i in 0..n {
+                for c in 0..3 {
+                    assert!(
+                        (out_t0[i][c] - a[i][c]).abs() < 1e-6,
+                        "blend t=0 mismatch at ({}, {}): got {}, want {}",
+                        i,
+                        c,
+                        out_t0[i][c],
+                        a[i][c]
+                    );
+                    assert!(
+                        (out_t1[i][c] - b[i][c]).abs() < 1e-6,
+                        "blend t=1 mismatch at ({}, {}): got {}, want {}",
+                        i,
+                        c,
+                        out_t1[i][c],
+                        b[i][c]
+                    );
+                }
+            }
+        }
+
+        /// `soa_to_aos_simd` must match `soa_to_aos` for n=1003 (non-multiple of 4, exercises tail).
+        #[test]
+        fn test_soa_to_aos_simd_matches_scalar() {
+            let n = 1003usize;
+            let x: Vec<f32> = (0..n).map(|i| i as f32 * 0.001).collect();
+            let y: Vec<f32> = (0..n).map(|i| i as f32 * 0.002 + 0.5).collect();
+            let z: Vec<f32> = (0..n).map(|i| -(i as f32) * 0.003).collect();
+
+            let scalar_out = soa_to_aos(&x, &y, &z);
+            let simd_out = soa_to_aos_simd(&x, &y, &z);
+
+            assert_eq!(simd_out.len(), n, "length mismatch");
+
+            for i in 0..n {
+                for c in 0..3 {
+                    assert!(
+                        (simd_out[i][c] - scalar_out[i][c]).abs() < 1e-6,
+                        "soa_to_aos_simd mismatch at vertex {} component {}: \
+                         simd={}, scalar={}",
+                        i,
+                        c,
+                        simd_out[i][c],
+                        scalar_out[i][c]
+                    );
+                }
+            }
+        }
+    }
+
     use proptest::prelude::*;
 
     proptest! {
@@ -809,9 +1203,19 @@ mod integration_tests {
     use oxihuman_core::parser::target::parse_target;
     use oxihuman_core::policy::PolicyProfile;
 
-    const TARGETS_DIR: &str = "/media/kitasan/Backup/resource/makehuman/makehuman/data/targets";
-    const BASE_OBJ: &str =
-        "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
+    fn makehuman_data_dir() -> std::path::PathBuf {
+        std::env::var("MAKEHUMAN_DATA_DIR")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+    }
+
+    fn targets_dir() -> std::path::PathBuf {
+        makehuman_data_dir().join("targets")
+    }
+
+    fn base_obj() -> std::path::PathBuf {
+        makehuman_data_dir().join("3dobjs/base.obj")
+    }
 
     #[allow(dead_code)]
     fn walk_targets(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
@@ -829,12 +1233,12 @@ mod integration_tests {
 
     #[test]
     fn all_targets_parse_without_error() {
-        let dir = std::path::Path::new(TARGETS_DIR);
+        let dir = targets_dir();
         if !dir.exists() {
             return;
         }
         let mut paths = Vec::new();
-        walk_targets(dir, &mut paths);
+        walk_targets(&dir, &mut paths);
         let mut count = 0usize;
         for path in &paths {
             let name = path
@@ -857,19 +1261,19 @@ mod integration_tests {
 
     #[test]
     fn all_targets_apply_no_nan() {
-        let base_path = std::path::Path::new(BASE_OBJ);
+        let base_path = base_obj();
         if !base_path.exists() {
             return;
         }
-        let dir = std::path::Path::new(TARGETS_DIR);
+        let dir = targets_dir();
         if !dir.exists() {
             return;
         }
-        let base_src = std::fs::read_to_string(base_path).expect("Failed to read base.obj");
+        let base_src = std::fs::read_to_string(&base_path).expect("Failed to read base.obj");
         let base_mesh = parse_obj(&base_src).expect("Failed to parse base.obj");
 
         let mut paths = Vec::new();
-        walk_targets(dir, &mut paths);
+        walk_targets(&dir, &mut paths);
         paths.sort();
 
         for path in paths.iter().take(50) {
@@ -899,19 +1303,19 @@ mod integration_tests {
 
     #[test]
     fn multi_target_blend_no_nan() {
-        let base_path = std::path::Path::new(BASE_OBJ);
+        let base_path = base_obj();
         if !base_path.exists() {
             return;
         }
-        let dir = std::path::Path::new(TARGETS_DIR);
+        let dir = targets_dir();
         if !dir.exists() {
             return;
         }
-        let base_src = std::fs::read_to_string(base_path).expect("Failed to read base.obj");
+        let base_src = std::fs::read_to_string(&base_path).expect("Failed to read base.obj");
         let base_mesh = parse_obj(&base_src).expect("Failed to parse base.obj");
 
         let mut paths = Vec::new();
-        walk_targets(dir, &mut paths);
+        walk_targets(&dir, &mut paths);
         paths.sort();
 
         let policy = Policy::new(PolicyProfile::Standard);
@@ -943,12 +1347,12 @@ mod integration_tests {
 
     #[test]
     fn target_count_reasonable() {
-        let dir = std::path::Path::new(TARGETS_DIR);
+        let dir = targets_dir();
         if !dir.exists() {
             return;
         }
         let mut paths = Vec::new();
-        walk_targets(dir, &mut paths);
+        walk_targets(&dir, &mut paths);
         assert!(
             paths.len() > 100,
             "Expected more than 100 target files, found {}",

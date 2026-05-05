@@ -1,6 +1,6 @@
 # oxihuman-mesh -- TODO
 
-> Version: 0.1.1 | Updated: 2026-03-13
+> Version: 0.1.2 | Updated: 2026-05-05
 
 ## Status: Stable
 

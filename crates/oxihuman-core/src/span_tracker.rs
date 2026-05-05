@@ -76,11 +76,7 @@ impl SpanTracker {
 
     pub fn mean_ns(&self, name: &str) -> u64 {
         let count = self.call_count(name);
-        if count == 0 {
-            0
-        } else {
-            self.total_ns(name) / count
-        }
+        self.total_ns(name).checked_div(count).unwrap_or(0)
     }
 
     pub fn last_completed(&self) -> Option<&SpanRecord> {

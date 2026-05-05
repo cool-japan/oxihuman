@@ -1059,9 +1059,9 @@ mod tests {
             .collect();
         lines.sort();
         let content = lines.join("\n");
-        std::fs::write("/tmp/oxihuman_body_landmarks.txt", &content).expect("should succeed");
-        let read_back =
-            std::fs::read_to_string("/tmp/oxihuman_body_landmarks.txt").expect("should succeed");
+        let tmp = std::env::temp_dir().join("oxihuman_body_landmarks.txt");
+        std::fs::write(&tmp, &content).expect("should succeed");
+        let read_back = std::fs::read_to_string(&tmp).expect("should succeed");
         assert!(
             read_back.contains("Top of Head") || read_back.contains("Neck"),
             "landmark names missing"

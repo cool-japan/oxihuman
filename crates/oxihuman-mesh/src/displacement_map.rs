@@ -139,9 +139,9 @@ impl DisplacementMap2D {
         let mut map = Self::new(width, height);
         for y in 0..height {
             for x in 0..width {
-                let cx = if width > 0 { x * tiles / width } else { 0 };
-                let cy = if height > 0 { y * tiles / height } else { 0 };
-                map.set(x, y, if (cx + cy) % 2 == 0 { 1.0 } else { 0.0 });
+                let cx = (x * tiles).checked_div(width).unwrap_or(0);
+                let cy = (y * tiles).checked_div(height).unwrap_or(0);
+                map.set(x, y, if (cx + cy).is_multiple_of(2) { 1.0 } else { 0.0 });
             }
         }
         map

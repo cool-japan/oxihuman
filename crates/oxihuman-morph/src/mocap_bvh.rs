@@ -840,8 +840,11 @@ Frame Time: 0.033333
     fn test_write_to_tmp() {
         let bvh = parse_bvh(minimal_bvh()).expect("should succeed");
         let text = write_bvh(&bvh);
-        std::fs::write("/tmp/test_mocap_bvh_output.bvh", &text)
-            .expect("failed to write /tmp/test_mocap_bvh_output.bvh");
+        std::fs::write(
+            std::env::temp_dir().join("test_mocap_bvh_output.bvh"),
+            &text,
+        )
+        .expect("failed to write test_mocap_bvh_output.bvh");
         assert!(text.contains("HIERARCHY"));
         assert!(text.contains("MOTION"));
     }

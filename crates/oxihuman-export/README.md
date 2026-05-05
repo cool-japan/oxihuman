@@ -23,7 +23,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 
 ```toml
 [dependencies]
-oxihuman-export = "0.1.1"
+oxihuman-export = "0.1.2"
 ```
 
 ## Format Matrix
@@ -36,7 +36,7 @@ oxihuman-export = "0.1.1"
 | COLLADA (.dae) | `collada` | Full geometry, materials, skeleton |
 | Wavefront OBJ / MTL | `obj` | Multi-material, UV, normals |
 | STL | `stl` | ASCII and binary variants |
-| USD / USDA | `usd` | Time-sampled animation support; `BlendShapeTimeSamples` + `UsdaWriter::write_blend_shape_animation` for blend shape animation (v0.1.1) |
+| USD / USDA | `usd` | Time-sampled animation support; `BlendShapeTimeSamples` + `UsdaWriter::write_blend_shape_animation` for blend shape animation (v0.1.2) |
 | VRM | `vrm` | Avatar format (VRM 0.x / 1.0) |
 | 3MF | `threemf` | 3D Manufacturing Format |
 | PLY | `ply` | Point cloud and mesh |

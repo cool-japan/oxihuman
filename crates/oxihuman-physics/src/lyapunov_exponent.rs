@@ -113,7 +113,7 @@ mod tests {
     fn test_estimate_returns_f64() {
         let est = new_lyapunov_estimator(3.5, 100);
         let lam = lyapunov_estimate(&est, 0.4);
-        let _ = lam as f64;
+        let _ = lam;
     }
 
     #[test]

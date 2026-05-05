@@ -78,10 +78,8 @@ impl OpenHashMap {
             match &self.slots[idx] {
                 Slot::Occupied(k, _) if *k == key => return idx,
                 Slot::Empty => return first_deleted.unwrap_or(idx),
-                Slot::Deleted => {
-                    if first_deleted.is_none() {
-                        first_deleted = Some(idx);
-                    }
+                Slot::Deleted if first_deleted.is_none() => {
+                    first_deleted = Some(idx);
                 }
                 _ => {}
             }

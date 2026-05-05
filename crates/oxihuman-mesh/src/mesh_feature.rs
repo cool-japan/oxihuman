@@ -795,7 +795,7 @@ mod tests {
         assert!(svg.contains('L'), "SVG should contain L command");
 
         // Write to /tmp/ for inspection
-        fs::write("/tmp/test_feature_lines.svg", &svg).ok();
+        fs::write(std::env::temp_dir().join("test_feature_lines.svg"), &svg).ok();
     }
 
     // ----------------------------------------------------------------

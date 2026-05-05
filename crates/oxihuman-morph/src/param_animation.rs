@@ -770,9 +770,9 @@ mod tests {
             lines.push(format!("frame {i}: brow={v:.4}"));
         }
         let output = lines.join("\n");
-        fs::write("/tmp/param_animation_bake_test.txt", &output).expect("should succeed");
-        let read_back =
-            fs::read_to_string("/tmp/param_animation_bake_test.txt").expect("should succeed");
+        let tmp = std::env::temp_dir().join("param_animation_bake_test.txt");
+        fs::write(&tmp, &output).expect("should succeed");
+        let read_back = fs::read_to_string(&tmp).expect("should succeed");
         assert!(read_back.contains("brow="));
     }
 

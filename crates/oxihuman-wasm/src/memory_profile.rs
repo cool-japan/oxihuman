@@ -415,13 +415,7 @@ impl MemoryProfiler {
             snapshot_count += 1;
         }
 
-        let average_alloc_size = if allocation_count > 0 {
-            // Use current peak as proxy for total bytes ever allocated
-            // divided by count — a reasonable approximation.
-            peak_usage / allocation_count
-        } else {
-            0
-        };
+        let average_alloc_size = peak_usage.checked_div(allocation_count).unwrap_or(0);
 
         let total_allocated = total_allocated_sum / snapshot_count.max(1) as u64;
 

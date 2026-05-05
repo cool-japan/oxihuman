@@ -84,7 +84,7 @@ impl TargetIndex {
             .filter(|e| is_subsequence(query, &e.name))
             .map(|e| (e, fuzzy_score(query, &e.name)))
             .collect();
-        matches.sort_by(|a, b| b.1.cmp(&a.1));
+        matches.sort_by_key(|b| std::cmp::Reverse(b.1));
         matches.into_iter().map(|(e, _)| e).collect()
     }
 

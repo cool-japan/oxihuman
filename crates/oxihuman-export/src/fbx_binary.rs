@@ -17,7 +17,7 @@
 //!   `F`=f32, `D`=f64, `S`=string, `R`=raw bytes,
 //!   `i`=i32 array, `d`=f64 array, `f`=f32 array.
 
-use miniz_oxide::deflate::compress_to_vec_zlib;
+use oxiarc_deflate::zlib_compress;
 use oxihuman_mesh::MeshBuffers;
 use std::io::Write;
 
@@ -141,7 +141,8 @@ fn write_array_with_compression<T>(
 
     if arr.len() > COMPRESSION_THRESHOLD {
         // encoding = 1 (zlib / deflate)
-        let compressed = compress_to_vec_zlib(&raw, 6);
+        let compressed = zlib_compress(&raw, 6)
+            .map_err(|e| anyhow::anyhow!("FBX zlib compression failed: {}", e))?;
         let compressed_len = u32::try_from(compressed.len())
             .map_err(|_| anyhow::anyhow!("FBX compressed array too large: {} bytes", compressed.len()))?;
         buf.extend_from_slice(&1u32.to_le_bytes()); // encoding = 1

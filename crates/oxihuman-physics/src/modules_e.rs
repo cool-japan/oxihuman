@@ -62,16 +62,16 @@ pub use sensor_ultrasonic::{
     valid_fraction, UltrasonicConfig, UltrasonicSample, UltrasonicSensor,
 };
 
-#[path = "sensor_lidar_stub.rs"]
-pub mod sensor_lidar_stub;
-pub use sensor_lidar_stub::{
+#[path = "sensor_lidar.rs"]
+pub mod sensor_lidar;
+pub use sensor_lidar::{
     cloud_centroid, filter_by_range, high_intensity_count, max_point_range, point_range,
     LidarConfig, LidarFrame, LidarPoint, LidarSensor,
 };
 
-#[path = "sensor_camera_stub.rs"]
-pub mod sensor_camera_stub;
-pub use sensor_camera_stub::{
+#[path = "sensor_camera.rs"]
+pub mod sensor_camera;
+pub use sensor_camera::{
     backproject_ray, fov_deg, pixel_area_at_depth, pixel_in_bounds, project_point,
     CameraIntrinsics, CameraPose, CameraStub,
 };

@@ -48,13 +48,16 @@ fn generate_missing_base_errors() {
 
 #[test]
 fn generate_unknown_expression_errors() {
-    let base_path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
-    if !std::path::Path::new(base_path).exists() {
+    let base_path = std::env::var("MAKEHUMAN_DATA_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+        .join("3dobjs/base.obj");
+    if !base_path.exists() {
         return;
     }
     let args: Vec<String> = vec![
         "--base",
-        base_path,
+        base_path.to_str().unwrap_or_default(),
         "--output",
         "/tmp/test_expr_unknown.glb",
         "--expression",
@@ -71,13 +74,16 @@ fn generate_unknown_expression_errors() {
 
 #[test]
 fn generate_with_expression_no_targets_dir() {
-    let base_path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
-    if !std::path::Path::new(base_path).exists() {
+    let base_path = std::env::var("MAKEHUMAN_DATA_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+        .join("3dobjs/base.obj");
+    if !base_path.exists() {
         return;
     }
     let args: Vec<String> = vec![
         "--base",
-        base_path,
+        base_path.to_str().unwrap_or_default(),
         "--output",
         "/tmp/test_expr_no_targets.glb",
         "--expression",
@@ -95,15 +101,18 @@ fn generate_with_expression_no_targets_dir() {
 
 #[test]
 fn save_session_creates_file() {
-    let base_path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
-    if !std::path::Path::new(base_path).exists() {
+    let base_path = std::env::var("MAKEHUMAN_DATA_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+        .join("3dobjs/base.obj");
+    if !base_path.exists() {
         return;
     }
     let session_path = "/tmp/test_save_session_cli.json";
     let _ = std::fs::remove_file(session_path);
     let args: Vec<String> = vec![
         "--base",
-        base_path,
+        base_path.to_str().unwrap_or_default(),
         "--output",
         "/tmp/test_save_session_out.glb",
         "--params",
@@ -140,13 +149,16 @@ fn save_session_creates_file() {
 
 #[test]
 fn generate_load_session_nonexistent_errors() {
-    let base_path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
-    if !std::path::Path::new(base_path).exists() {
+    let base_path = std::env::var("MAKEHUMAN_DATA_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+        .join("3dobjs/base.obj");
+    if !base_path.exists() {
         return;
     }
     let args: Vec<String> = vec![
         "--base",
-        base_path,
+        base_path.to_str().unwrap_or_default(),
         "--output",
         "/tmp/test_load_nonexistent.glb",
         "--load-session",
@@ -168,8 +180,11 @@ fn validate_nonexistent_errors() {
 
 #[test]
 fn validate_real_target_file() {
-    let path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/targets/armslegs";
-    let entries: Vec<_> = std::fs::read_dir(path)
+    let path = std::env::var("MAKEHUMAN_DATA_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+        .join("targets/armslegs");
+    let entries: Vec<_> = std::fs::read_dir(&path)
         .into_iter()
         .flatten()
         .flatten()

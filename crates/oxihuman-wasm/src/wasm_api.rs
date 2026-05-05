@@ -419,6 +419,15 @@ mod bindgen_impl {
             self.inner.get_mesh_segments(mode)
         }
 
+        /// Initialise a cloth simulation from the most recently built mesh.
+        ///
+        /// Does nothing when no mesh has been built yet.
+        /// `stiffness` is forwarded to all cloth springs; 0.0 = limp, 1.0 = rigid.
+        #[wasm_bindgen]
+        pub fn init_cloth(&mut self, stiffness: f64) {
+            self.inner.init_cloth(stiffness as f32);
+        }
+
         /// Step physics simulation by `dt` seconds.
         #[wasm_bindgen]
         pub fn step_physics(&mut self, dt: f64) {

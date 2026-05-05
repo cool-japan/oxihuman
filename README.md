@@ -3,10 +3,10 @@
 **Privacy-first, client-side human body generator — pure Rust, WASM/WebGPU ready.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.1-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.2-green.svg)](CHANGELOG.md)
 [![Rust Edition](https://img.shields.io/badge/rust-edition%202021-orange.svg)](https://doc.rust-lang.org/edition-guide/rust-2021/)
 
-> **Version 0.1.1** — Released 2026-03-13
+> **Version 0.1.2** — Released 2026-05-05
 > **Author**: COOLJAPAN OU (Team Kitasan)
 > **Repository**: https://github.com/cool-japan/oxihuman
 > **License**: Apache-2.0
@@ -15,7 +15,7 @@
 
 ## Overview
 
-OxiHuman is a pure-Rust parametric human body generator that runs entirely client-side — in the browser via WebAssembly/WebGPU or natively on any platform. It synthesises detailed 3D human meshes from high-level slider parameters without ever transmitting body data to a server. The project spans ~943,000 lines of Rust across 8 workspace crates, with 32,644 passing tests.
+OxiHuman is a pure-Rust parametric human body generator that runs entirely client-side — in the browser via WebAssembly/WebGPU or natively on any platform. It synthesises detailed 3D human meshes from high-level slider parameters without ever transmitting body data to a server. The project spans ~943,000 lines of Rust across 8 workspace crates, with 32,791 passing tests.
 
 ### Core Principles
 
@@ -30,7 +30,7 @@ OxiHuman is a pure-Rust parametric human body generator that runs entirely clien
 
 ## Workspace Crates
 
-All crates are at version **0.1.1**.
+All crates are at version **0.1.2**.
 
 | Crate | Status | Tests | Purpose |
 |-------|--------|------:|---------|
@@ -41,9 +41,9 @@ All crates are at version **0.1.1**.
 | `oxihuman-physics` | Stable | 5,217 | Soft-body, cloth, rigid body, FEM, SPH, biomechanics |
 | `oxihuman-viewer` | Stable | 4,974 | wgpu/WebGPU rendering, camera systems, 100+ debug views |
 | `oxihuman-wasm` | Stable | 168 | WebAssembly bindings (wasm-bindgen), 68-method browser API |
-| `oxihuman-cli` | Stable | 134 | 32 subcommands: generate, export, batch, validate, sign |
+| `oxihuman-cli` | Stable | 134 | 35 subcommands: generate, export, batch, validate, sign |
 | `oxihuman-tests` | Stable | 39 | Integration and cross-crate tests |
-| **Total** | | **32,644** | |
+| **Total** | | **32,791** | |
 
 ---
 
@@ -111,7 +111,7 @@ All crates are at version **0.1.1**.
 
 ### CLI (`oxihuman-cli`)
 
-32 subcommands covering the full generation and export workflow:
+35 subcommands covering the full generation and export workflow:
 
 ```
 oxihuman generate          # Generate mesh from parameter JSON
@@ -147,14 +147,14 @@ Add individual crates to your `Cargo.toml` as needed:
 
 ```toml
 [dependencies]
-oxihuman-core    = "0.1.1"
-oxihuman-morph   = "0.1.1"
-oxihuman-mesh    = "0.1.1"
-oxihuman-export  = "0.1.1"
-oxihuman-physics = "0.1.1"
-oxihuman-viewer  = "0.1.1"
-oxihuman-wasm    = "0.1.1"
-oxihuman-cli     = "0.1.1"
+oxihuman-core    = "0.1.2"
+oxihuman-morph   = "0.1.2"
+oxihuman-mesh    = "0.1.2"
+oxihuman-export  = "0.1.2"
+oxihuman-physics = "0.1.2"
+oxihuman-viewer  = "0.1.2"
+oxihuman-wasm    = "0.1.2"
+oxihuman-cli     = "0.1.2"
 ```
 
 ---
@@ -165,8 +165,8 @@ oxihuman-cli     = "0.1.1"
 
 ```toml
 [dependencies]
-oxihuman-morph = "0.1.1"
-oxihuman-mesh  = "0.1.1"
+oxihuman-morph = "0.1.2"
+oxihuman-mesh  = "0.1.2"
 ```
 
 ```rust
@@ -226,12 +226,25 @@ cargo build -p oxihuman-wasm --target wasm32-unknown-unknown --features wasm,web
 ## Testing
 
 ```bash
-# Run all 32,644 tests
+# Run all 32,791 tests
 cargo nextest run --all-features
 
 # Run tests for a specific crate
 cargo nextest run -p oxihuman-morph --all-features
 ```
+
+### Test fixtures
+
+Some tests depend on the [MakeHuman](http://www.makehumancommunity.org/) dataset and oxihuman asset
+packs. To run them locally:
+
+| Variable | Purpose | Example |
+|---|---|---|
+| `MAKEHUMAN_DATA_DIR` | Path to the MakeHuman `data/` directory (containing `3dobjs/base.obj` and `targets/`) | `/path/to/makehuman/data` |
+| `OXIHUMAN_ASSETS_DIR` | Path to the oxihuman asset pack root (containing `alpha_pack/oxihuman_assets.toml`) | `/path/to/oxihuman/assets` |
+
+Tests that require these fixtures skip gracefully when the variable is unset, so the standard
+`cargo nextest run --all-features` still passes on machines without the dataset.
 
 ---
 

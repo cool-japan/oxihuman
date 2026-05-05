@@ -214,6 +214,13 @@ pub use memory_pool_typed::{new_memory_pool_typed, MemoryPoolTyped};
 pub mod object_arena;
 pub use object_arena::{new_object_arena, ArenaHandle, Generation, ObjectArena};
 
+#[path = "arena_allocator.rs"]
+pub mod arena_allocator;
+pub use arena_allocator::{
+    arena_alloc_bytes, arena_alloc_bytes_aligned, arena_remaining, arena_reset, arena_stats,
+    arena_usage_ratio, default_arena_config, new_arena, ArenaAllocator, ArenaConfig, ArenaStats,
+};
+
 #[path = "slab_allocator.rs"]
 pub mod slab_allocator;
 pub use slab_allocator::{SlabAllocator, SlabKey};
@@ -294,9 +301,9 @@ pub use patch_generator::{
     DiffHunk, UnifiedPatch as GeneratedPatch,
 };
 
-#[path = "file_watcher_stub.rs"]
-pub mod file_watcher_stub;
-pub use file_watcher_stub::{
+#[path = "file_watcher.rs"]
+pub mod file_watcher;
+pub use file_watcher::{
     drain_and_count, is_watched as path_is_watched, new_file_watcher, watch_paths, FileWatcherStub,
     FsEvent,
 };
@@ -328,9 +335,9 @@ pub use symlink_resolver::{
     detect_cycle, new_symlink_resolver, register_all, resolve_batch, Symlink, SymlinkResolver,
 };
 
-#[path = "file_lock_stub.rs"]
-pub mod file_lock_stub;
-pub use file_lock_stub::{
+#[path = "file_lock.rs"]
+pub mod file_lock;
+pub use file_lock::{
     new_lock_manager, release_all, try_exclusive, try_shared, FileLockManager, LockMode, LockRecord,
 };
 
@@ -367,15 +374,15 @@ pub use checksum_verifier::{
     Checksum, ChecksumAlgo,
 };
 
-#[path = "file_transfer_stub.rs"]
-pub mod file_transfer_stub;
-pub use file_transfer_stub::{
+#[path = "file_transfer.rs"]
+pub mod file_transfer;
+pub use file_transfer::{
     cancel_job, new_transfer_manager, tick_all, TransferJob, TransferManager, TransferState,
 };
 
-#[path = "object_storage_stub.rs"]
-pub mod object_storage_stub;
-pub use object_storage_stub::{
+#[path = "object_storage.rs"]
+pub mod object_storage;
+pub use object_storage::{
     copy_object, download, new_object_storage, upload, ObjectMeta, ObjectStorage, StoredObject,
 };
 
@@ -448,9 +455,9 @@ pub use clock_version_vector::{
     new_clock_version_vector, ClockVersionVector,
 };
 
-#[path = "compression_stub.rs"]
-pub mod compression_stub;
-pub use compression_stub::{compress_rle, compression_ratio, decompress_rle, is_compressible};
+#[path = "compression.rs"]
+pub mod compression;
+pub use compression::{compress_rle, compression_ratio, decompress_rle, is_compressible};
 
 #[path = "token_bucket_limiter.rs"]
 pub mod token_bucket_limiter;
@@ -581,19 +588,16 @@ pub use skip_list_simple::{
     skip_simple_range, skip_simple_remove, SkipListSimple,
 };
 
-#[path = "regex_stub.rs"]
-pub mod regex_stub;
-pub use regex_stub::{regex_count_matches, regex_first_match, regex_match, regex_match_all};
+#[path = "regex.rs"]
+pub mod regex;
+pub use regex::{regex_count_matches, regex_first_match, regex_match, regex_match_all};
 
-#[path = "aho_corasick_stub.rs"]
-pub mod aho_corasick_stub;
-pub use aho_corasick_stub::{
-    ac_stub_any_match, ac_stub_count_matches, ac_stub_first_match, ac_stub_search,
+pub use crate::_core_part2::aho_corasick::{
+    ac_stub_any_match, ac_stub_count_matches, ac_stub_first_match, ac_stub_search, AcStubAutomaton,
+    AcStubMatch, AcStubMatchKind, AcStubNode,
 };
 
-#[path = "suffix_array_stub.rs"]
-pub mod suffix_array_stub;
-pub use suffix_array_stub::{
+pub use crate::_core_part2::suffix_array::{
     build_suffix_array_stub, lcp_array_stub, sa_stub_count_occurrences, sa_stub_find_all,
     sa_stub_longest_repeated_substring, sa_stub_search,
 };
@@ -612,9 +616,9 @@ pub use merkle_tree::{
     MerkleTree,
 };
 
-#[path = "base64_stub.rs"]
-pub mod base64_stub;
-pub use base64_stub::{
+#[path = "base64.rs"]
+pub mod base64;
+pub use base64::{
     base64_decode as b64s_decode, base64_decode_config as b64s_decode_config,
     base64_decode_url_safe as b64s_decode_url_safe, base64_decoded_len as b64s_decoded_len,
     base64_encode as b64s_encode, base64_encode_config as b64s_encode_config,
@@ -711,11 +715,12 @@ pub use bitmask_flags::{
     BitmaskFlags,
 };
 
-#[path = "atomic_counter_stub.rs"]
-pub mod atomic_counter_stub;
-pub use atomic_counter_stub::{
-    counter_add, counter_compare_and_swap, counter_decrement, counter_get, counter_increment,
-    counter_reset, new_atomic_counter, AtomicCounter,
+#[path = "atomic_counter.rs"]
+pub mod atomic_counter;
+pub use atomic_counter::{
+    counter_add, counter_compare_and_swap, counter_compare_exchange, counter_decrement,
+    counter_get, counter_increment, counter_is_zero, counter_reset, counter_value,
+    new_atomic_counter, new_atomic_counter_with, AtomicCounter,
 };
 
 #[path = "string_utils.rs"]
@@ -801,9 +806,9 @@ pub use query_bus::{
     query_set_param, Query, QueryResult,
 };
 
-#[path = "repository_stub.rs"]
-pub mod repository_stub;
-pub use repository_stub::{
+#[path = "repository.rs"]
+pub mod repository;
+pub use repository::{
     new_string_repo, repo_all_ids, repo_count, repo_delete, repo_exists, repo_find, repo_save,
     StringRepo,
 };
@@ -1060,11 +1065,11 @@ pub use ear_clip_triangulate::{
     polygon_signed_area as ec_polygon_signed_area, EcPoint,
 };
 
-#[path = "huffman_stub.rs"]
-pub mod huffman_stub;
-#[path = "lz77_stub.rs"]
-pub mod lz77_stub;
-pub use huffman_stub::{
+#[path = "huffman.rs"]
+pub mod huffman;
+#[path = "lz77.rs"]
+pub mod lz77;
+pub use huffman::{
     build_frequency_table, decode_symbol, encode_symbol, huffman_decode, huffman_encode,
     table_size, BitReader, BitWriter, HuffNode, HuffmanCodeTable, HuffmanError, HuffmanSymbol,
     HuffmanTable, HuffmanTree,
@@ -1074,4 +1079,20 @@ pub use huffman_stub::{
 pub mod security;
 pub use security::{
     checked_stride_offset, is_safe_content_type, sanitize_path, validate_file_size, SecurityError,
+};
+
+#[path = "font_renderer.rs"]
+pub mod font_renderer;
+pub use font_renderer::{
+    default_font_config, font_config_to_json, glyph_count, layout_text, measure_glyph,
+    new_font_renderer_stub, text_bounding_box, FontConfig, FontError, FontRenderer,
+    FontRendererStub, GlyphMetrics, TextLayout,
+};
+
+#[path = "lua.rs"]
+pub mod lua;
+pub use lua::{
+    default_lua_config, lua_execute, lua_get_global, lua_global_count, lua_result_to_json,
+    lua_set_global, lua_stub_to_json, lua_value_to_json, lua_value_type_name, new_lua_script,
+    new_lua_stub, LuaConfig, LuaResult, LuaScript, LuaStub, LuaValue,
 };

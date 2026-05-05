@@ -159,8 +159,8 @@ pub use xr_viewport_v2::{
     xr_stereo_offset_v2, XrViewportV2,
 };
 
-pub mod neural_render_stub;
-pub use neural_render_stub::{
+pub mod neural_render;
+pub use neural_render::{
     neural_render_is_valid, neural_render_latent_size, neural_render_memory_mb,
     neural_render_param_count, new_neural_render_config, NeuralRenderConfig,
 };
@@ -491,14 +491,14 @@ pub use screen_space_gi_view::{
     SsgiView,
 };
 
-pub mod dlss_view_stub;
-pub use dlss_view_stub::{
+pub mod dlss_view;
+pub use dlss_view::{
     dlss_is_enabled, dlss_render_resolution, dlss_scale_factor, dlss_set_quality, new_dlss_view,
     DlssQuality, DlssView,
 };
 
-pub mod fsr_view_stub;
-pub use fsr_view_stub::{
+pub mod fsr_view;
+pub use fsr_view::{
     fsr_is_enabled, fsr_render_resolution, fsr_scale_factor, fsr_set_mode, new_fsr_view, FsrMode,
     FsrView,
 };

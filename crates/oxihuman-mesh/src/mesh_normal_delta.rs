@@ -585,8 +585,9 @@ mod tests {
         mnd.add(1, [0.1, 0.2, 0.3]);
         let flat = mnd.to_flat();
         let bytes: Vec<u8> = flat.iter().flat_map(|f| f.to_le_bytes()).collect();
-        std::fs::write("/tmp/normal_delta_flat.bin", &bytes).expect("should write to /tmp/");
-        let read_bytes = std::fs::read("/tmp/normal_delta_flat.bin").expect("should succeed");
+        let tmp = std::env::temp_dir().join("normal_delta_flat.bin");
+        std::fs::write(&tmp, &bytes).expect("should write to temp dir");
+        let read_bytes = std::fs::read(&tmp).expect("should succeed");
         assert_eq!(read_bytes.len(), 4 * 3 * 4); // 4 verts * 3 floats * 4 bytes
     }
 }

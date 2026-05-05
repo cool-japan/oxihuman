@@ -332,10 +332,7 @@ pub fn boundary_loops(edges: &[(u32, u32)]) -> Vec<Vec<u32>> {
         *visited_verts.entry(start).or_insert(true) = true;
         let mut current = start;
 
-        loop {
-            let Some(neighbours) = adj.get(&current).cloned() else {
-                break;
-            };
+        while let Some(neighbours) = adj.get(&current).cloned() {
             let mut next_opt = None;
             for nb in neighbours {
                 if !visited.get(&(current, nb)).copied().unwrap_or(true) {

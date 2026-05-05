@@ -16,11 +16,15 @@ exclude     = ["target/", "tests/fixtures/", "*.wasm", "benches/data/"]
 [dependencies]
 anyhow.workspace    = true
 thiserror.workspace = true
+tokio.workspace     = true
 serde               = { workspace = true }
 serde_json.workspace = true
 toml.workspace      = true
 sha2.workspace      = true
 hex.workspace       = true
+fontdue.workspace   = true
+zune-png.workspace  = true
+zune-core.workspace = true
 
 [dev-dependencies]
 proptest.workspace  = true

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.1.2] - 2026-05-05
+
+### Changed
+- Test fixtures that depend on the MakeHuman dataset now resolve the data root via the
+  `MAKEHUMAN_DATA_DIR` environment variable instead of hard-coded absolute paths.
+  Set it to the MakeHuman `data/` directory (the one containing `3dobjs/base.obj` and `targets/`).
+  Tests that require this data skip gracefully when the variable is unset.
+- Asset pack tests resolve the asset root via `OXIHUMAN_ASSETS_DIR` (the directory containing
+  `alpha_pack/oxihuman_assets.toml`). Tests skip gracefully when the variable is unset.
+
 ## [0.1.1] - 2026-03-13
 
 ### Added

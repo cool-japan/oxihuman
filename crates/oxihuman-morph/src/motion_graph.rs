@@ -165,7 +165,7 @@ impl MotionGraph {
             .iter()
             .filter(|t| t.from_state == state)
             .collect();
-        ts.sort_by(|a, b| b.priority.cmp(&a.priority));
+        ts.sort_by_key(|b| std::cmp::Reverse(b.priority));
         ts
     }
 

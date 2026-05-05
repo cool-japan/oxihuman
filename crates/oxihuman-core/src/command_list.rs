@@ -92,7 +92,7 @@ impl CommandList {
 
     pub fn sorted_by_priority(&self) -> Vec<&CmdEntry> {
         let mut v: Vec<&CmdEntry> = self.entries.iter().collect();
-        v.sort_by(|a, b| b.priority.cmp(&a.priority));
+        v.sort_by_key(|b| std::cmp::Reverse(b.priority));
         v
     }
 

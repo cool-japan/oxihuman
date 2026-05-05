@@ -282,11 +282,18 @@ pub fn validate_manifest(
 mod tests {
     use super::*;
 
-    const TARGETS_DIR: &str = "/media/kitasan/Backup/resource/makehuman/makehuman/data/targets";
+    fn makehuman_data_dir() -> std::path::PathBuf {
+        std::env::var("MAKEHUMAN_DATA_DIR")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+    }
+    fn targets_dir() -> std::path::PathBuf {
+        makehuman_data_dir().join("targets")
+    }
 
     #[test]
     fn build_pack_small_sample() {
-        let dir = Path::new(TARGETS_DIR).join("bodyshapes");
+        let dir = targets_dir().join("bodyshapes");
         if !dir.exists() {
             return;
         }
@@ -353,7 +360,7 @@ mod tests {
 
     #[test]
     fn build_pack_writes_manifest() {
-        let dir = Path::new(TARGETS_DIR).join("armslegs");
+        let dir = targets_dir().join("armslegs");
         if !dir.exists() {
             return;
         }
@@ -451,20 +458,18 @@ mod tests {
 
     #[test]
     fn validate_real_pack() {
-        use std::path::Path;
-        let dir =
-            Path::new("/media/kitasan/Backup/resource/makehuman/makehuman/data/targets/bodyshapes");
+        let dir = targets_dir().join("bodyshapes");
         if !dir.exists() {
             return;
         }
         let config = PackBuilderConfig {
-            targets_dir: dir.to_path_buf(),
+            targets_dir: dir.clone(),
             policy: Policy::new(PolicyProfile::Standard),
             max_files: Some(3),
         };
         let manifest = build_pack(config).expect("should succeed");
         let policy = Policy::new(PolicyProfile::Standard);
-        let report = validate_manifest(&manifest, dir, &policy);
+        let report = validate_manifest(&manifest, &dir, &policy);
         // All files we just hashed should validate correctly
         assert_eq!(
             report.hash_mismatches, 0,

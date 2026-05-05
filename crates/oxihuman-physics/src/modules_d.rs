@@ -338,9 +338,9 @@ pub use auxetic_material::{
     relative_density as auxetic_relative_density, AuxeticParams, AuxeticProperties,
 };
 
-#[path = "metamaterial_stub.rs"]
-pub mod metamaterial_stub;
-pub use metamaterial_stub::{
+#[path = "metamaterial.rs"]
+pub mod metamaterial;
+pub use metamaterial::{
     bragg_frequency_hz, effective_mass_density, is_in_bandgap, locally_resonant_bandgap,
     resonator_frequency_hz, transmission_loss_db, wave_speed as metamaterial_wave_speed,
     BandgapInfo, MetamaterialKind, MetamaterialParams,

@@ -93,7 +93,7 @@ impl ActionMap {
 
     pub fn by_priority(&self) -> Vec<&ActionEntry> {
         let mut sorted: Vec<&ActionEntry> = self.entries.iter().collect();
-        sorted.sort_by(|a, b| b.priority.cmp(&a.priority));
+        sorted.sort_by_key(|b| std::cmp::Reverse(b.priority));
         sorted
     }
 

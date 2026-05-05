@@ -2,7 +2,7 @@
 
 Cross-crate integration test suite for the OxiHuman workspace. This crate is not published (`publish = false`); it exists solely to exercise multi-crate workflows that cannot be tested within individual crates.
 
-**Version:** 0.1.1 | **Tests:** 39 passing | **Updated:** 2026-03-13
+**Version:** 0.1.2 | **Tests:** 39 passing | **Updated:** 2026-05-05
 
 ## What it tests
 

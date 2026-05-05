@@ -90,8 +90,11 @@ fn strict_policy_engine_builds() {
 
 #[test]
 fn real_base_mesh_via_wasm_engine() {
-    let path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
-    if let Ok(obj_bytes) = std::fs::read(path) {
+    let path = std::env::var("MAKEHUMAN_DATA_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+        .join("3dobjs/base.obj");
+    if let Ok(obj_bytes) = std::fs::read(&path) {
         let mut e = WasmEngine::new_from_obj_bytes(&obj_bytes).expect("should succeed");
         assert!(e.vertex_count() > 10_000);
         let bytes = e.build_mesh_bytes();

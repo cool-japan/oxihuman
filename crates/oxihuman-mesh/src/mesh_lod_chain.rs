@@ -29,7 +29,7 @@ impl LodChain {
     /// Adds a LOD level to the chain.
     pub fn add_level(&mut self, level: LodLevel) {
         self.levels.push(level);
-        self.levels.sort_by(|a, b| a.level.cmp(&b.level));
+        self.levels.sort_by_key(|a| a.level);
     }
 
     /// Returns the number of LOD levels in the chain.

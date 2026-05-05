@@ -240,8 +240,11 @@ mod tests {
         use crate::normals::compute_normals;
         use crate::suit::apply_suit_flag;
         use oxihuman_core::parser::obj::parse_obj;
-        let path = "/media/kitasan/Backup/resource/makehuman/makehuman/data/3dobjs/base.obj";
-        if let Ok(src) = std::fs::read_to_string(path) {
+        let path = std::env::var("MAKEHUMAN_DATA_DIR")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
+            .join("3dobjs/base.obj");
+        if let Ok(src) = std::fs::read_to_string(&path) {
             if let Ok(obj) = parse_obj(&src) {
                 let morph_buf = oxihuman_morph::engine::MeshBuffers {
                     positions: obj.positions,

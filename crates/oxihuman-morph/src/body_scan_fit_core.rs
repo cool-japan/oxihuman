@@ -874,10 +874,10 @@ mod tests {
             lines.push(format!("{}: {:.4}", k, params[k]));
         }
         let content = lines.join("\n");
-        std::fs::write("/tmp/oxihuman_body_scan_fit_quick.txt", &content).expect("should succeed");
+        let tmp = std::env::temp_dir().join("oxihuman_body_scan_fit_quick.txt");
+        std::fs::write(&tmp, &content).expect("should succeed");
 
-        let read_back = std::fs::read_to_string("/tmp/oxihuman_body_scan_fit_quick.txt")
-            .expect("should succeed");
+        let read_back = std::fs::read_to_string(&tmp).expect("should succeed");
         assert!(read_back.contains("height"));
     }
 }
