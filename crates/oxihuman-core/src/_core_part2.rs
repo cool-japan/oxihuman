@@ -1019,8 +1019,10 @@ pub use image_codec::{
     ImageHeader, PixelFormat, RawDecodeResult,
 };
 
+#[cfg(feature = "net")]
 #[path = "network.rs"]
 pub mod network;
+#[cfg(feature = "net")]
 pub use network::{
     connect_stub, connection_state, default_network_config, disconnect_stub, flush_receive_buffer,
     network_stub_to_json, new_network_stub, packet_count_received, packet_count_sent,

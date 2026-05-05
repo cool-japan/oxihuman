@@ -16,7 +16,7 @@ exclude     = ["target/", "tests/fixtures/", "*.wasm", "benches/data/"]
 [dependencies]
 anyhow.workspace    = true
 thiserror.workspace = true
-tokio.workspace     = true
+tokio               = { workspace = true, optional = true }
 serde               = { workspace = true }
 serde_json.workspace = true
 toml.workspace      = true
@@ -25,6 +25,10 @@ hex.workspace       = true
 fontdue.workspace   = true
 zune-png.workspace  = true
 zune-core.workspace = true
+
+[features]
+default = []
+net     = ["dep:tokio"]
 
 [dev-dependencies]
 proptest.workspace  = true
