@@ -38,3 +38,5 @@ cli_test
 
 # Rustc ICE dumps
 rustc-ice-*.txt
+
+target
