@@ -79,11 +79,112 @@ pub fn flow_vertex_field(positions: &[[f32; 3]], flow: &EdgeFlow) -> Vec<[f32; 3
     field
 }
 
-/// Smooth edge flow by averaging neighbors.
+/// Smooth edge flow by iterative Laplacian averaging of edge directions and magnitudes.
+///
+/// For each iteration every edge's direction and magnitude are averaged with
+/// those of adjacent edges (edges that share a vertex).  A Laplacian factor of
+/// 0.5 is used: `new = 0.5 * self + 0.5 * neighbour_avg`.
+/// If there are no edges, or `iterations` is 0, the original flow is returned.
 #[allow(dead_code)]
-pub fn smooth_edge_flow(flow: &EdgeFlow, _iterations: u32) -> EdgeFlow {
-    // Simplified: return clone
-    flow.clone()
+pub fn smooth_edge_flow(flow: &EdgeFlow, iterations: u32) -> EdgeFlow {
+    if iterations == 0 || flow.edges.is_empty() {
+        return flow.clone();
+    }
+
+    // Determine the number of vertices referenced by the edges.
+    let max_v = flow
+        .edges
+        .iter()
+        .flat_map(|e| [e[0], e[1]])
+        .max()
+        .map(|m| m as usize + 1)
+        .unwrap_or(0);
+
+    // Build vertex → list of edge indices adjacency.
+    let mut v_to_edges: Vec<Vec<usize>> = vec![Vec::new(); max_v];
+    for (ei, e) in flow.edges.iter().enumerate() {
+        let a = e[0] as usize;
+        let b = e[1] as usize;
+        if a < max_v {
+            v_to_edges[a].push(ei);
+        }
+        if b < max_v {
+            v_to_edges[b].push(ei);
+        }
+    }
+
+    // For each edge, its "neighbourhood" is the union of edges adjacent to
+    // either endpoint (excluding itself).
+    let ne = flow.edges.len();
+    let mut edge_neighbors: Vec<Vec<usize>> = Vec::with_capacity(ne);
+    for (ei, e) in flow.edges.iter().enumerate() {
+        let mut nbrs: Vec<usize> = Vec::new();
+        for &vi in &[e[0] as usize, e[1] as usize] {
+            if vi < max_v {
+                for &nei in &v_to_edges[vi] {
+                    if nei != ei && !nbrs.contains(&nei) {
+                        nbrs.push(nei);
+                    }
+                }
+            }
+        }
+        edge_neighbors.push(nbrs);
+    }
+
+    let mut directions = flow.directions.clone();
+    let mut magnitudes = flow.magnitudes.clone();
+    const LAMBDA: f32 = 0.5;
+
+    for _ in 0..iterations {
+        let prev_dirs = directions.clone();
+        let prev_mags = magnitudes.clone();
+
+        for ei in 0..ne {
+            let nbrs = &edge_neighbors[ei];
+            if nbrs.is_empty() {
+                continue;
+            }
+            let count = nbrs.len() as f32;
+
+            // Average neighbouring directions.
+            let mut avg_dir = [0.0f32; 3];
+            let mut avg_mag = 0.0f32;
+            for &ni in nbrs {
+                avg_dir[0] += prev_dirs[ni][0];
+                avg_dir[1] += prev_dirs[ni][1];
+                avg_dir[2] += prev_dirs[ni][2];
+                avg_mag += prev_mags[ni];
+            }
+            avg_dir[0] /= count;
+            avg_dir[1] /= count;
+            avg_dir[2] /= count;
+            avg_mag /= count;
+
+            // Laplacian blend.
+            let new_dir = [
+                prev_dirs[ei][0] * (1.0 - LAMBDA) + avg_dir[0] * LAMBDA,
+                prev_dirs[ei][1] * (1.0 - LAMBDA) + avg_dir[1] * LAMBDA,
+                prev_dirs[ei][2] * (1.0 - LAMBDA) + avg_dir[2] * LAMBDA,
+            ];
+            // Renormalise direction if non-degenerate.
+            let len = (new_dir[0] * new_dir[0]
+                + new_dir[1] * new_dir[1]
+                + new_dir[2] * new_dir[2])
+                .sqrt();
+            directions[ei] = if len > 1e-12 {
+                [new_dir[0] / len, new_dir[1] / len, new_dir[2] / len]
+            } else {
+                new_dir
+            };
+            magnitudes[ei] = prev_mags[ei] * (1.0 - LAMBDA) + avg_mag * LAMBDA;
+        }
+    }
+
+    EdgeFlow {
+        edges: flow.edges.clone(),
+        directions,
+        magnitudes,
+    }
 }
 
 /// Serialize flow to JSON string.

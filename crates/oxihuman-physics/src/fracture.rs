@@ -205,25 +205,30 @@ pub fn cell_centroid(cell: &VoronoiCell) -> [f32; 3] {
     }
 }
 
-/// Approximate cell volume as sum of triangulated face areas * stub thickness.
+/// Volume of the star-shaped solid bounded by the cell's surface faces and the
+/// seed apex, via the divergence theorem: V = (1/6)|Σ (a−s)·((b−s)×(c−s))|
+/// over a fan triangulation of each face (s = seed). For a closed, consistently
+/// wound cell this is the exact enclosed volume, independent of the apex.
 pub fn cell_volume_approx(cell: &VoronoiCell) -> f32 {
-    let mut total_area = 0.0f32;
+    let s = cell.seed;
+    let mut signed_six = 0.0f32;
     for face in &cell.faces {
         if face.len() >= 3 {
             for i in 1..face.len() - 1 {
-                let ab = sub(face[i], face[0]);
-                let ac = sub(face[i + 1], face[0]);
+                let a = sub(face[0], s);
+                let b = sub(face[i], s);
+                let c = sub(face[i + 1], s);
+                // scalar triple product a · (b × c)
                 let cr = [
-                    ab[1] * ac[2] - ab[2] * ac[1],
-                    ab[2] * ac[0] - ab[0] * ac[2],
-                    ab[0] * ac[1] - ab[1] * ac[0],
+                    b[1] * c[2] - b[2] * c[1],
+                    b[2] * c[0] - b[0] * c[2],
+                    b[0] * c[1] - b[1] * c[0],
                 ];
-                total_area += len(cr) * 0.5;
+                signed_six += a[0] * cr[0] + a[1] * cr[1] + a[2] * cr[2];
             }
         }
     }
-    // Stub: volume ≈ area * average thickness (assume unit thickness)
-    total_area * 0.1
+    (signed_six / 6.0).abs()
 }
 
 /// Apply an impulse to all cells based on distance from impact point.
@@ -270,42 +275,72 @@ pub fn fracture_mesh(
 }
 
 /// Merge cells with volume < min_volume into their nearest neighbor.
-pub fn merge_small_cells(cells: Vec<VoronoiCell>, min_volume: f32) -> Vec<VoronoiCell> {
+///
+/// For each sub-threshold cell, its faces are appended to the nearest
+/// surviving neighbor's face list.  The sub-threshold cell is then
+/// dropped from the output.  If *every* cell would be merged (all are
+/// below the threshold), the original slice is returned unchanged so
+/// the output is never empty.
+pub fn merge_small_cells(mut cells: Vec<VoronoiCell>, min_volume: f32) -> Vec<VoronoiCell> {
     if cells.is_empty() {
         return cells;
     }
 
-    let mut result: Vec<VoronoiCell> = Vec::new();
-    let mut merged: Vec<bool> = vec![false; cells.len()];
+    let n = cells.len();
 
-    for i in 0..cells.len() {
+    // Pre-compute volumes so we don't borrow `cells` inside a mutable loop.
+    let volumes: Vec<f32> = cells.iter().map(cell_volume_approx).collect();
+
+    // Track which indices have been absorbed into a neighbor.
+    let mut merged: Vec<bool> = vec![false; n];
+
+    // Collect (small_index, target_index) pairs first, then apply — this
+    // avoids borrow conflicts between the immutable seed reads and the
+    // mutable face appends.
+    let mut transfer_pairs: Vec<(usize, usize)> = Vec::new();
+
+    for i in 0..n {
         if merged[i] {
             continue;
         }
-        let vol = cell_volume_approx(&cells[i]);
-        if vol < min_volume {
-            // Find nearest non-merged cell
-            let nearest = (0..cells.len())
-                .filter(|&j| j != i && !merged[j])
-                .min_by(|&a, &b| {
-                    dist_sq(cells[i].seed, cells[a].seed)
-                        .partial_cmp(&dist_sq(cells[i].seed, cells[b].seed))
-                        .unwrap_or(std::cmp::Ordering::Equal)
-                });
+        if volumes[i] < min_volume {
+            // Find the nearest surviving neighbor by seed distance.
+            let nearest = (0..n).filter(|&j| j != i && !merged[j]).min_by(|&a, &b| {
+                dist_sq(cells[i].seed, cells[a].seed)
+                    .partial_cmp(&dist_sq(cells[i].seed, cells[b].seed))
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
             if let Some(j) = nearest {
                 merged[i] = true;
-                // We'll merge at the end; for now just skip
-                let _ = j;
+                transfer_pairs.push((i, j));
             }
         }
     }
 
-    for (i, cell) in cells.into_iter().enumerate() {
-        if !merged[i] {
-            result.push(cell);
-        }
+    // Guard: if all cells would be dropped, keep everything unchanged.
+    if merged.iter().all(|&m| m) {
+        // Reset and return cells as-is.
+        return cells;
     }
-    result
+
+    // Apply face transfers: move faces from the small cell into the target.
+    // We process pairs in order; because only sub-threshold cells are sources
+    // and targets are always surviving cells, no target index appears as a
+    // source, so the transfers are independent of one another.
+    for (src, dst) in transfer_pairs {
+        // Temporarily drain the source faces into a local buffer to satisfy
+        // the borrow checker (cannot borrow `cells` mutably twice at once).
+        let src_faces: Vec<Vec<[f32; 3]>> = std::mem::take(&mut cells[src].faces);
+        cells[dst].faces.extend(src_faces);
+    }
+
+    // Collect surviving cells.
+    cells
+        .into_iter()
+        .enumerate()
+        .filter(|(i, _)| !merged[*i])
+        .map(|(_, cell)| cell)
+        .collect()
 }
 
 /// Direction between two cell centroids.
@@ -450,6 +485,32 @@ mod tests {
     }
 
     #[test]
+    fn test_cell_volume_approx_exact_tetrahedron() {
+        // Unit corner tetrahedron: vertices (0,0,0),(1,0,0),(0,1,0),(0,0,1); volume = 1/6.
+        let v0 = [0.0f32, 0.0, 0.0];
+        let v1 = [1.0f32, 0.0, 0.0];
+        let v2 = [0.0f32, 1.0, 0.0];
+        let v3 = [0.0f32, 0.0, 1.0];
+        // Four outward-wound (CCW) faces.
+        let faces = vec![
+            vec![v0, v2, v1], // bottom, normal -z
+            vec![v0, v3, v2], // x=0,    normal -x
+            vec![v0, v1, v3], // y=0,    normal -y
+            vec![v1, v2, v3], // slanted, normal +xyz
+        ];
+        let cell = VoronoiCell {
+            id: 0,
+            seed: [0.25, 0.25, 0.25], // centroid, inside
+            faces,
+        };
+        let vol = cell_volume_approx(&cell);
+        assert!(
+            (vol - 1.0 / 6.0).abs() < 1e-4,
+            "tetra volume should be 1/6 ≈ 0.16667, got {vol}"
+        );
+    }
+
+    #[test]
     fn test_apply_fracture_impulse_moves_seeds() {
         let (pos, tris) = box_mesh();
         let seeds = generate_voronoi_seeds([0.0; 3], [1.0; 3], 4, 42);
@@ -518,5 +579,101 @@ mod tests {
             (l - 1.0).abs() < 1e-5,
             "separation impulse should be unit length, got {l}"
         );
+    }
+
+    // -----------------------------------------------------------------------
+    // Face-conservation tests (expose the former face-drop bug)
+    // -----------------------------------------------------------------------
+
+    /// Helper: build two cells where cell 0 is tiny (3 small triangles, low
+    /// area → low volume) and cell 1 is large (12 box triangles, high volume).
+    fn two_cells_one_small() -> Vec<VoronoiCell> {
+        // Large cell: reuse the full box mesh faces.
+        let (pos, tris) = box_mesh();
+        let large_faces: Vec<Vec<[f32; 3]>> = tris
+            .iter()
+            .map(|t| vec![pos[t[0] as usize], pos[t[1] as usize], pos[t[2] as usize]])
+            .collect();
+
+        // Small cell: a tiny triangle near the origin (area ~ 0.5 * 0.01 * 0.01 = 5e-5,
+        // volume ≈ 5e-6 which is well below any reasonable threshold).
+        let tiny_face = vec![[0.0f32, 0.0, 0.0], [0.01, 0.0, 0.0], [0.0, 0.01, 0.0]];
+
+        vec![
+            VoronoiCell {
+                id: 0,
+                seed: [0.005, 0.005, 0.0], // near origin
+                faces: vec![tiny_face],
+            },
+            VoronoiCell {
+                id: 1,
+                seed: [0.5, 0.5, 0.5], // center of the box
+                faces: large_faces,
+            },
+        ]
+    }
+
+    #[test]
+    fn test_merge_small_cells_face_conservation() {
+        // Total face count across all output cells must equal total before merge.
+        // This test exposes the former bug where small-cell faces were silently
+        // dropped instead of transferred to the absorbing neighbor.
+        let cells = two_cells_one_small();
+        let total_faces_before: usize = cells.iter().map(|c| c.faces.len()).sum();
+
+        // cell 0 has volume ≈ 5e-6; use a threshold well above that but below
+        // the large cell's volume so only cell 0 is merged.
+        let vol_small = cell_volume_approx(&cells[0]);
+        let vol_large = cell_volume_approx(&cells[1]);
+        // Sanity: small must actually be smaller.
+        assert!(
+            vol_small < vol_large,
+            "test setup: cell 0 should be smaller than cell 1"
+        );
+        let threshold = (vol_small + vol_large) / 2.0;
+
+        let merged_cells = merge_small_cells(cells.clone(), threshold);
+        let total_faces_after: usize = merged_cells.iter().map(|c| c.faces.len()).sum();
+
+        assert_eq!(
+            total_faces_before, total_faces_after,
+            "faces must be conserved during merge: before={}, after={}",
+            total_faces_before, total_faces_after
+        );
+    }
+
+    #[test]
+    fn test_merge_small_cells_target_grew() {
+        // After merging cell 0 (small) into cell 1 (large), cell 1 must have
+        // exactly cell_0_faces + cell_1_faces faces.
+        let cells = two_cells_one_small();
+        let faces_small = cells[0].faces.len();
+        let faces_large = cells[1].faces.len();
+
+        let vol_small = cell_volume_approx(&cells[0]);
+        let vol_large = cell_volume_approx(&cells[1]);
+        let threshold = (vol_small + vol_large) / 2.0;
+
+        let result = merge_small_cells(cells, threshold);
+
+        // Only the large cell should survive.
+        assert_eq!(result.len(), 1, "only the large cell should survive");
+        assert_eq!(
+            result[0].faces.len(),
+            faces_small + faces_large,
+            "surviving cell should own the merged cell's faces too"
+        );
+    }
+
+    #[test]
+    fn test_merge_small_cells_large_cells_unchanged() {
+        // With threshold 0.0 and cells that all have non-negative volume,
+        // strict `< 0.0` never fires → output count equals input count.
+        let (pos, tris) = box_mesh();
+        let seeds = generate_voronoi_seeds([0.0; 3], [1.0; 3], 5, 17);
+        let cells = voronoi_fracture(&pos, &tris, &seeds);
+        let count_before = cells.len();
+        let result = merge_small_cells(cells, 0.0);
+        assert_eq!(result.len(), count_before, "no merges at threshold 0.0");
     }
 }

@@ -381,3 +381,7 @@ pub mod thermal_model;
 pub use thermal_model::{
     BodyRegion, ThermalBody, ThermalColumn, ThermalLayer, ThermalNode, ThermalSimulation,
 };
+
+#[path = "epa_solver.rs"]
+pub mod epa_solver;
+pub use epa_solver::{epa_closest_face, epa_no_collision, epa_stub, EpaResult};

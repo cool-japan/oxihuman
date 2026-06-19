@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
-//! File checksum verifier (CRC32/SHA256 stub).
+//! File checksum verifier (CRC32 / SHA-256 / xxHash-64).
 
 /// Checksum algorithm.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,7 +39,7 @@ impl Checksum {
     }
 }
 
-/// Simple CRC32 stub (polynomial 0xEDB88320).
+/// CRC32 implementation using the standard IEEE 802.3 polynomial (0xEDB88320).
 pub fn crc32_bytes(data: &[u8]) -> u32 {
     let mut crc: u32 = 0xFFFF_FFFF;
     for &byte in data {
@@ -55,51 +55,40 @@ pub fn crc32_bytes(data: &[u8]) -> u32 {
     !crc
 }
 
-/// Simple SHA-256 stub (FNV-based hash, not real SHA256).
+/// SHA-256 digest of `data`.
+///
+/// Delegates to the real SHA-256 implementation in `hashing_sha256`.
+/// The name is kept as `sha256_stub` for backward compatibility with
+/// existing callers and the public re-export in `_core_part3.rs`.
 pub fn sha256_stub(data: &[u8]) -> [u8; 32] {
-    let mut out = [0u8; 32];
-    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
-    for &b in data {
-        h ^= b as u64;
-        h = h.wrapping_mul(0x0000_0100_0000_01b3);
-    }
-    let bytes = h.to_le_bytes();
-    for i in 0..32 {
-        out[i] = bytes[i % 8].wrapping_add(i as u8);
-    }
-    out
+    crate::hashing_sha256::sha256_hash(data).0
 }
 
-/// Compute a checksum for bytes.
+/// Compute a checksum for `data` using the specified algorithm.
 pub fn compute_checksum(algo: ChecksumAlgo, data: &[u8]) -> Checksum {
     let value = match &algo {
         ChecksumAlgo::Crc32 => crc32_bytes(data).to_le_bytes().to_vec(),
         ChecksumAlgo::Sha256 => sha256_stub(data).to_vec(),
-        ChecksumAlgo::Xxhash64 => {
-            let mut h: u64 = 0x27D4EB2F165667C5;
-            for &b in data {
-                h ^= b as u64;
-                h = h.wrapping_mul(0xBF58476D1CE4E5B9);
-            }
-            h.to_le_bytes().to_vec()
-        }
+        ChecksumAlgo::Xxhash64 => crate::hashing_xxhash::xxhash64(data, 0)
+            .to_le_bytes()
+            .to_vec(),
     };
     Checksum::new(algo, value)
 }
 
-/// Verify data against an expected checksum.
+/// Verify `data` against an expected checksum.
 pub fn verify_checksum(data: &[u8], expected: &Checksum) -> bool {
     let actual = compute_checksum(expected.algo.clone(), data);
     actual.value == expected.value
 }
 
-/// Verify a checksum hex string.
+/// Compute a checksum and compare it against a hex string.
 pub fn verify_hex(data: &[u8], algo: ChecksumAlgo, hex: &str) -> bool {
     let computed = compute_checksum(algo, data);
     computed.hex() == hex
 }
 
-/// Build a checksum registry for multiple files (stub).
+/// Build a checksum registry for a slice of named byte buffers.
 pub fn checksum_map(items: &[(&str, &[u8])], algo: ChecksumAlgo) -> Vec<(String, Checksum)> {
     items
         .iter()
@@ -144,6 +133,35 @@ mod tests {
     }
 
     #[test]
+    fn test_compute_checksum_xxhash64() {
+        let c = compute_checksum(ChecksumAlgo::Xxhash64, b"test");
+        assert_eq!(c.value.len(), 8);
+        // The value must match the real xxhash64 implementation.
+        let expected = crate::hashing_xxhash::xxhash64(b"test", 0)
+            .to_le_bytes()
+            .to_vec();
+        assert_eq!(c.value, expected);
+    }
+
+    #[test]
+    fn test_xxhash64_empty_via_compute() {
+        // Cross-check: compute_checksum for empty input must agree with
+        // the KAT value from hashing_xxhash (0xef46db3751d8e999).
+        let c = compute_checksum(ChecksumAlgo::Xxhash64, b"");
+        let expected_hash: u64 = 0xef46db3751d8e999;
+        assert_eq!(c.value, expected_hash.to_le_bytes().to_vec());
+    }
+
+    #[test]
+    fn test_sha256_stub_uses_real_sha256() {
+        // sha256_stub must return the same bytes as hashing_sha256::sha256_hash.
+        let data = b"oxihuman";
+        let via_stub = sha256_stub(data);
+        let via_direct = crate::hashing_sha256::sha256_hash(data).0;
+        assert_eq!(via_stub, via_direct);
+    }
+
+    #[test]
     fn test_verify_checksum_ok() {
         let data = b"oxihuman";
         let chk = compute_checksum(ChecksumAlgo::Crc32, data);
@@ -173,5 +191,13 @@ mod tests {
     fn test_algo_output_len() {
         assert_eq!(ChecksumAlgo::Sha256.output_len(), 32);
         assert_eq!(ChecksumAlgo::Crc32.output_len(), 4);
+        assert_eq!(ChecksumAlgo::Xxhash64.output_len(), 8);
+    }
+
+    #[test]
+    fn test_verify_hex_xxhash64() {
+        let data = b"hello";
+        let c = compute_checksum(ChecksumAlgo::Xxhash64, data);
+        assert!(verify_hex(data, ChecksumAlgo::Xxhash64, &c.hex()));
     }
 }

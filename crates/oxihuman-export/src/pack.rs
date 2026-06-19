@@ -282,18 +282,9 @@ pub fn validate_manifest(
 mod tests {
     use super::*;
 
-    fn makehuman_data_dir() -> std::path::PathBuf {
-        std::env::var("MAKEHUMAN_DATA_DIR")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-    }
-    fn targets_dir() -> std::path::PathBuf {
-        makehuman_data_dir().join("targets")
-    }
-
     #[test]
     fn build_pack_small_sample() {
-        let dir = targets_dir().join("bodyshapes");
+        let dir = oxihuman_test_utils::targets_dir().join("bodyshapes");
         if !dir.exists() {
             return;
         }
@@ -360,7 +351,7 @@ mod tests {
 
     #[test]
     fn build_pack_writes_manifest() {
-        let dir = targets_dir().join("armslegs");
+        let dir = oxihuman_test_utils::targets_dir().join("armslegs");
         if !dir.exists() {
             return;
         }
@@ -458,7 +449,7 @@ mod tests {
 
     #[test]
     fn validate_real_pack() {
-        let dir = targets_dir().join("bodyshapes");
+        let dir = oxihuman_test_utils::targets_dir().join("bodyshapes");
         if !dir.exists() {
             return;
         }

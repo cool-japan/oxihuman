@@ -19,12 +19,11 @@ oxihuman-core.workspace  = true
 oxihuman-mesh.workspace  = true
 oxihuman-physics.workspace = true
 wgpu     = { workspace = true, optional = true }
-pollster = { workspace = true, optional = true }
 winit    = { workspace = true, optional = true }
 
 [features]
 default = []
-webgpu  = ["dep:wgpu", "dep:pollster"]
+webgpu  = ["dep:wgpu"]
 winit   = ["dep:winit"]
 
 [dev-dependencies]

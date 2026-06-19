@@ -3,6 +3,8 @@
 
 //! Voxel-based mesh remeshing via signed distance field reconstruction.
 
+use crate::marching_cubes::{marching_cubes, ScalarField};
+
 // ── Structs ───────────────────────────────────────────────────────────────────
 
 /// Configuration for voxel-based remeshing.
@@ -33,6 +35,10 @@ pub struct VoxelRemeshResult {
     pub triangle_count: usize,
     pub success: bool,
     pub iterations: u32,
+    /// Extracted vertex positions (world-space XYZ).
+    pub vertices: Vec<[f32; 3]>,
+    /// Triangle index list (flat, groups of 3).
+    pub triangles: Vec<u32>,
 }
 
 // ── Functions ─────────────────────────────────────────────────────────────────
@@ -161,18 +167,107 @@ pub fn filled_voxel_count(grid: &VoxelRemeshGrid) -> usize {
     grid.data.iter().filter(|&&v| v).count()
 }
 
-/// Reconstruct a mesh from a `VoxelRemeshGrid` (marching-cubes stub).
+/// Apply one pass of Laplacian smoothing to a set of vertex positions given a
+/// flat triangle index list.  Each vertex is moved toward the mean of its
+/// one-ring neighbours.  The result is written back to `positions` in-place.
+fn laplacian_smooth_pass(positions: &mut [[f32; 3]], indices: &[u32]) {
+    if positions.is_empty() || indices.len() < 3 {
+        return;
+    }
+    let n = positions.len();
+    let mut sum = vec![[0.0f32; 3]; n];
+    let mut count = vec![0u32; n];
+
+    let mut t = 0;
+    while t + 2 < indices.len() {
+        let [ia, ib, ic] = [
+            indices[t] as usize,
+            indices[t + 1] as usize,
+            indices[t + 2] as usize,
+        ];
+        if ia < n && ib < n && ic < n {
+            // Each vertex accumulates its two triangle-neighbours
+            for &(src, dst) in &[(ib, ia), (ic, ia), (ia, ib), (ic, ib), (ia, ic), (ib, ic)] {
+                for k in 0..3 {
+                    sum[dst][k] += positions[src][k];
+                }
+                count[dst] += 1;
+            }
+        }
+        t += 3;
+    }
+
+    for i in 0..n {
+        if count[i] > 0 {
+            let inv = 1.0 / count[i] as f32;
+            positions[i][0] = sum[i][0] * inv;
+            positions[i][1] = sum[i][1] * inv;
+            positions[i][2] = sum[i][2] * inv;
+        }
+    }
+}
+
+/// Reconstruct a mesh from a `VoxelRemeshGrid` using Marching Cubes.
+///
+/// The boolean voxel occupancy is converted to a signed scalar field:
+/// occupied cells get `-1.0` (inside) and empty cells get `+1.0` (outside).
+/// Marching Cubes extracts the zero-crossing surface.  Optional Laplacian
+/// smoothing passes are applied according to `cfg.smooth_iterations`.
 #[allow(dead_code)]
 pub fn remesh_from_voxels(grid: &VoxelRemeshGrid, cfg: &VoxelRemeshConfig) -> VoxelRemeshResult {
     let filled = filled_voxel_count(grid);
-    // Each filled voxel contributes approximately 2 triangles on its surface.
-    let tri_estimate = filled * 2;
-    let vert_estimate = filled * 4;
+    if filled == 0 {
+        return VoxelRemeshResult {
+            vertex_count: 0,
+            triangle_count: 0,
+            success: false,
+            iterations: cfg.smooth_iterations,
+            vertices: Vec::new(),
+            triangles: Vec::new(),
+        };
+    }
+
+    let nx = grid.width as usize;
+    let ny = grid.height as usize;
+    let nz = grid.depth as usize;
+
+    // Build a ScalarField: occupied → -1 (inside), empty → +1 (outside).
+    let mut field = ScalarField::new(
+        [nx, ny, nz],
+        [0.0f32; 3],
+        [grid.voxel_size; 3],
+    );
+    for iz in 0..nz {
+        for iy in 0..ny {
+            for ix in 0..nx {
+                let linear = ix + iy * nx + iz * nx * ny;
+                let val = if grid.data[linear] { -1.0f32 } else { 1.0f32 };
+                field.set(ix, iy, iz, val);
+            }
+        }
+    }
+
+    // Run Marching Cubes at isovalue 0.0.
+    let mesh_buffers = marching_cubes(&field, 0.0);
+    let mut positions = mesh_buffers.positions;
+    let indices = mesh_buffers.indices;
+
+    // Apply Laplacian smoothing.
+    for _ in 0..cfg.smooth_iterations {
+        laplacian_smooth_pass(&mut positions, &indices);
+    }
+
+    let vertex_count = positions.len();
+    let triangle_count = indices.len() / 3;
+    let success = vertex_count > 0 && triangle_count > 0;
+
     VoxelRemeshResult {
-        vertex_count: vert_estimate,
-        triangle_count: tri_estimate,
-        success: filled > 0,
+        vertex_count,
+        triangle_count,
+        success,
         iterations: cfg.smooth_iterations,
+        vertices: positions,
+        triangles: indices,
     }
 }
 
@@ -272,7 +367,7 @@ mod tests {
         let cfg = default_voxel_remesh_config();
         let r = remesh_from_voxels(&g, &cfg);
         assert!(r.success);
-        assert_eq!(r.triangle_count, 4);
+        assert!(r.triangle_count > 0, "marching cubes must produce triangles");
     }
 
     #[test]
@@ -300,9 +395,77 @@ mod tests {
             triangle_count: 50,
             success: true,
             iterations: 3,
+            vertices: Vec::new(),
+            triangles: Vec::new(),
         };
         let j = voxel_remesh_result_to_json(&r);
         assert!(j.contains("\"success\":true"));
         assert!(j.contains("\"iterations\":3"));
+    }
+
+    /// Build a small sphere mesh and round-trip through voxelise → remesh.
+    /// The real marching cubes path must produce a non-trivial mesh.
+    #[test]
+    fn remesh_from_voxels_produces_triangles() {
+        use std::f32::consts::PI;
+        // Icosphere-like sphere mesh: unit sphere, ~100 surface triangles.
+        let n_lat = 8usize;
+        let n_lon = 8usize;
+        let mut positions: Vec<[f32; 3]> = Vec::new();
+        let mut triangles: Vec<[u32; 3]> = Vec::new();
+
+        // Generate latitude/longitude grid vertices on the unit sphere.
+        for i in 0..=n_lat {
+            let phi = PI * i as f32 / n_lat as f32; // 0 .. π
+            for j in 0..=n_lon {
+                let theta = 2.0 * PI * j as f32 / n_lon as f32; // 0 .. 2π
+                positions.push([
+                    phi.sin() * theta.cos(),
+                    phi.cos(),
+                    phi.sin() * theta.sin(),
+                ]);
+            }
+        }
+        let stride = n_lon + 1;
+        for i in 0..n_lat {
+            for j in 0..n_lon {
+                let a = (i * stride + j) as u32;
+                let b = (i * stride + j + 1) as u32;
+                let c = ((i + 1) * stride + j) as u32;
+                let d = ((i + 1) * stride + j + 1) as u32;
+                triangles.push([a, b, c]);
+                triangles.push([b, d, c]);
+            }
+        }
+
+        let cfg = VoxelRemeshConfig {
+            voxel_size: 0.3,
+            smooth_iterations: 1,
+            preserve_boundaries: false,
+        };
+        let grid = voxelize_mesh_remesh(&positions, &triangles, &cfg);
+        let result = remesh_from_voxels(&grid, &cfg);
+
+        assert!(result.success, "remesh of a sphere voxel grid must succeed");
+        assert!(
+            result.vertex_count > 4,
+            "remesh must produce more than 4 vertices, got {}",
+            result.vertex_count
+        );
+        assert!(
+            result.triangle_count > 0,
+            "remesh must produce triangles, got {}",
+            result.triangle_count
+        );
+        assert_eq!(
+            result.vertices.len(),
+            result.vertex_count,
+            "vertices vec length must match vertex_count"
+        );
+        assert_eq!(
+            result.triangles.len(),
+            result.triangle_count * 3,
+            "triangles vec length must be triangle_count * 3"
+        );
     }
 }

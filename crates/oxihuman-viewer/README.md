@@ -2,7 +2,7 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Version:** 0.1.2 | **Status:** Stable | **Updated:** 2026-05-05
+**Version:** 0.2.0 | **Status:** Stable | **Updated:** 2026-06-19
 
 | Metric | Value |
 |--------|-------|
@@ -27,14 +27,14 @@ Hardware-accelerated GPU rendering via wgpu 22 is available under the optional `
 
 ```toml
 [dependencies]
-oxihuman-viewer = "0.1"
+oxihuman-viewer = "0.2"
 ```
 
 ### With WebGPU / wgpu hardware rendering
 
 ```toml
 [dependencies]
-oxihuman-viewer = { version = "0.1", features = ["webgpu"] }
+oxihuman-viewer = { version = "0.2", features = ["webgpu"] }
 ```
 
 ### Workspace dependencies

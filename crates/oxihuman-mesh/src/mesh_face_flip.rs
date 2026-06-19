@@ -1,6 +1,11 @@
 #![allow(dead_code)]
 //! Face flipping utilities.
 
+use std::collections::HashMap;
+
+/// Map from undirected edge key to face adjacency entries: (face_idx, directed_a, directed_b).
+type EdgeFaceMap = HashMap<(u32, u32), Vec<(usize, u32, u32)>>;
+
 /// Face flip tracker.
 #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
@@ -53,11 +58,101 @@ pub fn flip_count(ff: &FaceFlip) -> usize {
     ff.flipped_indices.len()
 }
 
-/// Make winding order consistent by propagating from face 0.
+/// Make winding order consistent by BFS-propagating winding from face 0.
+///
+/// For each pair of adjacent faces sharing an undirected edge: if the shared
+/// edge is traversed in the **same** directed sense in both faces, the
+/// neighbour is flipped (consistent winding requires opposite traversal of
+/// shared edges in adjacent faces). Disconnected components are each seeded
+/// from their first unvisited face.
 #[allow(dead_code)]
 pub fn consistent_winding(tris: &[[u32; 3]]) -> Vec<[u32; 3]> {
-    // Simplified: just return a copy (full impl would BFS adjacency)
-    tris.to_vec()
+    use std::collections::VecDeque;
+
+    let n = tris.len();
+    if n == 0 {
+        return Vec::new();
+    }
+
+    // Build edge → list of (face_index, directed_edge (a,b)) for each undirected edge.
+    // Undirected key: (min(a,b), max(a,b)).
+    let mut edge_faces: EdgeFaceMap = EdgeFaceMap::new();
+    for (fi, tri) in tris.iter().enumerate() {
+        for k in 0..3 {
+            let a = tri[k];
+            let b = tri[(k + 1) % 3];
+            let key = if a < b { (a, b) } else { (b, a) };
+            edge_faces.entry(key).or_default().push((fi, a, b));
+        }
+    }
+
+    let mut result: Vec<[u32; 3]> = tris.to_vec();
+    let mut visited = vec![false; n];
+    let mut queue: VecDeque<usize> = VecDeque::new();
+
+    let mut seed = 0usize;
+    loop {
+        // Find next unvisited face as a connected-component seed.
+        while seed < n && visited[seed] {
+            seed += 1;
+        }
+        if seed >= n {
+            break;
+        }
+        visited[seed] = true;
+        queue.push_back(seed);
+
+        while let Some(fi) = queue.pop_front() {
+            let tri = result[fi];
+            for k in 0..3 {
+                let a = tri[k];
+                let b = tri[(k + 1) % 3];
+                let key = if a < b { (a, b) } else { (b, a) };
+
+                let entries = match edge_faces.get(&key) {
+                    Some(e) => e.clone(),
+                    None => continue,
+                };
+
+                // Find the directed edge for face fi in the original tris (not mutated
+                // version) to keep the edge-face map consistent.
+                // We look at the directed edge of fi as stored in result[fi].
+                for (nfi, na, nb) in entries {
+                    if nfi == fi || visited[nfi] {
+                        continue;
+                    }
+                    // Check if neighbour nfi traverses this edge in the same direction as fi.
+                    // fi's directed edge for this undirected edge: (a, b) as computed above.
+                    // nfi's directed edge: (na, nb).
+                    // Consistent winding = opposite directions, i.e. fi has (a,b) and nfi has (b,a).
+                    // If nfi has the same direction (na == a and nb == b), flip it.
+                    let same_direction = na == a && nb == b;
+                    if same_direction {
+                        result[nfi] = flip_face_ff(result[nfi]);
+                        // Update edge_faces to reflect the flip so subsequent neighbours
+                        // see the corrected directions.
+                        for edge_k in 0..3 {
+                            let ea = result[nfi][edge_k];
+                            let eb = result[nfi][(edge_k + 1) % 3];
+                            let ekey = if ea < eb { (ea, eb) } else { (eb, ea) };
+                            if let Some(list) = edge_faces.get_mut(&ekey) {
+                                for entry in list.iter_mut() {
+                                    if entry.0 == nfi {
+                                        entry.1 = ea;
+                                        entry.2 = eb;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    visited[nfi] = true;
+                    queue.push_back(nfi);
+                }
+            }
+        }
+    }
+
+    result
 }
 
 /// Detect which faces are flipped relative to average normal.
@@ -146,8 +241,30 @@ mod tests {
 
     #[test]
     fn test_consistent_winding() {
-        let tris = vec![[0, 1, 2]];
-        assert_eq!(consistent_winding(&tris), tris);
+        // A single triangle is trivially consistent — must come back unchanged.
+        let tris = vec![[0u32, 1, 2]];
+        let result = consistent_winding(&tris);
+        assert_eq!(result.len(), 1);
+        // After consistent winding the vertices must be a rotation of [0,1,2]
+        // or a flip of it — for a single triangle it stays as-is.
+        assert_eq!(result[0], [0, 1, 2]);
+    }
+
+    #[test]
+    fn test_consistent_winding_flips_reversed() {
+        // Two triangles sharing edge (1, 2):
+        //   tri0: [0, 1, 2] — directed edge 1→2
+        //   tri1: [3, 1, 2] — directed edge 1→2 (same direction as tri0, inconsistent)
+        // After consistent_winding tri1 should be flipped so its shared
+        // directed edge becomes 2→1, i.e. [3, 2, 1].
+        let tris = vec![[0u32, 1, 2], [3, 1, 2]];
+        let result = consistent_winding(&tris);
+        assert_eq!(result.len(), 2);
+        // tri0 is the seed — must remain [0, 1, 2]
+        assert_eq!(result[0], [0, 1, 2]);
+        // tri1's directed traversal of the shared undirected edge (1,2) must
+        // now be 2→1, which means the triangle is [3, 2, 1].
+        assert_eq!(result[1], [3, 2, 1]);
     }
 
     #[test]

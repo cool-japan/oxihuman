@@ -41,11 +41,51 @@ pub fn new_neural_blend_shape(input_dim: usize, output_dim: usize) -> NeuralBlen
     NeuralBlendShape::new(input_dim, output_dim)
 }
 
-/// Run a forward pass (stub: returns zeroed weights).
+/// Run a forward pass through the single-layer MLP.
+///
+/// Computes `out[j] = activation(Σ_i input[i] * weights[i * output_dim + j] + bias[j])`.
+/// If the evaluator is disabled or the input is empty, returns a zero vector.
+/// If `input.len() != nbs.input_dim`, the input is zero-padded or clamped silently.
 pub fn nbs_forward(nbs: &NeuralBlendShape, input: &[f32]) -> Vec<f32> {
-    /* Stub: returns zero output of length output_dim */
-    let _ = input;
-    vec![0.0; nbs.output_dim]
+    if !nbs.enabled || nbs.output_dim == 0 {
+        return vec![0.0; nbs.output_dim];
+    }
+
+    // Build a working input slice of exactly input_dim length (zero-padded / clamped).
+    let effective_len = input.len().min(nbs.input_dim);
+    // Accumulate output
+    let mut out = nbs.bias.clone();
+    // out[j] = bias[j] + Σ_i input[i] * weights[i * output_dim + j]
+    for (i, &x) in input[..effective_len].iter().enumerate() {
+        if x == 0.0 {
+            continue;
+        }
+        let row_offset = i * nbs.output_dim;
+        for (j, o) in out.iter_mut().enumerate() {
+            *o += x * nbs.weights[row_offset + j];
+        }
+    }
+
+    // Apply activation in-place.
+    match nbs.activation {
+        NbsActivation::Relu => {
+            for v in out.iter_mut() {
+                *v = v.max(0.0);
+            }
+        }
+        NbsActivation::Tanh => {
+            for v in out.iter_mut() {
+                *v = v.tanh();
+            }
+        }
+        NbsActivation::Sigmoid => {
+            for v in out.iter_mut() {
+                *v = 1.0 / (1.0 + (-*v).exp());
+            }
+        }
+    }
+
+    out
 }
 
 /// Set the activation function.
@@ -157,6 +197,47 @@ mod tests {
         assert_eq!(
             nbs.bias.len(),
             4, /* bias length must equal output_dim */
+        );
+    }
+
+    #[test]
+    fn nbs_forward_identity_weights_zero_bias() {
+        // Build a 3-in, 3-out NBS with identity weight matrix (w[i*od+j] = 1 if i==j else 0),
+        // zero bias, ReLU activation. Output[j] should equal input[j] for all j < min(id,od).
+        let id = 3;
+        let od = 3;
+        let mut nbs = new_neural_blend_shape(id, od);
+        nbs_set_activation(&mut nbs, NbsActivation::Relu);
+        // Identity weight matrix
+        let mut weights = vec![0.0_f32; id * od];
+        for k in 0..id.min(od) {
+            weights[k * od + k] = 1.0;
+        }
+        nbs_load_weights(&mut nbs, &weights);
+        // bias already zero from new_neural_blend_shape
+
+        let input = [1.0_f32, 2.0, 3.0];
+        let out = nbs_forward(&nbs, &input);
+
+        for (j, (&o, &i)) in out.iter().zip(input.iter()).enumerate() {
+            assert!((o - i).abs() < 1e-6, "output[{}] = {} expected {}", j, o, i);
+        }
+    }
+
+    #[test]
+    fn nbs_forward_weights_used_not_zero() {
+        // With non-zero weights and non-zero input the output must differ from the old stub's
+        // all-zero result. Use a 2-in, 2-out NBS with weights [1,0, 0,1] and input [0.5, -0.5].
+        // After ReLU: out = [0.5, 0.0]  (not [0,0]).
+        let mut nbs = new_neural_blend_shape(2, 2);
+        nbs_set_activation(&mut nbs, NbsActivation::Relu);
+        nbs_load_weights(&mut nbs, &[1.0, 0.0, 0.0, 1.0]);
+        let out = nbs_forward(&nbs, &[0.5, -0.5]);
+        // At least one output component must be non-zero.
+        assert!(
+            out.iter().any(|&v| v.abs() > 1e-6),
+            "expected non-zero output with non-zero weights, got {:?}",
+            out
         );
     }
 }

@@ -137,8 +137,8 @@ pub use gif_export::{estimate_gif_size, gif_metadata_json, validate_gif, GifExpo
 
 pub mod apng_export;
 pub use apng_export::{
-    apng_metadata_json, estimate_raw_bytes as apng_estimate_raw_bytes, validate_apng, ApngExport,
-    ApngFrame,
+    apng_metadata_json, estimate_raw_bytes as apng_estimate_raw_bytes, export_apng,
+    has_png_signature, parse_ihdr_dimensions, validate_apng, ApngExport, ApngFrame,
 };
 
 pub mod webp_export;
@@ -147,10 +147,12 @@ pub use webp_export::{
     webp_metadata_json, WebpExport, WebpOptions,
 };
 
+pub mod av1;
+
 pub mod avif_export;
 pub use avif_export::{
-    all_opaque, avif_metadata_json, estimate_avif_bytes, validate_avif, AvifExport, AvifOptions,
-    AvifPreset,
+    all_opaque, avif_metadata_json, estimate_avif_bytes, to_avif_bytes, validate_avif, AvifExport,
+    AvifOptions, AvifPreset,
 };
 
 pub mod jpeg_xl_export;
@@ -183,8 +185,8 @@ pub use ico_export::{
 
 pub mod psd_export;
 pub use psd_export::{
-    estimate_psd_bytes, find_psd_layer, psd_metadata_json, validate_psd, PsdBlendMode, PsdExport,
-    PsdLayer,
+    estimate_psd_bytes, find_psd_layer, psd_metadata_json, to_psd_bytes, validate_psd,
+    PsdBlendMode, PsdExport, PsdLayer,
 };
 
 pub mod pdf_export;

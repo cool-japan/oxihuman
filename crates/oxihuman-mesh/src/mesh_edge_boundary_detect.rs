@@ -9,17 +9,93 @@ pub struct BoundaryEdgeDetect { edges: Vec<(u32,u32)>, loops: Vec<Vec<(u32,u32)>
 
 #[allow(dead_code)]
 pub fn detect_boundary_edges_bd(indices: &[u32]) -> BoundaryEdgeDetect {
-    let mut edge_count: HashMap<(u32,u32), u32> = HashMap::new();
+    // Step 1: Find all boundary edges (those that appear in exactly one triangle).
+    // Track directed edges so we know orientation for chaining.
+    let mut undirected_count: HashMap<(u32,u32), u32> = HashMap::new();
+    // directed_edge[undirected_key] = (a, b) as encountered in the first triangle.
+    let mut directed_edge: HashMap<(u32,u32), (u32,u32)> = HashMap::new();
+
     for tri in indices.chunks(3) {
         if tri.len() < 3 { continue; }
         for k in 0..3 {
-            let (a,b) = (tri[k], tri[(k+1)%3]);
-            let key = if a<b{(a,b)}else{(b,a)};
-            *edge_count.entry(key).or_default() += 1;
+            let (a, b) = (tri[k], tri[(k+1)%3]);
+            let key = if a < b { (a, b) } else { (b, a) };
+            let cnt = undirected_count.entry(key).or_default();
+            if *cnt == 0 {
+                directed_edge.insert(key, (a, b));
+            }
+            *cnt += 1;
         }
     }
-    let edges: Vec<(u32,u32)> = edge_count.into_iter().filter(|(_,c)| *c == 1).map(|(e,_)| e).collect();
-    let loops = vec![edges.clone()]; // simplified
+
+    // Collect boundary edges (count == 1) preserving directed orientation.
+    let mut boundary_directed: Vec<(u32, u32)> = undirected_count
+        .iter()
+        .filter(|(_, &c)| c == 1)
+        .filter_map(|(key, _)| directed_edge.get(key).copied())
+        .collect();
+
+    // Normalised undirected list for membership queries.
+    let edges: Vec<(u32, u32)> = boundary_directed
+        .iter()
+        .map(|&(a, b)| if a < b { (a, b) } else { (b, a) })
+        .collect();
+
+    // Step 2: Chain directed boundary edges into loops.
+    // Build a map: start_vertex → directed edge (start, end).
+    // Multiple edges can start from the same vertex in degenerate meshes;
+    // we handle that by keeping a Vec per vertex and popping.
+    let mut next_map: HashMap<u32, Vec<(u32, u32)>> = HashMap::new();
+    for &(a, b) in &boundary_directed {
+        next_map.entry(a).or_default().push((a, b));
+    }
+
+    let mut loops: Vec<Vec<(u32, u32)>> = Vec::new();
+    let mut visited: std::collections::HashSet<(u32, u32)> = std::collections::HashSet::new();
+
+    // Try to chain starting from each unvisited edge.
+    // Sort for determinism.
+    boundary_directed.sort();
+    for &start_edge in &boundary_directed {
+        if visited.contains(&start_edge) {
+            continue;
+        }
+
+        let mut current_loop: Vec<(u32, u32)> = Vec::new();
+        let mut current = start_edge.0;
+        let loop_start = start_edge.0;
+
+        loop {
+            // Find an unvisited edge starting from `current`.
+            let edge = next_map
+                .get_mut(&current)
+                .and_then(|v| v.iter().position(|e| !visited.contains(e)).map(|pos| v[pos]));
+
+            let edge = match edge {
+                Some(e) => e,
+                None => break,
+            };
+
+            visited.insert(edge);
+            current_loop.push(edge);
+            current = edge.1;
+
+            if current == loop_start {
+                // Closed the loop.
+                break;
+            }
+        }
+
+        if !current_loop.is_empty() {
+            loops.push(current_loop);
+        }
+    }
+
+    // If no loops were formed (open chains / degenerate), fall back to one group.
+    if loops.is_empty() && !edges.is_empty() {
+        loops.push(edges.clone());
+    }
+
     BoundaryEdgeDetect { edges, loops }
 }
 

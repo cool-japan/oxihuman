@@ -22,8 +22,12 @@ oxihuman-core.workspace  = true
 oxihuman-morph.workspace = true
 
 [dev-dependencies]
-proptest.workspace     = true
-criterion.workspace    = true
+proptest.workspace            = true
+criterion.workspace           = true
+oxihuman-test-utils = { path = "../oxihuman-test-utils" }
+
+[lints]
+workspace = true
 
 [[bench]]
 name    = "mesh_bench"

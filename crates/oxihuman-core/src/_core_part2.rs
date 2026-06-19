@@ -693,6 +693,13 @@ pub use lexer_token_stream::{
     count_tokens_of_kind, lex_string, LexToken, LexTokenKind, LexerStream,
 };
 
+#[path = "compression_lz.rs"]
+pub mod compression_lz;
+pub use compression_lz::{
+    lz_compress, lz_compress_bound, lz_decompress, lz_is_compressed, lz_roundtrip_ok, LzCompressor,
+    LzConfig,
+};
+
 #[path = "compression_lz4.rs"]
 pub mod compression_lz4;
 pub use compression_lz4::{
@@ -737,7 +744,10 @@ pub use encryption_chacha::{
 
 #[path = "hashing_sha256.rs"]
 pub mod hashing_sha256;
-pub use hashing_sha256::{hmac_sha256_stub, sha256_eq, sha256_hash, Sha256Digest, Sha256Hasher};
+#[allow(deprecated)]
+pub use hashing_sha256::{
+    hmac_sha256, hmac_sha256_stub, sha256_eq, sha256_hash, Sha256Digest, Sha256Hasher,
+};
 
 #[path = "hashing_blake3.rs"]
 pub mod hashing_blake3;
@@ -1019,8 +1029,26 @@ pub use image_codec::{
     ImageHeader, PixelFormat, RawDecodeResult,
 };
 
+#[path = "image_gif.rs"]
+pub mod image_gif;
+pub use image_gif::{gif_decode, gif_encode_rgb, GifError};
+
+#[path = "image_jpeg.rs"]
+pub mod image_jpeg;
+pub use image_jpeg::{jpeg_decode, jpeg_encode_rgb, JpegError};
+
+#[path = "image_tiff.rs"]
+pub mod image_tiff;
+pub use image_tiff::{tiff_decode, tiff_encode_rgb, TiffError};
+
+#[path = "image_webp.rs"]
+pub mod image_webp;
+pub use image_webp::{webp_decode, webp_encode_rgb, WebpError};
+
+#[cfg(feature = "net")]
 #[path = "network.rs"]
 pub mod network;
+#[cfg(feature = "net")]
 pub use network::{
     connect_stub, connection_state, default_network_config, disconnect_stub, flush_receive_buffer,
     network_stub_to_json, new_network_stub, packet_count_received, packet_count_sent,

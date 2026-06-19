@@ -16,19 +16,25 @@ exclude     = ["target/", "tests/fixtures/", "*.wasm", "benches/data/"]
 [dependencies]
 anyhow.workspace    = true
 thiserror.workspace = true
-tokio.workspace     = true
+tokio               = { workspace = true, optional = true }
 serde               = { workspace = true }
 serde_json.workspace = true
 toml.workspace      = true
 sha2.workspace      = true
 hex.workspace       = true
 fontdue.workspace   = true
-zune-png.workspace  = true
-zune-core.workspace = true
+zune-png.workspace     = true
+zune-core.workspace    = true
+oxiarc-deflate.workspace = true
+
+[features]
+default = []
+net     = ["dep:tokio"]
 
 [dev-dependencies]
-proptest.workspace  = true
-criterion.workspace = true
+proptest.workspace          = true
+criterion.workspace         = true
+oxihuman-test-utils = { path = "../oxihuman-test-utils" }
 
 [[bench]]
 name    = "core_bench"

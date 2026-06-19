@@ -626,12 +626,6 @@ mod tests {
         }
     }
 
-    fn makehuman_data_dir() -> std::path::PathBuf {
-        std::env::var("MAKEHUMAN_DATA_DIR")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-    }
-
     #[test]
     fn build_mesh_no_targets() {
         let policy = Policy::new(PolicyProfile::Standard);
@@ -685,7 +679,7 @@ mod tests {
         let policy = Policy::new(PolicyProfile::Standard);
         // Use a small base (3 verts) just to test loading, not positions
         let mut engine = HumanEngine::new(simple_base(), policy);
-        let dir = makehuman_data_dir().join("targets/bodyshapes");
+        let dir = oxihuman_test_utils::makehuman_data_dir().join("targets/bodyshapes");
         if dir.exists() {
             let count = engine
                 .load_targets_from_dir(&dir, |_name| Box::new(|_p: &ParamState| 0.5f32))
@@ -698,7 +692,7 @@ mod tests {
     fn load_targets_auto_weight() {
         let policy = Policy::new(PolicyProfile::Standard);
         let mut engine = HumanEngine::new(simple_base(), policy);
-        let dir = makehuman_data_dir().join("targets/bodyshapes");
+        let dir = oxihuman_test_utils::makehuman_data_dir().join("targets/bodyshapes");
         if dir.exists() {
             let count = engine
                 .load_targets_from_dir_auto(&dir)
@@ -1203,20 +1197,6 @@ mod integration_tests {
     use oxihuman_core::parser::target::parse_target;
     use oxihuman_core::policy::PolicyProfile;
 
-    fn makehuman_data_dir() -> std::path::PathBuf {
-        std::env::var("MAKEHUMAN_DATA_DIR")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-    }
-
-    fn targets_dir() -> std::path::PathBuf {
-        makehuman_data_dir().join("targets")
-    }
-
-    fn base_obj() -> std::path::PathBuf {
-        makehuman_data_dir().join("3dobjs/base.obj")
-    }
-
     #[allow(dead_code)]
     fn walk_targets(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
         if let Ok(entries) = std::fs::read_dir(dir) {
@@ -1233,7 +1213,7 @@ mod integration_tests {
 
     #[test]
     fn all_targets_parse_without_error() {
-        let dir = targets_dir();
+        let dir = oxihuman_test_utils::targets_dir();
         if !dir.exists() {
             return;
         }
@@ -1261,11 +1241,11 @@ mod integration_tests {
 
     #[test]
     fn all_targets_apply_no_nan() {
-        let base_path = base_obj();
+        let base_path = oxihuman_test_utils::base_obj();
         if !base_path.exists() {
             return;
         }
-        let dir = targets_dir();
+        let dir = oxihuman_test_utils::targets_dir();
         if !dir.exists() {
             return;
         }
@@ -1303,11 +1283,11 @@ mod integration_tests {
 
     #[test]
     fn multi_target_blend_no_nan() {
-        let base_path = base_obj();
+        let base_path = oxihuman_test_utils::base_obj();
         if !base_path.exists() {
             return;
         }
-        let dir = targets_dir();
+        let dir = oxihuman_test_utils::targets_dir();
         if !dir.exists() {
             return;
         }
@@ -1347,7 +1327,7 @@ mod integration_tests {
 
     #[test]
     fn target_count_reasonable() {
-        let dir = targets_dir();
+        let dir = oxihuman_test_utils::targets_dir();
         if !dir.exists() {
             return;
         }

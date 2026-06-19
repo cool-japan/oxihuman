@@ -2,7 +2,7 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
 // SPDX-License-Identifier: Apache-2.0
 
-//! Encoding utilities: hex, base64 (simple), URL encoding stubs.
+//! Encoding utilities: hex, base64 (simple), URL encoding.
 
 /// Encoding type marker.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -121,16 +121,60 @@ pub fn base64_decode_simple(s: &str) -> Option<Vec<u8>> {
     Some(out)
 }
 
-/// Stub URL encoder (replaces spaces with %20).
+/// Full RFC 3986 percent-encoder.
+///
+/// Unreserved characters (A–Z a–z 0–9 `-` `_` `.` `~`) are passed through
+/// unchanged; every other byte is encoded as `%XX` (uppercase hex).
+///
+/// The function name is kept as `url_encode_stub` for API compatibility.
 #[allow(dead_code)]
 pub fn url_encode_stub(s: &str) -> String {
-    s.replace(' ', "%20")
+    // Upper-case hex digits for percent-encoding (RFC 3986 §2.1 recommends
+    // upper case for normalisation).
+    const HEX_UPPER: &[u8] = b"0123456789ABCDEF";
+    let mut out = String::with_capacity(s.len() * 3);
+    for byte in s.bytes() {
+        match byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                out.push(byte as char);
+            }
+            _ => {
+                out.push('%');
+                out.push(HEX_UPPER[(byte >> 4) as usize] as char);
+                out.push(HEX_UPPER[(byte & 0xF) as usize] as char);
+            }
+        }
+    }
+    out
 }
 
-/// Stub URL decoder (replaces %20 with space).
+/// Full RFC 3986 percent-decoder.
+///
+/// Converts `%XX` sequences (case-insensitive hex digits) back to their
+/// original bytes; any sequence that cannot be decoded is passed through
+/// verbatim (lenient mode).  The resulting byte vector is interpreted as
+/// UTF-8 with replacement on invalid sequences.
+///
+/// The function name is kept as `url_decode_stub` for API compatibility.
 #[allow(dead_code)]
 pub fn url_decode_stub(s: &str) -> String {
-    s.replace("%20", " ")
+    let bytes = s.as_bytes();
+    let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            let hi = hex_digit(bytes[i + 1] as char);
+            let lo = hex_digit(bytes[i + 2] as char);
+            if let (Some(h), Some(l)) = (hi, lo) {
+                out.push((h << 4) | l);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
 }
 
 /// Count UTF-8 characters (not bytes) in a string.
@@ -184,12 +228,41 @@ mod tests {
 
     #[test]
     fn test_url_encode_stub() {
+        // Space → %20
         assert_eq!(url_encode_stub("hello world"), "hello%20world");
+        // & and = are not unreserved; must be encoded.
+        assert_eq!(url_encode_stub("a&b=c"), "a%26b%3Dc");
     }
 
     #[test]
     fn test_url_decode_stub() {
+        // %20 → space
         assert_eq!(url_decode_stub("hello%20world"), "hello world");
+        // roundtrip for encoded punctuation
+        assert_eq!(url_decode_stub("a%26b%3Dc"), "a&b=c");
+    }
+
+    #[test]
+    fn test_url_encode_unreserved_passthrough() {
+        // Unreserved characters must not be encoded.
+        let unreserved = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
+        assert_eq!(url_encode_stub(unreserved), unreserved);
+    }
+
+    #[test]
+    fn test_url_roundtrip() {
+        let original = "https://example.com/path?q=hello world&lang=en";
+        let encoded = url_encode_stub(original);
+        let decoded = url_decode_stub(&encoded);
+        assert_eq!(decoded, original);
+    }
+
+    #[test]
+    fn test_url_decode_invalid_percent_passthrough() {
+        // A lone '%' with no valid hex digits should be passed through as-is.
+        assert_eq!(url_decode_stub("100%pure"), "100%pure");
+        // %GG is not valid hex, should be left verbatim.
+        assert_eq!(url_decode_stub("%GG"), "%GG");
     }
 
     #[test]

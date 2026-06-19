@@ -53,13 +53,60 @@ impl CrcTable {
         c ^ 0xFFFF_FFFF
     }
 
-    /// Combine two CRC values for independent byte sequences.
-    /// This is an approximation: re-run is always more accurate.
+    /// Combine two CRC-32 values for independent byte sequences.
+    ///
+    /// Given `crc1 = CRC32(A)` and `crc2 = CRC32(B)` where `B` is `len2` bytes
+    /// long, returns `CRC32(A ++ B)` (the CRC of the concatenation) without
+    /// re-scanning the underlying data. This is a faithful port of zlib's
+    /// `crc32_combine_`, which advances `crc1` over `len2` zero bytes using
+    /// GF(2) operator matrices and then folds in `crc2`.
     pub fn combine(&self, crc1: u32, crc2: u32, len2: usize) -> u32 {
-        // Simple approach: XOR is NOT a valid combine for CRC32, but
-        // we expose a utility that chains via dummy bytes instead.
-        let _ = (crc1, crc2, len2);
-        0 // placeholder; real combine requires GF(2) polynomial math
+        // Degenerate case.
+        if len2 == 0 {
+            return crc1;
+        }
+
+        let mut even = [0u32; GF2_DIM]; // even-power-of-two zeros operator
+        let mut odd = [0u32; GF2_DIM]; // odd-power-of-two zeros operator
+
+        // Operator for one zero bit, in `odd`.
+        odd[0] = POLY; // CRC-32 polynomial
+        let mut row = 1u32;
+        #[allow(clippy::needless_range_loop)]
+        for n in 1..GF2_DIM {
+            odd[n] = row;
+            row <<= 1;
+        }
+
+        // Operator for two zero bits, in `even`.
+        gf2_matrix_square(&mut even, &odd);
+        // Operator for four zero bits, in `odd`.
+        gf2_matrix_square(&mut odd, &even);
+
+        // Apply len2 zero BYTES to crc1. The first square below builds the
+        // operator for one zero byte (eight zero bits) into `even`.
+        let mut crc1 = crc1;
+        let mut len2 = len2 as u64;
+        loop {
+            gf2_matrix_square(&mut even, &odd);
+            if len2 & 1 != 0 {
+                crc1 = gf2_matrix_times(&even, crc1);
+            }
+            len2 >>= 1;
+            if len2 == 0 {
+                break;
+            }
+            gf2_matrix_square(&mut odd, &even);
+            if len2 & 1 != 0 {
+                crc1 = gf2_matrix_times(&odd, crc1);
+            }
+            len2 >>= 1;
+            if len2 == 0 {
+                break;
+            }
+        }
+
+        crc1 ^ crc2
     }
 
     /// Return the raw table entry for byte index `i`.
@@ -89,6 +136,38 @@ pub fn crc32(data: &[u8]) -> u32 {
 #[allow(dead_code)]
 pub fn crc32_match(a: &[u8], b: &[u8]) -> bool {
     crc32(a) == crc32(b)
+}
+
+/// Number of bits in the CRC-32 register; the GF(2) operator matrices are
+/// `GF2_DIM` columns wide.
+const GF2_DIM: usize = 32;
+
+/// Multiply the bit vector `vec` by the GF(2) matrix `mat`.
+///
+/// Each set bit in `vec` selects the corresponding column of `mat`, and the
+/// selected columns are XOR-ed together to form the result.
+fn gf2_matrix_times(mat: &[u32; GF2_DIM], mut vec: u32) -> u32 {
+    let mut sum = 0u32;
+    let mut idx = 0usize;
+    while vec != 0 {
+        if vec & 1 != 0 {
+            sum ^= mat[idx];
+        }
+        vec >>= 1;
+        idx += 1;
+    }
+    sum
+}
+
+/// Square the GF(2) operator matrix `mat`, storing the result in `square`.
+///
+/// Squaring an operator that advances the CRC over `k` zero bits yields the
+/// operator that advances it over `2 * k` zero bits.
+fn gf2_matrix_square(square: &mut [u32; GF2_DIM], mat: &[u32; GF2_DIM]) {
+    #[allow(clippy::needless_range_loop)]
+    for n in 0..GF2_DIM {
+        square[n] = gf2_matrix_times(mat, mat[n]);
+    }
 }
 
 #[cfg(test)]
@@ -160,5 +239,37 @@ mod tests {
         let t = CrcTable::new();
         assert_eq!(t.entry(0), t.entry(256));
         assert_eq!(t.entry(1), t.entry(257));
+    }
+
+    #[test]
+    fn combine_matches_concatenation() {
+        let t = CrcTable::new();
+        let a = b"hello, ";
+        let b = b"world!";
+        let mut concat = a.to_vec();
+        concat.extend_from_slice(b);
+        let crc_a = t.checksum(a);
+        let crc_b = t.checksum(b);
+        let combined = t.combine(crc_a, crc_b, b.len());
+        assert_eq!(combined, t.checksum(&concat));
+    }
+
+    #[test]
+    fn combine_empty_second_is_identity() {
+        let t = CrcTable::new();
+        let crc_a = t.checksum(b"abc");
+        assert_eq!(t.combine(crc_a, t.checksum(b""), 0), crc_a);
+    }
+
+    #[test]
+    fn combine_three_way_associative() {
+        let t = CrcTable::new();
+        let (a, b, c) = (b"AAAA".as_slice(), b"BBBBBB".as_slice(), b"CC".as_slice());
+        let mut all = a.to_vec();
+        all.extend_from_slice(b);
+        all.extend_from_slice(c);
+        let ab = t.combine(t.checksum(a), t.checksum(b), b.len());
+        let abc = t.combine(ab, t.checksum(c), c.len());
+        assert_eq!(abc, t.checksum(&all));
     }
 }

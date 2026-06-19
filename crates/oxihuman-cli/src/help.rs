@@ -7,7 +7,10 @@ use oxihuman_morph::presets::BodyPreset;
 use oxihuman_morph::ExpressionPreset;
 
 pub fn print_help() {
-    println!("OxiHuman CLI v0.1.0 — Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)");
+    println!(
+        "OxiHuman CLI v{} — Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)",
+        env!("CARGO_PKG_VERSION")
+    );
     println!();
     println!("SUBCOMMANDS:");
     println!("  generate      Build a morphed .glb file");

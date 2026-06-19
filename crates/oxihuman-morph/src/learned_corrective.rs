@@ -41,10 +41,43 @@ pub fn lc_add_entry(lc: &mut LearnedCorrective, entry: CorrectiveEntry) {
     lc.entries.push(entry);
 }
 
-/// Evaluate all corrective entries and accumulate deltas (stub: zeroed output).
-pub fn lc_evaluate(lc: &LearnedCorrective, _drivers: &[f32]) -> Vec<[f32; 3]> {
-    /* Stub: returns zeroed delta array */
-    vec![[0.0; 3]; lc.vertex_count]
+/// Evaluate all corrective entries and accumulate their deltas.
+///
+/// For each `CorrectiveEntry` whose `driver_index` is valid:
+/// ```text
+/// activation_weight = max(0, 1 - |drivers[driver_index] - entry.driver_value| * entry.weight)
+/// output[v] += activation_weight * entry.delta[v]
+/// ```
+/// Entries whose `driver_index` is out of range are silently skipped.
+pub fn lc_evaluate(lc: &LearnedCorrective, drivers: &[f32]) -> Vec<[f32; 3]> {
+    let mut output = vec![[0.0_f32; 3]; lc.vertex_count];
+
+    for entry in &lc.entries {
+        if entry.driver_index >= drivers.len() {
+            continue;
+        }
+        let driver_val = drivers[entry.driver_index];
+        let activation_weight = f32::max(
+            0.0,
+            1.0 - (driver_val - entry.driver_value).abs() * entry.weight,
+        );
+
+        if activation_weight == 0.0 {
+            continue;
+        }
+
+        let vertex_count = entry.delta.len().min(lc.vertex_count);
+        for (out_v, delta_v) in output[..vertex_count]
+            .iter_mut()
+            .zip(&entry.delta[..vertex_count])
+        {
+            out_v[0] += activation_weight * delta_v[0];
+            out_v[1] += activation_weight * delta_v[1];
+            out_v[2] += activation_weight * delta_v[2];
+        }
+    }
+
+    output
 }
 
 /// Return entry count.
@@ -161,5 +194,60 @@ mod tests {
     fn test_enabled_by_default() {
         let lc = new_learned_corrective(1);
         assert!(lc.enabled /* must be enabled by default */,);
+    }
+
+    #[test]
+    fn lc_evaluate_exact_driver_match_applies_full_delta() {
+        // A single entry: driver_index=0, driver_value=0.5, weight=1.0
+        // When driver[0] == 0.5 → |0.5 - 0.5| * 1.0 = 0 → activation_weight = 1.0
+        // delta[0] = [0.3, 0.1, 0.2] → output[0] must equal [0.3, 0.1, 0.2].
+        let mut lc = new_learned_corrective(2);
+        lc_add_entry(
+            &mut lc,
+            CorrectiveEntry {
+                driver_index: 0,
+                driver_value: 0.5,
+                delta: vec![[0.3, 0.1, 0.2], [0.0, 0.0, 0.0]],
+                weight: 1.0,
+            },
+        );
+        let out = lc_evaluate(&lc, &[0.5]);
+        assert!(
+            (out[0][0] - 0.3).abs() < 1e-6,
+            "expected out[0][0] ≈ 0.3, got {}",
+            out[0][0]
+        );
+        assert!(
+            (out[0][1] - 0.1).abs() < 1e-6,
+            "expected out[0][1] ≈ 0.1, got {}",
+            out[0][1]
+        );
+        assert!(
+            (out[0][2] - 0.2).abs() < 1e-6,
+            "expected out[0][2] ≈ 0.2, got {}",
+            out[0][2]
+        );
+    }
+
+    #[test]
+    fn lc_evaluate_far_driver_produces_near_zero_delta() {
+        // driver_value=0.5, weight=1.0; driver at 2.5 → |2.5-0.5|*1.0=2.0 → max(0,1-2)=0.0
+        // All deltas must remain zero.
+        let mut lc = new_learned_corrective(1);
+        lc_add_entry(
+            &mut lc,
+            CorrectiveEntry {
+                driver_index: 0,
+                driver_value: 0.5,
+                delta: vec![[1.0, 1.0, 1.0]],
+                weight: 1.0,
+            },
+        );
+        let out = lc_evaluate(&lc, &[2.5]);
+        assert!(
+            out[0].iter().all(|&v| v.abs() < 1e-6),
+            "expected near-zero delta for far driver, got {:?}",
+            out[0]
+        );
     }
 }

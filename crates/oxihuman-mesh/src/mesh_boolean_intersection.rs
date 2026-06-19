@@ -27,7 +27,26 @@ impl Default for BooleanIntersectionConfig {
     }
 }
 
-/// Compute the intersection of two meshes (stub returns empty if no AABB overlap).
+use crate::mesh::MeshBuffers;
+use crate::mesh_sdf::{combined_aabb, compute_sdf_on_bounds, sdf_intersection, sdf_to_mesh};
+
+/// Build a `MeshBuffers` from raw vertex and flat-triangle-index slices.
+fn build_mesh_buffers(verts: &[[f32; 3]], tris: &[[u32; 3]]) -> MeshBuffers {
+    let n = verts.len();
+    MeshBuffers {
+        positions: verts.to_vec(),
+        indices: tris.iter().flat_map(|t| [t[0], t[1], t[2]]).collect(),
+        normals: vec![[0.0f32, 1.0, 0.0]; n],
+        tangents: vec![[1.0f32, 0.0, 0.0, 1.0]; n],
+        uvs: vec![[0.0f32; 2]; n],
+        colors: None,
+        has_suit: false,
+    }
+}
+
+/// Compute the intersection of two meshes via volumetric SDF.
+///
+/// Returns an empty result when either mesh is empty or AABBs don't overlap.
 pub fn mesh_boolean_intersection(
     verts_a: &[[f32; 3]],
     tris_a: &[[u32; 3]],
@@ -35,14 +54,37 @@ pub fn mesh_boolean_intersection(
     tris_b: &[[u32; 3]],
     _cfg: &BooleanIntersectionConfig,
 ) -> BooleanIntersectionResult {
-    /* Stub: return empty result if bounding boxes don't overlap */
-    if !aabbs_overlap(verts_a, verts_b) || tris_a.is_empty() || tris_b.is_empty() {
+    // If either mesh is empty or the AABBs don't overlap there is no
+    // intersection — return an empty result immediately.
+    if verts_a.is_empty()
+        || tris_a.is_empty()
+        || verts_b.is_empty()
+        || tris_b.is_empty()
+        || !aabbs_overlap(verts_a, verts_b)
+    {
         return BooleanIntersectionResult::default();
     }
-    /* Placeholder: return mesh_a as a stand-in for the intersection region */
+
+    let mesh_a = build_mesh_buffers(verts_a, tris_a);
+    let mesh_b = build_mesh_buffers(verts_b, tris_b);
+
+    let (mn, mx) = combined_aabb(&mesh_a, &mesh_b, 0.1);
+    let res = 32usize;
+    let sdf_a = compute_sdf_on_bounds(&mesh_a, mn, mx, res, true);
+    let sdf_b = compute_sdf_on_bounds(&mesh_b, mn, mx, res, true);
+
+    let sdf_result = sdf_intersection(&sdf_a, &sdf_b).unwrap_or(sdf_a);
+    let mesh_out = sdf_to_mesh(&sdf_result, 0.0);
+
+    let triangles: Vec<[u32; 3]> = mesh_out
+        .indices
+        .chunks_exact(3)
+        .map(|c| [c[0], c[1], c[2]])
+        .collect();
+
     BooleanIntersectionResult {
-        vertices: verts_a.to_vec(),
-        triangles: tris_a.to_vec(),
+        vertices: mesh_out.positions,
+        triangles,
     }
 }
 
@@ -233,6 +275,47 @@ mod tests {
         assert_eq!(
             intersection_aabb_volume(&va, &vb),
             0.0 /* no overlap */
+        );
+    }
+
+    /// Build a closed box mesh centred at `offset` with half-size 0.5.
+    fn box_at(offset: [f32; 3]) -> (Vec<[f32; 3]>, Vec<[u32; 3]>) {
+        let mesh = crate::shapes::box_mesh([0.5, 0.5, 0.5]);
+        let verts: Vec<[f32; 3]> = mesh
+            .positions
+            .iter()
+            .map(|p| [p[0] + offset[0], p[1] + offset[1], p[2] + offset[2]])
+            .collect();
+        let tris: Vec<[u32; 3]> = mesh
+            .indices
+            .chunks_exact(3)
+            .map(|c| [c[0], c[1], c[2]])
+            .collect();
+        (verts, tris)
+    }
+
+    #[test]
+    fn intersection_of_overlapping_boxes_is_non_empty() {
+        let cfg = BooleanIntersectionConfig::default();
+        let (va, ta) = box_at([0.0, 0.0, 0.0]);
+        let (vb, tb) = box_at([0.25, 0.25, 0.25]); // partial overlap
+        let result = mesh_boolean_intersection(&va, &ta, &vb, &tb, &cfg);
+        assert!(
+            !result.vertices.is_empty(),
+            "overlapping boxes must have a non-empty intersection"
+        );
+    }
+
+    #[test]
+    fn intersection_of_non_overlapping_boxes_is_empty() {
+        let cfg = BooleanIntersectionConfig::default();
+        let (va, ta) = box_at([0.0, 0.0, 0.0]);
+        let (vb, tb) = box_at([5.0, 5.0, 5.0]); // clearly disjoint
+        let result = mesh_boolean_intersection(&va, &ta, &vb, &tb, &cfg);
+        assert_eq!(
+            result.vertices.len(),
+            0,
+            "disjoint boxes must have an empty intersection"
         );
     }
 }

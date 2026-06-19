@@ -1,8 +1,9 @@
 # OxiHuman TODO
 
-> Last updated: 2026-05-05
-> Version: 0.1.2
-> Total SLoC: ~943,000 Rust (5,330 source files)
+> Last updated: 2026-06-19
+> Version: 0.2.0 (unreleased; +8 algorithm de-fakes since the 0.1.9 tag)
+> Total SLoC: ~968,000 Rust (5,341 source files)
+> Tests: 33,410 passing · 0 clippy warnings (workspace, all features)
 
 ---
 
@@ -203,7 +204,140 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 - [x] Full documentation (rustdoc, user guide, developer guide, TypeScript examples)
 - [x] Security audit complete (security.rs: path sanitization, checked arithmetic, magic bytes; 1 low advisory)
 
-### v0.1.2 (current) — Maintenance Release
+### v0.2.0 (current) — 8 Algorithm De-fakes + 13 Dead-code Module Removals
+
+- [x] Version bump to 0.2.0
+- [x] Real CRC-32 combine (`crc_table.rs`) — GF(2) matrix algorithm: zeros-operator matrices (1/2/4-bit), advances crc1 over len2 zero bytes via repeated matrix squaring, then folds in crc2; `combine(crc(A), crc(B), B.len()) == crc(A‖B)` exactly
+- [x] Real expression weights parser (`expression_io.rs`) — `expression_from_json` parses full `"weights":[…]` array via `extract_json_f32_array`; crate wired into `_morph_part1.rs` (was orphan file, never compiled)
+- [x] Real procedural cubemap environment (`background_renderer.rs`) — `CubemapStub` → `Cubemap`; equirectangular uv→direction, OpenGL cube-face selection, smoothstep elevation gradient, horizon haze, sun highlight
+- [x] Real GLB skinning export (`glb.rs`) — `export_glb_with_skeleton` emits `JOINTS_0` (u16×4) + `WEIGHTS_0` (f32×4) + per-joint `inverseBindMatrices`; top-4 nearest joints, inverse-distance weighted; `mat4_inverse` via general 4×4 LU
+- [x] Real fracture cell volume (`fracture.rs`) — `cell_volume_approx` via divergence theorem `V=(1/6)|Σ(a−s)·((b−s)×(c−s))|`; exact for closed, consistently wound cells
+- [x] Real articulated-body forward dynamics (`rigid_body_tree.rs`) — Composite-Rigid-Body inertia assembly, RNEA Coriolis/centrifugal bias, Gauss-Jordan solver `Hq̈=τ−C`, semi-implicit integration; `total_kinetic_energy` = `½q̇ᵀHq̇`
+- [x] Real discrete curl (`mesh_edge_flow_field.rs`) — `edge_flow_field_curl_magnitude` via Stokes' theorem (circulation÷area); ring param changed to `&[(usize,[f32;3])]`; Newell area + trapezoidal circulation
+- [x] Real Laplacian AO smoothing (`mesh_ambient_occlusion_mesh.rs`) — geometric Laplacian over adaptive proximity graph; `smooth_ao_laplacian` topological 1-ring umbrella operator; `AoMesh` gains `indices: Vec<u32>`
+- [x] Removed 13 dead-code scaffolding modules (all carried `#![allow(dead_code)]`, unreachable from any public entry point): `byte_order.rs`, `callback_registry.rs`, `dep_resolver_simple.rs`, `deque_ring.rs`, `handle_map.rs`, `property_bag.rs`, `quaternion_utils.rs` (oxihuman-core); `mesh_spin_duplicate.rs` (oxihuman-mesh); `angular_limit.rs`, `body_dynamics.rs`, `gyroscopic_torque.rs`, `ragdoll_config.rs` (oxihuman-physics); `tooltip.rs` (oxihuman-viewer)
+- [x] 33,410 tests · 0 warnings · 0 clippy warnings
+- [ ] Publish to crates.io (awaiting approval)
+
+### v0.1.9 — Adaptive AV1 Arithmetic Coding + 6 Physics/Mesh De-fakes
+- [x] Version bump to 0.1.9
+- [x] Real adaptive AV1 arithmetic coding (ec.rs, coeffs.rs, cdf_tables.rs) — CDF-adaptive symbol coding with descending-CDF adapt_cdf, two-pass repair_cdf_monotone, per-frame CoeffCdfContext (skip/nonzero/sign/mag_class); lossless round-trip preserved
+- [x] Real dodecahedron (mesh_platonic_solid.rs) — 20 golden-ratio vertices + 36 triangles, CCW winding, unit sphere; Euler V−E+F=2
+- [x] Real Tikhonov-regularized QEF solver (mesh_dual_contouring.rs) — (AᵀA+λI)x=(Aᵀb+λc) via gaussian_solve, fallback to cell centre
+- [x] Real Bond stiffness rotation (anisotropic_material.rs) — full 6×6 Voigt Bond matrix C'=MCMᵀ for rotation about Z
+- [x] Real rational NURBS tessellation (mesh_nurbs_surface.rs) — Cox–de Boor basis, rational S(u,v), clamped-endpoint fix
+- [x] Real face-conserving fracture cell merge (fracture.rs) — appends face lists to nearest neighbor; fixes silent face loss bug
+- [x] Real XPBD tetrahedral volume constraint (xpbd_volume.rs) — analytic ∇C, Δλ, Δp per XPBD; pinned-vertex guard
+- [x] 33,364 tests · 0 warnings · 0 clippy warnings
+- [ ] Publish to crates.io (awaiting approval)
+
+### v0.1.8 — Full AV1 Encoder, AVIF Container, HDF5/Parquet Binaries, Mesh De-fake
+- [x] Version bump to 0.1.8
+- [x] Full AV1 intra still-image codec in pure Rust (22 modules in av1/) — Profile 0, WHT4×4 lossless backbone, MC_IDENTITY GBR, round-trip bit-exact
+- [x] Real AVIF binary encoder (avif_export.rs) — `to_avif_bytes` builds ISOBMFF/AVIF container with av1C/colr/iloc/iprp
+- [x] Real HDF5 superblock v0 binary encoder (hdf5_weights_export.rs) — signature, object headers, HEAP/TREE/SNOD, Hdf5Payload enum
+- [x] Thrift Compact protocol encoder (thrift_export.rs) — ThriftCompactEncoder with field-delta, zigzag varints, nested structs
+- [x] Real Parquet binary encoder (parquet_stub_export.rs) — PAR1, PLAIN data pages, compact-Thrift FileMetaData footer
+- [x] Real Voronoi cell area (mesh_voronoi.rs) — fan-triangulation around centroid
+- [x] Real fluid surface extraction (mesh_fluid_surface.rs) — ScalarField + marching_cubes + Laplacian smoothing
+- [x] Multi-axis twist/bend/taper modifiers (mesh_twist/bend/taper_modifier.rs) — match params.axis for X/Y/Z
+- [x] QEF-based dual contouring (mesh_dual_contour.rs) — qef_solve_lstsq via Gaussian elimination
+- [x] Gordon boolean-sum surfaces (mesh_gordon_surface.rs) — S(u,v) = L_u + L_v − B
+- [x] Draco compression-level wiring (draco_compress.rs) — Huffman entropy gated by compression_level
+- [x] Network RST race fix (oxihuman-core/network.rs) — accept_one_in_background parks connection 500ms
+- [x] 33,341 tests · 0 warnings · 0 clippy warnings
+- [ ] Publish to crates.io (awaiting approval)
+
+### v0.1.7 — Binary Format Encoders, FACS Synergy, Position-Based Fluids
+- [x] Version bump to 0.1.7
+- [x] Real ONNX protobuf binary encoder (onnx_export.rs) — `to_onnx_bytes` produces valid ModelProto binary using ProtoEncoder
+- [x] Real PSD binary encoder (psd_export.rs) — `to_psd_bytes` produces all 5 PSD sections: header/color-mode/resources/layer-mask/image-data
+- [x] Real FlatBuffers binary encoder (flatbuf_stub_export.rs) — `to_flatbuf_bytes` and `flatbuf_encode_mesh` via FbBinaryBuilder (vtable, soffset, string/vector offsets)
+- [x] Real Cap'n Proto binary export (capnp_stub_export.rs) — `to_capnp_bytes` / `export_mesh_capnp_binary` via CapnSegment + serialize_message from core
+- [x] FACS coactivation synergy rules (facs_synergy.rs) — 12 rules: synergistic (AU6+AU12, AU1+AU2, AU23+AU24), antagonistic (AU1+AU4, AU12+AU15), gate (AU25→AU26)
+- [x] Position-Based Fluids solver (pbf_solver.rs) — Macklin & Müller 2013: Poly6 kernel, Spiky gradient, λ constraint projection, XSPH viscosity
+- [x] 33,124 tests · 0 warnings · 0 clippy warnings
+- [ ] Publish to crates.io (awaiting approval)
+
+### v0.1.6 — Morph Evaluators, Mesh Booleans, EPA Solver, AO Renderer, APNG Encoder
+- [x] Version bump to 0.1.6
+- [x] Real single-layer MLP forward pass in `nbs_forward` (neural_blend_shape.rs) — activation(Σ W·input + bias)
+- [x] Real `lc_evaluate` (learned_corrective.rs) — driver-activation × delta accumulation
+- [x] Real `ddr_evaluate` (data_driven_rig.rs) — inverse-distance weighted kNN regression over pose samples
+- [x] Real `ebt_evaluate` (emotion_blend_tree.rs) — recursive DFS blend tree (Add/Multiply/Override ops, cycle detection)
+- [x] Real `apm_evaluate` (age_progression_morph.rs) — piecewise-linear interpolation between AgeStage brackets
+- [x] Real `ebmrph_evaluate` (ethnic_blend_morph.rs) — normalized weighted blend over ethnic feature sets
+- [x] Real `ebm_evaluate` (example_based_morph.rs) — `rest + Σ w_e·(example_e − rest)` blend shapes
+- [x] Real DLB skinning functions in dual_quaternion_skin.rs — `dqs_transform_vertex/dqs_transform_all` (antipodal fix, DQ normalize, sandwich transform)
+- [x] Real `psd_evaluate` (pose_space_deform.rs) — `Σ w_e·delta_e / Σ w_e` weighted blend (not argmax copy)
+- [x] Real `randomize_gaussian_stub` (param_randomizer.rs) — Box-Muller from two LCG draws
+- [x] Real `vdm_process` (voice_driven_morph.rs) — Goertzel DFT band-energy per AudioBandMapping + IIR smoothing
+- [x] Real `gds_evaluate` (gaze_driven_shape.rs) — yaw/pitch gain mapped to 4-channel directional morph
+- [x] Real `pw_evaluate_with_positions` (procedural_wrinkle.rs) — per-region distance/falloff wrinkle displacement
+- [x] Extract `compute_sdf_on_bounds` primitive (mesh_sdf.rs) — shared grid for multi-mesh SDF operations
+- [x] Real `slice_mesh_with_plane` (mesh_slice_plane.rs) — per-triangle plane classification and edge split
+- [x] Real `mesh_boolean_union` (mesh_boolean_union.rs) — combined AABB SDF grid → sdf_union → marching cubes
+- [x] Real `mesh_boolean_difference` (mesh_boolean_difference.rs) — sdf_subtraction path
+- [x] Real `mesh_boolean_intersection` (mesh_boolean_intersection.rs) — sdf_intersection path with AABB early-exit
+- [x] Real `boolean_op` routing (mesh_boolean_ops.rs) — delegates to union/difference/intersection
+- [x] Real `csg_to_mesh` (mesh_boolean_csg.rs) — ScalarField CSG → marching cubes
+- [x] Real `remesh_from_voxels` (mesh_voxel_remesh.rs) — occupancy → ScalarField → marching cubes + Laplacian smooth
+- [x] Real `poisson_reconstruct_stub` (mesh_poisson_recon.rs) — delegates to PoissonReconstructor::reconstruct
+- [x] Real topological invariants (topological_insulator.rs) — 2-band Dirac model: Chern number, Z2, anomalous Hall conductance
+- [x] Real EPA solver (epa_solver.rs) — iterative polytope expansion, horizon edge extraction, contact point
+- [x] Real `compute_ao_at_vertex` (ao_renderer.rs) — Hammersley hemisphere sampling, cosine-weighted solid-angle integral
+- [x] Real APNG encoder (apng_export.rs) — PNG signature, IHDR/acTL/fcTL/IDAT/fdAT/IEND, CRC32, zlib scanlines
+- [x] 33,076 tests · 0 warnings · 0 clippy warnings
+- [ ] Publish to crates.io (awaiting approval)
+
+### v0.1.5 — Image Codecs, Archive Reader, WASM Interpreter, Async Signal
+- [x] Version bump to 0.1.5
+- [x] Real ZIP archive reader — `open_archive(path)` parses actual ZIP files (EOCD, central dir, local headers; Stored + DEFLATE)
+- [x] Real blocking async signal — `AsyncSignal` now `Arc<Mutex+Condvar>`; `signal_wait` blocks until set; `signal_wait_timeout` timed
+- [x] Real JPEG baseline codec — DCT, Huffman, JFIF framing; encoder + decoder; wired into `encode_stub`/`decode_stub`
+- [x] Real GIF89a codec — LZW (variable-width LSB-first), median-cut quantisation; encoder + decoder
+- [x] Real WebP VP8L lossless codec — canonical Huffman (bit-reversed), RIFF/WEBP container; encoder + decoder
+- [x] Real TIFF baseline codec — uncompressed RGB, 12 IFD tags, LE/BE read; encoder + decoder
+- [x] Real WASM MVP bytecode interpreter — `wasm_call` executes 100+ opcodes on shared linear memory; `wasm_call_stub` deprecated alias
+- [x] Fix wgpu 29 API compatibility in `oxihuman-viewer` (Option-wrapped BindGroupLayout + DepthStencilState fields)
+- [ ] Publish to crates.io (awaiting approval)
+
+### v0.1.4 — Hash De-fake + Algorithm Improvements
+- [x] Version bump to 0.1.4
+- [x] Real SHA-256 (FIPS 180-4, pure Rust, KAT-validated) — replace fake mixing in `hashing_sha256.rs`
+- [x] Real BLAKE3 (pure Rust, spec-faithful, KAT-validated) — replace fake mixing in `hashing_blake3.rs`
+- [x] Real xxHash64/32 (pure Rust, spec-faithful, KAT-validated) — replace fake mixing in `hashing_xxhash.rs`
+- [x] Wire `checksum_verifier.rs` to real SHA-256 and real xxHash64
+- [x] Real Myers O(ND) diff — replace simplified prefix-only stub in `text_diff_myers.rs`
+- [x] Real patience diff (LCS-of-unique-lines + patience sort) — replace stub in `patience_diff.rs`
+- [x] Real ear-clip polygon triangulation (`triangulate_earclip_2d` + `triangulate_polygon_3d`) in `mesh_triangulate.rs`
+- [x] Full RFC 3986 URL percent-encoding/decoding — replace space-only stubs in `encoding_utils.rs`
+- [ ] Publish to crates.io (awaiting approval)
+
+### v0.1.3 — Algorithm De-fake Release
+- [x] Version bump to 0.1.3
+- [x] Real ChaCha20-Poly1305 AEAD (RFC 8439, KAT-validated, pure Rust)
+- [x] Real AES-128/256-GCM AEAD (FIPS-197 + SP800-38D, KAT-validated, pure Rust)
+- [x] Real LZ4 block compression (wire-faithful: match tokens, hash chain)
+- [x] Real Snappy compression (varint preamble + literal/copy tags)
+- [x] Real LZ77/LZSS compression (sliding window, length/distance encoding)
+- [x] Real zstd compression (Huffman + LZ77, spec-valid frames)
+- [x] Real brotli compression (single meta-block, Huffman-coded)
+- [x] Real compression pipeline (routes through actual codecs)
+- [x] Real OAuth2 RFC-6749 protocol (request builders + response parsing + transport trait)
+- [x] Real LBS (fast_lbs_transform: Σ wᵢ·Mᵢ·v matrix multiply)
+- [x] Real mean curvature map wired to WASM API (cotangent-weight Laplacian)
+- [x] Real winding propagation (BFS consistent_winding in mesh_face_flip)
+- [x] Real Laplacian edge-flow smoothing (honors `iterations` count)
+- [x] Real partition rebalancing (Kernighan-Lin boundary moves)
+- [x] Real constraint island splitting (union-find BFS over constraint graph)
+- [x] Real topological sort in render graph builder (Kahn's algorithm)
+- [x] Real boundary-edge loop extraction (mesh_edge_boundary_detect)
+- [x] Extract oxihuman-test-utils crate (publish=false, canonical env-var helpers)
+- [x] Rename gc_stub.rs → gc.rs; GcStub → Gc; new_gc_stub → new_gc
+- [ ] Publish to crates.io (awaiting approval)
+
+### v0.1.2 — Maintenance Release
 - [x] Version bump to 0.1.2
 - [x] Replace miniz_oxide with oxiarc-deflate (COOLJAPAN compression policy)
 - [x] Fix rustdoc broken intra-doc links in capnproto.rs (bit-range notation)
@@ -250,11 +384,11 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 - [x] Wire SIMD into `oxihuman-morph` hot loops
   - The `simd` feature on `oxihuman-morph` (`crates/oxihuman-morph/Cargo.toml`) is declared but gates nothing. Add `wide` (Pure Rust stable SIMD) as a workspace dep, gate acceleration of target-application inner loops (`engine.rs` MorphEngine hot paths) behind `#[cfg(feature = "simd")]`. Benchmark via `morph_bench` before/after. Keep default features = no `wide` dep.
 
-- [ ] Extract shared `oxihuman-test-utils` crate (publish=false)
-  - Once the 0.1.2 env-var refactor is committed, extract `makehuman_data_dir()` / `targets_dir()` / `base_obj()` helpers into `crates/oxihuman-test-utils/` (`publish = false`) as a `[dev-dependencies]` dep, or add a `dev-utils` feature to `oxihuman-core` exposing the same helpers.
+- [x] Extract shared `oxihuman-test-utils` crate (publish=false)
+  - Extracted `makehuman_data_dir()` / `targets_dir()` / `base_obj()` / `assets_dir()` into `crates/oxihuman-test-utils/` (`publish = false`). Wired as `[dev-dependencies]` in all 7 consuming crates; eliminated 6 duplicate definitions and 13 inline env-var blocks.
 
-- [ ] Audit + rename remaining `*_stub.rs` files (39 total on branch 0.1.2)
-  - 39 files still carry the `_stub` suffix despite TODO.md claiming "44 stubs replaced." Most are functionally complete — rename to drop `_stub` and update `#[path = "..."]` directives in `_core_part{1,2,3}.rs`. Genuine stubs (e.g., `capnproto_stub.rs`) get individual implementation tasks.
+- [x] Audit + rename remaining `*_stub.rs` files (1 remaining on branch 0.1.2)
+  - `gc_stub.rs` was the only remaining `_stub` file (audit found the "39" count was stale). Renamed `gc_stub.rs` → `gc.rs`; renamed `GcStub` → `Gc` and `new_gc_stub` → `new_gc`; updated `_core_part3.rs` wiring.
 
 - [x] Reconcile CLI subcommand count — Verified via dispatcher in main.rs: 35 subcommands wired across 7 modules. Updated README.md (was 32) and crates/oxihuman-cli/README.md (was 34) to 35.
   - `README.md` claims 32 CLI subcommands; only 7 command files in `crates/oxihuman-cli/src/commands/`. Either expand `commands/` to match the documented 32 subcommands (per IMPLEMENT POLICY), or update README to reflect the actual count.
@@ -272,3 +406,64 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 - [x] Cap'n Proto traversal & depth limits — implement message-size traversal counter and pointer-depth cap per spec ("Security Considerations" section). Builds on the wire-format pointer kinds landed in 0.1.2.
 - [x] Cap'n Proto far pointers + composite list tag (element_size = 7) — needed for cross-segment references and list-of-struct. Builds on the segment table + pointer encoding from the 0.1.2 wire-format slice.
 - [x] Rename `capnproto_stub.rs` → `capnproto.rs` once the deferred Cap'n Proto sub-slices (traversal limits, far pointers, composite lists) land.
+
+## Stubs to implement (added 2026-06-12 by /cooljapan-stub-check) — DONE 2026-06-14
+
+- [x] `oxihuman-viewer`: `background_renderer.rs` — real procedural cubemap environment. Renamed
+  `CubemapStub` → `Cubemap`; `sample_cubemap` does equirectangular `uv→direction`, OpenGL cube-face
+  selection, smoothstep elevation gradient + horizon haze + directional sun. (+2 tests)
+- [x] `oxihuman-export`: `glb.rs` — real skinning weight export. `export_glb_with_skeleton` now emits
+  `JOINTS_0`/`WEIGHTS_0` + per-joint `inverseBindMatrices` (memoised FK, general 4×4 inverse,
+  top-4 inverse-distance auto-weights normalised to 1). (+2 tests)
+- [x] `oxihuman-morph`: `expression_io.rs` — full weights-array JSON parser (`extract_json_f32_array`);
+  also wired the previously-orphan module into the crate. (+2 tests, +9 now-compiled tests)
+- [x] `oxihuman-core`: `crc_table.rs` — real GF(2) CRC-32 `combine` (zlib matrix algorithm);
+  `combine(crc(A),crc(B),len(B)) == crc(A‖B)`. (+3 tests)
+
+## Backlog — Underspecified De-fakes (data-model extensions) — DONE 2026-06-14
+
+- [x] **`fracture.rs:cell_volume_approx`** — replaced `total_area * 0.1` with the divergence-theorem
+  volume of the star-shaped solid from the seed apex: `V = (1/6)|Σ (a−s)·((b−s)×(c−s))|` over a fan
+  triangulation. No data-model change needed (the seed apex makes the open surface patches integrable);
+  exact for closed, consistently-wound cells. Verified on a unit corner tetrahedron (= 1/6).
+- [x] **`mesh_edge_flow_field.rs:edge_flow_field_curl_magnitude`** — real discrete curl via Stokes'
+  theorem (circulation ÷ enclosed area). Ring parameter changed from `&[[f32;3]]` to
+  `&[(usize,[f32;3])]` so each ring vertex maps to its flow vector; area via Newell's method,
+  circulation via trapezoidal rule. Verified: rotational field `F=(−y,x,0)` ⇒ curl 2.0.
+- [x] **`mesh_ambient_occlusion_mesh.rs:smooth_ao`** — real Laplacian smoothing. Added
+  `indices: Vec<u32>` to `AoMesh`; `smooth_ao` is now a proximity-graph Laplacian (adaptive radius),
+  plus `smooth_ao_laplacian` (topological 1-ring umbrella over the index buffer) and `AoMesh::smooth`.
+- [x] **`rigid_body_tree.rs:forward_dynamics_step`** — real articulated-body forward dynamics.
+  `ArtBody` gained `com_offset: [f32;3]` and `link_length: f32`. Builds `H(q)` by propagating each
+  link's spatial inertia through the tree (CRBA via world-frame geometric Jacobians), computes the
+  RNEA Coriolis/centrifugal bias `C(q,q̇)`, solves `H q̈ = τ − C`, integrates semi-implicitly.
+  `total_kinetic_energy` is now `½ q̇ᵀH q̇`. Verified by the single-link parallel-axis theorem.
+
+## Backlog — Orphan module audit (2026-06-14)
+
+**2,006 `.rs` files were on disk but never wired into any crate** (not reachable via
+`mod`/`#[path]`/`include!` from a crate root, so never compiled/tested/shipped). They do **not**
+affect the shipped product — the wired subset compiles, passes all 33,410 tests, and is clippy-clean.
+Detector: `/tmp/orphan_audit.py` (resolves the real module graph incl. `include!` aggregators).
+
+- [x] **Ran orphan-audit workflow** (11 agents, 78 files deep-reviewed) — evidence-based classification:
+  - Of 30 `≥60%`-symbol-twin candidates: **13 truly redundant**, 17 share method names but are
+    semantically distinct (e.g. `bounded_queue` FIFO vs `array_stack` LIFO; `fbx_ascii` ≠ `usda_export`).
+  - Of a 48-file unique/partial sample: **30 real_feature** (62%), **14 renamed_dup** (29%),
+    **4 stub** (8%), 0 broken. Real features are substantial — `target_docs.rs` (1313 LOC),
+    `population_validate.rs` (1099), `bvh_export.rs` (612), `hair_v2/strand.rs` (605),
+    `cloth_v2/solver.rs` (601), `elastic_rod`, `voxel_grid`, `age_morph`, `eyelid_control`, …
+  - Several TODO "COMPLETE" features (`hair_v2`, `cloth_v2`, `target_docs`, `population_validate`,
+    `bvh_export`) are written but **never wired/compiled/tested**.
+- [x] **Deleted 13 individually-verified redundant duplicates** (2026-06-14, orphans 2006 → 1993;
+  build still green): `byte_order`, `callback_registry`, `dep_resolver_simple`, `deque_ring`,
+  `handle_map`, `property_bag`, `quaternion_utils` (core); `mesh_spin_duplicate` (mesh);
+  `angular_limit`, `body_dynamics`, `gyroscopic_torque`, `ragdoll_config` (physics); `tooltip` (viewer).
+- [ ] **Remaining 1,993 orphans need a full per-file audit before further action.** Extrapolated mix:
+  ~60% genuine unintegrated features (~1,200), ~30% functional duplicates (~600), ~8% stubs (~160).
+  - **Delete path** (dupes + stubs): safe but each must be individually confirmed (the symbol-name
+    heuristic over-flags — only 13/30 dup-candidates were truly redundant). Run the full classification
+    workflow over all 1,993, then delete confirmed dupes/stubs.
+  - **Wire path** (real features): large, collision-prone (rename-on-wire needed; ~⅓ of sampled
+    real_features had `collides=true`), requires per-feature integration + tests. Best done one
+    feature at a time with explicit approval.

@@ -3,9 +3,12 @@
 
 //! Draco-like mesh compression (quantized vertex attribute encoding).
 
+#![allow(dead_code)]
+
+use oxihuman_core::{huffman_decode, huffman_encode, HuffmanCodeTable};
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-#[allow(dead_code)]
 pub struct DracoConfig {
     pub position_quantization: u8,
     pub normal_quantization: u8,
@@ -14,7 +17,6 @@ pub struct DracoConfig {
     pub compression_level: u8,
 }
 
-#[allow(dead_code)]
 pub struct CompressedMesh {
     pub data: Vec<u8>,
     pub original_vertex_count: usize,
@@ -22,7 +24,6 @@ pub struct CompressedMesh {
     pub quantization_bits: u8,
 }
 
-#[allow(dead_code)]
 pub struct DracoQuantizedMesh {
     pub positions: Vec<[i32; 3]>,
     pub normals: Vec<[i32; 3]>,
@@ -33,9 +34,202 @@ pub struct DracoQuantizedMesh {
     pub position_scale: f32,
 }
 
+// ── Quantization level mapping ────────────────────────────────────────────────
+
+/// Map compression_level (0..=10) to quantize_bits for position data.
+///
+/// Higher compression_level means fewer quantization bits, producing smaller
+/// output at the cost of positional precision:
+///
+/// - level 0    : 14 bits  (most precise, raw / no entropy coding)
+/// - level 1-3  : 12 bits
+/// - level 4-7  : 10 bits
+/// - level 8-10 :  8 bits  (highest compression)
+fn quantize_bits_for_level(compression_level: u8) -> u8 {
+    match compression_level {
+        0 => 14,
+        1..=3 => 12,
+        4..=7 => 10,
+        _ => 8,
+    }
+}
+
+// ── Entropy coding (Huffman) ──────────────────────────────────────────────────
+
+/// Wire format for entropy-coded sections.
+///
+/// Layout when flag == 0x00 (raw):
+///   `[flag: u8 = 0x00][payload bytes...]`
+///
+/// Layout when flag == 0x01 (Huffman):
+///   `[flag: u8 = 0x01]`
+///   `[num_symbols: u16 LE]`    - number of distinct symbols in the table
+///   For each symbol (num_symbols entries):
+///     `[symbol: u8]`           - byte value
+///     `[code_len: u8]`         - canonical code length (1..=15)
+///   `[symbol_count: u32 LE]`   - total original symbol count (for decoder)
+///   `[bit_count: u64 LE]`      - valid bit count in the packed stream
+///   `[payload_len: u32 LE]`    - byte length of the packed bit stream
+///   `[payload: payload_len]`   - packed Huffman bit stream
+pub fn draco_entropy_encode(data: &[u8], level: u8) -> Vec<u8> {
+    if level == 0 || data.is_empty() {
+        // Raw pass-through: flag=0 + original bytes
+        let mut out = Vec::with_capacity(1 + data.len());
+        out.push(0u8);
+        out.extend_from_slice(data);
+        return out;
+    }
+
+    // Build Huffman code table from the data.
+    let table = match HuffmanCodeTable::from_data(data) {
+        Some(t) => t,
+        None => {
+            // Fallback to raw if we can't build a table (should not happen for
+            // non-empty data, but be defensive).
+            let mut out = Vec::with_capacity(1 + data.len());
+            out.push(0u8);
+            out.extend_from_slice(data);
+            return out;
+        }
+    };
+
+    let (packed, bit_count) = match huffman_encode(data, &table) {
+        Ok(r) => r,
+        Err(_) => {
+            // Fallback to raw on encoding error.
+            let mut out = Vec::with_capacity(1 + data.len());
+            out.push(0u8);
+            out.extend_from_slice(data);
+            return out;
+        }
+    };
+
+    // Collect active symbols and their code lengths for the header.
+    let active_syms: Vec<(u8, u8)> = table
+        .codes
+        .iter()
+        .enumerate()
+        .filter(|(_, &(_, len))| len > 0)
+        .map(|(sym, &(_, len))| (sym as u8, len))
+        .collect();
+
+    let num_symbols = active_syms.len() as u16;
+    let symbol_count = data.len() as u32;
+
+    // Total capacity estimate: flag(1) + num_sym(2) + sym_entries(2*n) +
+    // symbol_count(4) + bit_count(8) + payload_len(4) + payload
+    let header_len = 1 + 2 + (2 * active_syms.len()) + 4 + 8 + 4;
+    let mut out = Vec::with_capacity(header_len + packed.len());
+
+    // flag = 1: Huffman-encoded
+    out.push(1u8);
+
+    // num_symbols (u16 LE)
+    out.extend_from_slice(&num_symbols.to_le_bytes());
+
+    // Symbol table entries: (symbol: u8, code_len: u8)
+    for (sym, code_len) in &active_syms {
+        out.push(*sym);
+        out.push(*code_len);
+    }
+
+    // symbol_count (u32 LE) — needed by decoder to know how many symbols to decode
+    out.extend_from_slice(&symbol_count.to_le_bytes());
+
+    // bit_count (u64 LE) — valid bit count in the packed stream
+    out.extend_from_slice(&(bit_count as u64).to_le_bytes());
+
+    // payload_len (u32 LE)
+    out.extend_from_slice(&(packed.len() as u32).to_le_bytes());
+
+    // packed Huffman stream
+    out.extend_from_slice(&packed);
+
+    out
+}
+
+/// Decode a buffer produced by [`draco_entropy_encode`].
+///
+/// Returns the original byte sequence or an error string.
+pub fn draco_entropy_decode(data: &[u8]) -> Result<Vec<u8>, String> {
+    if data.is_empty() {
+        return Err("draco_entropy_decode: empty input".to_string());
+    }
+
+    let flag = data[0];
+    match flag {
+        0 => {
+            // Raw: everything after the flag byte is the payload.
+            Ok(data[1..].to_vec())
+        }
+        1 => {
+            // Huffman-encoded: parse header.
+            let mut cursor = 1usize;
+
+            let read_u16 = |buf: &[u8], pos: &mut usize| -> Result<u16, String> {
+                if *pos + 2 > buf.len() {
+                    return Err("draco_entropy_decode: truncated num_symbols".to_string());
+                }
+                let v = u16::from_le_bytes([buf[*pos], buf[*pos + 1]]);
+                *pos += 2;
+                Ok(v)
+            };
+
+            let read_u32 = |buf: &[u8], pos: &mut usize| -> Result<u32, String> {
+                if *pos + 4 > buf.len() {
+                    return Err("draco_entropy_decode: truncated u32 field".to_string());
+                }
+                let v = u32::from_le_bytes([buf[*pos], buf[*pos + 1], buf[*pos + 2], buf[*pos + 3]]);
+                *pos += 4;
+                Ok(v)
+            };
+
+            let read_u64 = |buf: &[u8], pos: &mut usize| -> Result<u64, String> {
+                if *pos + 8 > buf.len() {
+                    return Err("draco_entropy_decode: truncated u64 field".to_string());
+                }
+                let mut bytes = [0u8; 8];
+                bytes.copy_from_slice(&buf[*pos..*pos + 8]);
+                *pos += 8;
+                Ok(u64::from_le_bytes(bytes))
+            };
+
+            let num_symbols = read_u16(data, &mut cursor)? as usize;
+
+            // Read code lengths to reconstruct the canonical table.
+            // We store them as a [u8; 256] lengths array.
+            let mut lengths = [0u8; 256];
+            for _ in 0..num_symbols {
+                if cursor + 2 > data.len() {
+                    return Err("draco_entropy_decode: truncated symbol entry".to_string());
+                }
+                let sym = data[cursor] as usize;
+                let code_len = data[cursor + 1];
+                cursor += 2;
+                lengths[sym] = code_len;
+            }
+
+            let symbol_count = read_u32(data, &mut cursor)? as usize;
+            let bit_count = read_u64(data, &mut cursor)? as usize;
+            let payload_len = read_u32(data, &mut cursor)? as usize;
+
+            if cursor + payload_len > data.len() {
+                return Err("draco_entropy_decode: truncated payload".to_string());
+            }
+            let payload = &data[cursor..cursor + payload_len];
+
+            // Reconstruct the canonical Huffman table from the serialised lengths.
+            let table = HuffmanCodeTable::from_lengths(&lengths);
+
+            huffman_decode(payload, bit_count, symbol_count, &table)
+                .map_err(|e| format!("draco_entropy_decode: huffman error: {e}"))
+        }
+        other => Err(format!("draco_entropy_decode: unknown flag byte {other:#04x}")),
+    }
+}
+
 // ── Functions ─────────────────────────────────────────────────────────────────
 
-#[allow(dead_code)]
 pub fn default_draco_config() -> DracoConfig {
     DracoConfig {
         position_quantization: 11,
@@ -46,7 +240,6 @@ pub fn default_draco_config() -> DracoConfig {
     }
 }
 
-#[allow(dead_code)]
 pub fn quantize_positions(
     positions: &[[f32; 3]],
     bits: u8,
@@ -90,7 +283,6 @@ pub fn quantize_positions(
     (quantized, mn, mx, scale)
 }
 
-#[allow(dead_code)]
 pub fn dequantize_positions(quantized: &[[i32; 3]], min: [f32; 3], scale: f32) -> Vec<[f32; 3]> {
     quantized
         .iter()
@@ -104,7 +296,6 @@ pub fn dequantize_positions(quantized: &[[i32; 3]], min: [f32; 3], scale: f32) -
         .collect()
 }
 
-#[allow(dead_code)]
 pub fn quantize_normals(normals: &[[f32; 3]], bits: u8) -> Vec<[i32; 3]> {
     let max_val = ((1i32 << bits) - 1) as f32;
     let half = max_val / 2.0;
@@ -120,7 +311,6 @@ pub fn quantize_normals(normals: &[[f32; 3]], bits: u8) -> Vec<[i32; 3]> {
         .collect()
 }
 
-#[allow(dead_code)]
 pub fn dequantize_normals(quantized: &[[i32; 3]], bits: u8) -> Vec<[f32; 3]> {
     let max_val = ((1i32 << bits) - 1) as f32;
     let half = max_val / 2.0;
@@ -136,7 +326,6 @@ pub fn dequantize_normals(quantized: &[[i32; 3]], bits: u8) -> Vec<[f32; 3]> {
         .collect()
 }
 
-#[allow(dead_code)]
 pub fn quantize_uvs(uvs: &[[f32; 2]], bits: u8) -> Vec<[i32; 2]> {
     let max_val = ((1i32 << bits) - 1) as f32;
     uvs.iter()
@@ -149,7 +338,6 @@ pub fn quantize_uvs(uvs: &[[f32; 2]], bits: u8) -> Vec<[i32; 2]> {
         .collect()
 }
 
-#[allow(dead_code)]
 pub fn dequantize_uvs(quantized: &[[i32; 2]], bits: u8) -> Vec<[f32; 2]> {
     let max_val = ((1i32 << bits) - 1) as f32;
     quantized
@@ -158,7 +346,6 @@ pub fn dequantize_uvs(quantized: &[[i32; 2]], bits: u8) -> Vec<[f32; 2]> {
         .collect()
 }
 
-#[allow(dead_code)]
 pub fn encode_indices_delta(indices: &[u32]) -> Vec<i32> {
     let mut out = Vec::with_capacity(indices.len());
     let mut prev = 0i32;
@@ -170,7 +357,6 @@ pub fn encode_indices_delta(indices: &[u32]) -> Vec<i32> {
     out
 }
 
-#[allow(dead_code)]
 pub fn decode_indices_delta(deltas: &[i32]) -> Vec<u32> {
     let mut out = Vec::with_capacity(deltas.len());
     let mut acc = 0i32;
@@ -191,14 +377,15 @@ fn compress_attrs(
     indices: &[u32],
     cfg: &DracoConfig,
 ) -> (CompressResult, [f32; 3], f32) {
-    let (qpos, mn, _mx, scale) = quantize_positions(positions, cfg.position_quantization);
+    // Use the compression-level-adjusted quantization bits for positions.
+    let pos_bits = quantize_bits_for_level(cfg.compression_level);
+    let (qpos, mn, _mx, scale) = quantize_positions(positions, pos_bits);
     let qnrm = quantize_normals(normals, cfg.normal_quantization);
     let quvs = quantize_uvs(uvs, cfg.uv_quantization);
     let idx_delta = encode_indices_delta(indices);
     ((qpos, qnrm, quvs, idx_delta), mn, scale)
 }
 
-#[allow(dead_code)]
 pub fn compress_mesh(
     positions: &[[f32; 3]],
     normals: &[[f32; 3]],
@@ -206,49 +393,78 @@ pub fn compress_mesh(
     indices: &[u32],
     cfg: &DracoConfig,
 ) -> CompressedMesh {
+    let pos_bits = quantize_bits_for_level(cfg.compression_level);
     let ((qpos, qnrm, quvs, idx_delta), _mn, _scale) =
         compress_attrs(positions, normals, uvs, indices, cfg);
 
-    // Pack everything into bytes (simple little-endian i32 streams)
-    let mut data: Vec<u8> = Vec::new();
-
-    // Header
-    data.extend_from_slice(&(positions.len() as u32).to_le_bytes());
-    data.extend_from_slice(&(indices.len() as u32).to_le_bytes());
-    data.push(cfg.position_quantization);
+    // Pack attribute bytes (simple little-endian i32 streams).
+    let mut attr_bytes: Vec<u8> = Vec::new();
 
     // Positions
     for p in &qpos {
         for &v in p {
-            data.extend_from_slice(&v.to_le_bytes());
+            attr_bytes.extend_from_slice(&v.to_le_bytes());
         }
     }
     // Normals
     for n in &qnrm {
         for &v in n {
-            data.extend_from_slice(&v.to_le_bytes());
+            attr_bytes.extend_from_slice(&v.to_le_bytes());
         }
     }
     // UVs
     for uv in &quvs {
         for &v in uv {
-            data.extend_from_slice(&v.to_le_bytes());
+            attr_bytes.extend_from_slice(&v.to_le_bytes());
         }
     }
     // Index deltas
     for &d in &idx_delta {
-        data.extend_from_slice(&d.to_le_bytes());
+        attr_bytes.extend_from_slice(&d.to_le_bytes());
     }
+
+    // Apply entropy coding gated on compression_level.
+    let encoded_attrs = draco_entropy_encode(&attr_bytes, cfg.compression_level);
+
+    // Assemble the final compressed payload.
+    let mut data: Vec<u8> = Vec::with_capacity(9 + encoded_attrs.len());
+
+    // Header: vertex_count(4) + index_count(4) + quantization_bits(1)
+    data.extend_from_slice(&(positions.len() as u32).to_le_bytes());
+    data.extend_from_slice(&(indices.len() as u32).to_le_bytes());
+    data.push(pos_bits);
+
+    // Entropy-coded attribute block
+    data.extend_from_slice(&encoded_attrs);
 
     CompressedMesh {
         data,
         original_vertex_count: positions.len(),
         original_index_count: indices.len(),
-        quantization_bits: cfg.position_quantization,
+        quantization_bits: pos_bits,
     }
 }
 
-#[allow(dead_code)]
+/// Decompress a mesh produced by [`compress_mesh`].
+///
+/// Returns the raw attribute bytes (positions / normals / UVs / index deltas
+/// packed as little-endian i32 streams) along with the header fields, or an
+/// error string describing the failure.
+pub fn decompress_mesh_bytes(
+    compressed: &CompressedMesh,
+) -> Result<(usize, usize, u8, Vec<u8>), String> {
+    let d = &compressed.data;
+    if d.len() < 9 {
+        return Err("decompress_mesh_bytes: data too short for header".to_string());
+    }
+    let vertex_count = u32::from_le_bytes([d[0], d[1], d[2], d[3]]) as usize;
+    let index_count = u32::from_le_bytes([d[4], d[5], d[6], d[7]]) as usize;
+    let quantization_bits = d[8];
+
+    let attr_bytes = draco_entropy_decode(&d[9..])?;
+    Ok((vertex_count, index_count, quantization_bits, attr_bytes))
+}
+
 pub fn estimate_compressed_size(
     vertex_count: usize,
     index_count: usize,
@@ -261,7 +477,6 @@ pub fn estimate_compressed_size(
     (pos_bits + nrm_bits + uv_bits + idx_bits) / 8 + 16
 }
 
-#[allow(dead_code)]
 pub fn compression_ratio(original_bytes: usize, compressed: &CompressedMesh) -> f32 {
     if compressed.data.is_empty() {
         return 1.0;
@@ -269,7 +484,6 @@ pub fn compression_ratio(original_bytes: usize, compressed: &CompressedMesh) -> 
     original_bytes as f32 / compressed.data.len() as f32
 }
 
-#[allow(dead_code)]
 pub fn quantize_mesh(
     positions: &[[f32; 3]],
     normals: &[[f32; 3]],
@@ -462,5 +676,146 @@ mod tests {
         assert_eq!(cfg.normal_quantization, 8);
         assert_eq!(cfg.uv_quantization, 10);
         assert!(cfg.use_edgebreaker);
+    }
+
+    // ── Entropy coding tests ──────────────────────────────────────────────────
+
+    #[test]
+    fn test_entropy_raw_roundtrip() {
+        // level=0 → raw pass-through
+        let data = vec![0xAA, 0xBB, 0xCC, 0xDD];
+        let encoded = draco_entropy_encode(&data, 0);
+        assert_eq!(encoded[0], 0u8, "flag must be 0 for raw");
+        let decoded = draco_entropy_decode(&encoded).expect("raw decode should succeed");
+        assert_eq!(decoded, data);
+    }
+
+    #[test]
+    fn test_entropy_huffman_roundtrip_level1() {
+        // A realistic byte stream with varied byte values.
+        let data: Vec<u8> = (0u8..=127).collect();
+        let encoded = draco_entropy_encode(&data, 1);
+        let decoded = draco_entropy_decode(&encoded).expect("huffman decode should succeed");
+        assert_eq!(decoded, data, "round-trip must reconstruct original data");
+    }
+
+    #[test]
+    fn test_entropy_huffman_roundtrip_level10() {
+        // Repeated bytes — good for Huffman compression.
+        let data: Vec<u8> = std::iter::repeat_n(42u8, 200).chain(
+            std::iter::repeat_n(7u8, 50)
+        ).collect();
+        let encoded = draco_entropy_encode(&data, 10);
+        assert_eq!(encoded[0], 1u8, "flag must be 1 for Huffman");
+        let decoded = draco_entropy_decode(&encoded).expect("level-10 decode should succeed");
+        assert_eq!(decoded, data);
+    }
+
+    #[test]
+    fn test_entropy_empty_raw_fallback() {
+        // Empty input always falls through as raw (even with level > 0).
+        let encoded = draco_entropy_encode(&[], 5);
+        assert_eq!(encoded[0], 0u8);
+        let decoded = draco_entropy_decode(&encoded).expect("empty raw decode ok");
+        assert!(decoded.is_empty());
+    }
+
+    #[test]
+    fn test_entropy_decode_unknown_flag_errors() {
+        let bad = vec![0xFFu8, 1, 2, 3];
+        assert!(draco_entropy_decode(&bad).is_err());
+    }
+
+    // ── compression_level wires quantize_bits ──────────────────────────────────
+
+    #[test]
+    fn test_quantize_bits_mapping() {
+        assert_eq!(quantize_bits_for_level(0), 14);
+        assert_eq!(quantize_bits_for_level(1), 12);
+        assert_eq!(quantize_bits_for_level(3), 12);
+        assert_eq!(quantize_bits_for_level(4), 10);
+        assert_eq!(quantize_bits_for_level(7), 10);
+        assert_eq!(quantize_bits_for_level(8), 8);
+        assert_eq!(quantize_bits_for_level(10), 8);
+    }
+
+    #[test]
+    fn test_compress_level0_uses_14bits() {
+        let pos = sample_positions();
+        let nrm = sample_normals();
+        let uvs = sample_uvs();
+        let idx = sample_indices();
+        let mut cfg = default_draco_config();
+        cfg.compression_level = 0;
+        let compressed = compress_mesh(&pos, &nrm, &uvs, &idx, &cfg);
+        // quantization_bits in output should reflect level-mapped bits.
+        assert_eq!(compressed.quantization_bits, 14);
+    }
+
+    #[test]
+    fn test_compress_level10_uses_8bits() {
+        let pos = sample_positions();
+        let nrm = sample_normals();
+        let uvs = sample_uvs();
+        let idx = sample_indices();
+        let mut cfg = default_draco_config();
+        cfg.compression_level = 10;
+        let compressed = compress_mesh(&pos, &nrm, &uvs, &idx, &cfg);
+        assert_eq!(compressed.quantization_bits, 8);
+    }
+
+    #[test]
+    fn test_compress_higher_level_not_larger_than_lower() {
+        // A large mesh gives Huffman a chance to actually compress.
+        let pos: Vec<[f32; 3]> = (0..64)
+            .map(|i| [i as f32 * 0.01, (i % 8) as f32 * 0.1, 0.0])
+            .collect();
+        let nrm: Vec<[f32; 3]> = pos.iter().map(|_| [0.0, 1.0, 0.0]).collect();
+        let uvs: Vec<[f32; 2]> = pos
+            .iter()
+            .enumerate()
+            .map(|(i, _)| [(i % 8) as f32 / 8.0, (i / 8) as f32 / 8.0])
+            .collect();
+        let idx: Vec<u32> = (0..60u32).collect();
+
+        let mut cfg_low = default_draco_config();
+        cfg_low.compression_level = 0;
+        let mut cfg_high = default_draco_config();
+        cfg_high.compression_level = 10;
+
+        let c_low = compress_mesh(&pos, &nrm, &uvs, &idx, &cfg_low);
+        let c_high = compress_mesh(&pos, &nrm, &uvs, &idx, &cfg_high);
+
+        // Both must produce non-empty, valid output.
+        assert!(!c_low.data.is_empty());
+        assert!(!c_high.data.is_empty());
+
+        // Higher compression level must produce an output that is strictly
+        // smaller than the level-0 (raw + 14-bit quantization) output.
+        assert!(
+            c_high.data.len() < c_low.data.len(),
+            "level-10 ({} bytes) should be smaller than level-0 ({} bytes)",
+            c_high.data.len(),
+            c_low.data.len()
+        );
+    }
+
+    #[test]
+    fn test_decompress_mesh_bytes_roundtrip() {
+        let pos = sample_positions();
+        let nrm = sample_normals();
+        let uvs = sample_uvs();
+        let idx = sample_indices();
+        let mut cfg = default_draco_config();
+        cfg.compression_level = 5;
+        let compressed = compress_mesh(&pos, &nrm, &uvs, &idx, &cfg);
+
+        let (vc, ic, qbits, attr_bytes) =
+            decompress_mesh_bytes(&compressed).expect("decompress should succeed");
+        assert_eq!(vc, pos.len());
+        assert_eq!(ic, idx.len());
+        assert_eq!(qbits, quantize_bits_for_level(5));
+        // attr_bytes must be non-empty (positions + normals + uvs + index deltas).
+        assert!(!attr_bytes.is_empty());
     }
 }

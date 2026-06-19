@@ -1,6 +1,6 @@
 # oxihuman-cli -- TODO
 
-> Version: 0.1.2 | Updated: 2026-05-05
+> Version: 0.2.0 | Updated: 2026-06-19
 
 ## Status: Stable
 

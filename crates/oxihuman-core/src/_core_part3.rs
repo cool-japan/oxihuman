@@ -233,9 +233,18 @@ pub use buddy_allocator::{new_buddy_allocator, BuddyAllocator};
 pub mod region_allocator;
 pub use region_allocator::{new_region_allocator, Region, RegionAllocator};
 
-#[path = "gc_stub.rs"]
-pub mod gc_stub;
-pub use gc_stub::{new_gc_stub, GcId, GcObject, GcState, GcStub};
+#[path = "gc.rs"]
+pub mod gc;
+pub use gc::{new_gc, Gc, GcId, GcObject, GcState};
+/// Compatibility alias — use [`Gc`] directly in new code.
+#[deprecated(since = "0.1.3", note = "use `Gc` instead")]
+pub type GcStub = Gc;
+/// Compatibility alias — use [`new_gc`] directly in new code.
+#[deprecated(since = "0.1.3", note = "use `new_gc()` instead")]
+#[inline]
+pub fn new_gc_stub() -> Gc {
+    new_gc()
+}
 
 #[path = "reference_counted.rs"]
 pub mod reference_counted;
@@ -1095,4 +1104,13 @@ pub use lua::{
     default_lua_config, lua_execute, lua_get_global, lua_global_count, lua_result_to_json,
     lua_set_global, lua_stub_to_json, lua_value_to_json, lua_value_type_name, new_lua_script,
     new_lua_stub, LuaConfig, LuaResult, LuaScript, LuaStub, LuaValue,
+};
+
+#[path = "wasm_bridge.rs"]
+pub mod wasm_bridge;
+pub use wasm_bridge::{
+    default_wasm_bridge_config, new_wasm_bridge, register_wasm_function, value_type_name,
+    wasm_bridge_to_json, wasm_call, wasm_call_stub, wasm_function_count, wasm_memory_size,
+    wasm_read_u32, wasm_write_u32, WasmBridge, WasmBridgeConfig, WasmError, WasmFunction,
+    WasmMemory, WasmValue, WasmValueType,
 };

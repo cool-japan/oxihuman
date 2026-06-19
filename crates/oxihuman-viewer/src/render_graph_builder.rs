@@ -34,10 +34,64 @@ pub fn add_edge_rgb(b: &mut RenderGraphBuilder, from: usize, to: usize) {
     }
 }
 
+/// Return a topological order of the render graph nodes using Kahn's algorithm.
+///
+/// Nodes with no dependencies are processed first.  If the graph contains a
+/// cycle, the nodes involved in the cycle are appended in their original index
+/// order (best-effort partial order) so the caller still receives all `n`
+/// indices.
 #[allow(dead_code)]
 pub fn build_render_graph(b: &RenderGraphBuilder) -> Vec<usize> {
-    // topological-ish order: just return 0..n for now
-    (0..b.nodes.len()).collect()
+    let n = b.nodes.len();
+    if n == 0 {
+        return Vec::new();
+    }
+
+    // Compute in-degrees.
+    let mut in_degree: Vec<usize> = vec![0; n];
+    for e in &b.edges {
+        if e.to < n {
+            in_degree[e.to] += 1;
+        }
+    }
+
+    // Build adjacency list: from → list of to.
+    let mut adj: Vec<Vec<usize>> = vec![Vec::new(); n];
+    for e in &b.edges {
+        if e.from < n && e.to < n {
+            adj[e.from].push(e.to);
+        }
+    }
+
+    // Seed queue with all zero-in-degree nodes (in index order for determinism).
+    let mut queue: std::collections::VecDeque<usize> = (0..n)
+        .filter(|&i| in_degree[i] == 0)
+        .collect();
+
+    let mut order: Vec<usize> = Vec::with_capacity(n);
+
+    while let Some(node) = queue.pop_front() {
+        order.push(node);
+        for &succ in &adj[node] {
+            if in_degree[succ] > 0 {
+                in_degree[succ] -= 1;
+                if in_degree[succ] == 0 {
+                    queue.push_back(succ);
+                }
+            }
+        }
+    }
+
+    // Handle cycles: append remaining nodes in original index order.
+    if order.len() < n {
+        for i in 0..n {
+            if in_degree[i] > 0 {
+                order.push(i);
+            }
+        }
+    }
+
+    order
 }
 
 #[allow(dead_code)]

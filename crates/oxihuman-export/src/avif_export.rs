@@ -100,6 +100,16 @@ pub fn all_opaque(export: &AvifExport) -> bool {
     export.pixels.iter().all(|p| p[3] == 255)
 }
 
+/// Encode an `AvifExport` as a complete AVIF binary file.
+///
+/// Returns the raw bytes of a valid AVIF/ISOBMFF container embedding a
+/// real AV1 intra-coded image. Pass `base_q_idx = 0` via
+/// `AvifPreset::Best` for near-lossless quality; the underlying codec
+/// always operates in the lossless WHT4×4 backbone.
+pub fn to_avif_bytes(export: &AvifExport) -> Vec<u8> {
+    crate::av1::avif_writer::write_avif(export)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

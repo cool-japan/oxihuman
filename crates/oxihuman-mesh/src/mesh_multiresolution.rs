@@ -41,11 +41,16 @@ impl MultiresolutionMesh {
     }
 }
 
-/// Push a new level by simple midpoint subdivision (stub).
+/// Push a new level by simple midpoint subdivision.
+///
+/// Does nothing if the mesh has no levels (defensive guard; the `new`
+/// constructor always provides at least one level, but callers should not
+/// be able to trigger a panic through this function).
 pub fn push_level(mr: &mut MultiresolutionMesh) {
-    let top = mr.levels.last().expect("at least one level");
-    let new_positions = top.positions.clone();
-    let new_indices = top.indices.clone();
+    let (new_positions, new_indices) = match mr.levels.last() {
+        Some(top) => (top.positions.clone(), top.indices.clone()),
+        None => return,
+    };
     let displacements = vec![[0.0_f32; 3]; new_positions.len()];
     mr.levels.push(MrLevel {
         positions: new_positions,

@@ -17,6 +17,11 @@ fn main() {
         return;
     }
 
+    if all_args[0] == "--version" || all_args[0] == "-V" {
+        println!("oxihuman {}", env!("CARGO_PKG_VERSION"));
+        std::process::exit(0);
+    }
+
     let subcommand = &all_args[0];
     let sub_args = &all_args[1..];
 

@@ -198,20 +198,21 @@ impl SdfGrid {
 
 // ── Core: compute_sdf ─────────────────────────────────────────────────────────
 
-/// Build a signed (or unsigned) distance field from a triangle mesh.
+/// Build a signed (or unsigned) distance field from `mesh` on a grid whose
+/// world-space extent is exactly `[mn, mx]`.  Both bounds must be finite and
+/// `mn[i] < mx[i]`; the caller is responsible for padding.
 ///
-/// Uses brute-force O(n × m) point-to-triangle distance.  For sign, a +X ray
-/// cast counts triangle intersections; an odd count means the point is inside.
-pub fn compute_sdf(mesh: &MeshBuffers, params: &SdfParams) -> SdfGrid {
-    // 1. Compute AABB with padding.
-    let (mut mn, mut mx) = aabb(mesh);
-    for i in 0..3 {
-        mn[i] -= params.padding;
-        mx[i] += params.padding;
-    }
-
+/// This is the inner primitive used by `compute_sdf` **and** by the volumetric
+/// boolean operations that need two meshes sampled on a **shared** grid.
+pub fn compute_sdf_on_bounds(
+    mesh: &MeshBuffers,
+    mn: [f32; 3],
+    mx: [f32; 3],
+    resolution: usize,
+    use_sign: bool,
+) -> SdfGrid {
     let size = [mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]];
-    let cell_size = size[0].max(size[1]).max(size[2]).max(1e-6) / params.resolution as f32;
+    let cell_size = size[0].max(size[1]).max(size[2]).max(1e-6) / resolution.max(1) as f32;
 
     let nx = ((size[0] / cell_size).ceil() as usize).max(1);
     let ny = ((size[1] / cell_size).ceil() as usize).max(1);
@@ -219,15 +220,15 @@ pub fn compute_sdf(mesh: &MeshBuffers, params: &SdfParams) -> SdfGrid {
 
     let mut grid = SdfGrid::new(nx, ny, nz, mn, cell_size);
 
-    // Gather triangles.
     let tris: Vec<([f32; 3], [f32; 3], [f32; 3])> = mesh
         .indices
         .chunks_exact(3)
         .map(|tri| {
-            let a = mesh.positions[tri[0] as usize];
-            let b = mesh.positions[tri[1] as usize];
-            let c = mesh.positions[tri[2] as usize];
-            (a, b, c)
+            (
+                mesh.positions[tri[0] as usize],
+                mesh.positions[tri[1] as usize],
+                mesh.positions[tri[2] as usize],
+            )
         })
         .collect();
 
@@ -246,9 +247,13 @@ pub fn compute_sdf(mesh: &MeshBuffers, params: &SdfParams) -> SdfGrid {
                     }
                 }
 
-                let mut dist = min_dist_sq.sqrt();
+                let mut dist = if min_dist_sq == f32::MAX {
+                    f32::MAX
+                } else {
+                    min_dist_sq.sqrt()
+                };
 
-                if params.use_sign && !tris.is_empty() && is_inside_ray_cast(p, &tris) {
+                if use_sign && !tris.is_empty() && is_inside_ray_cast(p, &tris) {
                     dist = -dist;
                 }
 
@@ -259,6 +264,36 @@ pub fn compute_sdf(mesh: &MeshBuffers, params: &SdfParams) -> SdfGrid {
     }
 
     grid
+}
+
+/// Build a signed (or unsigned) distance field from a triangle mesh.
+///
+/// Derives the grid extent from the mesh's own AABB plus `params.padding`,
+/// then delegates to `compute_sdf_on_bounds`.
+pub fn compute_sdf(mesh: &MeshBuffers, params: &SdfParams) -> SdfGrid {
+    let (mut mn, mut mx) = aabb(mesh);
+    for i in 0..3 {
+        mn[i] -= params.padding;
+        mx[i] += params.padding;
+    }
+    compute_sdf_on_bounds(mesh, mn, mx, params.resolution, params.use_sign)
+}
+
+/// Compute the union AABB of two meshes and return `(mn, mx)` with `padding`.
+pub fn combined_aabb(
+    mesh_a: &MeshBuffers,
+    mesh_b: &MeshBuffers,
+    padding: f32,
+) -> ([f32; 3], [f32; 3]) {
+    let (mn_a, mx_a) = aabb(mesh_a);
+    let (mn_b, mx_b) = aabb(mesh_b);
+    let mut mn = [0.0f32; 3];
+    let mut mx = [0.0f32; 3];
+    for i in 0..3 {
+        mn[i] = mn_a[i].min(mn_b[i]) - padding;
+        mx[i] = mx_a[i].max(mx_b[i]) + padding;
+    }
+    (mn, mx)
 }
 
 /// Ray-cast along +X from `p`; return true if inside (odd crossing count).

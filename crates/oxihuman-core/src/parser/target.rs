@@ -84,12 +84,7 @@ mod tests {
     #[test]
     fn parse_real_target_file() {
         // Load a real .target file from the MakeHuman resource directory
-        let path = {
-            std::env::var("MAKEHUMAN_DATA_DIR")
-                .map(std::path::PathBuf::from)
-                .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-                .join("targets/armslegs")
-        };
+        let path = oxihuman_test_utils::targets_dir().join("armslegs");
         let read_dir = match std::fs::read_dir(&path) {
             Ok(d) => d,
             Err(_) => return, // skip if resource path not available on this machine

@@ -41,10 +41,66 @@ pub fn ddr_add_sample(rig: &mut DataDrivenRig, sample: RigSample) {
     rig.samples.push(sample);
 }
 
-/// Evaluate the rig for a pose (stub: zeroed output).
-pub fn ddr_evaluate(rig: &DataDrivenRig, _pose: &[f32]) -> Vec<f32> {
-    /* Stub: returns zeroed shape output */
-    vec![0.0; rig.shape_dim]
+/// Compute the Euclidean distance between two pose parameter slices.
+///
+/// Handles mismatched lengths by treating missing elements as 0.
+fn euclidean_distance(a: &[f32], b: &[f32]) -> f32 {
+    let len = a.len().max(b.len());
+    let mut sum_sq = 0.0_f32;
+    for i in 0..len {
+        let ai = if i < a.len() { a[i] } else { 0.0 };
+        let bi = if i < b.len() { b[i] } else { 0.0 };
+        let diff = ai - bi;
+        sum_sq += diff * diff;
+    }
+    sum_sq.sqrt()
+}
+
+/// Evaluate the rig for a pose via inverse-distance-weighted (IDW) regression over samples.
+///
+/// For each sample `s`:
+/// - `dist = euclidean_distance(pose, &s.pose_params)`
+/// - If `dist < 1e-9` (exact match), immediately return a clone of that sample's output.
+/// - Otherwise weight = `1.0 / dist`.
+///
+/// Final output = `Σ(w * s.shape_output) / Σw`, clamped to `rig.shape_dim`.
+/// If there are no samples, returns a zero vector.
+pub fn ddr_evaluate(rig: &DataDrivenRig, pose: &[f32]) -> Vec<f32> {
+    if rig.samples.is_empty() {
+        return vec![0.0; rig.shape_dim];
+    }
+
+    let mut weight_sum = 0.0_f32;
+    let mut accum = vec![0.0_f32; rig.shape_dim];
+
+    for sample in &rig.samples {
+        let dist = euclidean_distance(pose, &sample.pose_params);
+        if dist < 1e-9 {
+            // Exact match — return immediately, clamped to shape_dim.
+            let mut out = sample.shape_output.clone();
+            out.truncate(rig.shape_dim);
+            out.resize(rig.shape_dim, 0.0);
+            return out;
+        }
+        let w = 1.0 / dist;
+        weight_sum += w;
+        let contribution_len = sample.shape_output.len().min(rig.shape_dim);
+        for (a, &s) in accum[..contribution_len]
+            .iter_mut()
+            .zip(&sample.shape_output[..contribution_len])
+        {
+            *a += w * s;
+        }
+    }
+
+    if weight_sum == 0.0 {
+        return vec![0.0; rig.shape_dim];
+    }
+
+    for v in accum.iter_mut() {
+        *v /= weight_sum;
+    }
+    accum
 }
 
 /// Return sample count.
@@ -169,6 +225,50 @@ mod tests {
         assert_eq!(
             ddr_sample_count(&rig),
             10, /* ten samples must be stored */
+        );
+    }
+
+    #[test]
+    fn ddr_exact_pose_match_returns_sample() {
+        // Add a single sample at pose [1.0, 2.0] with shape_output [0.7, 0.3].
+        // Evaluating at the exact same pose must return [0.7, 0.3].
+        let mut rig = new_data_driven_rig(2, 2);
+        ddr_add_sample(
+            &mut rig,
+            RigSample {
+                pose_params: vec![1.0, 2.0],
+                shape_output: vec![0.7, 0.3],
+            },
+        );
+        let out = ddr_evaluate(&rig, &[1.0, 2.0]);
+        assert!((out[0] - 0.7).abs() < 1e-5, "expected 0.7 got {}", out[0]);
+        assert!((out[1] - 0.3).abs() < 1e-5, "expected 0.3 got {}", out[1]);
+    }
+
+    #[test]
+    fn ddr_two_samples_midpoint() {
+        // Two samples: A at pose [0.0] shape [1.0], B at pose [2.0] shape [3.0].
+        // Query at pose [1.0]: dist_A = 1, dist_B = 1 → equal weights → blend = (1+3)/2 = 2.0.
+        let mut rig = new_data_driven_rig(1, 1);
+        ddr_add_sample(
+            &mut rig,
+            RigSample {
+                pose_params: vec![0.0],
+                shape_output: vec![1.0],
+            },
+        );
+        ddr_add_sample(
+            &mut rig,
+            RigSample {
+                pose_params: vec![2.0],
+                shape_output: vec![3.0],
+            },
+        );
+        let out = ddr_evaluate(&rig, &[1.0]);
+        assert!(
+            (out[0] - 2.0).abs() < 1e-5,
+            "expected 2.0 at midpoint, got {}",
+            out[0]
         );
     }
 }

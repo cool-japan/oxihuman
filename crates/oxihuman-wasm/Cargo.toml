@@ -31,9 +31,10 @@ js-sys                   = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true, optional = true }
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.64"
-serde_json.workspace = true
-criterion.workspace = true
+wasm-bindgen-test         = "0.3.75"
+serde_json.workspace      = true
+criterion.workspace       = true
+oxihuman-test-utils = { path = "../oxihuman-test-utils" }
 
 [[bench]]
 name    = "wasm_bench"

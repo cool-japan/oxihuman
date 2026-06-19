@@ -36,6 +36,10 @@ pub struct AoVertex {
 #[derive(Debug, Default, Clone)]
 pub struct AoMesh {
     pub vertices: Vec<AoVertex>,
+    /// Triangle index list (3 indices per triangle). When present, enables
+    /// topology-aware 1-ring Laplacian smoothing; an empty list is valid and
+    /// falls back to proximity-graph smoothing.
+    pub indices: Vec<u32>,
     pub config: AoBakeConfig,
 }
 
@@ -69,6 +73,17 @@ impl AoMesh {
             v.ao = clamped;
         }
     }
+
+    /// Smooth baked AO. Uses topological 1-ring Laplacian when `indices` are
+    /// present, otherwise falls back to proximity-graph smoothing.
+    pub fn smooth(&mut self, iterations: usize) {
+        if self.indices.is_empty() {
+            smooth_ao(&mut self.vertices);
+        } else {
+            let idx = self.indices.clone();
+            smooth_ao_laplacian(&mut self.vertices, &idx, iterations);
+        }
+    }
 }
 
 /// Validates that all AO values are in [0, 1].
@@ -98,14 +113,117 @@ pub fn boost_ao_contrast(vertices: &mut [AoVertex], power: f32) {
     }
 }
 
-/// Smooths AO values by averaging with neighbors (simplified: global mean).
+/// Smooth AO values with one pass of geometric Laplacian smoothing over a
+/// proximity graph: each vertex is averaged with neighbours within an adaptive
+/// radius (derived from the mean nearest-neighbour distance). This is a genuine
+/// local Laplacian (unlike a global-mean blend). Coincident points are treated
+/// as mutual neighbours. Result stays in [0, 1].
 pub fn smooth_ao(vertices: &mut [AoVertex]) {
-    if vertices.is_empty() {
+    let n = vertices.len();
+    if n < 2 {
         return;
     }
-    let mean = vertices.iter().map(|v| v.ao).sum::<f32>() / vertices.len() as f32;
-    for v in vertices.iter_mut() {
-        v.ao = (v.ao + mean) * 0.5;
+
+    // Adaptive radius: 2 × mean nearest-neighbour distance (floor to keep
+    // coincident/degenerate inputs well-defined).
+    let mut nn_sum = 0.0f32;
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..n {
+        let pi = vertices[i].position;
+        let mut best = f32::INFINITY;
+        for j in 0..n {
+            if i == j {
+                continue;
+            }
+            let pj = vertices[j].position;
+            let dx = pi[0] - pj[0];
+            let dy = pi[1] - pj[1];
+            let dz = pi[2] - pj[2];
+            let d2 = dx * dx + dy * dy + dz * dz;
+            if d2 < best {
+                best = d2;
+            }
+        }
+        if best.is_finite() {
+            nn_sum += best.sqrt();
+        }
+    }
+    let mean_nn = nn_sum / n as f32;
+    let radius = (2.0 * mean_nn).max(1e-4);
+    let radius2 = radius * radius;
+
+    let mut smoothed = vec![0.0f32; n];
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..n {
+        let pi = vertices[i].position;
+        let mut acc = 0.0f32;
+        let mut count = 0.0f32;
+        for j in 0..n {
+            if i == j {
+                continue;
+            }
+            let pj = vertices[j].position;
+            let dx = pi[0] - pj[0];
+            let dy = pi[1] - pj[1];
+            let dz = pi[2] - pj[2];
+            if dx * dx + dy * dy + dz * dz <= radius2 {
+                acc += vertices[j].ao;
+                count += 1.0;
+            }
+        }
+        smoothed[i] = if count > 0.0 {
+            0.5 * vertices[i].ao + 0.5 * (acc / count)
+        } else {
+            vertices[i].ao
+        };
+    }
+    for (v, &s) in vertices.iter_mut().zip(smoothed.iter()) {
+        v.ao = s.clamp(0.0, 1.0);
+    }
+}
+
+/// Topological 1-ring Laplacian AO smoothing using a triangle index buffer.
+/// Builds vertex adjacency from `indices` (triples) and runs `iterations`
+/// umbrella-operator passes: ao' = 0.5·ao + 0.5·mean(1-ring neighbours).
+/// Falls back to leaving a vertex unchanged if it has no incident edges.
+pub fn smooth_ao_laplacian(vertices: &mut [AoVertex], indices: &[u32], iterations: usize) {
+    let n = vertices.len();
+    if n == 0 || indices.len() < 3 {
+        return;
+    }
+    // Build 1-ring adjacency (dedup via sorted Vec per vertex).
+    let mut adj: Vec<Vec<usize>> = vec![Vec::new(); n];
+    for tri in indices.chunks_exact(3) {
+        let a = tri[0] as usize;
+        let b = tri[1] as usize;
+        let c = tri[2] as usize;
+        if a >= n || b >= n || c >= n {
+            continue;
+        }
+        for &(u, v) in &[(a, b), (b, c), (c, a)] {
+            if !adj[u].contains(&v) {
+                adj[u].push(v);
+            }
+            if !adj[v].contains(&u) {
+                adj[v].push(u);
+            }
+        }
+    }
+    for _ in 0..iterations {
+        let mut next = vec![0.0f32; n];
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..n {
+            if adj[i].is_empty() {
+                next[i] = vertices[i].ao;
+            } else {
+                let sum: f32 = adj[i].iter().map(|&j| vertices[j].ao).sum();
+                let mean = sum / adj[i].len() as f32;
+                next[i] = 0.5 * vertices[i].ao + 0.5 * mean;
+            }
+        }
+        for (v, &s) in vertices.iter_mut().zip(next.iter()) {
+            v.ao = s.clamp(0.0, 1.0);
+        }
     }
 }
 
@@ -220,5 +338,37 @@ mod tests {
     fn test_default_config_ray_count() {
         /* Default should be 64 rays */
         assert_eq!(AoBakeConfig::default().ray_count, 64);
+    }
+
+    #[test]
+    fn test_smooth_ao_laplacian_diffuses_along_topology() {
+        // Two triangles sharing an edge: a quad (0,1,2,3) with one hot vertex.
+        let mut verts = vec![
+            AoVertex { position: [0.0, 0.0, 0.0], normal: [0.0, 1.0, 0.0], ao: 1.0 },
+            AoVertex { position: [1.0, 0.0, 0.0], normal: [0.0, 1.0, 0.0], ao: 0.0 },
+            AoVertex { position: [1.0, 1.0, 0.0], normal: [0.0, 1.0, 0.0], ao: 0.0 },
+            AoVertex { position: [0.0, 1.0, 0.0], normal: [0.0, 1.0, 0.0], ao: 0.0 },
+        ];
+        let indices = [0u32, 1, 2, 0, 2, 3];
+        let before = verts[1].ao;
+        smooth_ao_laplacian(&mut verts, &indices, 1);
+        // Vertex 1 is adjacent to the hot vertex 0 → its AO must rise.
+        assert!(verts[1].ao > before, "neighbour of hot vertex should increase");
+        assert!(verts.iter().all(|v| (0.0..=1.0).contains(&v.ao)));
+    }
+
+    #[test]
+    fn test_ao_mesh_smooth_uses_indices() {
+        let mut mesh = AoMesh::new(AoBakeConfig::default());
+        mesh.vertices = vec![
+            AoVertex { position: [0.0, 0.0, 0.0], normal: [0.0, 1.0, 0.0], ao: 1.0 },
+            AoVertex { position: [1.0, 0.0, 0.0], normal: [0.0, 1.0, 0.0], ao: 0.0 },
+            AoVertex { position: [0.0, 1.0, 0.0], normal: [0.0, 1.0, 0.0], ao: 0.0 },
+        ];
+        mesh.indices = vec![0, 1, 2];
+        mesh.smooth(2);
+        assert!(mesh.vertices.iter().all(|v| (0.0..=1.0).contains(&v.ao)));
+        // Topology present → vertex 1 (adjacent to hot vertex 0) increased from 0.
+        assert!(mesh.vertices[1].ao > 0.0);
     }
 }

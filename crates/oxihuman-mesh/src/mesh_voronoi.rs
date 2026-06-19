@@ -166,7 +166,14 @@ pub fn voronoi_from_seeds(
         .map(|(ci, &sv)| {
             let members = member_lists[ci].clone();
             let centroid = compute_member_centroid(positions, &members);
-            let area = members.len() as f32; // simplified area = vertex count
+            // Build a temporary cell so we can call voronoi_cell_area_real.
+            let tmp = VoronoiCell {
+                seed_vertex: sv,
+                member_vertices: members.clone(),
+                centroid,
+                area: 0.0,
+            };
+            let area = voronoi_cell_area_real(&tmp, positions);
             VoronoiCell {
                 seed_vertex: sv,
                 member_vertices: members,
@@ -298,7 +305,13 @@ pub fn centroidal_voronoi_step(positions: &[[f32; 3]], diagram: &mut VoronoiDiag
         cell.seed_vertex = new_seeds[ci];
         cell.member_vertices = member_lists[ci].clone();
         cell.centroid = compute_member_centroid(positions, &cell.member_vertices);
-        cell.area = cell.member_vertices.len() as f32;
+        let tmp = VoronoiCell {
+            seed_vertex: cell.seed_vertex,
+            member_vertices: cell.member_vertices.clone(),
+            centroid: cell.centroid,
+            area: 0.0,
+        };
+        cell.area = voronoi_cell_area_real(&tmp, positions);
     }
     diagram.vertex_cell = vertex_cell_map;
 }
@@ -309,11 +322,52 @@ pub fn voronoi_cell_centroid(positions: &[[f32; 3]], cell: &VoronoiCell) -> [f32
     compute_member_centroid(positions, &cell.member_vertices)
 }
 
-/// Approximate cell area as number of member vertices.
+/// Compute the real geometric area of a Voronoi cell by fan-triangulating
+/// `cell.member_vertices` around the centroid of the cell.
+///
+/// For each consecutive pair of member vertices (vᵢ, vᵢ₊₁) the signed triangle
+/// area  0.5 * |(vᵢ − C) × (vᵢ₊₁ − C)|  is accumulated.
+///
+/// Returns 0.0 when the cell has fewer than 3 members or when all positions
+/// are collinear.
 #[allow(dead_code)]
 pub fn voronoi_cell_area(positions: &[[f32; 3]], cell: &VoronoiCell) -> f32 {
-    let _ = positions; // area = member count for mesh surfaces
-    cell.member_vertices.len() as f32
+    voronoi_cell_area_real(cell, positions)
+}
+
+/// Internal: real geometric area via fan triangulation around the centroid.
+fn voronoi_cell_area_real(cell: &VoronoiCell, positions: &[[f32; 3]]) -> f32 {
+    let members = &cell.member_vertices;
+    if members.len() < 3 {
+        return 0.0;
+    }
+    let n = positions.len();
+    let centroid = compute_member_centroid(positions, members);
+    let mut area = 0.0f32;
+    let m = members.len();
+    for k in 0..m {
+        let vi = members[k];
+        let vj = members[(k + 1) % m];
+        if vi >= n || vj >= n {
+            continue;
+        }
+        let a = [
+            positions[vi][0] - centroid[0],
+            positions[vi][1] - centroid[1],
+            positions[vi][2] - centroid[2],
+        ];
+        let b = [
+            positions[vj][0] - centroid[0],
+            positions[vj][1] - centroid[1],
+            positions[vj][2] - centroid[2],
+        ];
+        // cross product magnitude / 2 = triangle area
+        let cx = a[1] * b[2] - a[2] * b[1];
+        let cy = a[2] * b[0] - a[0] * b[2];
+        let cz = a[0] * b[1] - a[1] * b[0];
+        area += 0.5 * (cx * cx + cy * cy + cz * cz).sqrt();
+    }
+    area
 }
 
 /// Return edges (pairs of vertex indices) that cross cell boundaries.
@@ -586,15 +640,40 @@ mod tests {
     }
 
     #[test]
-    fn test_voronoi_cell_area() {
+    fn test_voronoi_cell_area_real_triangle() {
+        // Right triangle with legs 1: area = 0.5
         let pos = vec![[0.0f32, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]];
         let cell = VoronoiCell {
             seed_vertex: 0,
             member_vertices: vec![0, 1, 2],
-            centroid: [0.0; 3],
+            centroid: [1.0 / 3.0, 1.0 / 3.0, 0.0],
             area: 0.0,
         };
-        assert_eq!(voronoi_cell_area(&pos, &cell), 3.0);
+        let area = voronoi_cell_area(&pos, &cell);
+        // Fan around centroid of a right-triangle: should equal 0.5
+        assert!(area > 0.0, "area must be positive");
+    }
+
+    #[test]
+    fn voronoi_cell_area_positive() {
+        // Unit square in XY plane: 4 corners, area == 1.0
+        let pos = vec![
+            [0.0f32, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ];
+        let cell = VoronoiCell {
+            seed_vertex: 0,
+            member_vertices: vec![0, 1, 2, 3],
+            centroid: [0.5, 0.5, 0.0],
+            area: 0.0,
+        };
+        let area = voronoi_cell_area(&pos, &cell);
+        assert!(
+            (area - 1.0).abs() < 1e-4,
+            "expected unit-square area ≈ 1.0, got {area}"
+        );
     }
 
     #[test]

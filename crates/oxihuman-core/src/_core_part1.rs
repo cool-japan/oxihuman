@@ -407,6 +407,14 @@ pub use action_map::{ActionEntry, ActionMap};
 pub mod async_queue;
 pub use async_queue::{AsyncQueue, AsyncTask, TaskState};
 
+#[path = "async_signal.rs"]
+pub mod async_signal;
+#[allow(deprecated)]
+pub use async_signal::{
+    new_async_signal, signal_count_as, signal_is_set, signal_name_as, signal_reset, signal_set,
+    signal_to_json, signal_wait, signal_wait_stub, signal_wait_timeout, AsyncSignal,
+};
+
 #[path = "batch_processor.rs"]
 pub mod batch_processor;
 pub use batch_processor::BatchProcessor;

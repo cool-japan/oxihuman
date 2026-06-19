@@ -161,10 +161,10 @@ impl PipelineCache {
         device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("pbr_pipeline_layout"),
             bind_group_layouts: &[
-                &self.camera_bgl,
-                &self.model_bgl,
-                &self.material_bgl,
-                &self.lights_bgl,
+                Some(&*self.camera_bgl),
+                Some(&*self.model_bgl),
+                Some(&*self.material_bgl),
+                Some(&*self.lights_bgl),
             ],
             immediate_size: 0,
         })
@@ -234,8 +234,8 @@ impl PipelineCache {
             },
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: depth_format,
-                depth_write_enabled: depth_write,
-                depth_compare: wgpu::CompareFunction::Less,
+                depth_write_enabled: Some(depth_write),
+                depth_compare: Some(wgpu::CompareFunction::Less),
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
@@ -264,9 +264,9 @@ impl PipelineCache {
         let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("wireframe_pipeline_layout"),
             bind_group_layouts: &[
-                &self.camera_bgl,
-                &self.model_bgl,
-                &self.material_bgl, // reused for wireframe color param
+                Some(&*self.camera_bgl),
+                Some(&*self.model_bgl),
+                Some(&*self.material_bgl),
             ],
             immediate_size: 0,
         });
@@ -301,8 +301,8 @@ impl PipelineCache {
             },
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: depth_format,
-                depth_write_enabled: false,
-                depth_compare: wgpu::CompareFunction::LessEqual,
+                depth_write_enabled: Some(false),
+                depth_compare: Some(wgpu::CompareFunction::LessEqual),
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
@@ -339,7 +339,7 @@ impl PipelineCache {
 
         let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("shadow_pipeline_layout"),
-            bind_group_layouts: &[&shadow_bgl, &self.model_bgl],
+            bind_group_layouts: &[Some(&shadow_bgl), Some(&*self.model_bgl)],
             immediate_size: 0,
         });
 
@@ -369,8 +369,8 @@ impl PipelineCache {
             },
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: depth_format,
-                depth_write_enabled: true,
-                depth_compare: wgpu::CompareFunction::Less,
+                depth_write_enabled: Some(true),
+                depth_compare: Some(wgpu::CompareFunction::Less),
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState {
                     constant: 2,
@@ -429,7 +429,7 @@ impl PipelineCache {
 
         let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("fullscreen_pipeline_layout"),
-            bind_group_layouts: &[&fs_bgl],
+            bind_group_layouts: &[Some(&fs_bgl)],
             immediate_size: 0,
         });
 

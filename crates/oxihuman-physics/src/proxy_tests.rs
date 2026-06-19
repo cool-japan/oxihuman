@@ -91,10 +91,7 @@ mod tests {
     #[test]
     fn real_base_mesh_proxies() {
         use oxihuman_core::parser::obj::parse_obj;
-        let path = std::env::var("MAKEHUMAN_DATA_DIR")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-            .join("3dobjs/base.obj");
+        let path = oxihuman_test_utils::base_obj();
         if let Ok(src) = std::fs::read_to_string(&path) {
             if let Ok(obj) = parse_obj(&src) {
                 let morph_buf = oxihuman_morph::engine::MeshBuffers {
@@ -186,10 +183,7 @@ mod tests {
     #[test]
     fn generate_fitted_proxies_count_real_mesh() {
         use oxihuman_core::parser::obj::parse_obj;
-        let path = std::env::var("MAKEHUMAN_DATA_DIR")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-            .join("3dobjs/base.obj");
+        let path = oxihuman_test_utils::base_obj();
         if let Ok(src) = std::fs::read_to_string(&path) {
             if let Ok(obj) = parse_obj(&src) {
                 let morph_buf = MB {

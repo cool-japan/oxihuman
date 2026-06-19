@@ -2,7 +2,7 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 168 passing | **API:** 68 WasmEngine methods | **Version:** 0.1.2 | **Updated:** 2026-05-05
+**Status:** Stable | **Tests:** 168 passing | **API:** 68 WasmEngine methods | **Version:** 0.2.0 | **Updated:** 2026-06-19
 
 WebAssembly bindings for OxiHuman — full browser-ready API via wasm-bindgen. A single `WasmEngine` struct exposes the entire OxiHuman pipeline to JavaScript/TypeScript, enabling privacy-preserving, client-side human body generation with no server round-trips.
 
@@ -24,7 +24,7 @@ The `wasm` feature is optional. Enable it when targeting browser/Node.js environ
 
 ```toml
 [dependencies]
-oxihuman-wasm = { version = "0.1.2", features = ["wasm"] }
+oxihuman-wasm = { version = "0.2.0", features = ["wasm"] }
 ```
 
 ---

@@ -327,15 +327,9 @@ mod tests {
         HumanEngine::new(base, Policy::new(PolicyProfile::Standard))
     }
 
-    fn makehuman_data_dir() -> std::path::PathBuf {
-        std::env::var("MAKEHUMAN_DATA_DIR")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-    }
-
     /// Build a real base.obj engine if available, otherwise use simple mesh.
     fn make_test_engine() -> HumanEngine {
-        let base_path = makehuman_data_dir().join("3dobjs/base.obj");
+        let base_path = oxihuman_test_utils::base_obj();
         if base_path.exists() {
             use oxihuman_core::parser::obj::parse_obj;
             let src = std::fs::read_to_string(&base_path).expect("should succeed");

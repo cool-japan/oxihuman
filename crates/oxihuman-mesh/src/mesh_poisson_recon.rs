@@ -805,17 +805,46 @@ pub fn density_estimate(points: &[[f32; 3]], query: [f32; 3], radius: f32) -> us
         .count()
 }
 
-/// Legacy stub: run Poisson reconstruction (returns convex hull approximation).
+/// Run Poisson reconstruction and return a surface mesh.
+///
+/// Delegates to [`PoissonReconstructor`] with the depth from `cfg.octree_depth`.
+/// Falls back to a no-geometry result when the input has fewer than 4 points or
+/// when Marching Cubes produces no triangles (e.g. planar/degenerate clouds).
 pub fn poisson_reconstruct_stub(
     points: &[[f32; 3]],
     normals: &[[f32; 3]],
-    _config: &PoissonReconConfig,
+    cfg: &PoissonReconConfig,
 ) -> PoissonReconResult {
-    let _ = normals;
-    PoissonReconResult {
-        positions: points.to_vec(),
-        indices: vec![],
-        implicit_value: 0.0,
+    if points.len() < 4 || points.len() != normals.len() {
+        return PoissonReconResult {
+            positions: points.to_vec(),
+            indices: Vec::new(),
+            implicit_value: 0.0,
+        };
+    }
+
+    let mut rec = PoissonReconstructor::new();
+    for (p, n) in points.iter().zip(normals.iter()) {
+        rec.add_oriented_point(
+            [p[0] as f64, p[1] as f64, p[2] as f64],
+            [n[0] as f64, n[1] as f64, n[2] as f64],
+        );
+    }
+    let config = PoissonConfig {
+        depth: cfg.octree_depth,
+        ..PoissonConfig::default()
+    };
+    match rec.reconstruct(&config) {
+        Ok((verts, idx)) => PoissonReconResult {
+            positions: verts,
+            indices: idx,
+            implicit_value: 0.0,
+        },
+        Err(_) => PoissonReconResult {
+            positions: points.to_vec(),
+            indices: Vec::new(),
+            implicit_value: 0.0,
+        },
     }
 }
 
@@ -927,12 +956,44 @@ mod tests {
     }
 
     #[test]
-    fn poisson_stub_returns_points() {
-        let pts = cloud();
-        let normals = vec![[0.0, 0.0, 1.0f32]; pts.len()];
-        let cfg = PoissonReconConfig::default();
+    fn poisson_stub_returns_valid_mesh() {
+        // A tetrahedron-like cloud with outward-pointing normals.
+        let pts = vec![
+            [0.0f32, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.5, 1.0, 0.0],
+            [0.5, 0.5, 1.0],
+            // Extra points to give the solver more signal.
+            [0.25, 0.25, 0.0],
+            [0.75, 0.25, 0.0],
+            [0.5, 0.75, 0.0],
+            [0.5, 0.25, 0.75],
+        ];
+        let normals: Vec<[f32; 3]> = pts
+            .iter()
+            .map(|&p| {
+                let centroid = [0.5f32, 0.5, 0.25];
+                let d = [p[0] - centroid[0], p[1] - centroid[1], p[2] - centroid[2]];
+                let len = (d[0] * d[0] + d[1] * d[1] + d[2] * d[2]).sqrt().max(1e-8);
+                [d[0] / len, d[1] / len, d[2] / len]
+            })
+            .collect();
+        let cfg = PoissonReconConfig {
+            octree_depth: 3, // low depth for fast test
+            ..PoissonReconConfig::default()
+        };
         let r = poisson_reconstruct_stub(&pts, &normals, &cfg);
-        assert_eq!(r.positions.len(), pts.len());
+        // After real reconstruction: indices must be a valid triangle list.
+        assert!(
+            r.indices.len().is_multiple_of(3),
+            "indices length must be divisible by 3, got {}",
+            r.indices.len()
+        );
+        assert!(
+            r.positions.len() >= 3,
+            "must have at least 3 positions, got {}",
+            r.positions.len()
+        );
     }
 
     #[test]

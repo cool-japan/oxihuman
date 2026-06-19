@@ -337,11 +337,26 @@ impl WasmEngine {
         true
     }
 
-    /// Return per-vertex mean curvature map as a JSON array of floats (stub: all zeros).
-    pub fn get_curvature_map(&self) -> String {
-        let n = self.vertex_count();
-        let zeros: Vec<f32> = vec![0.0; n];
-        serde_json::to_string(&zeros).unwrap_or_else(|_| "[]".to_string())
+    /// Return per-vertex mean curvature map as a JSON array of floats.
+    ///
+    /// Returns the real cotangent-weight mean curvature when a mesh has been built
+    /// (i.e. `last_mesh` is `Some`). Returns `"[]"` when no mesh is available.
+    pub fn get_curvature_map(&mut self) -> String {
+        if self.last_mesh.is_none() {
+            use oxihuman_mesh::mesh::MeshBuffers;
+            use oxihuman_mesh::normals::compute_normals;
+            let morph_buf = self.engine.build_mesh();
+            let mut m = MeshBuffers::from_morph(morph_buf);
+            compute_normals(&mut m);
+            self.last_mesh = Some(m);
+        }
+        let mesh = match &self.last_mesh {
+            Some(m) => m,
+            None => return "[]".to_string(),
+        };
+        use oxihuman_mesh::{default_curvature_config, mc_mean_curvature};
+        let curvatures = mc_mean_curvature(mesh, &default_curvature_config());
+        serde_json::to_string(&curvatures).unwrap_or_else(|_| "[]".to_string())
     }
 
     /// Return geodesic distances from `source_vertex` as a JSON array.

@@ -821,3 +821,19 @@ pub use mesh_poisson_recon::{
     point_to_voxel, poisson_reconstruct_stub, required_octree_depth, PoissonConfig,
     PoissonReconConfig, PoissonReconResult, PoissonReconstructor,
 };
+
+pub mod mesh_voxel_remesh;
+pub use mesh_voxel_remesh::{
+    default_voxel_remesh_config, filled_voxel_count, new_voxel_remesh_grid, remesh_from_voxels,
+    set_voxel_remesh, voxel_at_remesh, voxel_remesh_grid_bounds, voxel_remesh_grid_to_json,
+    voxel_remesh_result_to_json, voxelize_mesh_remesh, VoxelRemeshConfig, VoxelRemeshGrid,
+    VoxelRemeshResult,
+};
+
+pub mod mesh_triangulate;
+pub use mesh_triangulate::{
+    default_triangulate_config, triangulate_earclip_2d, triangulate_fan,
+    triangulate_to_json, triangulate_triangle_count, triangulate_validate,
+    triangulate_polygon_3d as triangulate_polygon_with_positions_3d,
+    TriangulateConfig, TriangulateMethod, TriangulateResult,
+};

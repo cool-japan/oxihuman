@@ -394,7 +394,7 @@ mod bindgen_impl {
 
         /// Return per-vertex curvature as a JSON array of floats.
         #[wasm_bindgen]
-        pub fn get_curvature_map(&self) -> String {
+        pub fn get_curvature_map(&mut self) -> String {
             self.inner.get_curvature_map()
         }
 

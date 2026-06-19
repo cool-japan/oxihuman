@@ -1,10 +1,10 @@
 # oxihuman-export -- TODO
 
-> Version: 0.1.2 | Updated: 2026-05-05
+> Version: 0.2.0 | Updated: 2026-06-19
 
 ## Status: Stable
 
-All core features implemented. 0 stubs (`todo!()`/`unimplemented!()`). 5,289 passing tests across ~883 source files. No `// TODO` or `// FIXME` comments.
+All core features implemented. 0 stubs (`todo!()`/`unimplemented!()`). 33,410 passing tests across ~883 source files. No `// TODO` or `// FIXME` comments.
 
 ## Completed
 

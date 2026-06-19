@@ -56,12 +56,7 @@ mod tests {
 
     #[test]
     fn load_alpha_pack_manifest() {
-        let path = {
-            std::env::var("OXIHUMAN_ASSETS_DIR")
-                .map(std::path::PathBuf::from)
-                .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_assets"))
-                .join("alpha_pack/oxihuman_assets.toml")
-        };
+        let path = oxihuman_test_utils::assets_dir().join("alpha_pack/oxihuman_assets.toml");
         if path.exists() {
             let m = AssetManifest::load(&path).expect("should succeed");
             assert_eq!(m.version, "0.1.0");

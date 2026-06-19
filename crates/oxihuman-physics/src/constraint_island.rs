@@ -81,10 +81,101 @@ pub fn island_is_sleeping(island: &Island) -> bool {
     island.sleeping
 }
 
+/// Split an island into its connected components using union-find.
+///
+/// Connectivity is inferred from the constraint IDs stored in the island:
+/// constraint with id `c` is treated as binding body `c % n` to body
+/// `(c % n + 1) % n` (where `n = bodies.len()`).  This is the most
+/// principled interpretation given that `Island` stores opaque body and
+/// constraint IDs without explicit body-pair data.
+///
+/// Returns one `Island` per connected component.  An island with no bodies
+/// or a single body is returned as-is.
 #[allow(dead_code)]
 pub fn split_island(island: &Island) -> Vec<Island> {
-    // Stub: no actual graph analysis, just return the island as-is.
-    vec![island.clone()]
+    let n = island.bodies.len();
+    if n <= 1 {
+        return vec![island.clone()];
+    }
+
+    // Union-Find with path compression and union by rank.
+    let mut parent: Vec<usize> = (0..n).collect();
+    let mut rank: Vec<usize> = vec![0; n];
+
+    fn find(parent: &mut Vec<usize>, x: usize) -> usize {
+        if parent[x] != x {
+            parent[x] = find(parent, parent[x]);
+        }
+        parent[x]
+    }
+
+    fn union(parent: &mut Vec<usize>, rank: &mut Vec<usize>, x: usize, y: usize) {
+        let rx = find(parent, x);
+        let ry = find(parent, y);
+        if rx == ry {
+            return;
+        }
+        match rank[rx].cmp(&rank[ry]) {
+            std::cmp::Ordering::Less => parent[rx] = ry,
+            std::cmp::Ordering::Greater => parent[ry] = rx,
+            std::cmp::Ordering::Equal => {
+                parent[ry] = rx;
+                rank[rx] += 1;
+            }
+        }
+    }
+
+    // For each constraint: connect body_index (c % n) with body_index ((c % n + 1) % n).
+    for &c in &island.constraints {
+        let ci = (c as usize) % n;
+        let cj = (ci + 1) % n;
+        union(&mut parent, &mut rank, ci, cj);
+    }
+
+    // Finalise all roots.
+    for i in 0..n {
+        let _ = find(&mut parent, i);
+    }
+
+    // Group body indices by their root.
+    let mut component_map: std::collections::HashMap<usize, Vec<usize>> =
+        std::collections::HashMap::new();
+    for i in 0..n {
+        let root = find(&mut parent, i);
+        component_map.entry(root).or_default().push(i);
+    }
+
+    // For each component, collect the bodies and constraints that belong to it.
+    let mut result: Vec<Island> = component_map
+        .values()
+        .map(|indices| {
+            // Collect body IDs for this component.
+            let bodies: Vec<u32> = indices.iter().map(|&bi| island.bodies[bi]).collect();
+            let body_set: std::collections::HashSet<u32> = bodies.iter().copied().collect();
+
+            // Assign constraints to the component they reference.
+            // Constraint c references body_index c % n; include if that body is in this component.
+            let constraints: Vec<u32> = island
+                .constraints
+                .iter()
+                .copied()
+                .filter(|&c| {
+                    let bi = (c as usize) % n;
+                    bi < island.bodies.len() && body_set.contains(&island.bodies[bi])
+                })
+                .collect();
+
+            Island {
+                bodies,
+                constraints,
+                sleeping: island.sleeping,
+            }
+        })
+        .collect();
+
+    // Sort by first body id for deterministic output.
+    result.sort_by_key(|isl| isl.bodies.first().copied().unwrap_or(u32::MAX));
+    result
 }
 
 impl IslandSolver {
@@ -164,10 +255,37 @@ mod tests {
     }
 
     #[test]
-    fn test_split() {
+    fn test_split_empty_island() {
+        // An empty island (no bodies) produces one empty island.
         let i = new_island();
         let parts = split_island(&i);
         assert_eq!(parts.len(), 1);
+    }
+
+    #[test]
+    fn test_split_disconnected_bodies() {
+        // Two bodies and no constraints → two separate components.
+        let mut i = new_island();
+        add_body_to_island(&mut i, 10);
+        add_body_to_island(&mut i, 20);
+        // No constraints: the two bodies are unconnected.
+        let parts = split_island(&i);
+        assert_eq!(parts.len(), 2, "two unconnected bodies must produce two islands");
+        let total_bodies: usize = parts.iter().map(|p| island_body_count(p)).sum();
+        assert_eq!(total_bodies, 2);
+    }
+
+    #[test]
+    fn test_split_connected_bodies_stay_together() {
+        // Two bodies connected by a constraint remain in one island.
+        let mut i = new_island();
+        add_body_to_island(&mut i, 10);
+        add_body_to_island(&mut i, 20);
+        // Constraint 0: connects body_index 0 % 2 = 0 with body_index 1 % 2 = 1.
+        i.constraints.push(0);
+        let parts = split_island(&i);
+        assert_eq!(parts.len(), 1, "connected bodies must remain in one island");
+        assert_eq!(island_body_count(&parts[0]), 2);
     }
 
     #[test]

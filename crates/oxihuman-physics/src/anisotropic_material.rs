@@ -106,15 +106,75 @@ impl StiffnessTensor {
     }
 }
 
-/// Rotate a stiffness tensor by angle `theta` about the z-axis.
-pub fn rotate_stiffness_z(c: &StiffnessTensor, theta: f64) -> StiffnessTensor {
-    /* Stub: only applies c² and s² terms for the C_11, C_22 swap */
-    let cs = theta.cos();
-    let sn = theta.sin();
-    let mut out = c.clone();
-    out.c[0][0] = c.c[0][0] * cs * cs + c.c[1][1] * sn * sn;
-    out.c[1][1] = c.c[0][0] * sn * sn + c.c[1][1] * cs * cs;
-    out
+/// Rotate a stiffness tensor by angle `theta` about the z-axis using the full
+/// Bond stress transformation.
+///
+/// For rotation angle θ with c = cos(θ), s = sin(θ), the 6×6 Bond matrix M
+/// (Voigt ordering: xx, yy, zz, yz, xz, xy) is:
+///
+/// ```text
+/// M = [
+///   [c²,   s²,  0,  0,  0,  2cs ],
+///   [s²,   c²,  0,  0,  0, -2cs ],
+///   [0,    0,   1,  0,  0,  0   ],
+///   [0,    0,   0,  c, -s,  0   ],
+///   [0,    0,   0,  s,  c,  0   ],
+///   [-cs,  cs,  0,  0,  0,  c²-s²],
+/// ]
+/// ```
+///
+/// The rotated tensor is C' = M · C · Mᵀ.
+#[allow(clippy::needless_range_loop)]
+pub fn rotate_stiffness_z(stiffness: &StiffnessTensor, theta: f64) -> StiffnessTensor {
+    let c = theta.cos();
+    let s = theta.sin();
+    let c2 = c * c;
+    let s2 = s * s;
+    let cs = c * s;
+
+    // Bond stress transformation matrix M (6×6, Voigt: xx=0,yy=1,zz=2,yz=3,xz=4,xy=5)
+    let m: [[f64; 6]; 6] = [
+        [c2, s2, 0.0, 0.0, 0.0, 2.0 * cs],
+        [s2, c2, 0.0, 0.0, 0.0, -2.0 * cs],
+        [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, c, -s, 0.0],
+        [0.0, 0.0, 0.0, s, c, 0.0],
+        [-cs, cs, 0.0, 0.0, 0.0, c2 - s2],
+    ];
+
+    // Mᵀ: transpose of M
+    let mut mt = [[0.0f64; 6]; 6];
+    for i in 0..6 {
+        for j in 0..6 {
+            mt[i][j] = m[j][i];
+        }
+    }
+
+    // temp = M × stiffness.c  (6×6 × 6×6)
+    let mut temp = [[0.0f64; 6]; 6];
+    for i in 0..6 {
+        for j in 0..6 {
+            let mut acc = 0.0f64;
+            for k in 0..6 {
+                acc += m[i][k] * stiffness.c[k][j];
+            }
+            temp[i][j] = acc;
+        }
+    }
+
+    // result = temp × Mᵀ  (= M × C × Mᵀ)
+    let mut result = [[0.0f64; 6]; 6];
+    for i in 0..6 {
+        for j in 0..6 {
+            let mut acc = 0.0f64;
+            for k in 0..6 {
+                acc += temp[i][k] * mt[k][j];
+            }
+            result[i][j] = acc;
+        }
+    }
+
+    StiffnessTensor { c: result }
 }
 
 #[cfg(test)]
@@ -183,5 +243,68 @@ mod tests {
     fn test_zero_is_symmetric() {
         let t = StiffnessTensor::zero();
         assert!(t.is_symmetric(1e-30));
+    }
+
+    #[test]
+    fn test_rotate_z_full_identity() {
+        // Rotation by 0 must leave ALL 36 entries unchanged.
+        let mut t = StiffnessTensor::zero();
+        // Populate with varied non-trivial entries so every cell is exercised.
+        for i in 0..6 {
+            for j in 0..6 {
+                t.c[i][j] = ((i * 6 + j + 1) as f64) * 1.1_f64;
+            }
+        }
+        let rotated = rotate_stiffness_z(&t, 0.0);
+        for i in 0..6 {
+            for j in 0..6 {
+                assert!(
+                    (rotated.c[i][j] - t.c[i][j]).abs() < 1e-9,
+                    "entry [{i}][{j}] changed under 0-rotation"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_rotate_z_90_preserves_symmetry() {
+        // After a 90° rotation the result must still be symmetric (Mᵀ = M⁻¹
+        // for an orthogonal Bond matrix, so symmetry is preserved).
+        let t = StiffnessTensor::isotropic(1e9, 5e8);
+        let rotated = rotate_stiffness_z(&t, std::f64::consts::PI / 2.0);
+        for i in 0..6 {
+            for j in 0..6 {
+                assert!(
+                    (rotated.c[i][j] - rotated.c[j][i]).abs() < 1e-6,
+                    "symmetry broken at [{i}][{j}]"
+                );
+            }
+        }
+        // For 90° rotation the in-plane axes swap: C'[0][0] ≈ C[1][1].
+        // For an isotropic tensor C[0][0] == C[1][1], so the value is preserved.
+        assert!((rotated.c[0][0] - t.c[1][1]).abs() < 1e-5);
+        assert!((rotated.c[1][1] - t.c[0][0]).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_rotate_z_isotropy_invariant() {
+        // An isotropic stiffness tensor must be invariant under any z-rotation.
+        let lambda = 2.0_f64;
+        let mu = 1.0_f64;
+        let t = StiffnessTensor::isotropic(lambda, mu);
+        for &angle in &[0.1_f64, 0.5, 1.0, 1.5] {
+            let rotated = rotate_stiffness_z(&t, angle);
+            for i in 0..6 {
+                for j in 0..6 {
+                    assert!(
+                        (rotated.c[i][j] - t.c[i][j]).abs() < 1e-5,
+                        "isotropic tensor changed at angle {angle} [{i}][{j}]: \
+                         got {}, expected {}",
+                        rotated.c[i][j],
+                        t.c[i][j]
+                    );
+                }
+            }
+        }
     }
 }

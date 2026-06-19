@@ -1,8 +1,7 @@
-//! Mesh boolean operations stub.
+//! Mesh boolean operations — volumetric SDF-based dispatcher.
 //!
-//! Classifies faces as inside/outside/boundary relative to a cutter AABB and
-//! assembles a result mesh. This is a geometric stub suitable for previewing
-//! Union, Intersection, and Subtraction results.
+//! Routes Union / Intersect / Subtract to the per-operation modules that use
+//! a shared SDF grid for correct volumetric boolean evaluation.
 
 /// The type of boolean operation to perform.
 #[allow(dead_code)]
@@ -98,12 +97,10 @@ fn tri_centroid(
 
 /// Performs the boolean operation and returns the assembled result mesh.
 ///
-/// This stub uses AABB classification: faces whose centroid lies inside the
-/// cutter AABB of mesh B are classified as "inside B".
-///
-/// - Union: all faces from A (outside B) + all faces from B.
-/// - Intersect: only faces from A that are inside B's AABB.
-/// - Subtract: only faces from A that are outside B's AABB.
+/// Delegates to the per-operation volumetric SDF implementations:
+/// - `BooleanOpType::Union`     → `mesh_boolean_union`
+/// - `BooleanOpType::Intersect` → `mesh_boolean_intersection`
+/// - `BooleanOpType::Subtract`  → `mesh_boolean_difference`
 #[allow(dead_code)]
 pub fn boolean_op(
     verts_a: &[[f32; 3]],
@@ -113,72 +110,46 @@ pub fn boolean_op(
     op: BooleanOpType,
     _cfg: &BooleanConfig,
 ) -> BooleanResult {
-    let (b_min, b_max) = aabb_from_verts(verts_b);
-
-    let mut out_verts: Vec<[f32; 3]> = Vec::new();
-    let mut out_faces: Vec<[u32; 3]> = Vec::new();
-
-    // Helper: append mesh A's subset of faces (offset already 0 in source).
-    let append_a_faces = |verts_a: &[[f32; 3]],
-                          faces_a: &[[u32; 3]],
-                          predicate: &dyn Fn([f32; 3]) -> bool,
-                          out_verts: &mut Vec<[f32; 3]>,
-                          out_faces: &mut Vec<[u32; 3]>| {
-        // Remap vertex indices.
-        let base = out_verts.len() as u32;
-        let mut used = vec![u32::MAX; verts_a.len()];
-        for face in faces_a {
-            let centroid = tri_centroid(verts_a, *face);
-            if predicate(centroid) {
-                let mut new_face = [0u32; 3];
-                for (slot, &vi) in new_face.iter_mut().zip(face.iter()) {
-                    if used[vi as usize] == u32::MAX {
-                        used[vi as usize] = base + out_verts.len() as u32 - base;
-                        out_verts.push(verts_a[vi as usize]);
-                    }
-                    *slot = used[vi as usize];
-                }
-                out_faces.push(new_face);
-            }
-        }
+    use super::mesh_boolean_difference::{
+        mesh_boolean_difference, BooleanDifferenceConfig,
     };
+    use super::mesh_boolean_intersection::{
+        mesh_boolean_intersection, BooleanIntersectionConfig,
+    };
+    use super::mesh_boolean_union::{mesh_boolean_union, BooleanUnionConfig};
 
-    match op {
+    let (out_verts, out_faces) = match op {
         BooleanOpType::Union => {
-            // Include A faces outside B, plus all B faces.
-            append_a_faces(
+            let r = mesh_boolean_union(
                 verts_a,
                 faces_a,
-                &|c| !point_in_aabb(c, b_min, b_max),
-                &mut out_verts,
-                &mut out_faces,
+                verts_b,
+                faces_b,
+                &BooleanUnionConfig::default(),
             );
-            // Append all of B.
-            let base = out_verts.len() as u32;
-            out_verts.extend_from_slice(verts_b);
-            for face in faces_b {
-                out_faces.push([face[0] + base, face[1] + base, face[2] + base]);
-            }
+            (r.vertices, r.triangles)
         }
         BooleanOpType::Intersect => {
-            append_a_faces(
+            let r = mesh_boolean_intersection(
                 verts_a,
                 faces_a,
-                &|c| point_in_aabb(c, b_min, b_max),
-                &mut out_verts,
-                &mut out_faces,
+                verts_b,
+                faces_b,
+                &BooleanIntersectionConfig::default(),
             );
+            (r.vertices, r.triangles)
         }
         BooleanOpType::Subtract => {
-            append_a_faces(
+            let r = mesh_boolean_difference(
                 verts_a,
                 faces_a,
-                &|c| !point_in_aabb(c, b_min, b_max),
-                &mut out_verts,
-                &mut out_faces,
+                verts_b,
+                faces_b,
+                &BooleanDifferenceConfig::default(),
             );
+            (r.vertices, r.triangles)
         }
-    }
+    };
 
     let is_manifold = check_manifold(&out_faces, out_verts.len());
     BooleanResult {

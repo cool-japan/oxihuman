@@ -397,6 +397,10 @@ pub use sph_fluid::{
     SphParticleV2,
 };
 
+#[path = "pbf_solver.rs"]
+pub mod pbf_solver;
+pub use pbf_solver::{default_pbf_config, new_pbf_particle, pbf_step, PbfConfig, PbfParticle};
+
 #[path = "lattice_boltzmann.rs"]
 pub mod lattice_boltzmann;
 pub use lattice_boltzmann::LatticeBoltzmann;

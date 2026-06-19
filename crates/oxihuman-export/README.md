@@ -8,7 +8,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 | Metric | Value |
 |--------|-------|
 | Status | Stable |
-| Tests passing | 5,289 |
+| Tests passing | 33,410 |
 | Public API items | 8,457 |
 | Source files | ~883 `.rs` files |
 | Stub coverage | 0 |
@@ -23,7 +23,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 
 ```toml
 [dependencies]
-oxihuman-export = "0.1.2"
+oxihuman-export = "0.2.0"
 ```
 
 ## Format Matrix
@@ -119,7 +119,7 @@ None. All modules are unconditionally compiled.
 
 - 0 `todo!()` / `unimplemented!()` macro calls
 - 0 stub implementations
-- 5,289 passing tests
+- 33,410 passing tests
 
 ## Dependencies
 

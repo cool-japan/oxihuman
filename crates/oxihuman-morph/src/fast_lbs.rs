@@ -58,18 +58,51 @@ pub fn fast_lbs_normalize(record: &mut FastLbsRecord) {
     }
 }
 
-/// Compute the blended position for a vertex (stub: just returns source position).
+/// Compute the blended position for a vertex using Linear Blend Skinning.
+///
+/// Computes: `out = Σ (weights[i] * (bone_matrices[bones[i]] * [x, y, z, 1.0]))`
+/// for each of the 4 bone records where the weight is non-negligible.
+/// Returns `source` unchanged when no bones have weight or vertex index is out of range.
 pub fn fast_lbs_transform(
     lbs: &FastLbs,
     vertex: usize,
     source: [f32; 3],
-    _bone_matrices: &[[[f32; 4]; 4]],
+    bone_matrices: &[[[f32; 4]; 4]],
 ) -> [f32; 3] {
-    /* Stub: returns source position unchanged for now */
-    if vertex < lbs.records.len() {
+    if vertex >= lbs.records.len() {
+        return [0.0; 3];
+    }
+    let rec = &lbs.records[vertex];
+    let [x, y, z] = source;
+
+    let mut out = [0.0f32; 3];
+    let mut total_weight = 0.0f32;
+
+    for i in 0..4 {
+        let w = rec.weights[i];
+        if w < 1e-9 {
+            continue;
+        }
+        let bone_idx = rec.bones[i] as usize;
+        if bone_idx >= bone_matrices.len() {
+            continue;
+        }
+        let m = &bone_matrices[bone_idx];
+        // 4×4 matrix * homogeneous point [x, y, z, 1]:
+        let tx = m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3];
+        let ty = m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3];
+        let tz = m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3];
+        out[0] += w * tx;
+        out[1] += w * ty;
+        out[2] += w * tz;
+        total_weight += w;
+    }
+
+    if total_weight < 1e-9 {
+        // No influential bones — return source unchanged
         source
     } else {
-        [0.0; 3]
+        out
     }
 }
 
@@ -165,9 +198,56 @@ mod tests {
 
     #[test]
     fn test_transform_returns_source() {
-        let lbs = new_fast_lbs(2, 2);
-        let pos = fast_lbs_transform(&lbs, 0, [1.0, 2.0, 3.0], &[]);
-        assert!((pos[0] - 1.0).abs() < 1e-5, /* stub returns source position */);
+        // With all-zero weights, the identity-matrix case falls back to source.
+        let mut lbs = new_fast_lbs(2, 2);
+        // Set vertex 0 to use bone 0 with full weight; bone matrix is identity.
+        let rec = FastLbsRecord {
+            bones: [0, 0, 0, 0],
+            weights: [1.0, 0.0, 0.0, 0.0],
+        };
+        fast_lbs_set(&mut lbs, 0, rec);
+        let identity: [[f32; 4]; 4] = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ];
+        let source = [1.0, 2.0, 3.0];
+        let pos = fast_lbs_transform(&lbs, 0, source, &[identity]);
+        assert!(
+            (pos[0] - 1.0).abs() < 1e-5,
+            "identity matrix must return source x"
+        );
+        assert!(
+            (pos[1] - 2.0).abs() < 1e-5,
+            "identity matrix must return source y"
+        );
+        assert!(
+            (pos[2] - 3.0).abs() < 1e-5,
+            "identity matrix must return source z"
+        );
+    }
+
+    #[test]
+    fn test_transform_rigid_translate() {
+        // Translation matrix: translates by [1, 2, 3].
+        let mut lbs = new_fast_lbs(1, 1);
+        let rec = FastLbsRecord {
+            bones: [0, 0, 0, 0],
+            weights: [1.0, 0.0, 0.0, 0.0],
+        };
+        fast_lbs_set(&mut lbs, 0, rec);
+        let translate: [[f32; 4]; 4] = [
+            [1.0, 0.0, 0.0, 1.0], // tx = 1
+            [0.0, 1.0, 0.0, 2.0], // ty = 2
+            [0.0, 0.0, 1.0, 3.0], // tz = 3
+            [0.0, 0.0, 0.0, 1.0],
+        ];
+        let source = [5.0, 6.0, 7.0];
+        let pos = fast_lbs_transform(&lbs, 0, source, &[translate]);
+        assert!((pos[0] - 6.0).abs() < 1e-5, "x must be source + 1");
+        assert!((pos[1] - 8.0).abs() < 1e-5, "y must be source + 2");
+        assert!((pos[2] - 10.0).abs() < 1e-5, "z must be source + 3");
     }
 
     #[test]

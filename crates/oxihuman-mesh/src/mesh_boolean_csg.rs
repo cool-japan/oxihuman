@@ -97,6 +97,57 @@ pub fn csg_inside_count(pts: &[[f32; 3]]) -> usize {
     pts.len()
 }
 
+/// Extract an iso-surface mesh from the union/intersection/subtraction of an
+/// `SdfSphere` and an `SdfBox` by sampling both on a regular 3-D grid and
+/// running Marching Cubes at iso-value 0.
+///
+/// # Parameters
+/// - `a`: signed-distance sphere primitive.
+/// - `b`: signed-distance box primitive.
+/// - `op`: which CSG operation to apply when combining the two SDFs.
+/// - `resolution`: number of grid **steps** per axis.  The grid spans
+///   `[-extent, +extent]³` with `resolution` cells; actual grid points lie at
+///   cell centres.
+/// - `extent`: half-width of the sampling domain in world units.
+///
+/// # Returns
+/// A [`crate::mesh::MeshBuffers`] containing the extracted iso-surface.
+#[allow(dead_code)]
+pub fn csg_to_mesh(
+    a: &SdfSphere,
+    b: &SdfBox,
+    op: CsgOp,
+    resolution: usize,
+    extent: f32,
+) -> crate::mesh::MeshBuffers {
+    use crate::marching_cubes::{marching_cubes, ScalarField};
+
+    let res = resolution.max(2);
+    let step = 2.0 * extent / res as f32;
+
+    // ScalarField stores grid-point values (not cell-centres) so we use
+    // `res + 1` points per axis to cover the full `[−extent, +extent]` domain
+    // with the first and last points landing exactly on the boundary.
+    let pts = res + 1;
+    let mut field = ScalarField::new(
+        [pts, pts, pts],
+        [-extent, -extent, -extent],
+        [step, step, step],
+    );
+
+    for iz in 0..pts {
+        for iy in 0..pts {
+            for ix in 0..pts {
+                let p = field.world_pos(ix, iy, iz);
+                let val = csg_combine(a.eval(p), b.eval(p), op);
+                field.set(ix, iy, iz, val);
+            }
+        }
+    }
+
+    marching_cubes(&field, 0.0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -177,5 +228,17 @@ mod tests {
         let b = unit_box();
         let pts = sample_csg_grid(&s, &b, CsgOp::Union, 4, 2.0);
         assert_eq!(csg_inside_count(&pts), pts.len());
+    }
+
+    #[test]
+    fn csg_to_mesh_sphere_union_box_non_empty() {
+        let s = unit_sphere();
+        let b = unit_box();
+        let mesh = csg_to_mesh(&s, &b, CsgOp::Union, 16, 2.0);
+        assert!(
+            !mesh.positions.is_empty(),
+            "union of sphere and box should produce a non-empty mesh, got {} vertices",
+            mesh.positions.len()
+        );
     }
 }

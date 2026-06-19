@@ -431,15 +431,15 @@ pub use proto_text_export::{
 pub mod capnp_stub_export;
 pub use capnp_stub_export::{
     add_capnp_field, add_capnp_struct, capnp_last_struct_field_count, capnp_struct_count,
-    export_mesh_capnp_schema, find_capnp_struct, new_capnp_export, to_capnp_schema, CapnpExport,
-    CapnpField, CapnpStruct,
+    export_mesh_capnp_schema, find_capnp_struct, new_capnp_export, to_capnp_bytes,
+    to_capnp_schema, CapnpExport, CapnpField, CapnpStruct,
 };
 
 pub mod flatbuf_stub_export;
 pub use flatbuf_stub_export::{
     add_fbs_field, add_fbs_table, export_mesh_fbs_schema, fbs_last_table_field_count,
-    fbs_table_count, find_fbs_table, new_flatbuf_export, set_fbs_root_type, to_fbs_schema,
-    FbsField, FbsTable, FlatbufExport,
+    fbs_table_count, find_fbs_table, flatbuf_encode_mesh, new_flatbuf_export, set_fbs_root_type,
+    to_flatbuf_bytes, to_fbs_schema, FbsField, FbsTable, FlatbufExport,
 };
 
 pub mod avro_export;

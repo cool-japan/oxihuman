@@ -36,17 +36,23 @@ pub fn expression_to_json(save: &ExpressionSave) -> String {
     )
 }
 
-/// Parse a minimal JSON string back into an `ExpressionLoad`.
-/// Returns `None` if the string is not a recognised format.
+/// Parse a JSON string back into an `ExpressionLoad`.
+///
+/// Extracts the `name` and `version` fields together with the full
+/// `weights` array. Returns `None` if the string is not a recognised format.
 #[allow(dead_code)]
 pub fn expression_from_json(json: &str) -> Option<ExpressionLoad> {
-    // Minimal parser — extract name and version fields.
     let name = extract_json_string(json, "name")?;
     let version_str = extract_json_number(json, "version")?;
     let version: u32 = version_str.parse().ok()?;
-    let weights = vec![0.0_f32]; // stub: full parser not required for tests
+    let weights = extract_json_f32_array(json, "weights").unwrap_or_default();
     let checksum = simple_checksum(json.as_bytes());
-    Some(ExpressionLoad { name, version, weights, checksum })
+    Some(ExpressionLoad {
+        name,
+        version,
+        weights,
+        checksum,
+    })
 }
 
 fn extract_json_string(json: &str, key: &str) -> Option<String> {
@@ -62,8 +68,33 @@ fn extract_json_number(json: &str, key: &str) -> Option<String> {
     let search = format!("\"{key}\":");
     let pos = json.find(&search)?;
     let after = json[pos + search.len()..].trim_start();
-    let end = after.find(|c: char| !c.is_ascii_digit()).unwrap_or(after.len());
+    let end = after
+        .find(|c: char| !c.is_ascii_digit())
+        .unwrap_or(after.len());
     Some(after[..end].to_owned())
+}
+
+/// Extract a JSON array of `f32` values associated with `key`.
+///
+/// Locates `"<key>":`, then the next `[` and its matching `]`, and parses each
+/// comma-separated, non-empty token as `f32`. An empty array yields
+/// `Some(vec![])`; a missing key or missing brackets yields `None`.
+fn extract_json_f32_array(json: &str, key: &str) -> Option<Vec<f32>> {
+    let search = format!("\"{key}\":");
+    let pos = json.find(&search)?;
+    let after = &json[pos + search.len()..];
+    let lb = after.find('[')?;
+    let rb = after[lb + 1..].find(']')? + lb + 1;
+    let inner = &after[lb + 1..rb];
+    let mut out = Vec::new();
+    for tok in inner.split(',') {
+        let t = tok.trim();
+        if t.is_empty() {
+            continue;
+        }
+        out.push(t.parse::<f32>().ok()?);
+    }
+    Some(out)
 }
 
 /// Stub: write expression data to a byte buffer (simulates file I/O).
@@ -112,7 +143,11 @@ mod tests {
     use super::*;
 
     fn make_save() -> ExpressionSave {
-        ExpressionSave { name: "smile".to_owned(), version: 1, weights: vec![0.5, 0.3] }
+        ExpressionSave {
+            name: "smile".to_owned(),
+            version: 1,
+            weights: vec![0.5, 0.3],
+        }
     }
 
     #[test]
@@ -169,12 +204,42 @@ mod tests {
     fn test_expression_name_from_json() {
         let s = make_save();
         let j = expression_to_json(&s);
-        assert_eq!(expression_name_from_json(&j).expect("should succeed"), "smile");
+        assert_eq!(
+            expression_name_from_json(&j).expect("should succeed"),
+            "smile"
+        );
     }
 
     #[test]
     fn test_expression_to_bytes_nonempty() {
         let s = make_save();
         assert!(!expression_to_bytes(&s).is_empty());
+    }
+
+    #[test]
+    fn test_expression_from_json_roundtrip_weights() {
+        let s = ExpressionSave {
+            name: "smile".to_owned(),
+            version: 2,
+            weights: vec![0.5, 0.3, 0.125, 1.0],
+        };
+        let j = expression_to_json(&s);
+        let loaded = expression_from_json(&j).expect("should parse");
+        assert_eq!(loaded.weights.len(), 4);
+        for (a, b) in loaded.weights.iter().zip(s.weights.iter()) {
+            assert!((a - b).abs() < 1e-4, "weight mismatch: {a} vs {b}");
+        }
+    }
+
+    #[test]
+    fn test_expression_from_json_empty_weights() {
+        let s = ExpressionSave {
+            name: "neutral".to_owned(),
+            version: 1,
+            weights: vec![],
+        };
+        let j = expression_to_json(&s);
+        let loaded = expression_from_json(&j).expect("should parse");
+        assert!(loaded.weights.is_empty());
     }
 }

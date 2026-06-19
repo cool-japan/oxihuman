@@ -48,10 +48,7 @@ fn generate_missing_base_errors() {
 
 #[test]
 fn generate_unknown_expression_errors() {
-    let base_path = std::env::var("MAKEHUMAN_DATA_DIR")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-        .join("3dobjs/base.obj");
+    let base_path = oxihuman_test_utils::base_obj();
     if !base_path.exists() {
         return;
     }
@@ -74,10 +71,7 @@ fn generate_unknown_expression_errors() {
 
 #[test]
 fn generate_with_expression_no_targets_dir() {
-    let base_path = std::env::var("MAKEHUMAN_DATA_DIR")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-        .join("3dobjs/base.obj");
+    let base_path = oxihuman_test_utils::base_obj();
     if !base_path.exists() {
         return;
     }
@@ -101,10 +95,7 @@ fn generate_with_expression_no_targets_dir() {
 
 #[test]
 fn save_session_creates_file() {
-    let base_path = std::env::var("MAKEHUMAN_DATA_DIR")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-        .join("3dobjs/base.obj");
+    let base_path = oxihuman_test_utils::base_obj();
     if !base_path.exists() {
         return;
     }
@@ -149,10 +140,7 @@ fn save_session_creates_file() {
 
 #[test]
 fn generate_load_session_nonexistent_errors() {
-    let base_path = std::env::var("MAKEHUMAN_DATA_DIR")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-        .join("3dobjs/base.obj");
+    let base_path = oxihuman_test_utils::base_obj();
     if !base_path.exists() {
         return;
     }
@@ -180,10 +168,7 @@ fn validate_nonexistent_errors() {
 
 #[test]
 fn validate_real_target_file() {
-    let path = std::env::var("MAKEHUMAN_DATA_DIR")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-        .join("targets/armslegs");
+    let path = oxihuman_test_utils::targets_dir().join("armslegs");
     let entries: Vec<_> = std::fs::read_dir(&path)
         .into_iter()
         .flatten()

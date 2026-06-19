@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 
-//! Mark-and-sweep GC stub — demonstrates the two-phase collection cycle using
+//! Mark-and-sweep garbage collector — two-phase (mark + sweep) collection cycle using
 //! object indices instead of actual heap pointers.
 
 /// Identifier for a GC-managed object.
@@ -35,13 +35,13 @@ impl GcObject {
 }
 
 /// Simple mark-and-sweep garbage collector stub.
-pub struct GcStub {
+pub struct Gc {
     objects: Vec<GcObject>,
     roots: Vec<GcId>,
     collected: usize,
 }
 
-impl GcStub {
+impl Gc {
     /// Create an empty GC.
     pub fn new() -> Self {
         Self {
@@ -124,15 +124,15 @@ impl GcStub {
     }
 }
 
-impl Default for GcStub {
+impl Default for Gc {
     fn default() -> Self {
         Self::new()
     }
 }
 
 /// Create a new GC stub.
-pub fn new_gc_stub() -> GcStub {
-    GcStub::new()
+pub fn new_gc() -> Gc {
+    Gc::new()
 }
 
 #[cfg(test)]
@@ -141,14 +141,14 @@ mod tests {
 
     #[test]
     fn test_alloc() {
-        let mut gc = GcStub::new();
+        let mut gc = Gc::new();
         let id = gc.alloc();
         assert_eq!(id, 0); /* first object has id 0 */
     }
 
     #[test]
     fn test_collect_unreachable() {
-        let mut gc = GcStub::new();
+        let mut gc = Gc::new();
         gc.alloc(); /* unreachable object */
         let freed = gc.collect();
         assert_eq!(freed, 1); /* one object collected */
@@ -156,7 +156,7 @@ mod tests {
 
     #[test]
     fn test_root_not_collected() {
-        let mut gc = GcStub::new();
+        let mut gc = Gc::new();
         let id = gc.alloc();
         gc.add_root(id);
         let freed = gc.collect();
@@ -165,7 +165,7 @@ mod tests {
 
     #[test]
     fn test_reachable_via_root() {
-        let mut gc = GcStub::new();
+        let mut gc = Gc::new();
         let root = gc.alloc();
         let child = gc.alloc();
         gc.add_root(root);
@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn test_unreachable_child() {
-        let mut gc = GcStub::new();
+        let mut gc = Gc::new();
         let root = gc.alloc();
         let orphan = gc.alloc();
         gc.add_root(root);
@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     fn test_live_count() {
-        let mut gc = GcStub::new();
+        let mut gc = Gc::new();
         let id = gc.alloc();
         gc.add_root(id);
         gc.collect();
@@ -196,7 +196,7 @@ mod tests {
 
     #[test]
     fn test_total_collected() {
-        let mut gc = GcStub::new();
+        let mut gc = Gc::new();
         gc.alloc();
         gc.alloc();
         gc.collect();
@@ -205,7 +205,7 @@ mod tests {
 
     #[test]
     fn test_multiple_roots() {
-        let mut gc = GcStub::new();
+        let mut gc = Gc::new();
         let a = gc.alloc();
         let b = gc.alloc();
         gc.add_root(a);
@@ -216,13 +216,13 @@ mod tests {
 
     #[test]
     fn test_default() {
-        let gc = GcStub::default();
+        let gc = Gc::default();
         assert_eq!(gc.live_count(), 0); /* default creates empty GC */
     }
 
     #[test]
     fn test_new_helper() {
-        let gc = new_gc_stub();
+        let gc = new_gc();
         assert_eq!(gc.live_count(), 0); /* helper creates empty GC */
     }
 }

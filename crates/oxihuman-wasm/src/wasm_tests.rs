@@ -90,10 +90,7 @@ fn strict_policy_engine_builds() {
 
 #[test]
 fn real_base_mesh_via_wasm_engine() {
-    let path = std::env::var("MAKEHUMAN_DATA_DIR")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| std::path::PathBuf::from("/tmp/oxihuman_nonexistent_data"))
-        .join("3dobjs/base.obj");
+    let path = oxihuman_test_utils::base_obj();
     if let Ok(obj_bytes) = std::fs::read(&path) {
         let mut e = WasmEngine::new_from_obj_bytes(&obj_bytes).expect("should succeed");
         assert!(e.vertex_count() > 10_000);
@@ -1020,7 +1017,7 @@ fn apply_expression_blend_unknown_returns_false() {
 
 #[test]
 fn get_curvature_map_returns_json_array() {
-    let e = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+    let mut e = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
     let json = e.get_curvature_map();
     let v: serde_json::Value =
         serde_json::from_str(&json).expect("curvature map must be valid JSON");
@@ -1029,7 +1026,7 @@ fn get_curvature_map_returns_json_array() {
 
 #[test]
 fn get_curvature_map_length_matches_vertex_count() {
-    let e = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
+    let mut e = WasmEngine::new_from_obj_bytes(SIMPLE_OBJ).expect("should succeed");
     let n = e.vertex_count();
     let json = e.get_curvature_map();
     let v: serde_json::Value = serde_json::from_str(&json).expect("should succeed");

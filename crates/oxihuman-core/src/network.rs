@@ -524,17 +524,25 @@ mod tests {
     }
 
     /// Spawn a background thread that accepts one connection and holds it open
-    /// until `listener` is dropped.  Returns the assigned port.
+    /// long enough for the sender to complete its write without receiving RST.
     ///
-    /// The `StdTcpListener` should be held in the caller for its lifetime.
+    /// The previous implementation dropped `_conn` immediately when the closure
+    /// returned, causing an OS RST that could race with an in-flight
+    /// `send_packet` write and flip the stub into `Error` state before the
+    /// test assertion ran (`send_increments_count` flaky failure).
+    ///
+    /// The fix keeps the accepted connection alive for 500 ms — well beyond any
+    /// reasonable test assertion window — before dropping it.  This is
+    /// test-only code; production paths are unaffected.
     fn accept_one_in_background(listener: StdTcpListener) -> u16 {
         let port = listener.local_addr().expect("local_addr").port();
         std::thread::spawn(move || {
-            // accept() blocks until a client connects; keep the conn alive
-            let _conn = listener.accept();
-            // _conn is held until the thread exits (when _conn is dropped at
-            // the end of the closure).  The thread will linger until the OS
-            // reclaims it, which is fine for test teardown.
+            if let Ok(conn) = listener.accept() {
+                // Hold the connection open so the sender side can complete
+                // write_all() and increment send_count before RST is sent.
+                std::thread::sleep(std::time::Duration::from_millis(500));
+                drop(conn);
+            }
         });
         port
     }

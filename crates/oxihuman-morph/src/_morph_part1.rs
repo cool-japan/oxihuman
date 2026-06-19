@@ -183,6 +183,13 @@ pub use facs::{
     FacsState,
 };
 
+#[path = "facs_synergy.rs"]
+pub mod facs_synergy;
+pub use facs_synergy::{
+    apply_coactivation_rules, coactivation_rule_count, default_coactivation_rules,
+    FacsCoactivationKind, FacsCoactivationRule, FacsCoactivationRules,
+};
+
 #[path = "gaze.rs"]
 pub mod gaze;
 pub use gaze::{
@@ -496,6 +503,9 @@ pub use expression_composer::{
     reset_expression, set_layer_weight, ComposedExpression, ExpressionComposer,
     ExpressionComposerConfig, ExpressionComposerLayer,
 };
+
+#[path = "expression_io.rs"]
+pub mod expression_io;
 
 #[path = "body_language.rs"]
 pub mod body_language;

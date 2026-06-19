@@ -24,12 +24,15 @@ path = "src/main.rs"
 [dependencies]
 anyhow.workspace         = true
 serde_json.workspace     = true
-oxihuman-core.workspace    = true
+oxihuman-core            = { workspace = true, features = ["net"] }
 oxihuman-morph.workspace   = true
 oxihuman-mesh.workspace    = true
 oxihuman-export.workspace  = true
 oxihuman-physics.workspace = true
 oxihuman-viewer.workspace  = true
+
+[dev-dependencies]
+oxihuman-test-utils = { path = "../oxihuman-test-utils" }
 
 [[test]]
 name    = "e2e_tests"

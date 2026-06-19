@@ -2,7 +2,7 @@
 
 Morphing engine for the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 5,865 passing | **Version:** 0.1.2 | **Updated:** 2026-05-05
+**Status:** Stable | **Tests:** 33,410 passing | **Version:** 0.2.0 | **Updated:** 2026-06-19
 
 ---
 
@@ -20,7 +20,7 @@ The crate contains zero `todo!()`/`unimplemented!()` calls; every declared publi
 
 ```toml
 [dependencies]
-oxihuman-morph = "0.1.2"
+oxihuman-morph = "0.2.0"
 ```
 
 No feature flags are required; all subsystems are included by default.
@@ -106,7 +106,7 @@ No thread-pool configuration is required; rayon's global pool is used by default
 
 ## Stability
 
-All public items follow semantic versioning. The 0.1.2 release is considered stable for downstream consumption within the OxiHuman workspace. Breaking changes will be accompanied by a minor-version bump until a 1.0 release is declared.
+All public items follow semantic versioning. The 0.2.0 release is considered stable for downstream consumption within the OxiHuman workspace. Breaking changes will be accompanied by a minor-version bump until a 1.0 release is declared.
 
 ---
 

@@ -605,6 +605,13 @@ pub use ao_debug_view::{
     AoDebugView,
 };
 
+pub mod ao_renderer;
+pub use ao_renderer::{
+    ao_intensity, ao_pass_name, ao_radius, ao_sample_count, ao_to_texture, compute_ao_at_vertex,
+    default_ao_config as ao_renderer_default_config, new_ao_renderer, AoRenderer,
+    AoConfig as AoRendererConfig,
+};
+
 pub mod normal_channel_view;
 pub use normal_channel_view::{
     ncv_active_channels, ncv_enable, ncv_is_enabled, ncv_set_mask, ncv_to_json,

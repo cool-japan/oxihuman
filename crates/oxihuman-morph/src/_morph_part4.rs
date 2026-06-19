@@ -407,9 +407,9 @@ pub use emotion_blend_tree::{
 #[path = "procedural_wrinkle.rs"]
 pub mod procedural_wrinkle;
 pub use procedural_wrinkle::{
-    new_procedural_wrinkle, pw_add_region, pw_evaluate, pw_region_count, pw_set_enabled,
-    pw_set_global_scale, pw_to_json, ProceduralWrinkle, WrinklePattern,
-    WrinkleRegion as ProceduralWrinkleRegion,
+    new_procedural_wrinkle, pw_add_region, pw_evaluate, pw_evaluate_with_positions,
+    pw_region_count, pw_set_enabled, pw_set_global_scale, pw_to_json, ProceduralWrinkle,
+    WrinklePattern, WrinkleRegion as ProceduralWrinkleRegion,
 };
 
 #[path = "age_progression_morph.rs"]
@@ -560,6 +560,13 @@ pub use stretch_mark_morph::{
     new_stretch_mark_morph, smm_add_entry, smm_clear, smm_entry_count, smm_evaluate,
     smm_set_enabled, smm_set_intensity, smm_to_json, StretchMarkEntry, StretchMarkMorph,
     StretchMarkRegion,
+};
+
+#[path = "param_randomizer.rs"]
+pub mod param_randomizer;
+pub use param_randomizer::{
+    new_param_randomizer, param_max, param_min, randomize_gaussian_stub, randomize_in_range,
+    randomized_count, randomizer_to_json, seed_randomizer, ParamRandomizer,
 };
 
 #[path = "cellulite_morph.rs"]

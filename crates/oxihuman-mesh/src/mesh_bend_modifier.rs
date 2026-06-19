@@ -22,15 +22,42 @@ pub fn new_bend_params(angle_deg: f32, axis: u8) -> BendParams {
 
 pub fn bend_vertex(p: [f32; 3], params: &BendParams) -> [f32; 3] {
     let angle_rad = params.angle_deg * PI / 180.0;
-    let t = (p[2] - params.limit_min) / (params.limit_max - params.limit_min + 1e-10);
-    let t = t.clamp(0.0, 1.0);
-    let theta = t * angle_rad;
-    let cos_t = theta.cos();
-    let sin_t = theta.sin();
-    let x = p[0] * cos_t - p[1] * sin_t;
-    let y = p[0] * sin_t + p[1] * cos_t;
-    let _ = params.axis;
-    [x, y, p[2]]
+    match params.axis {
+        0 => {
+            // Bend along X axis: rotation in the YZ plane, proportional to x position.
+            let t = ((p[0] - params.limit_min) / (params.limit_max - params.limit_min + 1e-10))
+                .clamp(0.0, 1.0);
+            let theta = t * angle_rad;
+            let cos_t = theta.cos();
+            let sin_t = theta.sin();
+            let y = p[1] * cos_t - p[2] * sin_t;
+            let z = p[1] * sin_t + p[2] * cos_t;
+            [p[0], y, z]
+        }
+        1 => {
+            // Bend along Y axis: rotation in the XZ plane, proportional to y position.
+            let t = ((p[1] - params.limit_min) / (params.limit_max - params.limit_min + 1e-10))
+                .clamp(0.0, 1.0);
+            let theta = t * angle_rad;
+            let cos_t = theta.cos();
+            let sin_t = theta.sin();
+            let x = p[0] * cos_t - p[2] * sin_t;
+            let z = p[0] * sin_t + p[2] * cos_t;
+            [x, p[1], z]
+        }
+        _ => {
+            // Bend along Z axis (default / axis==2): rotation in XY plane,
+            // proportional to z position.  This is the original formula.
+            let t = ((p[2] - params.limit_min) / (params.limit_max - params.limit_min + 1e-10))
+                .clamp(0.0, 1.0);
+            let theta = t * angle_rad;
+            let cos_t = theta.cos();
+            let sin_t = theta.sin();
+            let x = p[0] * cos_t - p[1] * sin_t;
+            let y = p[0] * sin_t + p[1] * cos_t;
+            [x, y, p[2]]
+        }
+    }
 }
 
 pub fn bend_is_unlimited(params: &BendParams) -> bool {
@@ -102,5 +129,44 @@ mod tests {
         let params = new_bend_params(180.0, 2);
         let c = bend_curvature(&params, 1.0);
         assert!((c - PI).abs() < 1e-4);
+    }
+
+    #[test]
+    fn test_bend_axis0_not_identity() {
+        // 90° bend around X: at x=limit_max the YZ coords rotate
+        let params = BendParams {
+            angle_deg: 90.0,
+            axis: 0,
+            limit_min: 0.0,
+            limit_max: 1.0,
+        };
+        let v = [1.0f32, 1.0, 0.0];
+        let out = bend_vertex(v, &params);
+        assert!(out != v, "axis=0 bend must differ from identity, got {out:?}");
+    }
+
+    #[test]
+    fn test_bend_axis1_not_identity() {
+        // 90° bend around Y: at y=limit_max the XZ coords rotate
+        let params = BendParams {
+            angle_deg: 90.0,
+            axis: 1,
+            limit_min: 0.0,
+            limit_max: 1.0,
+        };
+        let v = [1.0f32, 1.0, 0.0];
+        let out = bend_vertex(v, &params);
+        assert!(out != v, "axis=1 bend must differ from identity, got {out:?}");
+    }
+
+    #[test]
+    fn test_bend_axis0_differs_from_axis2() {
+        let p0 = BendParams { angle_deg: 45.0, axis: 0, limit_min: 0.0, limit_max: 2.0 };
+        let p2 = BendParams { angle_deg: 45.0, axis: 2, limit_min: 0.0, limit_max: 2.0 };
+        let v = [1.0f32, 1.0, 1.0];
+        assert!(
+            bend_vertex(v, &p0) != bend_vertex(v, &p2),
+            "axis=0 and axis=2 must produce different results"
+        );
     }
 }

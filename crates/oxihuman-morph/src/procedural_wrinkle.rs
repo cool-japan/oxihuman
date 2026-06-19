@@ -53,10 +53,95 @@ pub fn pw_add_region(pw: &mut ProceduralWrinkle, region: WrinkleRegion) {
     pw.regions.push(region);
 }
 
-/// Evaluate wrinkle normals/offsets (stub: zeroed).
+/// Evaluate wrinkle offsets with no vertex positions (returns all-zero offsets).
+///
+/// When vertex positions are not available use [`pw_evaluate_with_positions`]
+/// to obtain real wrinkle displacements.  This overload exists so that
+/// callers that have not yet been updated continue to compile and run.
 pub fn pw_evaluate(pw: &ProceduralWrinkle) -> Vec<[f32; 3]> {
-    /* Stub: returns zeroed offset array */
-    vec![[0.0; 3]; pw.vertex_count]
+    vec![[0.0_f32; 3]; pw.vertex_count]
+}
+
+/// Evaluate procedural wrinkle offsets for a given set of vertex positions.
+///
+/// For each vertex the function accumulates displacement contributions from
+/// every [`WrinkleRegion`] whose sphere of influence covers that vertex:
+///
+/// 1. **Falloff** `t = 1 − dist/radius` (linear, 0 at the edge, 1 at the
+///    centre) weights each region's contribution.
+/// 2. **Pattern** determines the direction and shape of the displacement:
+///    - [`WrinklePattern::Linear`] — displaces along the region's local +X
+///      axis (world X) using a cosine ripple.
+///    - [`WrinklePattern::Radial`] — displaces outward along the
+///      centre → vertex direction using a cosine ripple.
+///    - [`WrinklePattern::Noise`] — displaces along the world +Y axis using
+///      a sine-based deterministic pseudo-noise pattern.
+/// 3. Each displacement is additionally scaled by `driver_weight` and the
+///    system-level `global_scale`.
+///
+/// `positions` must have the same length as `pw.vertex_count`.  If it is
+/// shorter the function processes only the available vertices; if it is
+/// longer only the first `vertex_count` entries are used.
+pub fn pw_evaluate_with_positions(pw: &ProceduralWrinkle, positions: &[[f32; 3]]) -> Vec<[f32; 3]> {
+    let count = pw.vertex_count.min(positions.len());
+    let mut offsets = vec![[0.0_f32; 3]; pw.vertex_count];
+
+    if !pw.enabled || pw.global_scale <= 0.0 {
+        return offsets;
+    }
+
+    for (v_idx, pos) in positions.iter().enumerate().take(count) {
+        let mut acc = [0.0_f32; 3];
+
+        for region in &pw.regions {
+            // Vector from region centre to vertex.
+            let dx = pos[0] - region.center[0];
+            let dy = pos[1] - region.center[1];
+            let dz = pos[2] - region.center[2];
+            let dist = (dx * dx + dy * dy + dz * dz).sqrt();
+
+            if dist > region.radius {
+                continue; // Outside influence sphere.
+            }
+
+            // Linear falloff: 1 at center, 0 at edge.
+            let t = 1.0_f32 - dist / region.radius;
+
+            // Cosine ripple magnitude (same formula for Linear and Radial).
+            let ripple = t * region.amplitude * (dist * region.frequency).cos();
+
+            let displacement: [f32; 3] = match region.pattern {
+                WrinklePattern::Linear => {
+                    // Displace along world +X axis.
+                    [ripple, 0.0_f32, 0.0_f32]
+                }
+                WrinklePattern::Radial => {
+                    // Displace along the centre → vertex direction.
+                    if dist < 1e-8 {
+                        [ripple, 0.0_f32, 0.0_f32]
+                    } else {
+                        let inv = 1.0_f32 / dist;
+                        [ripple * dx * inv, ripple * dy * inv, ripple * dz * inv]
+                    }
+                }
+                WrinklePattern::Noise => {
+                    // Deterministic sine-based pseudo-noise along world +Y axis.
+                    let noise = t * region.amplitude * (dist * region.frequency).sin();
+                    [0.0_f32, noise, 0.0_f32]
+                }
+            };
+
+            // Apply driver weight and global scale.
+            let scale = region.driver_weight * pw.global_scale;
+            acc[0] += displacement[0] * scale;
+            acc[1] += displacement[1] * scale;
+            acc[2] += displacement[2] * scale;
+        }
+
+        offsets[v_idx] = acc;
+    }
+
+    offsets
 }
 
 /// Set global scale.
@@ -167,5 +252,55 @@ mod tests {
     fn test_enabled_default() {
         let pw = new_procedural_wrinkle(1);
         assert!(pw.enabled /* must be enabled by default */,);
+    }
+
+    #[test]
+    fn pw_evaluate_region_affects_nearby_vertex() {
+        // A radial region at the origin with radius 1.0 should produce a
+        // non-zero offset for a vertex at [0.5, 0, 0] which lies inside it.
+        let mut pw = new_procedural_wrinkle(1);
+        pw_add_region(
+            &mut pw,
+            WrinkleRegion {
+                pattern: WrinklePattern::Radial,
+                center: [0.0, 0.0, 0.0],
+                radius: 1.0,
+                amplitude: 1.0,
+                frequency: 1.0,
+                driver_weight: 1.0,
+            },
+        );
+        let positions: Vec<[f32; 3]> = vec![[0.5, 0.0, 0.0]];
+        let offsets = pw_evaluate_with_positions(&pw, &positions);
+        let mag = offsets[0].iter().map(|&v| v * v).sum::<f32>().sqrt();
+        assert!(
+            mag > 1e-6,
+            "vertex inside region must receive a non-zero offset, got magnitude {mag}"
+        );
+    }
+
+    #[test]
+    fn pw_evaluate_vertex_outside_region_zero() {
+        // A vertex at [2.0, 0, 0] is outside a region of radius 1.0 centred
+        // at the origin and must receive exactly zero offset.
+        let mut pw = new_procedural_wrinkle(1);
+        pw_add_region(
+            &mut pw,
+            WrinkleRegion {
+                pattern: WrinklePattern::Radial,
+                center: [0.0, 0.0, 0.0],
+                radius: 1.0,
+                amplitude: 1.0,
+                frequency: 1.0,
+                driver_weight: 1.0,
+            },
+        );
+        let positions: Vec<[f32; 3]> = vec![[2.0, 0.0, 0.0]];
+        let offsets = pw_evaluate_with_positions(&pw, &positions);
+        let mag = offsets[0].iter().map(|&v| v * v).sum::<f32>().sqrt();
+        assert!(
+            mag < 1e-6,
+            "vertex outside region must have zero offset, got magnitude {mag}"
+        );
     }
 }

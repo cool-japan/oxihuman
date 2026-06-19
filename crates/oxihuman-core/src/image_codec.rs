@@ -313,8 +313,9 @@ pub fn default_encode_config(fmt: ImageFormat) -> EncodeConfig {
 }
 
 /// Returns encoded bytes for the given image data and config.
-/// BMP and PNG are routed to real implementations when the pixel buffer matches
-/// the expected size. All other formats use a 4-byte stub magic header.
+/// BMP and PNG use hand-coded implementations; JPEG, GIF, WebP, TIFF delegate to
+/// their respective codec modules. TGA and HDR return a 4-byte magic-stub header
+/// (those formats are not yet implemented).
 #[allow(dead_code)]
 pub fn encode_stub(header: &ImageHeader, pixels: &[u8], cfg: &EncodeConfig) -> Vec<u8> {
     let pixel_count = (header.width as usize) * (header.height as usize);
@@ -327,7 +328,6 @@ pub fn encode_stub(header: &ImageHeader, pixels: &[u8], cfg: &EncodeConfig) -> V
             } else if pixels.len() == expected_rgb {
                 bmp_encode_rgb(header.width, header.height, pixels)
             } else {
-                // Pixel buffer doesn't match; return BMP magic stub
                 vec![
                     0x42u8,
                     0x4Du8,
@@ -339,24 +339,63 @@ pub fn encode_stub(header: &ImageHeader, pixels: &[u8], cfg: &EncodeConfig) -> V
         ImageFormat::Png => {
             match png_encode_rgb(header.width as usize, header.height as usize, pixels) {
                 Ok(encoded) => encoded,
-                Err(_) => {
-                    vec![
-                        0x89u8,
-                        0x00,
-                        (header.width & 0xFF) as u8,
-                        (header.height & 0xFF) as u8,
-                    ]
-                }
+                Err(_) => vec![
+                    0x89u8,
+                    0x00,
+                    (header.width & 0xFF) as u8,
+                    (header.height & 0xFF) as u8,
+                ],
+            }
+        }
+        ImageFormat::Jpeg => {
+            let quality = cfg.quality.clamp(1, 100);
+            match super::image_jpeg::jpeg_encode_rgb(header.width, header.height, pixels, quality) {
+                Ok(encoded) => encoded,
+                Err(_) => vec![
+                    0xFFu8,
+                    0xD8,
+                    (header.width & 0xFF) as u8,
+                    (header.height & 0xFF) as u8,
+                ],
+            }
+        }
+        ImageFormat::Gif => {
+            match super::image_gif::gif_encode_rgb(header.width, header.height, pixels) {
+                Ok(encoded) => encoded,
+                Err(_) => vec![
+                    0x47u8,
+                    0x49,
+                    (header.width & 0xFF) as u8,
+                    (header.height & 0xFF) as u8,
+                ],
+            }
+        }
+        ImageFormat::Webp => {
+            match super::image_webp::webp_encode_rgb(header.width, header.height, pixels) {
+                Ok(encoded) => encoded,
+                Err(_) => vec![
+                    0x52u8,
+                    0x49,
+                    (header.width & 0xFF) as u8,
+                    (header.height & 0xFF) as u8,
+                ],
+            }
+        }
+        ImageFormat::Tiff => {
+            match super::image_tiff::tiff_encode_rgb(header.width, header.height, pixels) {
+                Ok(encoded) => encoded,
+                Err(_) => vec![
+                    0x49u8,
+                    0x49,
+                    (header.width & 0xFF) as u8,
+                    (header.height & 0xFF) as u8,
+                ],
             }
         }
         _ => {
             let fmt_byte = match cfg.format {
-                ImageFormat::Jpeg => 0xFFu8,
                 ImageFormat::Tga => 0x00u8,
                 ImageFormat::Hdr => 0x23u8,
-                ImageFormat::Gif => 0x47u8,
-                ImageFormat::Webp => 0x52u8,
-                ImageFormat::Tiff => 0x49u8,
                 _ => 0x00u8,
             };
             vec![
@@ -369,8 +408,9 @@ pub fn encode_stub(header: &ImageHeader, pixels: &[u8], cfg: &EncodeConfig) -> V
     }
 }
 
-/// Returns `None` for empty data, otherwise `Some(DecodeResult)` with a dummy header.
-/// Real BMP and PNG are decoded using their respective implementations.
+/// Returns `None` for empty data, otherwise `Some(DecodeResult)` wrapping decoded metadata.
+/// BMP, PNG, JPEG, GIF, WebP, and TIFF are decoded using their respective implementations.
+/// TGA and HDR fall back to a 1×1 placeholder result.
 #[allow(dead_code)]
 pub fn decode_stub(data: &[u8]) -> Option<DecodeResult> {
     if data.is_empty() {
@@ -379,55 +419,46 @@ pub fn decode_stub(data: &[u8]) -> Option<DecodeResult> {
 
     let fmt = detect_format(data);
 
-    match fmt {
-        ImageFormat::Bmp => {
-            if let Ok(raw) = bmp_decode(data) {
-                let channels = raw.pixels.len() / (raw.width * raw.height).max(1);
-                let pixel_count = raw.width * raw.height;
-                let pf = if channels == 4 {
-                    PixelFormat::Rgba8
-                } else {
-                    PixelFormat::Rgb8
-                };
-                let header = ImageHeader {
-                    width: raw.width as u32,
-                    height: raw.height as u32,
-                    format: ImageFormat::Bmp,
-                    pixel_format: pf,
-                };
-                return Some(DecodeResult {
-                    byte_size: raw.pixels.len(),
-                    pixel_count,
-                    header,
-                });
-            }
-        }
-        ImageFormat::Png => {
-            if let Ok(raw) = png_decode(data) {
-                let pixel_count = raw.width * raw.height;
-                let channels = raw.pixels.len() / pixel_count.max(1);
-                let pf = if channels == 4 {
-                    PixelFormat::Rgba8
-                } else {
-                    PixelFormat::Rgb8
-                };
-                let header = ImageHeader {
-                    width: raw.width as u32,
-                    height: raw.height as u32,
-                    format: ImageFormat::Png,
-                    pixel_format: pf,
-                };
-                return Some(DecodeResult {
-                    byte_size: raw.pixels.len(),
-                    pixel_count,
-                    header,
-                });
-            }
-        }
-        _ => {}
+    let raw_result: Option<(RawDecodeResult, ImageFormat)> = match fmt {
+        ImageFormat::Bmp => bmp_decode(data).ok().map(|r| (r, ImageFormat::Bmp)),
+        ImageFormat::Png => png_decode(data).ok().map(|r| (r, ImageFormat::Png)),
+        ImageFormat::Jpeg => super::image_jpeg::jpeg_decode(data)
+            .ok()
+            .map(|r| (r, ImageFormat::Jpeg)),
+        ImageFormat::Gif => super::image_gif::gif_decode(data)
+            .ok()
+            .map(|r| (r, ImageFormat::Gif)),
+        ImageFormat::Webp => super::image_webp::webp_decode(data)
+            .ok()
+            .map(|r| (r, ImageFormat::Webp)),
+        ImageFormat::Tiff => super::image_tiff::tiff_decode(data)
+            .ok()
+            .map(|r| (r, ImageFormat::Tiff)),
+        _ => None,
+    };
+
+    if let Some((raw, img_fmt)) = raw_result {
+        let pixel_count = raw.width * raw.height;
+        let channels = raw.pixels.len().checked_div(pixel_count).unwrap_or(3);
+        let pf = if channels == 4 {
+            PixelFormat::Rgba8
+        } else {
+            PixelFormat::Rgb8
+        };
+        let header = ImageHeader {
+            width: raw.width as u32,
+            height: raw.height as u32,
+            format: img_fmt,
+            pixel_format: pf,
+        };
+        return Some(DecodeResult {
+            byte_size: raw.pixels.len(),
+            pixel_count,
+            header,
+        });
     }
 
-    // Fallback: return a stub result for unknown / unsupported formats
+    // Fallback for unsupported formats (TGA, HDR, Unknown)
     let header = ImageHeader {
         width: 1,
         height: 1,

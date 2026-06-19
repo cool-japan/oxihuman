@@ -4,6 +4,8 @@
 
 //! Dual contouring isosurface extraction.
 
+use oxihuman_core::gaussian_solve;
+
 /// A QEF (Quadric Error Function) accumulator used in dual contouring.
 #[derive(Clone, Debug, Default)]
 pub struct QefDc {
@@ -52,40 +54,39 @@ pub fn qef_dc_error(qef: &QefDc, p: [f32; 3]) -> f32 {
     err
 }
 
-/// Solve for the minimising vertex position (simplified: uses cell centre).
+/// Solve for the minimising vertex position using Tikhonov-regularised normal equations.
+///
+/// Solves `(AᵀA + λI) x = (Aᵀb + λ·cell_centre)` where λ is proportional to the
+/// trace of AᵀA, pulling the solution toward `cell_centre` on under-constrained cells.
 pub fn qef_dc_solve(qef: &QefDc, cell_centre: [f32; 3]) -> [f32; 3] {
     if qef.plane_count == 0 {
         return cell_centre;
     }
-    // Diagonal pseudo-solve: gradient descent one step from centre
-    let mut g = [0.0_f32; 3];
-    for (i, gi) in g.iter_mut().enumerate() {
-        let v: f32 = qef.ata[i]
-            .iter()
-            .zip(cell_centre.iter())
-            .map(|(&a, &c)| a * c)
-            .sum();
-        *gi = v - qef.atb[i];
-    }
-    let denom: f32 = g.iter().map(|&x| x * x).sum::<f32>().max(1e-12);
-    let num: f32 = g
-        .iter()
-        .enumerate()
-        .map(|(i, &gi)| {
-            let ap_i: f32 = qef.ata[i]
-                .iter()
-                .zip(cell_centre.iter())
-                .map(|(&a, &c)| a * c)
-                .sum();
-            (ap_i - qef.atb[i]) * gi
+
+    // λ = max(1e-6, 1e-3 × trace(AᵀA) / 3)
+    let trace = qef.ata[0][0] + qef.ata[1][1] + qef.ata[2][2];
+    let lambda = (1e-3_f32 * trace / 3.0).max(1e-6_f32) as f64;
+
+    // Build regularised system as f64 for numerical stability
+    let a_reg: Vec<Vec<f64>> = (0..3)
+        .map(|i| {
+            (0..3)
+                .map(|j| {
+                    let base = qef.ata[i][j] as f64;
+                    if i == j { base + lambda } else { base }
+                })
+                .collect()
         })
-        .sum();
-    let alpha = num / denom;
-    [
-        cell_centre[0] - alpha * g[0],
-        cell_centre[1] - alpha * g[1],
-        cell_centre[2] - alpha * g[2],
-    ]
+        .collect();
+
+    let b_reg: Vec<f64> = (0..3)
+        .map(|i| qef.atb[i] as f64 + lambda * cell_centre[i] as f64)
+        .collect();
+
+    match gaussian_solve(&a_reg, &b_reg) {
+        Some(x) => [x[0] as f32, x[1] as f32, x[2] as f32],
+        None => cell_centre,
+    }
 }
 
 /// Run dual contouring on a scalar field given as a closure.
@@ -265,5 +266,49 @@ mod tests {
     fn dual_contour_dc_low_res_noop() {
         let r = dual_contour_dc(sphere_sdf, 1, [-2.0; 3], [2.0; 3]);
         assert_eq!(r.positions.len(), 0);
+    }
+
+    #[test]
+    fn test_qef_dc_planar_sdf_placement() {
+        // Three planes with normal [1,0,0] all at x=0.5 (d=0.5).
+        // AᵀA = [[3,0,0],[0,0,0],[0,0,0]], Aᵀb = [1.5,0,0].
+        // Regularisation pulls toward cell_centre=[0.5,0.5,0.5].
+        // Result x-coordinate should converge near 0.5.
+        let mut q = QefDc::default();
+        qef_dc_add_plane(&mut q, [1.0, 0.0, 0.0], 0.5);
+        qef_dc_add_plane(&mut q, [1.0, 0.0, 0.0], 0.5);
+        qef_dc_add_plane(&mut q, [1.0, 0.0, 0.0], 0.5);
+        let result = qef_dc_solve(&q, [0.5, 0.5, 0.5]);
+        assert!(
+            (result[0] - 0.5).abs() < 0.02,
+            "x should be near 0.5, got {}",
+            result[0]
+        );
+    }
+
+    #[test]
+    fn test_qef_dc_orthogonal_planes_exact_corner() {
+        // Three orthogonal planes x=0.3, y=0.6, z=0.8 — well-conditioned.
+        // The solver should recover the intersection [0.3, 0.6, 0.8] closely.
+        let mut q = QefDc::default();
+        qef_dc_add_plane(&mut q, [1.0, 0.0, 0.0], 0.3);
+        qef_dc_add_plane(&mut q, [0.0, 1.0, 0.0], 0.6);
+        qef_dc_add_plane(&mut q, [0.0, 0.0, 1.0], 0.8);
+        let result = qef_dc_solve(&q, [0.5, 0.5, 0.5]);
+        assert!(
+            (result[0] - 0.3).abs() < 0.01,
+            "x should be ~0.3, got {}",
+            result[0]
+        );
+        assert!(
+            (result[1] - 0.6).abs() < 0.01,
+            "y should be ~0.6, got {}",
+            result[1]
+        );
+        assert!(
+            (result[2] - 0.8).abs() < 0.01,
+            "z should be ~0.8, got {}",
+            result[2]
+        );
     }
 }

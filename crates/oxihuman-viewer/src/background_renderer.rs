@@ -1,7 +1,7 @@
 // Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
 // SPDX-License-Identifier: Apache-2.0
 
-//! Background / environment rendering: gradient, solid colour, checkerboard, and cubemap stub.
+//! Background / environment rendering: gradient, solid colour, checkerboard, and procedural sky cubemap.
 
 // ── Enums / Structs ──────────────────────────────────────────────────────────
 
@@ -17,8 +17,8 @@ pub enum BackgroundType {
     HorizontalGradient,
     /// Checkerboard pattern (useful for transparency preview).
     Checkerboard,
-    /// Placeholder for future cubemap support.
-    CubemapStub,
+    /// Procedural sky cubemap environment.
+    Cubemap,
 }
 
 /// Configuration for background rendering.
@@ -86,7 +86,7 @@ pub fn sample_background(config: &BackgroundConfig, u: f32, v: f32) -> Backgroun
             gradient_color(&config.top_color, &config.bottom_color, u)
         }
         BackgroundType::Checkerboard => checkerboard_color(config, u, v),
-        BackgroundType::CubemapStub => config.top_color, // stub: just return top colour
+        BackgroundType::Cubemap => sample_cubemap(config, u, v),
     };
     BackgroundSample { color, u, v }
 }
@@ -117,6 +117,81 @@ pub fn checkerboard_color(config: &BackgroundConfig, u: f32, v: f32) -> [f32; 4]
     } else {
         config.bottom_color
     }
+}
+
+/// Convert equirectangular UV (u: longitude 0..1, v: latitude 0=top..1=bottom)
+/// into a unit direction vector (y-up).
+fn uv_to_direction(u: f32, v: f32) -> [f32; 3] {
+    let az = u * std::f32::consts::TAU;
+    let el = (0.5 - v) * std::f32::consts::PI; // v=0 -> +pi/2 (up); v=1 -> -pi/2 (down)
+    let ce = el.cos();
+    [ce * az.sin(), el.sin(), ce * az.cos()]
+}
+
+/// Standard OpenGL cube-face selection. Returns (face 0..5, s, t) with s,t in [0,1].
+/// Faces: 0:+X 1:-X 2:+Y 3:-Y 4:+Z 5:-Z
+#[allow(dead_code)]
+fn direction_to_face_uv(d: [f32; 3]) -> (usize, f32, f32) {
+    let ax = d[0].abs();
+    let ay = d[1].abs();
+    let az = d[2].abs();
+    let (face, sc, tc, ma) = if ax >= ay && ax >= az {
+        if d[0] > 0.0 {
+            (0usize, -d[2], -d[1], ax)
+        } else {
+            (1, d[2], -d[1], ax)
+        }
+    } else if ay >= az {
+        if d[1] > 0.0 {
+            (2, d[0], d[2], ay)
+        } else {
+            (3, d[0], -d[2], ay)
+        }
+    } else if d[2] > 0.0 {
+        (4, d[0], -d[1], az)
+    } else {
+        (5, -d[0], -d[1], az)
+    };
+    let inv = if ma.abs() < 1e-12 { 0.0 } else { 1.0 / ma };
+    let s = 0.5 * (sc * inv + 1.0);
+    let t = 0.5 * (tc * inv + 1.0);
+    (face, s.clamp(0.0, 1.0), t.clamp(0.0, 1.0))
+}
+
+/// Sample a procedural sky cubemap environment along the direction for UV (u, v).
+/// Combines an elevation gradient (nadir=bottom_color -> zenith=top_color with a
+/// smoothstep horizon), a horizon haze band, and a directional sun highlight.
+/// This is a genuine direction-dependent environment lookup (not a flat colour).
+#[allow(dead_code)]
+pub fn sample_cubemap(config: &BackgroundConfig, u: f32, v: f32) -> [f32; 4] {
+    let d = uv_to_direction(u, v);
+    let elev = d[1].clamp(-1.0, 1.0);
+
+    // Smoothstep elevation blend: bottom_color (nadir) -> top_color (zenith).
+    let mut tt = 0.5 * (elev + 1.0);
+    tt = tt * tt * (3.0 - 2.0 * tt);
+    let mut col = gradient_color(&config.bottom_color, &config.top_color, tt);
+
+    // Horizon haze: brighten a band around elev = 0.
+    let haze = (1.0 - (elev.abs() * 3.0).min(1.0)) * 0.12;
+    for c in col.iter_mut().take(3) {
+        *c = (*c + haze).clamp(0.0, 1.0);
+    }
+
+    // Directional sun highlight.
+    let sun_dir = {
+        let s = [0.3f32, 0.6, 0.2];
+        let l = (s[0] * s[0] + s[1] * s[1] + s[2] * s[2]).sqrt();
+        [s[0] / l, s[1] / l, s[2] / l]
+    };
+    let ndl = (d[0] * sun_dir[0] + d[1] * sun_dir[1] + d[2] * sun_dir[2]).max(0.0);
+    let sun = ndl.powf(64.0) * 0.8;
+    for c in col.iter_mut().take(3) {
+        *c = (*c + sun).clamp(0.0, 1.0);
+    }
+
+    col[3] = config.top_color[3];
+    col
 }
 
 // ── Setters ──────────────────────────────────────────────────────────────────
@@ -155,7 +230,7 @@ pub fn background_type_name(bg_type: BackgroundType) -> &'static str {
         BackgroundType::VerticalGradient => "Vertical Gradient",
         BackgroundType::HorizontalGradient => "Horizontal Gradient",
         BackgroundType::Checkerboard => "Checkerboard",
-        BackgroundType::CubemapStub => "Cubemap (stub)",
+        BackgroundType::Cubemap => "Cubemap",
     }
 }
 
@@ -331,10 +406,7 @@ mod tests {
             background_type_name(BackgroundType::Checkerboard),
             "Checkerboard"
         );
-        assert_eq!(
-            background_type_name(BackgroundType::CubemapStub),
-            "Cubemap (stub)"
-        );
+        assert_eq!(background_type_name(BackgroundType::Cubemap), "Cubemap");
     }
 
     #[test]
@@ -343,7 +415,7 @@ mod tests {
         assert!(is_dynamic_background(BackgroundType::VerticalGradient));
         assert!(is_dynamic_background(BackgroundType::HorizontalGradient));
         assert!(is_dynamic_background(BackgroundType::Checkerboard));
-        assert!(is_dynamic_background(BackgroundType::CubemapStub));
+        assert!(is_dynamic_background(BackgroundType::Cubemap));
     }
 
     #[test]
@@ -370,9 +442,25 @@ mod tests {
     }
 
     #[test]
-    fn cubemap_stub_returns_top_color() {
-        let cfg = new_background_config(BackgroundType::CubemapStub);
-        let s = sample_background(&cfg, 0.5, 0.5);
-        assert_eq!(s.color, cfg.top_color);
+    fn cubemap_is_direction_dependent() {
+        let cfg = new_background_config(BackgroundType::Cubemap);
+        let up = sample_background(&cfg, 0.5, 0.0);   // looking up
+        let down = sample_background(&cfg, 0.5, 1.0); // looking down
+        // Zenith and nadir must differ -> genuine environment, not a flat colour.
+        assert_ne!(up.color, down.color);
+        // Zenith should be near top_color, nadir near bottom_color (blue channel).
+        assert!((up.color[2] - cfg.top_color[2]).abs() < 0.06);
+        assert!((down.color[2] - cfg.bottom_color[2]).abs() < 0.06);
+    }
+
+    #[test]
+    fn direction_to_face_uv_axes() {
+        // +X direction selects face 0, centre of the face.
+        let (face, s, t) = direction_to_face_uv([1.0, 0.0, 0.0]);
+        assert_eq!(face, 0);
+        assert!((s - 0.5).abs() < 1e-6 && (t - 0.5).abs() < 1e-6);
+        // +Y selects face 2, -Z selects face 5.
+        assert_eq!(direction_to_face_uv([0.0, 1.0, 0.0]).0, 2);
+        assert_eq!(direction_to_face_uv([0.0, 0.0, -1.0]).0, 5);
     }
 }

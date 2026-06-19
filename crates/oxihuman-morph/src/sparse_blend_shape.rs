@@ -46,9 +46,8 @@ pub fn sbs_add_delta(shape: &mut SparseBlendShape, delta: SparseDelta) {
     shape.deltas.push(delta);
 }
 
-/// Apply the sparse blend shape to a position buffer (stub: no-op).
+/// Apply the sparse blend shape to a position buffer.
 pub fn sbs_apply(shape: &SparseBlendShape, positions: &mut [[f32; 3]]) {
-    /* Stub: applies weighted deltas; currently no-op */
     for d in &shape.deltas {
         let idx = d.vertex_index as usize;
         if idx < positions.len() {

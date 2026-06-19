@@ -53,8 +53,34 @@ impl CursorWriter {
         self.position += 4;
     }
 
+    pub fn write_u64_le(&mut self, v: u64) {
+        let bytes = v.to_le_bytes();
+        self.ensure_capacity(8);
+        self.buffer[self.position..self.position + 8].copy_from_slice(&bytes);
+        self.position += 8;
+    }
+
+    pub fn write_i32_le(&mut self, v: i32) {
+        self.write_u32_le(v as u32);
+    }
+
+    pub fn write_i64_le(&mut self, v: i64) {
+        self.write_u64_le(v as u64);
+    }
+
+    pub fn write_f64_le(&mut self, v: f64) {
+        self.write_u64_le(v.to_bits());
+    }
+
     pub fn write_f32_le(&mut self, v: f32) {
         self.write_u32_le(v.to_bits());
+    }
+
+    pub fn write_u32_be(&mut self, v: u32) {
+        let bytes = v.to_be_bytes();
+        self.ensure_capacity(4);
+        self.buffer[self.position..self.position + 4].copy_from_slice(&bytes);
+        self.position += 4;
     }
 
     pub fn write_bytes(&mut self, data: &[u8]) {

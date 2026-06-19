@@ -12,6 +12,8 @@ pub struct VolumeConstraint {
     /// Rest volume.
     pub rest_volume: f32,
     pub compliance: f32,
+    /// Accumulated Lagrange multiplier (reset each outer time step).
+    pub lambda: f32,
 }
 
 #[allow(dead_code)]
@@ -21,6 +23,7 @@ impl VolumeConstraint {
             indices,
             rest_volume,
             compliance,
+            lambda: 0.0,
         }
     }
 }
@@ -37,6 +40,39 @@ pub fn tet_signed_volume(p: &[[f32; 3]; 4]) -> f32 {
         v1[0] * v2[1] - v1[1] * v2[0],
     ];
     (v0[0] * cross[0] + v0[1] * cross[1] + v0[2] * cross[2]) / 6.0
+}
+
+// ---------------------------------------------------------------------------
+// Vector math helpers (f32, 3-component, array-based).
+// ---------------------------------------------------------------------------
+
+#[inline(always)]
+fn sub3(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
+    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+}
+
+#[inline(always)]
+fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
+    [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ]
+}
+
+#[inline(always)]
+fn dot3(a: [f32; 3], b: [f32; 3]) -> f32 {
+    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+}
+
+#[inline(always)]
+fn scale3(a: [f32; 3], s: f32) -> [f32; 3] {
+    [a[0] * s, a[1] * s, a[2] * s]
+}
+
+#[inline(always)]
+fn len3_sq(a: [f32; 3]) -> f32 {
+    dot3(a, a)
 }
 
 /// XPBD volume system.
@@ -87,6 +123,10 @@ impl XpbdVolume {
     }
 
     pub fn step(&mut self, dt: f32, sub_steps: u32) {
+        // Reset accumulated Lagrange multipliers once per outer time step (XPBD standard).
+        for c in &mut self.constraints {
+            c.lambda = 0.0;
+        }
         let sub_dt = dt / sub_steps as f32;
         for _ in 0..sub_steps {
             self.substep(sub_dt);
@@ -112,43 +152,108 @@ impl XpbdVolume {
             self.positions[i][1] += self.velocities[i][1] * dt;
             self.positions[i][2] += self.velocities[i][2] * dt;
         }
-        // Volume constraints (simplified gradient-based).
-        let constraints = self.constraints.clone();
-        for c in &constraints {
-            let pts: [[f32; 3]; 4] = [
-                self.positions[c.indices[0]],
-                self.positions[c.indices[1]],
-                self.positions[c.indices[2]],
-                self.positions[c.indices[3]],
+        // Volume constraints — real XPBD tetrahedral volume gradient projection.
+        //
+        // For a tet (p0,p1,p2,p3):
+        //   V  = (1/6) * (p1-p0) · ((p2-p0) × (p3-p0))
+        //   C  = V - V_rest
+        //
+        // Analytic constraint gradients (face normals scaled by 1/6):
+        //   ∇₁C = (1/6) * (p2-p0) × (p3-p0)
+        //   ∇₂C = (1/6) * (p3-p0) × (p1-p0)
+        //   ∇₃C = (1/6) * (p1-p0) × (p2-p0)
+        //   ∇₀C = -(∇₁C + ∇₂C + ∇₃C)   [linear-momentum conservation]
+        //
+        // XPBD update:
+        //   α̃    = compliance / dt²
+        //   w_sum = Σᵢ wᵢ |∇ᵢC|²
+        //   Δλ   = -(C + α̃·λ) / (w_sum + α̃)
+        //   λ    += Δλ
+        //   Δpᵢ  = wᵢ · ∇ᵢC · Δλ
+
+        // We need mutable access to both `constraints` and `positions`/`inv_masses`.
+        // Borrow positions and inv_masses as raw-pointer copies to allow simultaneous
+        // mutable iteration over constraints and mutation of positions.
+        // Safety: constraints never alias positions/inv_masses (they are separate Vec fields).
+        let n_constraints = self.constraints.len();
+        for ci in 0..n_constraints {
+            let [i0, i1, i2, i3] = self.constraints[ci].indices;
+
+            let p0 = self.positions[i0];
+            let p1 = self.positions[i1];
+            let p2 = self.positions[i2];
+            let p3 = self.positions[i3];
+
+            // Edge vectors from p0.
+            let e1 = sub3(p1, p0); // p1 - p0
+            let e2 = sub3(p2, p0); // p2 - p0
+            let e3 = sub3(p3, p0); // p3 - p0
+
+            // Signed volume  V = (1/6) e1 · (e2 × e3)
+            let e2_cross_e3 = cross(e2, e3);
+            let vol = dot3(e1, e2_cross_e3) / 6.0;
+
+            let rest_volume = self.constraints[ci].rest_volume;
+            let constraint_val = vol - rest_volume;
+
+            // Analytic gradients (each is a face-normal / 6).
+            let grad1 = scale3(cross(e2, e3), 1.0 / 6.0); // (p2-p0) × (p3-p0) / 6
+            let grad2 = scale3(cross(e3, e1), 1.0 / 6.0); // (p3-p0) × (p1-p0) / 6
+            let grad3 = scale3(cross(e1, e2), 1.0 / 6.0); // (p1-p0) × (p2-p0) / 6
+                                                          // ∇₀C = -(∇₁C + ∇₂C + ∇₃C) by momentum conservation.
+            let grad0 = [
+                -(grad1[0] + grad2[0] + grad3[0]),
+                -(grad1[1] + grad2[1] + grad3[1]),
+                -(grad1[2] + grad2[2] + grad3[2]),
             ];
-            let vol = tet_signed_volume(&pts);
-            let err = vol.abs() - c.rest_volume;
-            // Simple correction: scale positions towards rest volume.
-            if err.abs() > 1e-6 {
-                let alpha = c.compliance / (dt * dt);
-                let w_sum: f32 = c.indices.iter().map(|&i| self.inv_masses[i]).sum();
-                if w_sum < 1e-9 {
-                    continue;
-                }
-                let lagrange = -err / (w_sum + alpha);
-                // Approximate gradient as centroid direction.
-                let cm = [
-                    (pts[0][0] + pts[1][0] + pts[2][0] + pts[3][0]) / 4.0,
-                    (pts[0][1] + pts[1][1] + pts[2][1] + pts[3][1]) / 4.0,
-                    (pts[0][2] + pts[1][2] + pts[2][2] + pts[3][2]) / 4.0,
-                ];
-                for &idx in &c.indices {
-                    let w = self.inv_masses[idx];
-                    let d = [
-                        self.positions[idx][0] - cm[0],
-                        self.positions[idx][1] - cm[1],
-                        self.positions[idx][2] - cm[2],
-                    ];
-                    let len = (d[0] * d[0] + d[1] * d[1] + d[2] * d[2]).sqrt().max(1e-6);
-                    self.positions[idx][0] += w * lagrange * d[0] / len;
-                    self.positions[idx][1] += w * lagrange * d[1] / len;
-                    self.positions[idx][2] += w * lagrange * d[2] / len;
-                }
+
+            let w0 = self.inv_masses[i0];
+            let w1 = self.inv_masses[i1];
+            let w2 = self.inv_masses[i2];
+            let w3 = self.inv_masses[i3];
+
+            // Weighted sum of squared gradient magnitudes.
+            let w_sum = w0 * len3_sq(grad0)
+                + w1 * len3_sq(grad1)
+                + w2 * len3_sq(grad2)
+                + w3 * len3_sq(grad3);
+
+            let alpha_tilde = self.constraints[ci].compliance / (dt * dt);
+
+            // Degenerate check: skip if the tet is flat or all particles are static.
+            if w_sum + alpha_tilde < 1e-12 {
+                continue;
+            }
+
+            let lambda_prev = self.constraints[ci].lambda;
+            let delta_lambda =
+                -(constraint_val + alpha_tilde * lambda_prev) / (w_sum + alpha_tilde);
+            self.constraints[ci].lambda += delta_lambda;
+
+            // Apply positional corrections (only to dynamic particles, wᵢ > 0).
+            if w0 > 0.0 {
+                let dp = scale3(grad0, w0 * delta_lambda);
+                self.positions[i0][0] += dp[0];
+                self.positions[i0][1] += dp[1];
+                self.positions[i0][2] += dp[2];
+            }
+            if w1 > 0.0 {
+                let dp = scale3(grad1, w1 * delta_lambda);
+                self.positions[i1][0] += dp[0];
+                self.positions[i1][1] += dp[1];
+                self.positions[i1][2] += dp[2];
+            }
+            if w2 > 0.0 {
+                let dp = scale3(grad2, w2 * delta_lambda);
+                self.positions[i2][0] += dp[0];
+                self.positions[i2][1] += dp[1];
+                self.positions[i2][2] += dp[2];
+            }
+            if w3 > 0.0 {
+                let dp = scale3(grad3, w3 * delta_lambda);
+                self.positions[i3][0] += dp[0];
+                self.positions[i3][1] += dp[1];
+                self.positions[i3][2] += dp[2];
             }
         }
         // Update velocities.
@@ -278,5 +383,121 @@ mod tests {
         s.add_particle([0.0, 0.0, 0.0], 1.0);
         s.step(0.5, 5);
         assert!(s.velocities[0][1] < 0.0);
+    }
+
+    // Helper: unit-tet positions used by the new tests.
+    fn unit_tet_positions() -> [[f32; 3]; 4] {
+        [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0],
+        ]
+    }
+
+    /// Real XPBD gradient should drive the tet's volume back toward rest_volume.
+    /// We perturb one vertex, run substeps, and assert the volume deviation shrinks.
+    #[test]
+    fn test_volume_constraint_restores_volume() {
+        let mut s = new_xpbd_volume();
+        // Disable gravity so volume change is solely from the constraint.
+        s.gravity = [0.0, 0.0, 0.0];
+
+        let pts = unit_tet_positions();
+        for &p in &pts {
+            s.add_particle(p, 1.0);
+        }
+        // Constraint is added BEFORE perturbation so rest_volume matches original tet.
+        s.add_volume_constraint([0, 1, 2, 3], 0.0);
+
+        // Perturb vertex 3 outward — this increases the volume.
+        s.positions[3] = [0.0, 0.0, 2.0];
+
+        // Compute initial deviation |V - V_rest|.
+        let rest_volume = s.constraints[0].rest_volume;
+        let initial_pts: [[f32; 3]; 4] = [
+            s.positions[0],
+            s.positions[1],
+            s.positions[2],
+            s.positions[3],
+        ];
+        let initial_err = (tet_signed_volume(&initial_pts).abs() - rest_volume).abs();
+
+        // Run 10 substeps with a small dt.
+        for _ in 0..10 {
+            s.step(0.016, 1);
+        }
+
+        let final_pts: [[f32; 3]; 4] = [
+            s.positions[0],
+            s.positions[1],
+            s.positions[2],
+            s.positions[3],
+        ];
+        let final_err = (tet_signed_volume(&final_pts).abs() - rest_volume).abs();
+
+        assert!(
+            final_err < initial_err,
+            "volume deviation did not decrease: initial={initial_err}, final={final_err}"
+        );
+    }
+
+    /// A tet exactly at rest volume with no gravity → no positional update (C=0 → Δλ=0).
+    #[test]
+    fn test_volume_constraint_rest_state_stillness() {
+        let mut s = new_xpbd_volume();
+        s.gravity = [0.0, 0.0, 0.0];
+
+        let pts = unit_tet_positions();
+        for &p in &pts {
+            s.add_particle(p, 1.0);
+        }
+        s.add_volume_constraint([0, 1, 2, 3], 0.0);
+
+        let before: Vec<[f32; 3]> = s.positions.clone();
+        s.step(0.016, 4);
+        let after: Vec<[f32; 3]> = s.positions.clone();
+
+        for i in 0..4 {
+            let d2 = (before[i][0] - after[i][0]).powi(2)
+                + (before[i][1] - after[i][1]).powi(2)
+                + (before[i][2] - after[i][2]).powi(2);
+            assert!(d2 < 1e-10, "particle {i} moved at rest state: d²={d2}");
+        }
+    }
+
+    /// The analytic gradients sum to zero (∇₀+∇₁+∇₂+∇₃=0), so a single projection
+    /// step must leave the centre of mass unchanged (linear momentum conservation).
+    #[test]
+    fn test_volume_constraint_momentum_conservation() {
+        let mut s = new_xpbd_volume();
+        s.gravity = [0.0, 0.0, 0.0];
+
+        let pts = unit_tet_positions();
+        for &p in &pts {
+            s.add_particle(p, 1.0);
+        }
+        s.add_volume_constraint([0, 1, 2, 3], 0.0);
+
+        // Perturb to create a non-zero constraint value.
+        s.positions[3] = [0.0, 0.0, 1.5];
+
+        let pos_before: Vec<[f32; 3]> = s.positions.clone();
+        // One substep only (one projection pass).
+        s.step(0.016, 1);
+        let pos_after: Vec<[f32; 3]> = s.positions.clone();
+
+        // Sum of positional deltas must be ≈ 0 (all masses equal → sum Δpᵢ = 0).
+        let mut delta_sum = [0.0f32; 3];
+        for i in 0..4 {
+            delta_sum[0] += pos_after[i][0] - pos_before[i][0];
+            delta_sum[1] += pos_after[i][1] - pos_before[i][1];
+            delta_sum[2] += pos_after[i][2] - pos_before[i][2];
+        }
+        let mag = (delta_sum[0].powi(2) + delta_sum[1].powi(2) + delta_sum[2].powi(2)).sqrt();
+        assert!(
+            mag < 1e-5,
+            "centre-of-mass shifted by {mag}: momentum not conserved"
+        );
     }
 }

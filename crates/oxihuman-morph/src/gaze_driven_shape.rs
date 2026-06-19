@@ -52,10 +52,58 @@ pub fn gds_set_direction(gds: &mut GazeDrivenShape, direction: GazeDirection) {
     gds.direction = direction;
 }
 
-/// Evaluate morph weights from current gaze (stub: uniform distribution).
+/// Evaluate morph weights from the current gaze direction.
+///
+/// The output vector has length `morph_count`.  When there are at least four
+/// morph targets they are assigned canonical gaze directions:
+///
+/// | Index | Meaning     | Driven by           |
+/// |-------|-------------|---------------------|
+/// | 0     | Look left   | yaw < 0  → magnitude |
+/// | 1     | Look right  | yaw > 0  → magnitude |
+/// | 2     | Look up     | pitch > 0 → magnitude |
+/// | 3     | Look down   | pitch < 0 → magnitude |
+///
+/// When fewer than four morph targets are available the entire vector is
+/// scaled uniformly by `‖(yaw_weight, pitch_weight)‖ / morph_count`.
+///
+/// The function is disabled-aware: when `gds.enabled` is `false` it returns
+/// an all-zero vector, matching the behaviour of other disabled controllers.
 pub fn gds_evaluate(gds: &GazeDrivenShape) -> Vec<f32> {
-    /* Stub: returns zeroed weights */
-    vec![0.0; gds.morph_count]
+    if !gds.enabled || gds.morph_count == 0 {
+        return vec![0.0_f32; gds.morph_count];
+    }
+
+    let yaw = gds.direction.yaw.clamp(-1.0_f32, 1.0_f32);
+    let pitch = gds.direction.pitch.clamp(-1.0_f32, 1.0_f32);
+
+    let yaw_weight = yaw * gds.yaw_gain;
+    let pitch_weight = pitch * gds.pitch_gain;
+
+    let mut weights = vec![0.0_f32; gds.morph_count];
+
+    if gds.morph_count >= 4 {
+        // Directional four-channel decomposition.
+        // Index 0: look-left  (yaw is negative → viewer's left)
+        weights[0] = (-yaw_weight).max(0.0_f32).clamp(0.0_f32, 1.0_f32);
+        // Index 1: look-right (yaw is positive → viewer's right)
+        weights[1] = yaw_weight.max(0.0_f32).clamp(0.0_f32, 1.0_f32);
+        // Index 2: look-up    (pitch is positive → upward)
+        weights[2] = pitch_weight.max(0.0_f32).clamp(0.0_f32, 1.0_f32);
+        // Index 3: look-down  (pitch is negative → downward)
+        weights[3] = (-pitch_weight).max(0.0_f32).clamp(0.0_f32, 1.0_f32);
+    } else {
+        // Scalar fallback: distribute the combined magnitude uniformly.
+        let magnitude = (yaw_weight * yaw_weight + pitch_weight * pitch_weight)
+            .sqrt()
+            .clamp(0.0_f32, 1.0_f32);
+        let per_morph = magnitude / gds.morph_count as f32;
+        for w in weights.iter_mut() {
+            *w = per_morph;
+        }
+    }
+
+    weights
 }
 
 /// Set yaw and pitch gains.
@@ -116,9 +164,14 @@ mod tests {
 
     #[test]
     fn test_evaluate_zeroed() {
+        // With default direction (yaw=0, pitch=0) all weights must be zero
+        // regardless of how many morph targets are configured.
         let g = new_gaze_driven_shape(3);
         let out = gds_evaluate(&g);
-        assert!(out.iter().all(|&v| v.abs() < 1e-6), /* stub must return zeros */);
+        assert!(
+            out.iter().all(|&v| v.abs() < 1e-6),
+            "zero gaze must produce all-zero weights"
+        );
     }
 
     #[test]
@@ -154,5 +207,41 @@ mod tests {
         let g = new_gaze_driven_shape(1);
         assert!((g.yaw_gain - 1.0).abs() < 1e-5, /* default yaw gain must be 1.0 */);
         assert!((g.pitch_gain - 1.0).abs() < 1e-5, /* default pitch gain must be 1.0 */);
+    }
+
+    #[test]
+    fn gds_nonzero_yaw_gives_nonzero_output() {
+        // A non-zero yaw must produce at least one non-zero morph weight.
+        let mut g = new_gaze_driven_shape(4);
+        gds_set_direction(
+            &mut g,
+            GazeDirection {
+                yaw: 0.5,
+                pitch: 0.0,
+            },
+        );
+        let out = gds_evaluate(&g);
+        assert!(
+            out.iter().any(|&v| v > 1e-6),
+            "non-zero yaw must produce at least one non-zero weight"
+        );
+    }
+
+    #[test]
+    fn gds_zero_gaze_gives_zero_output() {
+        // Default-constructed direction (yaw=0, pitch=0) must always yield zeros.
+        let mut g = new_gaze_driven_shape(6);
+        gds_set_direction(
+            &mut g,
+            GazeDirection {
+                yaw: 0.0,
+                pitch: 0.0,
+            },
+        );
+        let out = gds_evaluate(&g);
+        assert!(
+            out.iter().all(|&v| v.abs() < 1e-6),
+            "zero gaze direction must produce all-zero weights"
+        );
     }
 }

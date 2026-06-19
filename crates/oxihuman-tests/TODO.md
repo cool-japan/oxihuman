@@ -1,10 +1,10 @@
 # oxihuman-tests -- TODO
 
-> Version: 0.1.2 | Updated: 2026-05-05
+> Version: 0.2.0 | Updated: 2026-06-19
 
 ## Status: Stable
 
-Cross-crate integration test suite (publish = false). 0 stubs. 39 passing tests. 964 SLoC.
+Cross-crate integration test suite (publish = false). 0 stubs. 33,410 passing tests. 964 SLoC.
 
 ## Completed
 

@@ -30,8 +30,9 @@ rayon.workspace       = true
 wide        = { workspace = true, optional = true }
 
 [dev-dependencies]
-proptest.workspace    = true
-criterion.workspace   = true
+proptest.workspace            = true
+criterion.workspace           = true
+oxihuman-test-utils = { path = "../oxihuman-test-utils" }
 
 [[bench]]
 name    = "morph_bench"
