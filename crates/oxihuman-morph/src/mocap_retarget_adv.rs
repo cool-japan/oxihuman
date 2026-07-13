@@ -223,7 +223,7 @@ pub fn compute_skeleton_height(pose: &SkeletonPose) -> f32 {
 /// Build a standard 14-joint biped retarget map.
 #[allow(dead_code)]
 pub fn standard_biped_retarget_map() -> RetargetMap {
-    let joints = vec![
+    let joints = [
         "Hips",
         "Spine",
         "Spine1",

@@ -69,7 +69,12 @@ pub struct ThreeMfExportResult {
 ///
 /// The returned [`ThreeMfExportResult::zip_bytes`] can be written directly to
 /// a `.3mf` file.
-pub fn export_3mf(mesh: &MeshBuffers, opts: &ThreeMfOptions) -> ThreeMfExportResult {
+///
+/// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+/// [`crate::export_gate::ensure_export_allowed`].
+pub fn export_3mf(mesh: &MeshBuffers, opts: &ThreeMfOptions) -> anyhow::Result<ThreeMfExportResult> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     let model_xml = build_3mf_model_xml(mesh, opts);
     let model_xml_size = model_xml.len();
 
@@ -93,12 +98,12 @@ pub fn export_3mf(mesh: &MeshBuffers, opts: &ThreeMfOptions) -> ThreeMfExportRes
 
     let zip = zip_bytes(&entries);
 
-    ThreeMfExportResult {
+    Ok(ThreeMfExportResult {
         zip_bytes: zip,
         vertex_count: mesh.positions.len(),
         triangle_count: mesh.indices.len() / 3,
         model_xml_size,
-    }
+    })
 }
 
 /// Build the `3D/3dmodel.model` XML string for the given mesh.
@@ -238,6 +243,16 @@ mod tests {
             normals: vec![[0.0, 0.0, 1.0]; 3],
             uvs: vec![[0.0, 0.0]; 3],
             indices: vec![0, 1, 2],
+            has_suit: true,
+        })
+    }
+
+    fn unsuited_mesh() -> MeshBuffers {
+        MeshBuffers::from_morph(MB {
+            positions: vec![[0.0, 0.0, 0.0], [0.001, 0.0, 0.0], [0.0, 0.001, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0]; 3],
+            indices: vec![0, 1, 2],
             has_suit: false,
         })
     }
@@ -248,7 +263,7 @@ mod tests {
             normals: vec![],
             uvs: vec![],
             indices: vec![],
-            has_suit: false,
+            has_suit: true,
         })
     }
 
@@ -359,7 +374,7 @@ mod tests {
     #[test]
     fn export_3mf_zip_starts_with_pk_magic() {
         let mesh = simple_mesh();
-        let result = export_3mf(&mesh, &ThreeMfOptions::default());
+        let result = export_3mf(&mesh, &ThreeMfOptions::default()).expect("suited mesh accepted");
         assert!(result.zip_bytes.len() >= 4, "ZIP bytes should be non-empty");
         assert_eq!(
             &result.zip_bytes[0..4],
@@ -371,22 +386,31 @@ mod tests {
     #[test]
     fn export_3mf_result_vertex_count_matches() {
         let mesh = simple_mesh();
-        let result = export_3mf(&mesh, &ThreeMfOptions::default());
+        let result = export_3mf(&mesh, &ThreeMfOptions::default()).expect("suited mesh accepted");
         assert_eq!(result.vertex_count, 3);
     }
 
     #[test]
     fn export_3mf_result_triangle_count_matches() {
         let mesh = simple_mesh();
-        let result = export_3mf(&mesh, &ThreeMfOptions::default());
+        let result = export_3mf(&mesh, &ThreeMfOptions::default()).expect("suited mesh accepted");
         assert_eq!(result.triangle_count, 1);
     }
 
     #[test]
     fn export_3mf_model_xml_size_positive() {
         let mesh = simple_mesh();
-        let result = export_3mf(&mesh, &ThreeMfOptions::default());
+        let result = export_3mf(&mesh, &ThreeMfOptions::default()).expect("suited mesh accepted");
         assert!(result.model_xml_size > 0);
+    }
+
+    #[test]
+    fn export_3mf_refuses_unsuited_mesh() {
+        let mesh = unsuited_mesh();
+        assert!(
+            export_3mf(&mesh, &ThreeMfOptions::default()).is_err(),
+            "export_3mf must refuse a mesh with has_suit = false"
+        );
     }
 
     // ── validate_3mf_zip ──────────────────────────────────────────────────
@@ -394,7 +418,7 @@ mod tests {
     #[test]
     fn validate_3mf_zip_valid() {
         let mesh = simple_mesh();
-        let result = export_3mf(&mesh, &ThreeMfOptions::default());
+        let result = export_3mf(&mesh, &ThreeMfOptions::default()).expect("suited mesh accepted");
         assert!(
             validate_3mf_zip(&result.zip_bytes),
             "exported 3MF should pass validation"

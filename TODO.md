@@ -1,9 +1,9 @@
 # OxiHuman TODO
 
-> Last updated: 2026-06-19
-> Version: 0.2.0 (unreleased; +8 algorithm de-fakes since the 0.1.9 tag)
-> Total SLoC: ~968,000 Rust (5,341 source files)
-> Tests: 33,410 passing · 0 clippy warnings (workspace, all features)
+> Last updated: 2026-07-13
+> Version: 0.2.1 (unreleased — BodyLab production release, awaiting publish approval)
+> Total SLoC: ~973,000 Rust (5,345 source files)
+> Tests: 33,569 passing · 0 clippy warnings (workspace, all features) · 0 `unwrap` in production
 
 ---
 
@@ -19,6 +19,45 @@
 | `oxihuman-viewer` | ~880 | **Stable** | 100% | 0 |
 | `oxihuman-wasm` | ~16 | **Stable** | 100% | 0 |
 | `oxihuman-cli` | ~12 | **Feature-complete** | 100% | 0 |
+
+---
+
+## Release Milestones
+
+### v0.2.1 (current) — Production Release (BodyLab)
+
+The fully client-side, browser-ready body generator. All milestones delivered:
+
+- [x] **M0 — Legal & safety cleanroom.** Clean-room audit, CC0 `PROVENANCE.md`
+  + `check_provenance.sh`, `CONTRIBUTING.md` / `NOTICE`, `SAFETY.md`, the
+  `invariant_no_nude_mesh_stage` regression + export gate on every exporter,
+  the 18 y age floor, SMPL/SMPL-X module removal, and branding reword.
+- [x] **M1 — Asset pack + OHPK v1.** `oxihuman-core-v1.ohpk` (2,093,260 B, 38
+  CC0 targets incl. 8 `measure/` girth targets, 21,833 verts, 0.011 mm worst
+  quantisation) built by `oxihuman-cli pack-core`; precise cross-section body
+  measurer.
+- [x] **M2 — Browser exports + fit.** In-memory `export_glb/vrm/stl/obj`,
+  `from_core_pack_bytes`, and `fit_to_measurements` (`brief-172` |Δ| ≤ 0.66 cm,
+  ~0.9 s).
+- [x] **M3 — BodyLab demo.** Static three.js r160 demo (`demo/`) with sliders,
+  live preview, and browser export; build + serve-check scripts; verified in
+  headless Chrome.
+- [x] **M4 — Zero-copy, bench, CI.** Zero-copy geometry pointer API
+  (`wasm_memory`/`positions_ptr`), reproducible bench harness (`web/bench/`,
+  `docs/bench/`, node checks), and the `npm-publish.yml` gzip size gate.
+
+### Post-launch (M5 / M6) — not yet started
+
+- [ ] Full-pack distribution UX (fetch/verify the broader non-core target set
+  outside the default repo footprint).
+- [ ] WebGPU render path in the browser demo (only if there is demand; the
+  native `webgpu` viewer feature already exists).
+- [ ] **M6** — OxiHuman-native shape space fit from public-domain ANSUR II
+  anthropometric survey data, removing the MakeHuman-derived shape basis.
+- [ ] Widen the pack's reachable girth envelope (the `adult-XL` hip currently
+  sits ≈ 1.44 cm short at the envelope edge).
+- [ ] Real DEFLATE zip reader in the wasm `pack.rs` path (currently the
+  classic OBJ/ZIP-pack flow assumes stored/uncompressed entries).
 
 ---
 
@@ -128,7 +167,7 @@
 ### Export — Completed
 - [x] FBX (fbx_ascii.rs + fbx_binary.rs - ASCII + binary FBX 7.4)
 - [x] VRM 1.0 (vrm_export.rs - GLB + VRMC extensions, 55 humanoid bones)
-- [x] 3MF (three_mf_export.rs - OPC/ZIP via oxiarc-archive)
+- [x] 3MF (fmt_3mf.rs - OPC/ZIP via oxiarc-archive)
 - [x] Alembic (alembic_ogawa_export.rs - Ogawa binary container)
 - [x] USD/USDA (usda_export.rs - text USDA with mesh/material/skeleton)
 
@@ -165,7 +204,7 @@
 - [x] Release pipeline (release.yml - validate/WASM/publish-dry-run/create-release)
 - [x] Docs deployment (docs.yml - cargo doc → GitHub Pages)
 - [x] cargo-deny config (deny.toml - licenses, advisories, COOLJAPAN ecosystem bans)
-- [x] crates.io publish preparation (all 8 crates pass --dry-run)
+- [x] crates.io publish preparation (oxihuman-core passes full --dry-run; all 9 crates pass cargo package --list; full workspace builds clean in debug + release)
 - [x] Alpha asset pack distribution strategy
 - [x] Demo website deployment (demo/ — index.html + app.js WebGPU/wireframe fallback + sw.js service worker)
 
@@ -204,7 +243,9 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 - [x] Full documentation (rustdoc, user guide, developer guide, TypeScript examples)
 - [x] Security audit complete (security.rs: path sanitization, checked arithmetic, magic bytes; 1 low advisory)
 
-### v0.2.0 (current) — 8 Algorithm De-fakes + 13 Dead-code Module Removals
+### v0.2.1 (current) — Production Release (BodyLab) — complete, see "Release Milestones" above for the full M0–M4 breakdown
+
+### v0.2.0 (released 2026-06-19) — 8 Algorithm De-fakes + 13 Dead-code Module Removals
 
 - [x] Version bump to 0.2.0
 - [x] Real CRC-32 combine (`crc_table.rs`) — GF(2) matrix algorithm: zeros-operator matrices (1/2/4-bit), advances crc1 over len2 zero bytes via repeated matrix squaring, then folds in crc2; `combine(crc(A), crc(B), B.len()) == crc(A‖B)` exactly

@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! On-demand JSON morph target load/unload/weight methods for `WasmEngine`.
+//!
+//! JSON-loaded targets are applied (scatter-add, weighted) by the central
+//! build path `WasmEngine::build_mesh_prepared` / `refresh_geometry`, so
+//! `set_target_weight_by_name` visibly affects every rendered and exported
+//! mesh.
 
 use crate::engine_core::WasmEngine;
 
@@ -37,6 +42,7 @@ impl WasmEngine {
         }
         self.json_targets.insert(name.to_string(), (deltas, 0.0));
         self.last_mesh = None;
+        self.geo_dirty = true;
         true
     }
 
@@ -45,6 +51,7 @@ impl WasmEngine {
         let removed = self.json_targets.remove(name).is_some();
         if removed {
             self.last_mesh = None;
+            self.geo_dirty = true;
         }
         removed
     }
@@ -64,6 +71,7 @@ impl WasmEngine {
         if let Some(entry) = self.json_targets.get_mut(name) {
             entry.1 = weight;
             self.last_mesh = None;
+            self.geo_dirty = true;
             true
         } else {
             false

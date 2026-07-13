@@ -3,6 +3,12 @@
 #![allow(dead_code)]
 
 //! ASCII STL format export.
+//!
+//! The slice-based functions in this module ([`render_ascii_stl`],
+//! [`export_ascii_stl`]) are low-level encoders over raw positions/indices
+//! with no human-mesh provenance.  Human meshes must go through the gated
+//! [`export_ascii_stl_mesh`] entry point, which refuses a
+//! [`oxihuman_mesh::MeshBuffers`] whose `has_suit` flag is false.
 
 fn normalize3(v: [f32; 3]) -> [f32; 3] {
     let l = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
@@ -90,6 +96,18 @@ pub fn export_ascii_stl(
     opts: &AsciiStlOptions,
 ) -> Vec<u8> {
     render_ascii_stl(positions, indices, opts).into_bytes()
+}
+
+/// Gated `MeshBuffers` entry point: encode a mesh as ASCII STL bytes.
+///
+/// Returns Err if the mesh has no suit applied (safety check via
+/// [`crate::export_gate::ensure_export_allowed`]).
+pub fn export_ascii_stl_mesh(
+    mesh: &oxihuman_mesh::MeshBuffers,
+    opts: &AsciiStlOptions,
+) -> anyhow::Result<Vec<u8>> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+    Ok(export_ascii_stl(&mesh.positions, &mesh.indices, opts))
 }
 
 pub fn count_ascii_stl_triangles(stl_text: &str) -> usize {
@@ -198,5 +216,24 @@ mod tests {
         let (pos, idx) = simple_tri();
         let s = render_ascii_stl(&pos, &idx, &opts);
         assert!(s.contains("custom"));
+    }
+
+    fn mesh(has_suit: bool) -> oxihuman_mesh::MeshBuffers {
+        use oxihuman_morph::engine::MeshBuffers as MB;
+        oxihuman_mesh::MeshBuffers::from_morph(MB {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0]; 3],
+            indices: vec![0, 1, 2],
+            has_suit,
+        })
+    }
+
+    #[test]
+    fn test_export_ascii_stl_mesh_gated() {
+        assert!(export_ascii_stl_mesh(&mesh(false), &default_ascii_stl_options()).is_err());
+        let bytes = export_ascii_stl_mesh(&mesh(true), &default_ascii_stl_options())
+            .expect("suited mesh must export");
+        assert!(!bytes.is_empty());
     }
 }

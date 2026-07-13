@@ -3,9 +3,9 @@
 
 //! Statistical body model built from PCA of body shape variations.
 //!
-//! Implements a PCA-based statistical body model (similar to SMPL/SCAPE concepts)
-//! using a pure-Rust SVD implementation based on Golub-Kahan bidiagonalization
-//! and implicit QR iteration with Wilkinson shifts.
+//! Implements a PCA-based statistical body model over registered mesh
+//! vertices, using a pure-Rust SVD implementation based on Golub-Kahan
+//! bidiagonalization and implicit QR iteration with Wilkinson shifts.
 
 use anyhow::ensure;
 

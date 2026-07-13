@@ -150,6 +150,9 @@ pub fn export_usda_animated(
     cfg: &UsdAnimConfig,
     path: &Path,
 ) -> anyhow::Result<()> {
+    // Bodysuit gate: refuse to write an unclothed human mesh to disk.
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     let content = build_usda_animated(mesh, samples, cfg);
     std::fs::write(path, content.as_bytes())
         .with_context(|| format!("Failed to write USD anim to {}", path.display()))?;
@@ -204,7 +207,7 @@ mod tests {
             uvs: vec![[0.0, 0.0]; 3],
             indices: vec![0, 1, 2],
             colors: None,
-            has_suit: false,
+            has_suit: true,
         }
     }
 
@@ -366,10 +369,21 @@ mod tests {
         let mesh = stub_mesh();
         let cfg = stub_cfg();
         let samples = stub_samples(&mesh, 2);
-        let path = std::path::Path::new("/tmp/test_usd_anim_export.usda");
-        export_usda_animated(&mesh, &samples, &cfg, path).expect("should write file");
+        let path = std::env::temp_dir().join("test_usd_anim_export.usda");
+        export_usda_animated(&mesh, &samples, &cfg, &path).expect("should write file");
         assert!(path.exists());
-        let content = std::fs::read_to_string(path).expect("should succeed");
+        let content = std::fs::read_to_string(&path).expect("should succeed");
         assert!(content.contains("timeSamples"));
+        std::fs::remove_file(&path).ok();
+    }
+
+    #[test]
+    fn export_usda_animated_refuses_unsuited_mesh() {
+        let mut mesh = stub_mesh();
+        mesh.has_suit = false;
+        let cfg = stub_cfg();
+        let samples = stub_samples(&mesh, 2);
+        let path = std::env::temp_dir().join("test_usd_anim_unsuited_refuse.usda");
+        assert!(export_usda_animated(&mesh, &samples, &cfg, &path).is_err());
     }
 }

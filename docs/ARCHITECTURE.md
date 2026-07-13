@@ -31,7 +31,7 @@ oxihuman-physics     ← collision proxies (Phase 3)
 
 ## Morph Algorithm
 
-Based on MakeHuman's `algos3d.py`:
+Standard sparse blendshape scatter-add, compatible with the documented `.target` file semantics (independent implementation):
 ```
 for each active target t with weight w:
     for each delta in t.deltas:

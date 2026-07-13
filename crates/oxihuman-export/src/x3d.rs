@@ -201,8 +201,18 @@ fn build_shape_block(
 
 /// Build a complete X3D XML document for a single mesh.
 ///
+/// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+/// [`crate::export_gate::ensure_export_allowed`]. This is the crate's lower
+/// XML-string-builder boundary; `export_x3d` calls it after writing to disk,
+/// so the gate check here is intentionally cheap/idempotent to re-run.
+///
 /// Returns the XML string and export statistics.
-pub fn build_x3d(mesh: &MeshBuffers, options: &X3dExportOptions) -> (String, X3dExportStats) {
+pub fn build_x3d(
+    mesh: &MeshBuffers,
+    options: &X3dExportOptions,
+) -> anyhow::Result<(String, X3dExportStats)> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     let sp1 = ind(options.indent);
     let sp2 = ind(options.indent * 2);
 
@@ -266,18 +276,23 @@ pub fn build_x3d(mesh: &MeshBuffers, options: &X3dExportOptions) -> (String, X3d
         byte_size,
     };
 
-    (out, stats)
+    Ok((out, stats))
 }
 
 // ── File export ───────────────────────────────────────────────────────────────
 
 /// Export a single mesh to an X3D file.
+///
+/// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+/// [`crate::export_gate::ensure_export_allowed`].
 pub fn export_x3d(
     mesh: &MeshBuffers,
     path: &Path,
     options: &X3dExportOptions,
 ) -> anyhow::Result<X3dExportStats> {
-    let (content, mut stats) = build_x3d(mesh, options);
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
+    let (content, mut stats) = build_x3d(mesh, options)?;
     std::fs::write(path, &content)
         .with_context(|| format!("Failed to write X3D file: {}", path.display()))?;
     stats.byte_size = content.len();
@@ -288,7 +303,20 @@ pub fn export_x3d(
 
 /// Build a complete X3D XML document containing multiple meshes, each as a
 /// separate `<Shape>` node inside the same `<Scene>`.
-pub fn build_x3d_scene(meshes: &[(&MeshBuffers, &str)], options: &X3dExportOptions) -> String {
+///
+/// Refuses (returns `Err`) when any mesh in `meshes` has `has_suit == false`
+/// — see [`crate::export_gate::ensure_export_allowed`]. This is the crate's
+/// lower XML-string-builder boundary; `export_x3d_scene` calls it after
+/// writing to disk, so the gate check here is intentionally cheap/idempotent
+/// to re-run.
+pub fn build_x3d_scene(
+    meshes: &[(&MeshBuffers, &str)],
+    options: &X3dExportOptions,
+) -> anyhow::Result<String> {
+    for (mesh, _name) in meshes {
+        crate::export_gate::ensure_export_allowed(mesh)?;
+    }
+
     let sp1 = ind(options.indent);
     let sp2 = ind(options.indent * 2);
 
@@ -333,16 +361,23 @@ pub fn build_x3d_scene(meshes: &[(&MeshBuffers, &str)], options: &X3dExportOptio
     out.push_str(&format!("{}</Scene>\n", sp1));
     out.push_str("</X3D>\n");
 
-    out
+    Ok(out)
 }
 
 /// Export a multi-mesh scene to an X3D file.
+///
+/// Refuses (returns `Err`) when any mesh in `meshes` has `has_suit == false`
+/// — see [`crate::export_gate::ensure_export_allowed`].
 pub fn export_x3d_scene(
     meshes: &[(&MeshBuffers, &str)],
     path: &Path,
     options: &X3dExportOptions,
 ) -> anyhow::Result<()> {
-    let content = build_x3d_scene(meshes, options);
+    for (mesh, _name) in meshes {
+        crate::export_gate::ensure_export_allowed(mesh)?;
+    }
+
+    let content = build_x3d_scene(meshes, options)?;
     std::fs::write(path, &content)
         .with_context(|| format!("Failed to write X3D scene file: {}", path.display()))?;
     Ok(())
@@ -444,6 +479,18 @@ mod tests {
         }
     }
 
+    fn make_unsuited_mesh() -> MeshBuffers {
+        MeshBuffers {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
+            tangents: vec![[1.0, 0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]],
+            indices: vec![0, 1, 2],
+            colors: None,
+            has_suit: false,
+        }
+    }
+
     // ── 1. format_coord_array ────────────────────────────────────────────────
 
     #[test]
@@ -489,7 +536,7 @@ mod tests {
     fn test_build_x3d_xml_declaration() {
         let mesh = make_triangle_mesh();
         let opts = X3dExportOptions::default();
-        let (xml, _) = build_x3d(&mesh, &opts);
+        let (xml, _) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert!(
             xml.starts_with("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"),
             "XML declaration missing or wrong"
@@ -500,7 +547,7 @@ mod tests {
     fn test_build_x3d_contains_required_elements() {
         let mesh = make_triangle_mesh();
         let opts = X3dExportOptions::default();
-        let (xml, _) = build_x3d(&mesh, &opts);
+        let (xml, _) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert!(xml.contains("<X3D"), "Missing <X3D>");
         assert!(xml.contains("</X3D>"), "Missing </X3D>");
         assert!(xml.contains("<Scene"), "Missing <Scene>");
@@ -516,7 +563,7 @@ mod tests {
     fn test_build_x3d_stats() {
         let mesh = make_triangle_mesh();
         let opts = X3dExportOptions::default();
-        let (xml, stats) = build_x3d(&mesh, &opts);
+        let (xml, stats) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert_eq!(stats.vertex_count, 3);
         assert_eq!(stats.face_count, 1);
         assert!(stats.has_normals);
@@ -532,7 +579,7 @@ mod tests {
             include_uvs: false,
             ..Default::default()
         };
-        let (xml, stats) = build_x3d(&mesh, &opts);
+        let (xml, stats) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert!(!xml.contains("<Normal"), "Should not emit <Normal>");
         assert!(
             !xml.contains("<TextureCoordinate"),
@@ -549,7 +596,7 @@ mod tests {
             solid: true,
             ..Default::default()
         };
-        let (xml, _) = build_x3d(&mesh, &opts);
+        let (xml, _) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert!(xml.contains("solid=\"true\""), "Expected solid=true");
     }
 
@@ -560,7 +607,7 @@ mod tests {
             profile: "Full".to_string(),
             ..Default::default()
         };
-        let (xml, _) = build_x3d(&mesh, &opts);
+        let (xml, _) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert!(xml.contains("profile=\"Full\""), "Custom profile not found");
     }
 
@@ -570,7 +617,7 @@ mod tests {
     fn test_validate_x3d_valid() {
         let mesh = make_triangle_mesh();
         let opts = X3dExportOptions::default();
-        let (xml, _) = build_x3d(&mesh, &opts);
+        let (xml, _) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert!(
             validate_x3d(&xml).is_ok(),
             "Valid XML should pass validation"
@@ -596,7 +643,8 @@ mod tests {
     fn test_export_x3d_writes_file() {
         let mesh = make_triangle_mesh();
         let opts = X3dExportOptions::default();
-        let path = std::path::Path::new("/tmp/oxihuman_x3d_test_single.x3d");
+        let tmp = std::env::temp_dir().join("oxihuman_x3d_test_single.x3d");
+        let path = tmp.as_path();
         let stats = export_x3d(&mesh, path, &opts).expect("export_x3d failed");
         assert!(path.exists(), "Output file not created");
         let content = std::fs::read_to_string(path).expect("should succeed");
@@ -616,7 +664,7 @@ mod tests {
         let m2 = make_quad_mesh();
         let opts = X3dExportOptions::default();
         let meshes: Vec<(&MeshBuffers, &str)> = vec![(&m1, "Body"), (&m2, "Head")];
-        let xml = build_x3d_scene(&meshes, &opts);
+        let xml = build_x3d_scene(&meshes, &opts).expect("build_x3d_scene should succeed for suited meshes");
         assert!(validate_x3d(&xml).is_ok(), "Scene XML failed validation");
         assert!(xml.contains("DEF=\"Body\""), "Missing Body shape");
         assert!(xml.contains("DEF=\"Head\""), "Missing Head shape");
@@ -630,7 +678,8 @@ mod tests {
         let m2 = make_quad_mesh();
         let opts = X3dExportOptions::default();
         let meshes: Vec<(&MeshBuffers, &str)> = vec![(&m1, "Body"), (&m2, "Clothes")];
-        let path = std::path::Path::new("/tmp/oxihuman_x3d_test_scene.x3d");
+        let tmp = std::env::temp_dir().join("oxihuman_x3d_test_scene.x3d");
+        let path = tmp.as_path();
         export_x3d_scene(&meshes, path, &opts).expect("export_x3d_scene failed");
         assert!(path.exists(), "Scene output file not created");
         let content = std::fs::read_to_string(path).expect("should succeed");
@@ -646,7 +695,7 @@ mod tests {
     fn test_build_x3d_empty_mesh() {
         let mesh = make_empty_mesh();
         let opts = X3dExportOptions::default();
-        let (xml, stats) = build_x3d(&mesh, &opts);
+        let (xml, stats) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert!(
             validate_x3d(&xml).is_ok(),
             "Empty mesh XML failed validation"
@@ -666,7 +715,7 @@ mod tests {
             indent: 4,
             ..Default::default()
         };
-        let (xml, _) = build_x3d(&mesh, &opts);
+        let (xml, _) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         // With indent=4, the <head> should be indented with 4 spaces
         assert!(
             xml.contains("    <head>"),
@@ -683,7 +732,7 @@ mod tests {
             author: "TestAuthor".to_string(),
             ..Default::default()
         };
-        let (xml, _) = build_x3d(&mesh, &opts);
+        let (xml, _) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert!(
             xml.contains("content=\"TestAuthor\""),
             "Author meta missing"
@@ -696,7 +745,7 @@ mod tests {
     fn test_build_x3d_quad_mesh_two_faces() {
         let mesh = make_quad_mesh();
         let opts = X3dExportOptions::default();
-        let (xml, stats) = build_x3d(&mesh, &opts);
+        let (xml, stats) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         assert_eq!(stats.face_count, 2);
         assert_eq!(stats.vertex_count, 4);
         // coordIndex should contain two -1 terminators
@@ -716,7 +765,7 @@ mod tests {
             mesh_name: "Mesh<1>&\"2\"".to_string(),
             ..Default::default()
         };
-        let (xml, _) = build_x3d(&mesh, &opts);
+        let (xml, _) = build_x3d(&mesh, &opts).expect("build_x3d should succeed for a suited mesh");
         // The raw '<' should NOT appear in the DEF attribute value
         assert!(
             xml.contains("DEF=\"Mesh&lt;1&gt;&amp;&quot;2&quot;\""),
@@ -730,7 +779,7 @@ mod tests {
     fn test_build_x3d_scene_empty() {
         let opts = X3dExportOptions::default();
         let meshes: Vec<(&MeshBuffers, &str)> = vec![];
-        let xml = build_x3d_scene(&meshes, &opts);
+        let xml = build_x3d_scene(&meshes, &opts).expect("build_x3d_scene should succeed for suited meshes");
         assert!(
             validate_x3d(&xml).is_ok(),
             "Empty scene XML failed validation"
@@ -738,6 +787,58 @@ mod tests {
         assert!(
             !xml.contains("<Shape"),
             "Empty scene should have no Shape nodes"
+        );
+    }
+
+    // ── export gate ───────────────────────────────────────────────────────
+
+    #[test]
+    fn test_export_x3d_refuses_unsuited_mesh() {
+        let mesh = make_unsuited_mesh();
+        let opts = X3dExportOptions::default();
+        let tmp = std::env::temp_dir().join("oxihuman_x3d_test_refuse.x3d");
+        let path = tmp.as_path();
+        assert!(
+            export_x3d(&mesh, path, &opts).is_err(),
+            "export_x3d must refuse a mesh with has_suit = false"
+        );
+        assert!(!path.exists(), "no file should be written when refused");
+    }
+
+    #[test]
+    fn test_export_x3d_scene_refuses_unsuited_mesh() {
+        let suited = make_triangle_mesh();
+        let unsuited = make_unsuited_mesh();
+        let opts = X3dExportOptions::default();
+        let meshes: Vec<(&MeshBuffers, &str)> = vec![(&suited, "Body"), (&unsuited, "Nude")];
+        let tmp = std::env::temp_dir().join("oxihuman_x3d_test_scene_refuse.x3d");
+        let path = tmp.as_path();
+        assert!(
+            export_x3d_scene(&meshes, path, &opts).is_err(),
+            "export_x3d_scene must refuse when any mesh has has_suit = false"
+        );
+        assert!(!path.exists(), "no file should be written when refused");
+    }
+
+    #[test]
+    fn test_build_x3d_refuses_unsuited_mesh() {
+        let mesh = make_unsuited_mesh();
+        let opts = X3dExportOptions::default();
+        assert!(
+            build_x3d(&mesh, &opts).is_err(),
+            "build_x3d must refuse a mesh with has_suit = false, even without going through export_x3d"
+        );
+    }
+
+    #[test]
+    fn test_build_x3d_scene_refuses_unsuited_mesh() {
+        let suited = make_triangle_mesh();
+        let unsuited = make_unsuited_mesh();
+        let opts = X3dExportOptions::default();
+        let meshes: Vec<(&MeshBuffers, &str)> = vec![(&suited, "Body"), (&unsuited, "Nude")];
+        assert!(
+            build_x3d_scene(&meshes, &opts).is_err(),
+            "build_x3d_scene must refuse when any mesh has has_suit = false, even without going through export_x3d_scene"
         );
     }
 }

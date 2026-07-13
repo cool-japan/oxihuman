@@ -1,10 +1,10 @@
 # oxihuman-physics -- TODO
 
-> Version: 0.2.0 | Updated: 2026-06-19
+> Version: 0.2.1 | Updated: 2026-07-13
 
 ## Status: Stable
 
-All core features implemented. 0 stubs (`todo!()`/`unimplemented!()`). 5,217 passing tests across 864 source files (~190k SLoC). No `// TODO` or `// FIXME` comments.
+All core features implemented. 0 stubs (`todo!()`/`unimplemented!()`). 5,262 passing tests across 864 source files (~190k SLoC). No `// TODO` or `// FIXME` comments.
 
 ## Completed
 

@@ -362,6 +362,23 @@ impl VrmMeta {
 
 // ── VRM exporter ─────────────────────────────────────────────────────────────
 
+/// Provenance of the mesh geometry currently held by a [`VrmExporter`].
+///
+/// The bodysuit invariant is enforced at the `MeshBuffers` boundary:
+/// [`VrmExporter::set_mesh_buffers`] refuses a mesh whose `has_suit` flag is
+/// false, so the only way a `MeshBuffers` source can reach [`VrmExporter::export`]
+/// is with the suit verified. Raw-slice geometry (via [`VrmExporter::set_mesh`])
+/// carries no human-mesh provenance and is a low-level path.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MeshSource {
+    /// No mesh set yet.
+    None,
+    /// Raw-slice geometry with no `has_suit` provenance (low-level path).
+    RawSlices,
+    /// Geometry from a `MeshBuffers` that passed the bodysuit gate.
+    SuitVerifiedBuffers,
+}
+
 /// VRM 1.0 exporter — builds a GLB binary with VRMC_vrm extensions.
 pub struct VrmExporter {
     gltf_json: serde_json::Value,
@@ -373,6 +390,7 @@ pub struct VrmExporter {
     vertex_count: usize,
     index_count: usize,
     node_count: usize,
+    mesh_source: MeshSource,
 }
 
 impl VrmExporter {
@@ -407,7 +425,50 @@ impl VrmExporter {
             vertex_count: 0,
             index_count: 0,
             node_count: 0,
+            mesh_source: MeshSource::None,
         }
+    }
+
+    /// Gated `MeshBuffers` entry point: set the mesh geometry from a
+    /// [`oxihuman_mesh::MeshBuffers`].
+    ///
+    /// This is the human-facing path used by the WASM `export_vrm()` API.
+    /// Returns Err if the mesh has no suit applied (safety check via
+    /// [`crate::export_gate::ensure_export_allowed`]), if the buffers are
+    /// inconsistent, or if the index list is not a triangle list.
+    pub fn set_mesh_buffers(&mut self, mesh: &oxihuman_mesh::MeshBuffers) -> anyhow::Result<()> {
+        crate::export_gate::ensure_export_allowed(mesh)?;
+
+        let positions: Vec<[f64; 3]> = mesh
+            .positions
+            .iter()
+            .map(|p| [f64::from(p[0]), f64::from(p[1]), f64::from(p[2])])
+            .collect();
+        let normals: Vec<[f64; 3]> = mesh
+            .normals
+            .iter()
+            .map(|n| [f64::from(n[0]), f64::from(n[1]), f64::from(n[2])])
+            .collect();
+        let uvs: Vec<[f64; 2]> = mesh
+            .uvs
+            .iter()
+            .map(|uv| [f64::from(uv[0]), f64::from(uv[1])])
+            .collect();
+        if !mesh.indices.len().is_multiple_of(3) {
+            anyhow::bail!(
+                "mesh index count {} is not a multiple of 3",
+                mesh.indices.len()
+            );
+        }
+        let triangles: Vec<[usize; 3]> = mesh
+            .indices
+            .chunks_exact(3)
+            .map(|t| [t[0] as usize, t[1] as usize, t[2] as usize])
+            .collect();
+
+        self.set_mesh(&positions, &normals, &uvs, &triangles)?;
+        self.mesh_source = MeshSource::SuitVerifiedBuffers;
+        Ok(())
     }
 
     /// Sets the mesh geometry data.
@@ -531,6 +592,7 @@ impl VrmExporter {
         self.vertex_count = n_verts;
         self.index_count = n_indices;
         self.has_mesh = true;
+        self.mesh_source = MeshSource::RawSlices;
         Ok(())
     }
 
@@ -787,9 +849,18 @@ impl VrmExporter {
     }
 
     /// Exports the VRM as a GLB binary (`.vrm` file contents).
+    ///
+    /// # Bodysuit invariant
+    ///
+    /// Human meshes must be supplied via [`Self::set_mesh_buffers`], which
+    /// gates on `MeshBuffers::has_suit` — a mesh that failed the gate can
+    /// never reach this method. `export` re-checks the recorded provenance
+    /// defensively: only `MeshSource::RawSlices` (low-level geometry with
+    /// no `has_suit` provenance) and `MeshSource::SuitVerifiedBuffers`
+    /// are accepted.
     pub fn export(&self) -> anyhow::Result<Vec<u8>> {
-        if !self.has_mesh {
-            anyhow::bail!("cannot export VRM: no mesh data set (call set_mesh first)");
+        if !self.has_mesh || self.mesh_source == MeshSource::None {
+            anyhow::bail!("cannot export VRM: no mesh data set (call set_mesh_buffers first)");
         }
         if !self.has_humanoid {
             anyhow::bail!("cannot export VRM: no humanoid mapping set (call set_humanoid first)");
@@ -1337,6 +1408,53 @@ mod tests {
         assert!(exp
             .set_skeleton(&["Root".to_string()], &[Some(0)], &[identity_matrix()])
             .is_err());
+    }
+
+    fn mesh_buffers(has_suit: bool) -> oxihuman_mesh::MeshBuffers {
+        use oxihuman_morph::engine::MeshBuffers as MB;
+        oxihuman_mesh::MeshBuffers::from_morph(MB {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
+            indices: vec![0, 1, 2],
+            has_suit,
+        })
+    }
+
+    #[test]
+    fn set_mesh_buffers_refuses_unsuited_mesh() {
+        let mut exp = VrmExporter::new();
+        assert!(
+            exp.set_mesh_buffers(&mesh_buffers(false)).is_err(),
+            "has_suit=false mesh must be refused"
+        );
+        assert!(!exp.has_mesh, "refused mesh must not be stored");
+    }
+
+    #[test]
+    fn set_mesh_buffers_accepts_suited_mesh_and_exports() {
+        let mut exp = VrmExporter::new();
+        exp.set_mesh_buffers(&mesh_buffers(true))
+            .expect("suited mesh accepted");
+
+        let humanoid = minimal_humanoid();
+        let n_bones = humanoid.bones.len();
+        let bone_names: Vec<String> = humanoid
+            .bones
+            .iter()
+            .map(|b| b.name.as_str().to_string())
+            .collect();
+        let mut bone_parents: Vec<Option<usize>> = vec![Some(0); n_bones];
+        bone_parents[0] = None;
+        let bind_poses: Vec<[f64; 16]> = vec![identity_matrix(); n_bones];
+        exp.set_skeleton(&bone_names, &bone_parents, &bind_poses)
+            .expect("skeleton");
+        exp.set_humanoid(&humanoid).expect("humanoid");
+        exp.set_meta(&VrmMeta::default_cc_by("Gated")).expect("meta");
+
+        let bytes = exp.export().expect("export");
+        let magic = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
+        assert_eq!(magic, GLB_MAGIC);
     }
 
     #[test]

@@ -24,37 +24,54 @@ pub fn new_body_measurement() -> BodyMeasurement {
 /// Add or compute a chest measurement.
 #[allow(dead_code)]
 pub fn chest_measurement(bm: &mut BodyMeasurement, value_cm: f32) {
-    bm.points.push(MeasurementPoint { name: "chest".to_string(), value_cm });
+    bm.points.push(MeasurementPoint {
+        name: "chest".to_string(),
+        value_cm,
+    });
 }
 
 /// Add or compute a hip measurement.
 #[allow(dead_code)]
 pub fn hip_measurement(bm: &mut BodyMeasurement, value_cm: f32) {
-    bm.points.push(MeasurementPoint { name: "hip".to_string(), value_cm });
+    bm.points.push(MeasurementPoint {
+        name: "hip".to_string(),
+        value_cm,
+    });
 }
 
 /// Add or compute a waist measurement.
 #[allow(dead_code)]
 pub fn waist_measurement(bm: &mut BodyMeasurement, value_cm: f32) {
-    bm.points.push(MeasurementPoint { name: "waist".to_string(), value_cm });
+    bm.points.push(MeasurementPoint {
+        name: "waist".to_string(),
+        value_cm,
+    });
 }
 
 /// Add or compute an inseam measurement.
 #[allow(dead_code)]
 pub fn inseam_measurement(bm: &mut BodyMeasurement, value_cm: f32) {
-    bm.points.push(MeasurementPoint { name: "inseam".to_string(), value_cm });
+    bm.points.push(MeasurementPoint {
+        name: "inseam".to_string(),
+        value_cm,
+    });
 }
 
 /// Add or compute an arm length measurement.
 #[allow(dead_code)]
 pub fn arm_length_measurement(bm: &mut BodyMeasurement, value_cm: f32) {
-    bm.points.push(MeasurementPoint { name: "arm_length".to_string(), value_cm });
+    bm.points.push(MeasurementPoint {
+        name: "arm_length".to_string(),
+        value_cm,
+    });
 }
 
 /// Serialize measurements to a JSON string.
 #[allow(dead_code)]
 pub fn measurements_to_json(bm: &BodyMeasurement) -> String {
-    let entries: Vec<String> = bm.points.iter()
+    let entries: Vec<String> = bm
+        .points
+        .iter()
         .map(|p| format!(r#"{{"name":"{}","value_cm":{:.2}}}"#, p.name, p.value_cm))
         .collect();
     format!("[{}]", entries.join(","))

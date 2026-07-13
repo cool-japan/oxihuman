@@ -63,9 +63,7 @@ impl WasmEngine {
                 }
             }
         }
-        self.engine.set_params(p.clone());
-        self.params = p;
-        self.last_mesh = None;
+        self.commit_params(p);
     }
 
     /// Advance animation by `dt_seconds` at the current FPS; wrap around.

@@ -347,6 +347,9 @@ pub fn export_obj_mtl(
     materials: &[MtlMaterial],
     options: &ObjMtlOptions,
 ) -> Result<ObjMtlStats> {
+    // Bodysuit gate: refuse to write an unclothed human mesh to disk.
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     let obj_content = build_obj_with_mtl(mesh, options);
     let mtl_content = build_mtl(materials);
 
@@ -513,7 +516,7 @@ mod tests {
             normals: vec![[0.0, 0.0, 1.0]; 3],
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
             indices: vec![0, 1, 2],
-            has_suit: false,
+            has_suit: true,
         })
     }
 
@@ -529,7 +532,7 @@ mod tests {
             normals: vec![[0.0, 0.0, 1.0]; 4],
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
             indices: vec![0, 1, 2, 0, 2, 3],
-            has_suit: false,
+            has_suit: true,
         })
     }
 
@@ -737,6 +740,16 @@ mod tests {
 
         std::fs::remove_file(&obj_path).ok();
         std::fs::remove_file(&mtl_path).ok();
+    }
+
+    #[test]
+    fn export_obj_mtl_refuses_unsuited_mesh() {
+        let mut mesh = triangle_mesh();
+        mesh.has_suit = false;
+        let mats = vec![MtlMaterial::default()];
+        let opts = ObjMtlOptions::default();
+        let obj_path = std::env::temp_dir().join("test_obj_mtl_unsuited_refuse.obj");
+        assert!(export_obj_mtl(&mesh, &obj_path, &mats, &opts).is_err());
     }
 
     #[test]

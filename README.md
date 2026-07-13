@@ -1,254 +1,249 @@
 # OxiHuman
 
-**Privacy-first, client-side human body generator — pure Rust, WASM/WebGPU ready.**
+**Privacy-first, client-side parametric human body generator — pure Rust, compiled to WebAssembly.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.2.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.1-green.svg)](CHANGELOG.md)
 [![Rust Edition](https://img.shields.io/badge/rust-edition%202021-orange.svg)](https://doc.rust-lang.org/edition-guide/rust-2021/)
 
-> **Version 0.2.0** — Released 2026-06-19
+![OxiHuman BodyLab: a lit 3-D human generated entirely in-browser from height / chest / waist / hip measurements, shown beside a live target / measured / Δ readout with a sub-centimetre fit and a "0 bytes uploaded" privacy badge.](docs/media/bodylab-hero.png)
+
+*The **BodyLab** demo: type real centimetres, press **Fit body**, and read an honest per-measurement Δ re-measured from the generated mesh — all on-device, `0 bytes uploaded`. [Try it below.](#demo)*
+
+> **Version 0.2.1** — Unreleased
 > **Author**: COOLJAPAN OU (Team Kitasan)
 > **Repository**: https://github.com/cool-japan/oxihuman
-> **License**: Apache-2.0
+> **License**: Apache-2.0 (code) / CC0-1.0 (bundled body-mesh data)
 
 ---
 
-## Overview
+## What this is
 
-OxiHuman is a pure-Rust parametric human body generator that runs entirely client-side — in the browser via WebAssembly/WebGPU or natively on any platform. It synthesises detailed 3D human meshes from high-level slider parameters without ever transmitting body data to a server. The project spans ~968,000 lines of Rust across 8 workspace crates, with 33,410 passing tests.
+OxiHuman generates detailed 3D human body meshes from parametric sliders
+(height, weight, muscle, age, ...) entirely on the client — in the browser
+via WebAssembly, or natively. There is no body-data upload step and no
+generation server: unlike hosted avatar services (e.g. Ready Player Me),
+there is no server to shut down, rate-limit, or have a data breach on,
+because the mesh math never leaves the device it runs on.
 
-### Core Principles
+Measured, not aspirational, numbers as of this release:
+
+| Metric | Value |
+|---|---|
+| WASM web build (gzip) | ~259 KB (258.92 KB / 265,138 B, `oxihuman_wasm_bg.wasm`, release + wasm-opt) |
+| Core asset pack | `oxihuman-core-v1.ohpk`, 2,093,260 B (≈ 2.00 MB), 38 CC0-licensed morph targets (30 macro-shape corners + 8 `measure/` girth targets), 21,833 base vertices |
+| Worst-case quantisation error | 0.011 mm (see [docs/bench/pack-reconstruction-error.md](docs/bench/pack-reconstruction-error.md)) |
+| Measurement fit (`brief-172` probe) | \|Δ\| ≤ 0.66 cm, ~0.9 s for a four-measurement fit under Node (see [docs/bench/measurement-error.md](docs/bench/measurement-error.md)) |
+| Engine morph cost | p50 ≈ 0.52 ms/frame at 21,833 verts (set_param + refresh_geometry; see [web/bench/README.md](web/bench/README.md)) |
+
+### Core principles
 
 | Principle | Description |
 |-----------|-------------|
 | **No network by default** | Core crates compile without any HTTP stack; no outbound connections at runtime |
 | **Client-side compute** | All morphing and mesh synthesis runs locally — in the browser or on native |
-| **Safety by construction** | The base mesh is always a bodysuit; no naked mesh stage exists in memory or exports |
+| **Safety by construction** | The base mesh is always a bodysuit; no naked mesh stage exists in memory or exports — see [SAFETY.md](SAFETY.md) |
 | **Deterministic builds** | Fully reproducible pipelines for both WASM and native targets |
 
 ---
 
-## Workspace Crates
+## Quick start (npm / browser)
 
-All crates are at version **0.2.0**.
-
-| Crate | Status | Tests | Purpose |
-|-------|--------|------:|---------|
-| `oxihuman-core` | Stable | 5,243 | Arena allocator, graphs, asset cache, spatial index, codec, event bus |
-| `oxihuman-morph` | Stable | 5,865 | Parametric morphing engine, FACS, pose graph, age/body model |
-| `oxihuman-mesh` | Stable | 5,715 | Mesh processing, topology, UV mapping, LOD, skinning |
-| `oxihuman-export` | Stable | 5,289 | glTF/GLB, COLLADA, OBJ, STL, USD, VRM, streaming export |
-| `oxihuman-physics` | Stable | 5,217 | Soft-body, cloth, rigid body, FEM, SPH, biomechanics |
-| `oxihuman-viewer` | Stable | 4,974 | wgpu/WebGPU rendering, camera systems, 100+ debug views |
-| `oxihuman-wasm` | Stable | 168 | WebAssembly bindings (wasm-bindgen), 68-method browser API |
-| `oxihuman-cli` | Stable | 134 | 35 subcommands: generate, export, batch, validate, sign |
-| `oxihuman-tests` | Stable | 39 | Integration and cross-crate tests |
-| **Total** | | **33,410** | |
-
----
-
-## Feature Highlights
-
-### Morphology (`oxihuman-morph`)
-
-- Parametric MorphEngine with target-based blending over thousands of vertices
-- Age progression model with anthropometric scaling
-- Body composition: muscle simulation, fat distribution, skeletal proportions
-- FACS facial action units (Action Units) for expressive face morphing
-- Pose graph with constraint system and skin deformation
-- Diversity parameters, body symmetry controls
-- Animation curves, parameter animation, animation retargeting
-- 30+ morph modules covering nasal, hip, limb, and torso regions
-
-### Mesh Processing (`oxihuman-mesh`)
-
-- Halfedge topology data model with vertex groups
-- Dual contouring (DC) surface extraction with sharp feature preservation
-- UV mapping, UV packing, UV stitching, UV quality analysis
-- LOD generation and mesh decimation
-- Parametric surfaces: Gordon surfaces, Coons patches
-- Linear Blend Skinning (LBS) and Dual Quaternion Skinning (DQS)
-- Normal map baking, bent normals, cage lattice deformation
-- Cloth pins, shape key mixing, paint masking
-- 60+ mesh algorithms
-
-### Export Pipeline (`oxihuman-export`)
-
-- **GLB/glTF**: binary export with bytemuck zero-copy packing, animated glTF
-- **COLLADA**: full scene graph export
-- **STL**: solid and ASCII modes
-- **USD**: Universal Scene Description export
-- **VRM**: avatar format export
-- **3MF**: additive manufacturing format
-- Vertex animation export, animation layer export
-- Texture packing, diffuse color export
-- Asset signing and pack verification
-- Streaming export, LOD export, morph quantization export
-- Batch pipeline for multi-asset processing
-
-### Physics (`oxihuman-physics`)
-
-- Capsule pair collision detection
-- Cloth simulation with pins and constraints
-- Rigid body dynamics
-- Finite Element Method (FEM): hyperelastic, anisotropic, foam, auxetic material models
-- Smoothed Particle Hydrodynamics (SPH) fluid simulation
-- Porous flow via Darcy pressure solver
-- Lattice Boltzmann fluid simulation
-- Runge-Kutta 4th-order integrator
-- Phase-field fracture, plate bending, creep/fatigue models
-- Biomechanics: tissue deformation, particle filter
-- 350+ physics modules
-
-### WASM / Browser (`oxihuman-wasm`)
-
-- `WasmEngine` — full browser-ready API via `wasm-bindgen`
-- 68-method JavaScript/TypeScript API surface
-- Target loading from bytes, ZIP pack loading
-- Parameter get/set, mesh export to bytes
-- Physics step, animation seek, preset application
-- Enable `webgpu` feature for wgpu-based in-browser rendering
-
-### CLI (`oxihuman-cli`)
-
-35 subcommands covering the full generation and export workflow:
-
-```
-oxihuman generate          # Generate mesh from parameter JSON
-oxihuman export-gltf       # Export to glTF/GLB
-oxihuman export-collada    # Export to COLLADA
-oxihuman export-stl        # Export to STL
-oxihuman morph-export      # Export morph targets
-oxihuman lod-export        # Export LOD levels
-oxihuman proxies           # Proxy mesh generation
-oxihuman asset-bundle      # Bundle assets
-oxihuman zip-pack          # Create ZIP pack
-oxihuman sign-pack         # Sign asset pack
-oxihuman verify-sign       # Verify pack signature
-oxihuman batch             # Batch processing pipeline
-oxihuman validate          # Validate mesh/asset integrity
-oxihuman stats             # Print project/mesh statistics
-oxihuman report            # Generate human-readable report
-# ... and 17 more subcommands
-```
-
-### Viewer (`oxihuman-viewer`)
-
-- wgpu/WebGPU rendering adapter (optional `webgpu` feature)
-- Multiple camera systems: orbit, fly, cinematic
-- LOD manager, depth linearization, instance batching
-- 100+ debug views including: bent normals, thermal overlay, false-color shading, histology visualization
-
----
-
-## Installation
-
-Add individual crates to your `Cargo.toml` as needed:
-
-```toml
-[dependencies]
-oxihuman-core    = "0.2.0"
-oxihuman-morph   = "0.2.0"
-oxihuman-mesh    = "0.2.0"
-oxihuman-export  = "0.2.0"
-oxihuman-physics = "0.2.0"
-oxihuman-viewer  = "0.2.0"
-oxihuman-wasm    = "0.2.0"
-oxihuman-cli     = "0.2.0"
-```
-
----
-
-## Quick Start
-
-### Native (Rust)
-
-```toml
-[dependencies]
-oxihuman-morph = "0.2.0"
-oxihuman-mesh  = "0.2.0"
-```
-
-```rust
-use oxihuman_morph::engine::MorphEngine;
-use oxihuman_export::gltf::GltfExporter;
-
-let mut engine = MorphEngine::default();
-engine.set_param("height", 0.6);
-engine.set_param("weight", 0.4);
-engine.set_param("age", 0.35);
-let mesh = engine.build_mesh();
-
-let exporter = GltfExporter::new();
-let glb_bytes = exporter.export_glb(&mesh)?;
-```
-
-### Browser (WebAssembly)
-
-```javascript
-import init, { WasmEngine } from "./oxihuman_wasm.js";
-
+```js
+import init, { OxiHumanEngine } from "oxihuman-wasm";
 await init();
-const engine = new WasmEngine();
-engine.set_param("height", 0.6);
-engine.set_param("weight", 0.4);
-const mesh_bytes = engine.export_mesh_bytes();
+const bytes  = new Uint8Array(await (await fetch("./pack/oxihuman-core-v1.ohpk")).arrayBuffer());
+const engine = OxiHumanEngine.from_core_pack_bytes(bytes);
+engine.set_param("height", 0.7);
 ```
 
-### CLI
+Then export in-memory (no filesystem — works on wasm32):
 
-```bash
-# Generate a mesh from parameters and export to GLB
-oxihuman generate --params params.json --output human.glb
-
-# Batch-generate with different presets
-oxihuman batch --input presets/ --output out/ --format gltf
-
-# Validate an asset pack
-oxihuman validate --pack assets.zip
+```js
+const glb = engine.export_glb();       // Uint8Array, GLB 2.0
+const vrm = engine.export_vrm();       // Uint8Array, VRM 1.0
+const stl = engine.export_stl(true);   // Uint8Array, binary STL (false = ASCII)
+const obj = engine.export_obj();       // string, Wavefront OBJ
 ```
 
----
+### Zero-copy geometry for three.js / WebGL
 
-## Building
-
-```bash
-# Native (all features)
-cargo build --all-features
-
-# WASM (browser target)
-cargo build -p oxihuman-wasm --target wasm32-unknown-unknown --features wasm
-
-# WASM with WebGPU rendering
-cargo build -p oxihuman-wasm --target wasm32-unknown-unknown --features wasm,webgpu
+```js
+import { wasm_memory } from "oxihuman-wasm";
+const memory = wasm_memory();
+engine.refresh_geometry();
+const positions = new Float32Array(memory.buffer, engine.positions_ptr(), engine.positions_len());
+// upload `positions` straight into a BufferGeometry/VBO with zero JS-side copies
 ```
 
-## Testing
-
-```bash
-# Run all 33,410 tests
-cargo nextest run --all-features
-
-# Run tests for a specific crate
-cargo nextest run -p oxihuman-morph --all-features
-```
-
-### Test fixtures
-
-Some tests depend on the [MakeHuman](http://www.makehumancommunity.org/) dataset and oxihuman asset
-packs. To run them locally:
-
-| Variable | Purpose | Example |
-|---|---|---|
-| `MAKEHUMAN_DATA_DIR` | Path to the MakeHuman `data/` directory (containing `3dobjs/base.obj` and `targets/`) | `/path/to/makehuman/data` |
-| `OXIHUMAN_ASSETS_DIR` | Path to the oxihuman asset pack root (containing `alpha_pack/oxihuman_assets.toml`) | `/path/to/oxihuman/assets` |
-
-Tests that require these fixtures skip gracefully when the variable is unset, so the standard
-`cargo nextest run --all-features` still passes on machines without the dataset.
+See [crates/oxihuman-wasm/README.md](crates/oxihuman-wasm/README.md) for the
+full 68-method API surface, the classic OBJ/ZIP-pack flow, and the Node.js
+verification harness.
 
 ---
 
 ## License
+
+> OxiHuman is an independent, pure-Rust, Apache-2.0 implementation of a
+> parametric human body generator. It is *format-compatible* with
+> MakeHuman: it reads the documented `.target` and `.mhclo` file formats.
+> It contains no code copied, translated, or otherwise derived from the
+> AGPL-licensed MakeHuman Python application.
+
+Code is licensed under [Apache-2.0](LICENSE). The bundled body-mesh and
+morph-target data assets (`assets/packs/`) are derived from MakeHuman data
+released under CC0-1.0; see [PROVENANCE.md](PROVENANCE.md) for the full
+upstream chain and [docs/CLEANROOM_AUDIT.md](docs/CLEANROOM_AUDIT.md) for
+the clean-room verification methodology. See also [NOTICE](NOTICE).
+
+---
+
+## Safety
+
+The base mesh is always exported wearing a bodysuit — there is no code path
+that produces or exports a nude mesh, enforced by an export gate checked on
+every export entry point (GLB, VRM, OBJ, STL, COLLADA, USD, 3MF) and a named
+regression test. Age is clamped client-side to the pack's declared floor
+(18 years for the shipped core pack) before any mesh is built. Details:
+[SAFETY.md](SAFETY.md).
+
+---
+
+## Limitations (honest)
+
+OxiHuman's topology and morph targets are MakeHuman-derived realistic human
+anatomy — this is not a stylised/anime avatar system, and won't look like
+one without new target data. The core pack ships 38 targets (30 macro-shape
+corners + 8 `measure/` girth targets; a broader, non-core target set is
+available separately, outside this repository's default asset footprint).
+Localised girth fitting (chest / waist / hip via the `measure/` targets)
+now works end-to-end and closes to sub-centimetre residuals across realistic
+adult tape measurements; the `brief-172` probe fits to \|Δ\| ≤ 0.66 cm. The
+pack's reachable girth envelope is finite, though: at the extremes (e.g. an
+`adult-XL` build) a girth can sit at the envelope edge, leaving up to ≈ 1.44 cm
+residual (worst case, `adult-XL` hip). The full per-measurement accuracy is
+characterised in
+[docs/bench/measurement-error.md](docs/bench/measurement-error.md), not
+assumed. There is no clothing or hair in the core pack. The bundled WebGL
+demo renders via WebGL, not WebGPU (an optional `webgpu` viewer feature
+exists for native/experimental use, but the shipped browser demo does not
+depend on it).
+
+---
+
+## Roadmap
+
+- **Own shape space (M6, future)**: replace reliance on MakeHuman-derived
+  morph targets with an OxiHuman-native shape space fit from public-domain
+  anthropometric survey data (ANSUR II), removing the dependency on any
+  third-party body-model shape basis entirely.
+
+---
+
+## Demo
+
+A BodyLab interactive demo lives in [`demo/`](demo/) — parameter sliders,
+live preview, measurement fitting, and GLB/VRM/STL/OBJ export straight from the
+browser. Every number on the page (WASM + pack transfer sizes, FPS, vertex
+count, `0 bytes uploaded`) is measured at runtime, never hardcoded.
+
+![BodyLab live morph: dragging the Height slider morphs the 21,833-vertex body in real time, entirely client-side.](docs/media/bodylab-morph.gif)
+
+### Live demo
+
+Hosted, nothing to install: **[cooljapan.tech/bodylab](https://cooljapan.tech/bodylab/)**
+— the BodyLab demo running fully client-side in your browser.
+
+Or run it locally (fully static, no build step at serve time):
+
+```sh
+scripts/build_demo.sh          # builds the WASM module into demo/pkg
+cd demo && python3 -m http.server 8080
+# open http://localhost:8080
+```
+
+### Honest measurement fit
+
+Type real centimetres and press **Fit body**: the engine re-measures the
+resulting mesh and reports the per-measurement Δ — the *measured* column is read
+back from the fitted geometry, never echoed from your input. The `brief-172`
+fit (172 / 96 / 82 / 98) closes to |Δ| ≤ 0.66 cm.
+
+<img src="docs/media/bodylab-readout.png" width="380"
+     alt="BodyLab Fit-to-measurements panel: Height 172.0 → 171.9 (Δ −0.05), Chest 96.0 → 95.3 (Δ −0.66), Waist 82.0 → 81.7 (Δ −0.28), Hip 98.0 → 97.6 (Δ −0.41), re-measured from geometry.">
+
+> The demo screenshots above are real captures of the page rendered in headless
+> Chrome; the on-screen FPS chip reads low only because that capture ran on a
+> software (SwiftShader) rasteriser with no GPU — on real hardware the morph
+> runs at 60 fps (p50 ≈ 0.52 ms/frame, see [`web/bench/`](web/bench/README.md)).
+
+---
+
+## Development
+
+### Workspace layout
+
+| Crate | Purpose |
+|-------|---------|
+| `oxihuman-core` | Arena allocator, graphs, asset cache, spatial index, codec, event bus |
+| `oxihuman-morph` | Parametric morphing engine, FACS, pose graph, age/body model, calibration |
+| `oxihuman-mesh` | Mesh processing, topology, UV mapping, LOD, skinning |
+| `oxihuman-export` | glTF/GLB, COLLADA, OBJ, STL, USD, VRM, streaming export |
+| `oxihuman-physics` | Soft-body, cloth, rigid body, FEM, SPH, biomechanics |
+| `oxihuman-viewer` | wgpu/WebGPU rendering, camera systems |
+| `oxihuman-wasm` | WebAssembly bindings (wasm-bindgen), zero-copy geometry |
+| `oxihuman-cli` | Subcommands: generate, export, batch, validate, pack-core, sign |
+| `oxihuman-tests` | Integration and cross-crate tests |
+| `oxihuman-test-utils` | Shared test-asset path helpers |
+| `oxihuman` | Top-level facade crate: re-exports core/morph/mesh/export/physics, plus optional viewer/wasm via `viewer`/`wasm` Cargo features (`full` = both) |
+
+### Building
+
+```sh
+cargo build --all-features
+cargo build -p oxihuman-wasm --target wasm32-unknown-unknown --features bindgen
+```
+
+### Testing
+
+```sh
+cargo nextest run --all-features
+cargo nextest run -p oxihuman-morph --all-features   # single crate
+```
+
+Some tests depend on the [MakeHuman](http://www.makehumancommunity.org/)
+dataset and OxiHuman asset packs:
+
+| Variable | Purpose | Example |
+|---|---|---|
+| `MAKEHUMAN_DATA_DIR` | Path to the MakeHuman `data/` directory (`3dobjs/base.obj`, `targets/`) | `/path/to/makehuman/data` |
+| `OXIHUMAN_ASSETS_DIR` | Path to the OxiHuman asset pack root | `/path/to/oxihuman/assets` |
+
+Tests skip gracefully when these are unset, so `cargo nextest run
+--all-features` still passes without the datasets present.
+
+### Rebuilding asset packs
+
+```sh
+scripts/fetch_upstream_assets.sh                # fetch CC0 MakeHuman upstream data
+oxihuman pack-core --tier core \
+  --upstream assets/upstream/makehuman \
+  --out assets/packs/oxihuman-core-v1.ohpk \
+  --report docs/bench/pack-reconstruction-error.md
+scripts/check_provenance.sh                     # verify CC0 provenance chain
+```
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) — in particular the forbidden-sources
+section (no MakeHuman AGPL code, no SMPL/SMPL-X/SMPL-H/STAR, no bundled
+community asset packs) before contributing to mesh or morph code.
+
+---
+
+## License (SPDX)
 
 Licensed under the [Apache License, Version 2.0](LICENSE).
 

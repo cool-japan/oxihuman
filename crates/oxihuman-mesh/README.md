@@ -8,9 +8,9 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 | Metric | Value |
 |--------|-------|
 | Status | Stable |
-| Tests passing | 5,715 |
+| Tests passing | 5,774 |
 | Public API items | 7,381 |
-| Source files | 898 `.rs` files |
+| Source files | 897 `.rs` files |
 | Stub coverage | 0 stubs |
 
 ## Overview
@@ -21,7 +21,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 
 ```toml
 [dependencies]
-oxihuman-mesh = "0.2.0"
+oxihuman-mesh = "0.2.1"
 ```
 
 ## Module Reference
@@ -35,9 +35,9 @@ oxihuman-mesh = "0.2.0"
 | `bounds` | Axis-aligned bounding box computation |
 | `measurements` | Body and mesh sizing utilities |
 | `normals` | Normal computation and smoothing |
-| `tangents` | Tangent frame generation (MikkTSpace-compatible) |
+| `mesh_tangent_space` | Tangent frame generation (MikkTSpace-compatible) |
 | `skinning` | Linear blend skinning (LBS) pipeline |
-| `weights` | Weight painting tools and normalization |
+| `mesh_vertex_weight_paint` | Weight painting tools and normalization |
 
 ### Geometry Processing
 

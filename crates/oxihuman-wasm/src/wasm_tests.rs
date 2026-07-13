@@ -240,7 +240,15 @@ f 4/1/1 5/2/1 6/3/1
     let mut e = WasmEngine::new_from_obj_bytes(obj).expect("should succeed");
     let json = e.get_measurements_json();
     let v: serde_json::Value = serde_json::from_str(&json).expect("should succeed");
-    for key in &["total_height", "max_width", "max_depth", "torso_height"] {
+    for key in &[
+        "total_height",
+        "chest",
+        "waist",
+        "hip",
+        "weight_kg",
+        "max_width",
+        "max_depth",
+    ] {
         let val = v[key].as_f64().unwrap_or(-1.0);
         assert!(val >= 0.0, "{key} should be non-negative, got {val}");
     }

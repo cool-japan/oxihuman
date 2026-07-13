@@ -272,7 +272,7 @@ pub fn cmd_workspace_info() {
     println!("  oxihuman-mesh    — mesh utilities, normals, tangents, LOD, smoothing, bounds");
     println!("  oxihuman-export  — GLB, GLTF, OBJ, STL, USDA, JSON exporters + pipeline");
     println!("  oxihuman-physics — collision proxies, capsule generation, surface sampling");
-    println!("  oxihuman-wasm    — WebAssembly bindings (stub)");
+    println!("  oxihuman-wasm    — WebAssembly bindings, full wasm-bindgen JS/TS API");
     println!("  oxihuman-viewer  — WebGPU viewer (stub)");
     println!("  oxihuman-cli     — command-line interface (this binary)");
 }

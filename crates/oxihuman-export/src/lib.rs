@@ -19,9 +19,19 @@
 //! | USD / USDZ | [`export_usda`], [`package_usdz`] |
 //! | Alembic | [`AlembicWriter`] (Ogawa-compatible binary writer) |
 //! | Point cache | [`export_pc2`], [`export_mdd`], [`export_point_cache`] |
-//! | VRM | [`build_vrm_extensions_json`] |
+//! | VRM 1.0 | [`vrm_export::VrmExporter`] |
 //! | 3MF | [`export_3mf`] |
 //! | Streaming | [`stream_mesh_positions`] |
+//!
+//! # VRM 1.0
+//!
+//! [`vrm_export::VrmExporter`] is the authoritative VRM 1.0 exporter: it
+//! assembles a complete, self-contained `.vrm` GLB binary (humanoid bone
+//! mapping, avatar metadata, and optional blend-shape/expression data,
+//! packaged under the `VRMC_vrm` glTF extension). The lower-level
+//! [`build_vrm_extensions_json`] helper only renders the `VRMC_vrm`
+//! extension JSON fragment for callers assembling their own glTF document
+//! and is not a full export path.
 //!
 //! # Quick start
 //!

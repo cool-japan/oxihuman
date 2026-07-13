@@ -69,8 +69,13 @@ fn write_ply_header(
 /// Export a mesh as a PLY file.
 /// Includes vertex positions, normals, and UV texture coordinates.
 /// Includes face connectivity.
+///
+/// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+/// [`crate::export_gate::ensure_export_allowed`].
 #[allow(dead_code)]
 pub fn export_ply(mesh: &MeshBuffers, path: &Path, format: PlyFormat) -> anyhow::Result<()> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     let vertex_count = mesh.positions.len();
     let face_count = mesh.indices.len() / 3;
     let has_normals = !mesh.normals.is_empty();
@@ -149,6 +154,12 @@ pub fn export_ply(mesh: &MeshBuffers, path: &Path, format: PlyFormat) -> anyhow:
 /// - `positions`: Nx3 positions
 /// - `normals`: optional Nx3 normals
 /// - `colors`: optional Nx3 RGB colors (u8)
+///
+/// This is a raw-slice encoder: it accepts bare position/normal/color arrays
+/// with no [`oxihuman_mesh::MeshBuffers`] / `has_suit` provenance, so it
+/// cannot call the export gate (see `crate::export_gate` module docs).
+/// [`export_mesh_as_point_cloud`] is the gated, human-facing wrapper — human
+/// meshes must go through that entry point instead of calling this directly.
 #[allow(dead_code)]
 pub fn export_point_cloud_ply(
     positions: &[[f32; 3]],
@@ -226,12 +237,19 @@ pub fn export_point_cloud_ply(
 }
 
 /// Export mesh vertex positions as a point cloud PLY (no faces).
+///
+/// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+/// [`crate::export_gate::ensure_export_allowed`]. A point cloud sampled from a
+/// human mesh is still human geometry, so it goes through the same gate as
+/// the full-mesh path even though it discards face connectivity.
 #[allow(dead_code)]
 pub fn export_mesh_as_point_cloud(
     mesh: &MeshBuffers,
     path: &Path,
     format: PlyFormat,
 ) -> anyhow::Result<()> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     let normals = if mesh.normals.is_empty() {
         None
     } else {
@@ -252,6 +270,16 @@ mod tests {
             normals: vec![[0.0, 0.0, 1.0]; 3],
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
             indices: vec![0, 1, 2],
+            has_suit: true,
+        })
+    }
+
+    fn unsuited_triangle_mesh() -> MeshBuffers {
+        MeshBuffers::from_morph(MB {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
+            indices: vec![0, 1, 2],
             has_suit: false,
         })
     }
@@ -267,7 +295,7 @@ mod tests {
             normals: vec![[0.0, 0.0, 1.0]; 4],
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
             indices: vec![0, 1, 2, 0, 2, 3],
-            has_suit: false,
+            has_suit: true,
         })
     }
 
@@ -449,5 +477,29 @@ mod tests {
 
         std::fs::remove_file(&ascii_path).ok();
         std::fs::remove_file(&binary_path).ok();
+    }
+
+    // ── export gate ───────────────────────────────────────────────────────
+
+    #[test]
+    fn export_ply_refuses_unsuited_mesh() {
+        let mesh = unsuited_triangle_mesh();
+        let path = std::path::PathBuf::from("/tmp/test_ply_refuse_export_ply.ply");
+        assert!(
+            export_ply(&mesh, &path, PlyFormat::Ascii).is_err(),
+            "export_ply must refuse a mesh with has_suit = false"
+        );
+        assert!(!path.exists(), "no file should be written when refused");
+    }
+
+    #[test]
+    fn export_mesh_as_point_cloud_refuses_unsuited_mesh() {
+        let mesh = unsuited_triangle_mesh();
+        let path = std::path::PathBuf::from("/tmp/test_ply_refuse_point_cloud.ply");
+        assert!(
+            export_mesh_as_point_cloud(&mesh, &path, PlyFormat::Ascii).is_err(),
+            "export_mesh_as_point_cloud must refuse a mesh with has_suit = false"
+        );
+        assert!(!path.exists(), "no file should be written when refused");
     }
 }

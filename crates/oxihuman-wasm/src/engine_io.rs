@@ -4,12 +4,9 @@
 //! JSON import/export, measurements, physics, scene, and render methods for `WasmEngine`.
 
 use anyhow::Result;
-use oxihuman_mesh::mesh::MeshBuffers;
-use oxihuman_mesh::normals::compute_normals;
-use oxihuman_mesh::suit::apply_suit_flag;
 use oxihuman_morph::params::ParamState;
 
-use crate::engine_core::WasmEngine;
+use crate::engine_core::{WasmEngine, MODEL_UNIT_CM};
 
 impl WasmEngine {
     /// Serialize the current `ParamState` to a JSON string.
@@ -23,46 +20,63 @@ impl WasmEngine {
     /// Parse a JSON string into a `ParamState` and apply it to the engine.
     pub fn import_params_json(&mut self, json: &str) -> Result<()> {
         let p: ParamState = serde_json::from_str(json)?;
-        self.engine.set_params(p.clone());
-        self.params = p;
-        self.last_mesh = None;
+        self.commit_params(p);
         Ok(())
     }
 
     /// Build the morphed mesh, compute body measurements, and return them as a JSON string.
     ///
+    /// All linear values are in **centimetres** (model units are decimetres;
+    /// see [`MODEL_UNIT_CM`]) — consistent with `get_measurements()`. A
+    /// `"units":"cm"` field is included so consumers can verify.
+    ///
+    /// Values come from the precise cross-section measurer
+    /// ([`oxihuman_morph::measurements::CrossSectionMeasurer`]): `height`,
+    /// `chest`, `waist`, `hip` are tape circumferences and `weight_kg` is a
+    /// mesh-volume mass. The legacy bounding-box fields (`max_width`,
+    /// `max_depth`, `shoulder_width`) are retained for backward compatibility.
+    ///
     /// Returns `"{}"` if the mesh is empty or measurements cannot be computed.
     pub fn get_measurements_json(&mut self) -> String {
         use oxihuman_mesh::measurements::compute_measurements;
-        let morph_buf = self.engine.build_mesh();
-        let mut mesh = MeshBuffers::from_morph(morph_buf);
-        compute_normals(&mut mesh);
-        apply_suit_flag(&mut mesh);
 
-        let Some(m) = compute_measurements(&mesh) else {
+        let Some(s) = self.tailoring_summary_cm() else {
             return "{}".to_string();
         };
+        // Legacy bounding-box extents (still reported for compatibility).
+        let mesh = self.build_mesh_prepared();
+        let (max_width, max_depth, shoulder_width) = compute_measurements(&mesh)
+            .map(|m| {
+                (
+                    (m.max_width * MODEL_UNIT_CM) as f64,
+                    (m.max_depth * MODEL_UNIT_CM) as f64,
+                    (m.shoulder_width * MODEL_UNIT_CM) as f64,
+                )
+            })
+            .unwrap_or((0.0, 0.0, 0.0));
 
-        // Hand-written JSON to avoid adding extra serde derives on BodyMeasurements.
         format!(
             concat!(
                 "{{",
-                "\"total_height\":{},",
-                "\"max_width\":{},",
-                "\"max_depth\":{},",
-                "\"torso_height\":{},",
-                "\"shoulder_width\":{},",
-                "\"waist_width\":{},",
-                "\"hip_width\":{}",
+                "\"units\":\"cm\",",
+                "\"total_height\":{:.2},",
+                "\"chest\":{:.2},",
+                "\"waist\":{:.2},",
+                "\"hip\":{:.2},",
+                "\"weight_kg\":{:.2},",
+                "\"max_width\":{:.2},",
+                "\"max_depth\":{:.2},",
+                "\"shoulder_width\":{:.2}",
                 "}}"
             ),
-            m.total_height,
-            m.max_width,
-            m.max_depth,
-            m.torso_height,
-            m.shoulder_width,
-            m.waist_width,
-            m.hip_width,
+            s.height_cm,
+            s.chest_cm,
+            s.waist_cm,
+            s.hip_cm,
+            s.weight_kg,
+            max_width,
+            max_depth,
+            shoulder_width,
         )
     }
 
@@ -72,11 +86,7 @@ impl WasmEngine {
     pub fn get_physics_proxies_json(&mut self) -> String {
         use oxihuman_physics::generate_proxies;
 
-        let morph_buf = self.engine.build_mesh();
-        let mut mesh = MeshBuffers::from_morph(morph_buf);
-        compute_normals(&mut mesh);
-        apply_suit_flag(&mut mesh);
-
+        let mesh = self.build_mesh_prepared();
         let proxies = generate_proxies(&mesh).unwrap_or_default();
 
         // Serialise capsules
@@ -176,10 +186,7 @@ impl WasmEngine {
         use oxihuman_morph::presets::BodyPreset;
 
         if let Some(preset) = BodyPreset::from_name(preset_name) {
-            let p = preset.params();
-            self.engine.set_params(p.clone());
-            self.params = p;
-            self.last_mesh = None; // invalidate cache
+            self.commit_params(preset.params());
         }
     }
 
@@ -193,12 +200,7 @@ impl WasmEngine {
     pub fn get_capsule_chains_json(&mut self) -> String {
         use oxihuman_physics::{build_rig, generate_proxies, CapsuleChain};
 
-        let morph_buf = self.engine.build_mesh_incremental();
-        let mut mesh = MeshBuffers::from_morph(morph_buf);
-        compute_normals(&mut mesh);
-        apply_suit_flag(&mut mesh);
-
-        self.last_mesh = Some(mesh.clone());
+        let mesh = self.build_mesh_prepared();
 
         let Some(proxies) = generate_proxies(&mesh) else {
             return "[]".to_string();
@@ -269,10 +271,7 @@ impl WasmEngine {
     pub fn get_lod_scene_json(&mut self, lod_level: u8) -> String {
         use oxihuman_mesh::lod::{generate_lod, LodLevel};
 
-        let morph_buf = self.engine.build_mesh_incremental();
-        let mut mesh = MeshBuffers::from_morph(morph_buf);
-        compute_normals(&mut mesh);
-        apply_suit_flag(&mut mesh);
+        let mesh = self.build_mesh_prepared();
 
         let level = match lod_level {
             0 => LodLevel::FULL,
@@ -282,8 +281,6 @@ impl WasmEngine {
         let lod_mesh = generate_lod(&mesh, level);
         let vc = lod_mesh.positions.len() as u32;
         let ic = lod_mesh.indices.len() as u32;
-
-        self.last_mesh = Some(mesh);
 
         format!(
             r#"{{"params":{},"vertex_count":{},"index_count":{},"lod_level":{}}}"#,
@@ -303,12 +300,7 @@ impl WasmEngine {
     pub fn get_physics_rig_json(&mut self) -> String {
         use oxihuman_physics::{build_rig, generate_proxies};
 
-        let morph_buf = self.engine.build_mesh_incremental();
-        let mut mesh = MeshBuffers::from_morph(morph_buf);
-        compute_normals(&mut mesh);
-        apply_suit_flag(&mut mesh);
-
-        self.last_mesh = Some(mesh.clone());
+        let mesh = self.build_mesh_prepared();
 
         let Some(proxies) = generate_proxies(&mesh) else {
             return r#"{"joints":[]}"#.to_string();
@@ -343,12 +335,7 @@ impl WasmEngine {
     /// (i.e. `last_mesh` is `Some`). Returns `"[]"` when no mesh is available.
     pub fn get_curvature_map(&mut self) -> String {
         if self.last_mesh.is_none() {
-            use oxihuman_mesh::mesh::MeshBuffers;
-            use oxihuman_mesh::normals::compute_normals;
-            let morph_buf = self.engine.build_mesh();
-            let mut m = MeshBuffers::from_morph(morph_buf);
-            compute_normals(&mut m);
-            self.last_mesh = Some(m);
+            let _ = self.build_mesh_prepared();
         }
         let mesh = match &self.last_mesh {
             Some(m) => m,

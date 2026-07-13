@@ -8,8 +8,14 @@ use oxihuman_mesh::mesh::MeshBuffers;
 use std::fmt::Write as FmtWrite;
 use std::path::Path;
 
+use crate::export_gate::ensure_export_allowed;
+
 /// Export a MeshBuffers to a Wavefront OBJ text file.
-/// Does NOT require `has_suit` (OBJ is for debugging/tools, not final export).
+///
+/// Returns Err if the mesh has no suit applied (safety check via
+/// [`crate::export_gate::ensure_export_allowed`]).  The historical bypass
+/// ("OBJ is for debugging/tools") has been removed: every human-facing
+/// exporter refuses an unsuited mesh.
 pub fn export_obj(mesh: &MeshBuffers, path: &Path) -> Result<()> {
     let content = mesh_to_obj_string(mesh)?;
     std::fs::write(path, content)?;
@@ -17,7 +23,11 @@ pub fn export_obj(mesh: &MeshBuffers, path: &Path) -> Result<()> {
 }
 
 /// Convert a MeshBuffers to OBJ format string.
+///
+/// Returns Err if the mesh has no suit applied (safety check).
 pub fn mesh_to_obj_string(mesh: &MeshBuffers) -> Result<String> {
+    ensure_export_allowed(mesh)?;
+
     let mut out = String::new();
     writeln!(out, "# OxiHuman exported mesh")?;
     writeln!(out, "# Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)")?;
@@ -72,8 +82,14 @@ mod tests {
             normals: vec![[0.0, 0.0, 1.0]; 3],
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
             indices: vec![0, 1, 2],
-            has_suit: false,
+            has_suit: true,
         })
+    }
+
+    fn unsuited_mesh() -> MeshBuffers {
+        let mut m = triangle_mesh();
+        m.has_suit = false;
+        m
     }
 
     #[test]
@@ -97,7 +113,7 @@ mod tests {
     #[test]
     fn export_obj_creates_file() {
         let m = triangle_mesh();
-        let path = std::path::PathBuf::from("/tmp/test_oxihuman.obj");
+        let path = std::env::temp_dir().join("test_oxihuman_gated.obj");
         export_obj(&m, &path).expect("should succeed");
         assert!(path.exists());
         let content = std::fs::read_to_string(&path).expect("should succeed");
@@ -111,5 +127,19 @@ mod tests {
         let s = mesh_to_obj_string(&m).expect("should succeed");
         // OBJ is 1-indexed: first face should reference 1, not 0
         assert!(s.contains("f 1/1/1 2/2/2 3/3/3"));
+    }
+
+    #[test]
+    fn obj_string_refuses_unsuited_mesh() {
+        let m = unsuited_mesh();
+        assert!(mesh_to_obj_string(&m).is_err(), "must refuse has_suit=false");
+    }
+
+    #[test]
+    fn export_obj_refuses_unsuited_mesh() {
+        let m = unsuited_mesh();
+        let path = std::env::temp_dir().join("test_oxihuman_unsuited.obj");
+        assert!(export_obj(&m, &path).is_err(), "must refuse has_suit=false");
+        assert!(!path.exists(), "no file may be written for unsuited mesh");
     }
 }

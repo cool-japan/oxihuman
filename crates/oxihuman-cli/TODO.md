@@ -1,10 +1,10 @@
 # oxihuman-cli -- TODO
 
-> Version: 0.2.0 | Updated: 2026-06-19
+> Version: 0.2.1 | Updated: 2026-07-13
 
 ## Status: Stable
 
-All core features implemented. 0 stubs. 134 passing tests. 34 subcommands across 4.9k SLoC.
+All core features implemented. 0 stubs. 193 passing tests. 36 subcommands across 4.8k SLoC.
 
 ## Completed
 
@@ -43,6 +43,7 @@ All core features implemented. 0 stubs. 134 passing tests. 34 subcommands across
 - [x] pack-dist-manifest -- distribution manifest generation
 - [x] pack-verify-dist -- distribution verification
 - [x] pack-wizard -- interactive pack creation wizard
+- [x] pack-core -- curate MakeHuman CC0 assets into an OHPK v1 core/full pack (incl. raw-to-packed vertex index remap, P0 fix)
 - [x] Help system (help module)
 - [x] Shared utilities (utils module)
 

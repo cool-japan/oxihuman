@@ -14,20 +14,31 @@
 
 // ── Configuration ─────────────────────────────────────────────────────────────
 
-const CACHE_NAME    = 'oxihuman-demo-v1';
+const CACHE_NAME    = 'oxihuman-bodylab-v2';
 const MAX_CACHE_MB  = 50;
 const MAX_CACHE_BYTES = MAX_CACHE_MB * 1024 * 1024;
 
 /**
  * Assets to precache during the install phase.
- * Adjust pkg/ paths to match your wasm-pack output directory.
+ *
+ * This list mirrors the real file set the page references (verified against the
+ * output of scripts/build_demo.sh: the vendored three.js, the ES modules, and
+ * the pkg/ + pack/ build artefacts). Keep it in sync when files are added.
  */
 const PRECACHE_ASSETS = [
+  './',
   './index.html',
+  './styles.css',
   './app.js',
   './sw.js',
+  './src/viewer.js',
+  './src/controls.js',
+  './src/badges.js',
+  './vendor/three.module.min.js',
+  './vendor/OrbitControls.js',
   './pkg/oxihuman_wasm.js',
   './pkg/oxihuman_wasm_bg.wasm',
+  './pack/oxihuman-core-v1.ohpk',
 ];
 
 /**

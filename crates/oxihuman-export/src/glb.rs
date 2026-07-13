@@ -4,10 +4,10 @@
 use anyhow::{bail, Result};
 use bytemuck::cast_slice;
 use oxihuman_mesh::mesh::MeshBuffers;
-use oxihuman_mesh::suit::ensure_suit_mesh;
 use serde_json::json;
-use std::io::Write;
 use std::path::Path;
+
+use crate::export_gate::ensure_export_allowed;
 
 // GLB magic constants
 const GLB_MAGIC: u32 = 0x46546C67; // "glTF"
@@ -15,12 +15,46 @@ const GLB_VERSION: u32 = 2;
 const CHUNK_JSON: u32 = 0x4E4F534A; // "JSON"
 const CHUNK_BIN: u32 = 0x004E4942; // "BIN\0"
 
-/// Export a MeshBuffers to a GLB 2.0 file.
+/// Assemble a complete GLB container from padded JSON and BIN chunk payloads.
+fn assemble_glb(json_bytes: &[u8], bin_data: &[u8]) -> Vec<u8> {
+    let json_chunk_len = json_bytes.len() as u32;
+    let bin_chunk_len = bin_data.len() as u32;
+    let total_len = 12 + 8 + json_chunk_len + 8 + bin_chunk_len;
+
+    let mut out = Vec::with_capacity(total_len as usize);
+    // GLB header (12 bytes)
+    out.extend_from_slice(&GLB_MAGIC.to_le_bytes());
+    out.extend_from_slice(&GLB_VERSION.to_le_bytes());
+    out.extend_from_slice(&total_len.to_le_bytes());
+    // JSON chunk
+    out.extend_from_slice(&json_chunk_len.to_le_bytes());
+    out.extend_from_slice(&CHUNK_JSON.to_le_bytes());
+    out.extend_from_slice(json_bytes);
+    // BIN chunk
+    out.extend_from_slice(&bin_chunk_len.to_le_bytes());
+    out.extend_from_slice(&CHUNK_BIN.to_le_bytes());
+    out.extend_from_slice(bin_data);
+    out
+}
+
+/// Pad a JSON byte buffer to a 4-byte boundary with spaces (GLB requirement).
+fn pad_json(mut json_bytes: Vec<u8>) -> Vec<u8> {
+    while !json_bytes.len().is_multiple_of(4) {
+        json_bytes.push(b' ');
+    }
+    json_bytes
+}
+
+/// Build a GLB 2.0 byte buffer from a mesh, entirely in memory.
+///
+/// This is the filesystem-free core of [`export_glb`] and is safe to call on
+/// `wasm32-unknown-unknown` (no `std::fs`, no temp files).
+///
 /// Returns Err if the mesh has no suit applied (safety check).
 /// If `mesh.colors` is Some, a COLOR_0 accessor is included in the output.
 /// If `mesh.tangents.len() == mesh.positions.len()`, a TANGENT accessor is included.
-pub fn export_glb(mesh: &MeshBuffers, path: &Path) -> Result<()> {
-    ensure_suit_mesh(mesh)?;
+pub fn build_glb_bytes(mesh: &MeshBuffers) -> Result<Vec<u8>> {
+    ensure_export_allowed(mesh)?;
 
     // ── 1. Build BIN chunk data ──────────────────────────────────────────────
     // Layout: [positions f32*3*n] [normals f32*3*n] [uvs f32*2*n] [indices u32*m]
@@ -163,34 +197,18 @@ pub fn export_glb(mesh: &MeshBuffers, path: &Path) -> Result<()> {
         "buffers": [{ "byteLength": total_bin }]
     });
 
-    let mut json_bytes = serde_json::to_vec(&gltf)?;
-    // Pad JSON to 4-byte boundary with spaces
-    while json_bytes.len() % 4 != 0 {
-        json_bytes.push(b' ');
-    }
+    let json_bytes = pad_json(serde_json::to_vec(&gltf)?);
 
-    // ── 3. Write GLB ─────────────────────────────────────────────────────────
-    let json_chunk_len = json_bytes.len() as u32;
-    let bin_chunk_len = bin_data.len() as u32;
-    let total_len = 12 + 8 + json_chunk_len + 8 + bin_chunk_len;
+    // ── 3. Assemble GLB bytes ────────────────────────────────────────────────
+    Ok(assemble_glb(&json_bytes, &bin_data))
+}
 
-    let mut file = std::fs::File::create(path)?;
-
-    // GLB header (12 bytes)
-    file.write_all(&GLB_MAGIC.to_le_bytes())?;
-    file.write_all(&GLB_VERSION.to_le_bytes())?;
-    file.write_all(&total_len.to_le_bytes())?;
-
-    // JSON chunk
-    file.write_all(&json_chunk_len.to_le_bytes())?;
-    file.write_all(&CHUNK_JSON.to_le_bytes())?;
-    file.write_all(&json_bytes)?;
-
-    // BIN chunk
-    file.write_all(&bin_chunk_len.to_le_bytes())?;
-    file.write_all(&CHUNK_BIN.to_le_bytes())?;
-    file.write_all(&bin_data)?;
-
+/// Export a MeshBuffers to a GLB 2.0 file (thin file-writing wrapper around
+/// [`build_glb_bytes`]).
+/// Returns Err if the mesh has no suit applied (safety check).
+pub fn export_glb(mesh: &MeshBuffers, path: &Path) -> Result<()> {
+    let bytes = build_glb_bytes(mesh)?;
+    std::fs::write(path, bytes)?;
     Ok(())
 }
 
@@ -262,6 +280,45 @@ mod tests {
         let path = std::path::PathBuf::from("/tmp/test_unsuited.glb");
         let result = export_glb(&mesh, &path);
         assert!(result.is_err(), "should refuse unsuited mesh");
+    }
+
+    #[test]
+    fn build_glb_bytes_refuses_unsuited_mesh() {
+        let mesh = unsuited_mesh();
+        assert!(
+            build_glb_bytes(&mesh).is_err(),
+            "in-memory builder must refuse unsuited mesh"
+        );
+    }
+
+    #[test]
+    fn build_glb_bytes_valid_container() {
+        let mesh = suited_mesh();
+        let bytes = build_glb_bytes(&mesh).expect("build_glb_bytes failed");
+        assert!(bytes.len() >= 12);
+        let magic = u32::from_le_bytes(bytes[0..4].try_into().expect("magic"));
+        assert_eq!(magic, 0x46546C67u32);
+        let version = u32::from_le_bytes(bytes[4..8].try_into().expect("version"));
+        assert_eq!(version, 2);
+        let total = u32::from_le_bytes(bytes[8..12].try_into().expect("total")) as usize;
+        assert_eq!(total, bytes.len(), "declared length must match buffer size");
+        // JSON chunk parses
+        let json_len = u32::from_le_bytes(bytes[12..16].try_into().expect("jlen")) as usize;
+        let json_str = std::str::from_utf8(&bytes[20..20 + json_len])
+            .expect("utf8")
+            .trim_end_matches(' ');
+        let parsed: serde_json::Value = serde_json::from_str(json_str).expect("json");
+        assert_eq!(parsed["asset"]["version"], "2.0");
+    }
+
+    #[test]
+    fn skeleton_bytes_refuse_unsuited_mesh() {
+        let mesh = unsuited_mesh();
+        let skeleton = oxihuman_mesh::skeleton::Skeleton::human_body();
+        assert!(
+            build_glb_with_skeleton_bytes(&mesh, &skeleton).is_err(),
+            "skinned GLB builder must refuse unsuited mesh"
+        );
     }
 
     #[test]
@@ -534,7 +591,7 @@ fn joint_world_transforms(skeleton: &Skeleton) -> Vec<[f32; 16]> {
     (0..n).map(|i| resolve(i, skeleton, &mut world)).collect()
 }
 
-/// Export a mesh with a skeleton as a skinned GLB 2.0 file.
+/// Build a skinned GLB 2.0 byte buffer from a mesh and skeleton, in memory.
 ///
 /// Produces a fully skinned GLB: in addition to the joint node hierarchy and
 /// `skins` array, it emits per-vertex `JOINTS_0` (u16x4) and `WEIGHTS_0`
@@ -543,12 +600,15 @@ fn joint_world_transforms(skeleton: &Skeleton) -> Vec<[f32; 16]> {
 /// normalized to sum to 1), plus an `inverseBindMatrices` accessor holding one
 /// inverse-bind matrix per joint (derived from the forward-kinematics world
 /// bind transforms).
-pub fn export_glb_with_skeleton(
+///
+/// Returns Err if the mesh has no suit applied (safety check).
+pub fn build_glb_with_skeleton_bytes(
     mesh: &MeshBuffers,
     skeleton: &Skeleton,
-    path: &Path,
-) -> anyhow::Result<()> {
-    // ── 1. Build BIN chunk (same layout as export_glb, no suit check) ────────
+) -> anyhow::Result<Vec<u8>> {
+    ensure_export_allowed(mesh)?;
+
+    // ── 1. Build BIN chunk (same layout as build_glb_bytes) ─────────────────
     let n_verts = mesh.positions.len();
     let n_idx = mesh.indices.len();
 
@@ -744,27 +804,23 @@ pub fn export_glb_with_skeleton(
         "buffers": [{ "byteLength": total_bin }]
     });
 
-    let mut json_bytes = serde_json::to_vec(&gltf)?;
-    while json_bytes.len() % 4 != 0 {
-        json_bytes.push(b' ');
-    }
+    let json_bytes = pad_json(serde_json::to_vec(&gltf)?);
 
-    // ── 4. Write GLB ─────────────────────────────────────────────────────────
-    let json_chunk_len = json_bytes.len() as u32;
-    let bin_chunk_len = bin_data.len() as u32;
-    let total_len = 12 + 8 + json_chunk_len + 8 + bin_chunk_len;
+    // ── 4. Assemble GLB bytes ────────────────────────────────────────────────
+    Ok(assemble_glb(&json_bytes, &bin_data))
+}
 
-    let mut file = std::fs::File::create(path)?;
-    file.write_all(&GLB_MAGIC.to_le_bytes())?;
-    file.write_all(&GLB_VERSION.to_le_bytes())?;
-    file.write_all(&total_len.to_le_bytes())?;
-    file.write_all(&json_chunk_len.to_le_bytes())?;
-    file.write_all(&CHUNK_JSON.to_le_bytes())?;
-    file.write_all(&json_bytes)?;
-    file.write_all(&bin_chunk_len.to_le_bytes())?;
-    file.write_all(&CHUNK_BIN.to_le_bytes())?;
-    file.write_all(&bin_data)?;
-
+/// Export a mesh with a skeleton as a skinned GLB 2.0 file (thin file-writing
+/// wrapper around [`build_glb_with_skeleton_bytes`]).
+///
+/// Returns Err if the mesh has no suit applied (safety check).
+pub fn export_glb_with_skeleton(
+    mesh: &MeshBuffers,
+    skeleton: &Skeleton,
+    path: &Path,
+) -> anyhow::Result<()> {
+    let bytes = build_glb_with_skeleton_bytes(mesh, skeleton)?;
+    std::fs::write(path, bytes)?;
     Ok(())
 }
 
@@ -916,13 +972,15 @@ use crate::material::PbrMaterial;
 /// Export a MeshBuffers to a GLB 2.0 file with an explicit PBR material.
 /// The material is embedded in the `materials` array and referenced from the
 /// mesh primitive.
+///
+/// Returns Err if the mesh has no suit applied (safety check).
 #[allow(dead_code)]
 pub fn export_glb_with_material(
     mesh: &MeshBuffers,
     material: &PbrMaterial,
     path: &Path,
 ) -> anyhow::Result<()> {
-    ensure_suit_mesh(mesh)?;
+    ensure_export_allowed(mesh)?;
 
     // ── 1. Build BIN chunk ───────────────────────────────────────────────────
     let n_verts = mesh.positions.len();
@@ -986,26 +1044,10 @@ pub fn export_glb_with_material(
         "buffers": [{ "byteLength": total_bin }]
     });
 
-    let mut json_bytes = serde_json::to_vec(&gltf)?;
-    while json_bytes.len() % 4 != 0 {
-        json_bytes.push(b' ');
-    }
+    let json_bytes = pad_json(serde_json::to_vec(&gltf)?);
 
-    // ── 3. Write GLB ─────────────────────────────────────────────────────────
-    let json_chunk_len = json_bytes.len() as u32;
-    let bin_chunk_len = bin_data.len() as u32;
-    let total_len = 12 + 8 + json_chunk_len + 8 + bin_chunk_len;
-
-    let mut file = std::fs::File::create(path)?;
-    file.write_all(&GLB_MAGIC.to_le_bytes())?;
-    file.write_all(&GLB_VERSION.to_le_bytes())?;
-    file.write_all(&total_len.to_le_bytes())?;
-    file.write_all(&json_chunk_len.to_le_bytes())?;
-    file.write_all(&CHUNK_JSON.to_le_bytes())?;
-    file.write_all(&json_bytes)?;
-    file.write_all(&bin_chunk_len.to_le_bytes())?;
-    file.write_all(&CHUNK_BIN.to_le_bytes())?;
-    file.write_all(&bin_data)?;
+    // ── 3. Assemble and write GLB ────────────────────────────────────────────
+    std::fs::write(path, assemble_glb(&json_bytes, &bin_data))?;
 
     Ok(())
 }
@@ -1078,16 +1120,19 @@ mod material_glb_tests {
 // Metadata-aware GLB export
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Export a GLB with OxiHuman metadata embedded in `asset.extras`.
+/// Build a GLB byte buffer with OxiHuman metadata embedded in `asset.extras`,
+/// entirely in memory (filesystem-free core of [`export_glb_with_meta`]).
 ///
-/// Calls the same BIN/JSON construction as [`export_glb`] and then patches
-/// `gltf_json["asset"]["extras"]` with the serialised [`crate::metadata::OxiHumanMeta`].
-pub fn export_glb_with_meta(
+/// Calls the same BIN/JSON construction as [`build_glb_bytes`] and then
+/// patches `gltf_json["asset"]["extras"]` with the serialised
+/// [`crate::metadata::OxiHumanMeta`].
+///
+/// Returns Err if the mesh has no suit applied (safety check).
+pub fn build_glb_with_meta_bytes(
     mesh: &MeshBuffers,
     meta: &crate::metadata::OxiHumanMeta,
-    path: &Path,
-) -> anyhow::Result<()> {
-    ensure_suit_mesh(mesh)?;
+) -> anyhow::Result<Vec<u8>> {
+    ensure_export_allowed(mesh)?;
 
     // ── 1. Build BIN chunk ───────────────────────────────────────────────────
     let n_verts = mesh.positions.len();
@@ -1149,27 +1194,21 @@ pub fn export_glb_with_meta(
 
     gltf_json["asset"]["extras"] = meta.to_json();
 
-    let mut json_bytes = serde_json::to_vec(&gltf_json)?;
-    while json_bytes.len() % 4 != 0 {
-        json_bytes.push(b' ');
-    }
+    let json_bytes = pad_json(serde_json::to_vec(&gltf_json)?);
 
-    // ── 3. Write GLB ─────────────────────────────────────────────────────────
-    let json_chunk_len = json_bytes.len() as u32;
-    let bin_chunk_len = bin_data.len() as u32;
-    let total_len = 12 + 8 + json_chunk_len + 8 + bin_chunk_len;
+    // ── 3. Assemble GLB bytes ────────────────────────────────────────────────
+    Ok(assemble_glb(&json_bytes, &bin_data))
+}
 
-    let mut file = std::fs::File::create(path)?;
-    file.write_all(&GLB_MAGIC.to_le_bytes())?;
-    file.write_all(&GLB_VERSION.to_le_bytes())?;
-    file.write_all(&total_len.to_le_bytes())?;
-    file.write_all(&json_chunk_len.to_le_bytes())?;
-    file.write_all(&CHUNK_JSON.to_le_bytes())?;
-    file.write_all(&json_bytes)?;
-    file.write_all(&bin_chunk_len.to_le_bytes())?;
-    file.write_all(&CHUNK_BIN.to_le_bytes())?;
-    file.write_all(&bin_data)?;
-
+/// Export a GLB with OxiHuman metadata embedded in `asset.extras` (thin
+/// file-writing wrapper around [`build_glb_with_meta_bytes`]).
+pub fn export_glb_with_meta(
+    mesh: &MeshBuffers,
+    meta: &crate::metadata::OxiHumanMeta,
+    path: &Path,
+) -> anyhow::Result<()> {
+    let bytes = build_glb_with_meta_bytes(mesh, meta)?;
+    std::fs::write(path, bytes)?;
     Ok(())
 }
 

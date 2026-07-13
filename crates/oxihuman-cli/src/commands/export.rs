@@ -3,13 +3,13 @@
 
 //! Export subcommands: stl, collada, gltf-sep, svg, lod-export, variant-pack, report.
 
-use anyhow::{bail, Context, Result};
+use anyhow::{bail, ensure, Context, Result};
 use std::path::PathBuf;
 
 use oxihuman_core::policy::{Policy, PolicyProfile};
 use oxihuman_export::collada::{export_collada, ColladaExportOptions};
 use oxihuman_export::gltf_sep::export_gltf_sep;
-use oxihuman_export::lod_export::export_default_lod_pack;
+use oxihuman_export::lod_export::{export_default_lod_pack, export_lod_pack, LodLevel};
 use oxihuman_export::params_json::import_params;
 use oxihuman_export::report_html::{
     export_html_report, mesh_report_from_buffers, PipelineReportData,
@@ -341,7 +341,7 @@ pub fn cmd_lod_export(args: &[String]) -> Result<()> {
     let mut targets: Option<PathBuf> = None;
     let mut params_src: Option<String> = None;
     let mut preset_name: Option<String> = None;
-    let mut _levels: usize = 3;
+    let mut levels: usize = 3;
 
     let mut i = 0;
     while i < args.len() {
@@ -368,7 +368,7 @@ pub fn cmd_lod_export(args: &[String]) -> Result<()> {
             }
             "--levels" => {
                 i += 1;
-                _levels = args[i].parse().context("--levels must be an integer")?;
+                levels = args[i].parse().context("--levels must be an integer")?;
             }
             other => bail!("unknown option: {}", other),
         }
@@ -377,6 +377,7 @@ pub fn cmd_lod_export(args: &[String]) -> Result<()> {
 
     let base = base.context("--base is required for lod-export")?;
     let output_dir = output_dir.context("--output-dir is required for lod-export")?;
+    ensure!(levels >= 1, "--levels must be at least 1, got {}", levels);
 
     if !base.exists() {
         bail!("base mesh not found: {}", base.display());
@@ -400,8 +401,23 @@ pub fn cmd_lod_export(args: &[String]) -> Result<()> {
         .and_then(|s| s.to_str())
         .unwrap_or_default();
 
-    let paths = export_default_lod_pack(&mesh, stem, &output_dir)
-        .with_context(|| format!("writing LOD pack to {}", output_dir.display()))?;
+    // Build a geometric ratio ladder: 1.0, 0.5, 0.25, ... down to a floor of
+    // 2% so decimation never collapses the mesh to nothing. `--levels 3`
+    // (the default) reproduces `export_default_lod_pack`'s exact levels.
+    let paths = if levels == 3 {
+        export_default_lod_pack(&mesh, stem, &output_dir)
+            .with_context(|| format!("writing LOD pack to {}", output_dir.display()))?
+    } else {
+        const MIN_RATIO: f32 = 0.02;
+        let lod_levels: Vec<LodLevel> = (0..levels)
+            .map(|i| {
+                let ratio = (1.0f32 / 2f32.powi(i as i32)).max(MIN_RATIO);
+                LodLevel::new(ratio, format!("_lod{}", i))
+            })
+            .collect();
+        export_lod_pack(&mesh, stem, &output_dir, &lod_levels)
+            .with_context(|| format!("writing LOD pack to {}", output_dir.display()))?
+    };
 
     println!(
         "Written LOD pack: {} levels → {}",

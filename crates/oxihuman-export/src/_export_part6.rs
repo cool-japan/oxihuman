@@ -313,12 +313,6 @@ pub use mixamo_export::{
     new_mixamo_bone, MixamoBone,
 };
 
-pub mod smpl_export;
-pub use smpl_export::{
-    new_smpl_params, smpl_gender_name, smpl_param_count, smpl_set_beta, smpl_set_pose,
-    smpl_to_json, SmplParams,
-};
-
 pub mod mediapipe_export;
 pub use mediapipe_export::{
     new_mediapipe_landmark, new_mediapipe_pose, pose_is_complete, pose_landmark_name,
@@ -358,12 +352,6 @@ pub mod panoptic_export;
 pub use panoptic_export::{
     new_panoptic_body, panoptic_is_body25, panoptic_keypoint_count, panoptic_push_keypoint,
     panoptic_to_json, PanopticBody,
-};
-
-pub mod smplx_export;
-pub use smplx_export::{
-    new_smplx_params, smplx_num_betas, smplx_num_expression, smplx_set_expression, smplx_to_json,
-    SmplxParams,
 };
 
 pub mod flame_export;

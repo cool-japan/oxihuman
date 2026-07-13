@@ -183,7 +183,8 @@ mod core_morph_mesh_export {
     fn pipeline_obj_export() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let tmp = std::env::temp_dir().join("oxihuman_integ_test.obj");
         oxihuman_export::export_obj(&mesh, &tmp)?;
@@ -201,7 +202,8 @@ mod core_morph_mesh_export {
     fn pipeline_stl_ascii_export() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let tmp = std::env::temp_dir().join("oxihuman_integ_test.stl");
         oxihuman_export::export_stl_ascii(&mesh, &tmp, "test_body")?;
@@ -221,7 +223,8 @@ mod core_morph_mesh_export {
     fn pipeline_stl_binary_export() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let tmp = std::env::temp_dir().join("oxihuman_integ_test_bin.stl");
         oxihuman_export::export_stl_binary(&mesh, &tmp)?;
@@ -239,7 +242,8 @@ mod core_morph_mesh_export {
     fn pipeline_stl_string_builder() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let stl_str = oxihuman_export::mesh_to_stl_ascii(&mesh, "integ_test")?;
         assert!(stl_str.contains("facet normal"));
@@ -264,7 +268,8 @@ mod core_morph_mesh_export {
     fn pipeline_glb_with_skeleton() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let skeleton = oxihuman_mesh::Skeleton {
             joints: vec![
@@ -509,7 +514,8 @@ mod morph_export_formats {
     fn export_usda_from_morph() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let tmp = std::env::temp_dir().join("oxihuman_integ_test.usda");
         let opts = oxihuman_export::UsdExportOptions::default();
@@ -541,10 +547,11 @@ mod morph_export_formats {
     fn export_3mf_from_morph() {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let opts = oxihuman_export::ThreeMfOptions::default();
-        let result = oxihuman_export::export_3mf(&mesh, &opts);
+        let result = oxihuman_export::export_3mf(&mesh, &opts).expect("export_3mf should succeed");
         assert!(
             !result.zip_bytes.is_empty(),
             "3MF zip archive should not be empty"
@@ -561,7 +568,8 @@ mod morph_export_formats {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
         let morph_buf = engine.build_mesh();
-        let mesh_buf = MeshBuffers::from_morph(morph_buf);
+        let mut mesh_buf = MeshBuffers::from_morph(morph_buf);
+        mesh_buf.has_suit = true; // export gate requires the suit layer
 
         let result = oxihuman_export::export_mesh_fbx_binary(&mesh_buf);
         assert!(result.is_ok(), "FBX binary export should succeed");
@@ -601,7 +609,8 @@ mod morph_export_formats {
     fn export_collada_from_morph() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let tmp = std::env::temp_dir().join("oxihuman_integ_test.dae");
         let opts = oxihuman_export::ColladaExportOptions::default();
@@ -620,7 +629,8 @@ mod morph_export_formats {
     fn export_x3d_from_morph() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let tmp = std::env::temp_dir().join("oxihuman_integ_test.x3d");
         let opts = oxihuman_export::X3dExportOptions::default();
@@ -637,7 +647,8 @@ mod morph_export_formats {
     fn export_ply_from_morph() -> anyhow::Result<()> {
         let obj = make_test_obj_mesh();
         let engine = HumanEngine::new(obj, test_policy());
-        let mesh = morph_to_mesh(engine.build_mesh());
+        let mut mesh = morph_to_mesh(engine.build_mesh());
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let tmp = std::env::temp_dir().join("oxihuman_integ_test.ply");
         oxihuman_export::export_ply(&mesh, &tmp, oxihuman_export::PlyFormat::Ascii)?;
@@ -789,7 +800,8 @@ mod cross_cutting {
     /// Full pipeline: morph -> mesh -> physics proxies -> export proxies JSON.
     #[test]
     fn full_pipeline_morph_physics_export() {
-        let mesh = make_body_like_mesh();
+        let mut mesh = make_body_like_mesh();
+        mesh.has_suit = true; // export gate requires the suit layer
 
         let proxies = oxihuman_physics::generate_proxies(&mesh).expect("should succeed");
         let json = oxihuman_physics::proxies_to_json(&proxies);

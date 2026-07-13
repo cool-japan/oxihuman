@@ -27,11 +27,10 @@ oxihuman-viewer.workspace = true
 oxihuman-physics.workspace = true
 serde.workspace           = true
 wasm-bindgen             = { workspace = true, optional = true }
-js-sys                   = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true, optional = true }
 
 [dev-dependencies]
-wasm-bindgen-test         = "0.3.75"
+wasm-bindgen-test         = "0.3.76"
 serde_json.workspace      = true
 criterion.workspace       = true
 oxihuman-test-utils = { path = "../oxihuman-test-utils" }
@@ -42,5 +41,8 @@ harness = false
 
 [features]
 default = []
-wasm    = ["dep:wasm-bindgen", "dep:js-sys"]
-bindgen = ["dep:wasm-bindgen", "dep:js-sys", "dep:console_error_panic_hook"]
+# Canonical browser feature: the full wasm-bindgen JS/TS API surface.
+# Build with: wasm-pack build --target web --no-default-features --features bindgen
+bindgen = ["dep:wasm-bindgen", "dep:console_error_panic_hook"]
+# Deprecated alias of `bindgen` (kept for pre-0.3 compatibility).
+wasm    = ["bindgen"]

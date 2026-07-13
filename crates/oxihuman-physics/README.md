@@ -2,11 +2,11 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Version:** 0.2.0 | **Status:** Stable | **Updated:** 2026-06-19
+**Version:** 0.2.1 | **Status:** Stable | **Updated:** 2026-07-13
 
 | Metric | Value |
 |--------|-------|
-| Passing tests | 5,217 |
+| Passing tests | 5,262 |
 | Public API items | 7,274 |
 | Source files | 864 `.rs` files |
 | Stub modules | 0 |
@@ -25,7 +25,7 @@ No feature flags are required. All modules are compiled unconditionally; stub mo
 
 ```toml
 [dependencies]
-oxihuman-physics = "0.2.0"
+oxihuman-physics = "0.2.1"
 ```
 
 ### Workspace dependencies
@@ -126,7 +126,7 @@ Categories covered:
 | `sensor_imu` | Inertial Measurement Unit simulation |
 | `sensor_force_plate` | Ground reaction force plate |
 | `sensor_emg` | Electromyography signal model |
-| `sensor_mocap` | Motion capture marker set |
+| `sensor_motion_capture` | Motion capture marker set |
 
 #### Actuators
 
@@ -168,7 +168,8 @@ Categories covered:
 | `chaos_pendulum` | Double pendulum chaos model |
 | `lorenz_system` | Lorenz attractor integration |
 | `reaction_diffusion` | Gray–Scott reaction-diffusion |
-| `cellular_automaton` | General cellular automaton engine |
+| `cellular_automaton_1d` | 1D elementary cellular automaton (Wolfram rules) |
+| `cellular_automata_phys` | Grid-based cellular automaton physics (sand/water/wall) |
 | `debris_system` | Explosion / debris particle spawning and lifecycle |
 
 ---

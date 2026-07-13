@@ -1,11 +1,11 @@
 # oxihuman-mesh -- TODO
 
-> Version: 0.2.0 | Updated: 2026-06-19
+> Version: 0.2.1 | Updated: 2026-07-13
 
 ## Status: Stable
 
-All core features implemented. 0 stubs. 5,715 passing tests (unit + proptest + doc).
-898 source files, ~230k lines.
+All core features implemented. 0 stubs. 5,774 passing tests (unit + proptest + doc).
+897 source files, ~233k lines.
 
 ## Completed
 
@@ -227,8 +227,8 @@ All core features implemented. 0 stubs. 5,715 passing tests (unit + proptest + d
 ### Reconstruction
 - [x] Marching cubes (with welding)
 - [x] Dual contouring (QEF-based)
-- [x] Power crust (stub/config)
-- [x] Poisson reconstruction (stub/config)
+- [x] Power crust (ball-pivoting approximation)
+- [x] Poisson reconstruction (screened Poisson: octree + SOR solve + marching cubes)
 
 ### Miscellaneous
 - [x] Vertex animation, morph animation, skinned animation, blend animation

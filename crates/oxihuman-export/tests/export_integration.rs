@@ -272,7 +272,7 @@ fn test_vrm_json_structure() {
 fn test_3mf_zip_structure() {
     let mesh = minimal_mesh();
     let opts = ThreeMfOptions::default();
-    let result = export_3mf(&mesh, &opts);
+    let result = export_3mf(&mesh, &opts).expect("export_3mf should succeed for a suited mesh");
 
     assert!(
         result.zip_bytes.len() >= 4,

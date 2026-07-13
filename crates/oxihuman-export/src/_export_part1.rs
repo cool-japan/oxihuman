@@ -1,6 +1,7 @@
 pub mod animation;
 pub mod auto_export;
 pub mod blend_shapes;
+pub mod export_gate;
 pub mod glb;
 pub mod gltf_sep;
 pub mod instancing;
@@ -26,7 +27,11 @@ pub use auto_export::{
     ExportFormat, ExportOptions,
 };
 pub use blend_shapes::{export_glb_blend_shapes, BlendShape};
-pub use glb::{export_glb, export_glb_with_meta, export_glb_with_skeleton};
+pub use export_gate::ensure_export_allowed;
+pub use glb::{
+    build_glb_bytes, build_glb_with_meta_bytes, build_glb_with_skeleton_bytes, export_glb,
+    export_glb_with_meta, export_glb_with_skeleton,
+};
 pub use gltf_sep::{export_gltf_sep, verify_gltf_sep};
 pub use instancing::{
     circle_instances, export_instanced_glb, grid_instances, row_instances, InstanceTransform,
@@ -142,8 +147,8 @@ pub use variant_pack::{
 };
 pub mod zip_pack;
 pub use zip_pack::{
-    crc32, pack_mesh_assets, read_zip_entry_names, validate_zip, write_zip, zip_bytes, ZipEntry,
-    ZipPackResult,
+    crc32, pack_mesh_assets, pack_mesh_assets_with_options, read_zip_entry_names, validate_zip,
+    write_zip, write_zip_with_options, zip_bytes, zip_bytes_with_options, ZipEntry, ZipPackResult,
 };
 pub mod mesh_quantize;
 pub use mesh_quantize::{
@@ -485,5 +490,14 @@ pub mod bend_deform_export;
 pub use bend_deform_export::{
     bend_angle_deg, bend_axis_length, bend_deform_to_json, bend_validate, default_bend_deform,
     set_bend_angle_deg, set_bend_axis, set_bend_limits, BendDeformExport,
+};
+
+// OHPK v1 core-pack container — single-file base-mesh + morph-target asset pack
+// written by the CLI and read (wasm32-safe, zero-copy) by the WASM runtime.
+pub mod core_pack;
+pub use core_pack::{
+    model_units_to_mm, CorePack, CorePackBuilder, CorePackFile, CorePackManifest,
+    CorePackProvenance, CorePackTarget, QuantizationReport, TargetErrorReport, MODEL_UNIT_MM,
+    OHPK_DEFLATE_LEVEL, OHPK_FLAG_DEFLATE, OHPK_MAGIC, OHPK_VERSION,
 };
 

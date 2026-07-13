@@ -45,12 +45,19 @@ pub fn default_lod_levels() -> Vec<LodLevel> {
 /// `base_name + level.suffix + ".glb"`.
 ///
 /// Returns the list of output file paths.
+///
+/// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+/// [`crate::export_gate::ensure_export_allowed`]. Each per-level
+/// [`export_glb`] call re-checks the (suit-preserving) decimated mesh, but
+/// this upfront check refuses before doing any decimation work.
 pub fn export_lod_pack(
     mesh: &MeshBuffers,
     base_name: &str,
     output_dir: &Path,
     levels: &[LodLevel],
 ) -> Result<Vec<PathBuf>> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     std::fs::create_dir_all(output_dir)?;
     let mut paths = Vec::with_capacity(levels.len());
 
@@ -114,12 +121,17 @@ impl LodPackStats {
 }
 
 /// Export a LOD pack and collect statistics for each level.
+///
+/// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+/// [`crate::export_gate::ensure_export_allowed`].
 pub fn export_lod_pack_with_stats(
     mesh: &MeshBuffers,
     base_name: &str,
     output_dir: &Path,
     levels: &[LodLevel],
 ) -> Result<LodPackStats> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     std::fs::create_dir_all(output_dir)?;
     let mut level_stats = Vec::with_capacity(levels.len());
 
@@ -190,6 +202,13 @@ mod tests {
         let p = PathBuf::from(format!("/tmp/test_lod_export_{}", name));
         std::fs::create_dir_all(&p).expect("should succeed");
         p
+    }
+
+    /// An unsuited variant of [`suited_grid_mesh`] for gate-refusal tests.
+    fn unsuited_grid_mesh() -> MeshBuffers {
+        let mut mesh = suited_grid_mesh();
+        mesh.has_suit = false;
+        mesh
     }
 
     // ── 1 ──────────────────────────────────────────────────────────────────
@@ -303,6 +322,35 @@ mod tests {
             "LOD0 size ({}) should be >= LOD2 size ({})",
             lod0_size,
             lod2_size
+        );
+    }
+
+    // ── export gate ───────────────────────────────────────────────────────
+
+    #[test]
+    fn export_lod_pack_refuses_unsuited_mesh() {
+        let mesh = unsuited_grid_mesh();
+        let dir = tmp_dir("refuse_pack");
+        let result = export_lod_pack(&mesh, "nude", &dir, &default_lod_levels());
+        assert!(
+            result.is_err(),
+            "export_lod_pack must refuse a mesh with has_suit = false"
+        );
+        assert!(
+            std::fs::read_dir(&dir).map(|mut d| d.next().is_none()).unwrap_or(true),
+            "no LOD files should be written when refused"
+        );
+    }
+
+    #[test]
+    fn export_lod_pack_with_stats_refuses_unsuited_mesh() {
+        let mesh = unsuited_grid_mesh();
+        let dir = tmp_dir("refuse_pack_stats");
+        let result =
+            export_lod_pack_with_stats(&mesh, "nude", &dir, &default_lod_levels());
+        assert!(
+            result.is_err(),
+            "export_lod_pack_with_stats must refuse a mesh with has_suit = false"
         );
     }
 }

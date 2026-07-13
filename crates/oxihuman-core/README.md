@@ -2,7 +2,7 @@
 
 Core infrastructure for the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 33,410 passing | **Version:** 0.2.0 | **Updated:** 2026-06-19
+**Status:** Stable | **Tests:** 5,571 passing | **Version:** 0.2.1 | **Updated:** 2026-07-13
 
 ---
 
@@ -18,10 +18,10 @@ The crate is purely declarative in its public API surface — no hidden global m
 
 ```toml
 [dependencies]
-oxihuman-core = "0.2.0"
+oxihuman-core = "0.2.1"
 ```
 
-No feature flags are required; all subsystems are included by default.
+All subsystems are included by default with no feature flags required, except the optional `net` feature (off by default), which enables a `tokio`-backed TCP networking module for streaming/collaboration use cases.
 
 ---
 
@@ -29,17 +29,17 @@ No feature flags are required; all subsystems are included by default.
 
 | Module | Description |
 |---|---|
-| `category` | Target categorization system — hierarchical tag assignment and lookup for morphing targets |
+| `category` | Target categorization — enum-based classification of morph targets (mirrors MakeHuman's directory layout), with string parsing and a content-safety check |
 | `integrity` | Data validation utilities — structural checks, checksum verification, invariant enforcement |
-| `manifest` | Asset manifest management — tracks asset lists, versions, and dependency declarations |
-| `pack_verify` | Pack verification — validates pack archives against embedded checksums and signatures |
+| `manifest` | Asset manifest management — versioned manifest of allowed targets, policy profile, and pack metadata |
+| `pack_verify` | Pack verification — validates pack archives against recorded per-file checksums |
 | `pack_sign` | Cryptographic signing — SHA-256-based pack signing and signature management |
 | `parser` | Parsing utilities — shared lexer/parser primitives used across config and asset formats |
 | `policy` | Policy management — runtime enforcement of data-access and generation policies |
 | `report` | Pipeline reporting — structured result and diagnostic reporting for build/export pipelines |
 | `target_index` | Target indexing and scanning — builds and queries a searchable index of morphing targets |
 | `plugin_registry` | Plugin lifecycle management — registration, enumeration, and teardown of plugins |
-| `plugin_api` | Plugin API surface — trait definitions and versioned interfaces consumed by plugins |
+| `plugin_api` | Plugin API surface — versioned plugin metadata, lifecycle state, and dependency-ordered activation |
 | `event_bus` | Event publishing/subscribing — synchronous in-process event bus with typed subscriptions |
 | `asset_hash` | Asset hashing — content-addressed hashing and identity comparison for binary assets |
 | `asset_cache` | Asset registry and LRU caching — in-memory cache with configurable eviction policy |
@@ -47,9 +47,9 @@ No feature flags are required; all subsystems are included by default.
 | `metrics` | Metrics collection — counters, gauges, and histograms for internal instrumentation |
 | `spatial_index` | Octree spatial indexing — 3-D point/region queries used by mesh and physics subsystems |
 | `command_bus` | Command execution with undo/redo — dispatches typed commands and maintains a revertible history |
-| `task_graph` | Task dependency graph — DAG-based scheduler for ordered, concurrent pipeline execution |
+| `task_graph` | Task dependency graph — DAG-based scheduler for ordered, sequential pipeline execution |
 | `config_schema` | Configuration schema validation — JSON-Schema-compatible validation for TOML/JSON configs |
-| `undo_redo` | Undo/redo stack — standalone reversible-action stack consumed by `command_bus` and editors |
+| `undo_redo` | Undo/redo stack — standalone reversible-action stack with bounded history depth (independent of `command_bus`'s own undo/redo fields) |
 
 ---
 
@@ -68,7 +68,7 @@ No feature flags are required; all subsystems are included by default.
 
 ## Stability
 
-All public items in this crate follow semantic versioning. The 0.2.0 release is considered stable for downstream consumption within the OxiHuman workspace. Breaking changes will be accompanied by a minor-version bump until a 1.0 release is declared.
+All public items in this crate follow semantic versioning. The 0.2.1 release is considered stable for downstream consumption within the OxiHuman workspace. Breaking changes will be accompanied by a minor-version bump until a 1.0 release is declared.
 
 ---
 

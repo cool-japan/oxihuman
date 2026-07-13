@@ -1,0 +1,53 @@
+OxiHuman
+Copyright (C) 2026 COOLJAPAN OU (Team KitaSan)
+
+This product is licensed under the Apache License, Version 2.0 (see the
+LICENSE file for the full text). This NOTICE file is provided pursuant to
+Section 4(d) of that License.
+
+================================================================================
+Source code
+================================================================================
+
+All source code in this repository (crates/, scripts/, demo/) is original
+work of COOLJAPAN OU (Team KitaSan) and is licensed under Apache-2.0.
+
+OxiHuman is an independent, pure-Rust, Apache-2.0 implementation of a
+parametric human body generator. It is format-compatible with MakeHuman: it
+reads the documented `.target` and `.mhclo` file formats. It contains no
+code copied, translated, or otherwise derived from the AGPL-licensed
+MakeHuman Python application. See docs/CLEANROOM_AUDIT.md for the
+verification methodology and findings supporting this statement.
+
+================================================================================
+Bundled data assets
+================================================================================
+
+The morph-target and base-mesh data assets bundled under `assets/packs/`
+(e.g. `oxihuman-core-v1.ohpk`) are derived from data files published by the
+MakeHuman project (http://www.makehumancommunity.org/), which are released
+by their authors under the CC0 1.0 Universal ("CC0-1.0") public domain
+dedication. CC0-1.0 dedicates the works to the public domain; it does not
+require attribution, but the upstream source and licence are recorded here
+and in PROVENANCE.md for transparency and traceability.
+
+  Upstream project : makehumancommunity/makehuman
+  Upstream tag     : v1.3.0
+  Upstream commit  : 1f508f6083b2f823dab15de924b3bde72e08d77c
+  Data licence     : CC0 1.0 Universal (CC0-1.0)
+  Full provenance  : see PROVENANCE.md and
+                      assets/upstream/UPSTREAM_MANIFEST.json
+
+No community-contributed asset packs (clothing, hair, skin textures, or
+additional body targets published in MakeHuman community asset
+repositories) are bundled with OxiHuman; such assets carry individual,
+per-asset licences and are out of scope for this project.
+
+================================================================================
+Third-party Rust crates
+================================================================================
+
+OxiHuman depends on a number of third-party Rust crates, each under its own
+permissive licence (Apache-2.0, MIT, or similar). See Cargo.lock and each
+dependency's published licence metadata on crates.io for details. No
+third-party crate's licence terms are modified or superseded by this NOTICE.

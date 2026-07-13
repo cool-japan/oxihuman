@@ -1,10 +1,10 @@
 # oxihuman-morph -- TODO
 
-> Version: 0.2.0 | Updated: 2026-06-19
+> Version: 0.2.1 | Updated: 2026-07-13
 
 ## Status: Stable
 
-All core features implemented. 0 stubs. 33,410 passing tests (unit + doc).
+All core features implemented. 0 stubs. 5,961 passing tests (unit + doc).
 918 source files, ~204k lines.
 
 ## Completed

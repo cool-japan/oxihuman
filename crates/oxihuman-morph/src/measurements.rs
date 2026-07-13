@@ -1146,6 +1146,18 @@ impl BodyMeasurements {
     }
 }
 
+// ===========================================================================
+// Robust cross-section tailoring measurer (child module)
+// ===========================================================================
+
+#[path = "measurements/cross_section.rs"]
+mod cross_section;
+
+pub use cross_section::{
+    body_vertex_boundary, CrossSectionMeasurer, MeasurerTopology, TailoringSummary,
+    HUMAN_DENSITY_KG_PER_L,
+};
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1449,5 +1461,78 @@ mod tests {
         let bm = BodyMeasurements::new(verts, tris);
         let pi = bm.ponderal_index().expect("PI failed");
         assert!(pi > 0.0, "ponderal index should be positive");
+    }
+
+    /// Build a closed vertical cylinder (radius `r`, height `h`, `seg` sides)
+    /// centred on the Y axis: flat index list for [`CrossSectionMeasurer`].
+    fn cylinder(r: f64, h: f64, seg: usize) -> (Vec<[f64; 3]>, Vec<u32>) {
+        let mut verts: Vec<[f64; 3]> = Vec::new();
+        for s in 0..seg {
+            let a = (s as f64) * std::f64::consts::TAU / seg as f64;
+            verts.push([r * a.cos(), 0.0, r * a.sin()]); // bottom ring
+        }
+        for s in 0..seg {
+            let a = (s as f64) * std::f64::consts::TAU / seg as f64;
+            verts.push([r * a.cos(), h, r * a.sin()]); // top ring
+        }
+        let cb = verts.len();
+        verts.push([0.0, 0.0, 0.0]); // bottom centre
+        let ct = verts.len();
+        verts.push([0.0, h, 0.0]); // top centre
+        let mut idx: Vec<u32> = Vec::new();
+        for s in 0..seg {
+            let n = (s + 1) % seg;
+            let (b0, b1, t0, t1) = (s as u32, n as u32, (seg + s) as u32, (seg + n) as u32);
+            idx.extend_from_slice(&[b0, b1, t1, b0, t1, t0]); // side quad
+            idx.extend_from_slice(&[cb as u32, b1, b0]); // bottom cap
+            idx.extend_from_slice(&[ct as u32, t0, t1]); // top cap
+        }
+        (verts, idx)
+    }
+
+    #[test]
+    fn test_cross_section_cylinder() {
+        let (verts, idx) = cylinder(10.0, 100.0, 48);
+        let m = CrossSectionMeasurer::new(verts, &idx);
+        assert!(
+            (m.stature_cm() - 100.0).abs() < 1e-6,
+            "H={}",
+            m.stature_cm()
+        );
+        let circ = m
+            .torso_circumference_at(50.0)
+            .expect("mid circumference should resolve");
+        let expected = std::f64::consts::TAU * 10.0; // 2πr ≈ 62.83
+        assert!(
+            (circ - expected).abs() < 1.0,
+            "circumference {circ} vs {expected}"
+        );
+        // Closed cylinder volume = π r² h = π·100·100 ≈ 31416 cm³.
+        let vol = m.body_volume_cm3();
+        assert!((vol - 31416.0).abs() < 200.0, "volume {vol}");
+        assert!(
+            m.mass_kg() > 30.0 && m.mass_kg() < 33.0,
+            "mass {}",
+            m.mass_kg()
+        );
+    }
+
+    #[test]
+    fn test_body_vertex_boundary_splits_helper() {
+        // Body = a tall box spanning the full height (verts 0..8), helper = a
+        // small box at higher indices sitting inside (verts 8..16).
+        let (mut verts, tris0) = scaled_cube(30.0, 170.0, 20.0);
+        let (mut helper_v, helper_t) = scaled_cube(4.0, 4.0, 4.0);
+        for v in &mut helper_v {
+            v[1] += 80.0; // lift the helper inside the body's height span
+        }
+        let offset = verts.len();
+        verts.append(&mut helper_v);
+        let mut tris: Vec<[usize; 3]> = tris0;
+        for t in helper_t {
+            tris.push([t[0] + offset, t[1] + offset, t[2] + offset]);
+        }
+        let k = body_vertex_boundary(&verts, &tris);
+        assert_eq!(k, 8, "body prefix boundary should exclude the helper block");
     }
 }

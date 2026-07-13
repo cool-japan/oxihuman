@@ -4,6 +4,11 @@
 //! COLLADA (`.dae`) 3D format export — ISO/IEC 17506.
 //!
 //! Writes COLLADA 1.4.1 XML directly as strings; no external XML crate required.
+//!
+//! The file-writing entry points ([`export_collada`], [`export_collada_scene`])
+//! refuse a mesh whose `has_suit` flag is false (safety check via
+//! [`crate::export_gate::ensure_export_allowed`]).  [`build_collada`] /
+//! [`build_collada_scene`] are low-level string builders.
 
 #![allow(dead_code)]
 
@@ -316,11 +321,15 @@ pub fn build_collada(
 }
 
 /// Export a single mesh as a `.dae` COLLADA file.
+///
+/// Returns Err if the mesh has no suit applied (safety check via
+/// [`crate::export_gate::ensure_export_allowed`]).
 pub fn export_collada(
     mesh: &MeshBuffers,
     path: &Path,
     options: &ColladaExportOptions,
 ) -> anyhow::Result<ColladaExportStats> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
     let (content, stats) = build_collada(mesh, options);
     std::fs::write(path, &content)
         .with_context(|| format!("Failed to write COLLADA file: {}", path.display()))?;
@@ -364,11 +373,16 @@ pub fn build_collada_scene(
 }
 
 /// Export multiple meshes as a `.dae` COLLADA scene file.
+///
+/// Returns Err if any mesh has no suit applied (safety check).
 pub fn export_collada_scene(
     meshes: &[(&MeshBuffers, &str)],
     path: &Path,
     options: &ColladaExportOptions,
 ) -> anyhow::Result<()> {
+    for (mesh, _name) in meshes {
+        crate::export_gate::ensure_export_allowed(mesh)?;
+    }
     let content = build_collada_scene(meshes, options);
     std::fs::write(path, &content)
         .with_context(|| format!("Failed to write COLLADA scene file: {}", path.display()))?;
@@ -417,7 +431,7 @@ mod tests {
             normals: vec![[0.0, 0.0, 1.0]; 4],
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
             indices: vec![0, 1, 2, 1, 3, 2],
-            has_suit: false,
+            has_suit: true,
         })
     }
 
@@ -427,8 +441,22 @@ mod tests {
             normals: vec![[0.0, 0.0, 1.0]; 3],
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
             indices: vec![0, 1, 2],
-            has_suit: false,
+            has_suit: true,
         })
+    }
+
+    // Test 0: gated export refuses unsuited mesh
+    #[test]
+    fn test_export_collada_refuses_unsuited_mesh() {
+        let mut mesh = single_tri_mesh();
+        mesh.has_suit = false;
+        let opts = ColladaExportOptions::default();
+        let path = std::env::temp_dir().join("oxihuman_test_collada_unsuited.dae");
+        assert!(export_collada(&mesh, &path, &opts).is_err());
+        assert!(!path.exists());
+        let meshes: Vec<(&MeshBuffers, &str)> = vec![(&mesh, "Bad")];
+        assert!(export_collada_scene(&meshes, &path, &opts).is_err());
+        assert!(!path.exists());
     }
 
     // Test 1: format_float_array basic

@@ -8,7 +8,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 | Metric | Value |
 |--------|-------|
 | Status | Stable |
-| Tests passing | 33,410 |
+| Tests passing | 5,579 |
 | Public API items | 8,457 |
 | Source files | ~883 `.rs` files |
 | Stub coverage | 0 |
@@ -23,7 +23,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 
 ```toml
 [dependencies]
-oxihuman-export = "0.2.0"
+oxihuman-export = "0.2.1"
 ```
 
 ## Format Matrix
@@ -42,6 +42,22 @@ oxihuman-export = "0.2.0"
 | PLY | `ply` | Point cloud and mesh |
 | X3D | `x3d` | XML-based 3D format |
 | SVG | `svg` | 2D projection export |
+
+### Asset Pack Format (OHPK v1)
+
+`core_pack` implements **OHPK v1**, a self-describing binary container that
+bundles a base mesh plus a set of sparse morph targets in one file: the
+`oxihuman-cli pack-core` command *writes* one, and `oxihuman-wasm` *reads* it
+back with zero-copy, no-filesystem, `wasm32`-safe parsing.
+
+| Item | Detail |
+|------|--------|
+| Magic / version | `b"OHPK"`, version `1` (`OHPK_MAGIC`, `OHPK_VERSION`) |
+| Compression | Body DEFLATE-compressed via `oxiarc-deflate` (flag `OHPK_FLAG_DEFLATE`, level `OHPK_DEFLATE_LEVEL = 9`) — no `zip`/`flate2` |
+| Write API | `CorePackBuilder`: `set_base_mesh`, `set_helper_metadata`, `add_target`, `set_manifest`, `build() -> Result<Vec<u8>>` |
+| Read API | `CorePack::parse(bytes)`: `manifest()`, `vertex_count()`, `base_positions()`, `base_indices()`, `base_uvs()`, `targets()`, `quantization_report()` |
+| Deltas | Sparse, `i16` max-abs-quantised per-target position deltas (`CorePackTarget::sparse()` / `indices()`) |
+| Shipped pack | [`assets/packs/oxihuman-core-v1.ohpk`](../../assets/packs) — 2,093,260 B, 38 CC0 morph targets, 21,833 base vertices, worst-case reconstruction error 0.011 mm |
 
 ### Advanced Pipeline Features
 
@@ -84,7 +100,6 @@ These modules are compiled into the crate and expose public APIs, but implementa
 | Module | Target |
 |--------|--------|
 | `mixamo_export` | Mixamo rig / animation |
-| `smpl_export` | SMPL body model parameters |
 | `mediapipe_export` | MediaPipe pose landmarks |
 | `openpose_export` | OpenPose keypoint format |
 | `cmu_motion_export` | CMU Motion Capture database format |
@@ -111,6 +126,26 @@ These modules are compiled into the crate and expose public APIs, but implementa
 | `alembic_export` | Alembic (.abc) geometry cache |
 | `draco_export` | Google Draco compressed mesh |
 
+## Export Safety Gate
+
+Every human-facing exporter entry point — GLB, glTF-separate, OBJ, STL, VRM,
+COLLADA, USD, 3MF, PLY, FBX, X3D, Alembic, LOD packs, and the `auto_export`
+router — calls the single gate `export_gate::ensure_export_allowed` before
+serialising a mesh. The gate refuses (`Err`) any `oxihuman_mesh::MeshBuffers`
+whose `has_suit` flag is `false`, so an unclothed human mesh can never be
+written to disk or returned to a caller. The cross-crate regression test
+[`invariant_no_nude_mesh_stage`](../oxihuman-tests/tests/invariant_no_nude_mesh_stage.rs)
+in `oxihuman-tests` iterates every gated entry point and asserts each one
+rejects an unsuited mesh.
+
+Byte-level builders that never touch the filesystem (`build_glb_bytes`,
+`build_glb_with_meta_bytes`, `build_glb_with_skeleton_bytes`,
+`mesh_to_obj_string`, `mesh_to_stl_ascii`, `encode_stl_binary`,
+`VrmExporter::export`, …) sit alongside the `Path`-based `export_*`
+convenience wrappers. `oxihuman-wasm`'s browser exporters call these in-memory
+builders directly, which is what keeps them working on `wasm32` (no
+filesystem, no `std::env::temp_dir()`).
+
 ## Feature Flags
 
 None. All modules are unconditionally compiled.
@@ -119,7 +154,8 @@ None. All modules are unconditionally compiled.
 
 - 0 `todo!()` / `unimplemented!()` macro calls
 - 0 stub implementations
-- 33,410 passing tests
+- Nude-mesh export gate enforced on every human-facing exporter entry point (see [Export Safety Gate](#export-safety-gate))
+- 5,579 passing tests
 
 ## Dependencies
 
@@ -131,6 +167,8 @@ serde          = { workspace = true }
 serde_json     = { workspace = true }
 toml           = { workspace = true }
 bytemuck       = { workspace = true }
+oxiarc-deflate = { workspace = true }
+oxiarc-archive = { workspace = true }
 sha2           = { workspace = true }
 hex            = { workspace = true }
 oxihuman-core  = { workspace = true }

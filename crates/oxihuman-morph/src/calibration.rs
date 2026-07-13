@@ -6,6 +6,15 @@
 //! Provides a [`BodyCalibrator`] that uses Nelder–Mead simplex optimisation to
 //! find morph-target weights whose resulting mesh best matches a set of
 //! [`TapeMeasurement`] entries (circumferences, lengths, widths, depths).
+//!
+//! # Units
+//!
+//! All geometry is expressed in **centimetres**, matching the wired
+//! [`measurements`](crate::measurements) module (`BodyMeasurements` documents
+//! "Units are centimetres"). Base vertices, morph-target displacements and the
+//! resulting residuals / `total_error` are all in centimetres. Callers whose
+//! meshes are in metres must scale by 100 before calling
+//! [`BodyCalibrator::calibrate`].
 
 use std::collections::HashMap;
 
@@ -290,10 +299,14 @@ impl BodyCalibrator {
     ///
     /// # Arguments
     ///
-    /// * `initial_vertices` — base mesh vertex positions `[x, y, z]`.
+    /// * `initial_vertices` — base mesh vertex positions `[x, y, z]`, in
+    ///   centimetres (Y-up convention).
     /// * `morph_targets` — named morph targets, each a full-mesh displacement
-    ///   array of the same length as `initial_vertices`.
+    ///   array (centimetres) of the same length as `initial_vertices`.
     /// * `initial_weights` — starting morph weights (one per morph target).
+    ///
+    /// Residuals and `total_error` in the returned [`CalibrationResult`] are in
+    /// centimetres.
     pub fn calibrate(
         &self,
         initial_vertices: &[[f64; 3]],
@@ -428,10 +441,14 @@ impl BodyCalibrator {
             return 0.0;
         }
 
+        // Unit convention: input vertices are expressed in centimetres, matching
+        // the wired `measurements.rs` module (`BodyMeasurements` documents "Units
+        // are centimetres"). All four measurement kinds therefore return values in
+        // centimetres directly, without any metre→cm rescaling, so a single
+        // calibration mixing circumferences and lengths stays unit-consistent.
         match func.kind {
             MeasurementKind::Circumference(section) => {
-                let (normal, point) =
-                    Self::circumference_plane_for_section(&selected, section);
+                let (normal, point) = Self::circumference_plane_for_section(&selected, section);
                 Self::compute_circumference(&selected, &normal, &point).unwrap_or(0.0)
             }
             MeasurementKind::Length(_, _) => {
@@ -441,14 +458,14 @@ impl BodyCalibrator {
                 if b.is_empty() {
                     0.0
                 } else {
-                    Self::compute_distance(a, b) * 100.0 // metres to cm
+                    Self::compute_distance(a, b) // cm (vertices already in cm)
                 }
             }
             MeasurementKind::Width(_section) => {
-                Self::compute_extent(&selected, 0) * 100.0 // x-axis extent
+                Self::compute_extent(&selected, 0) // x-axis extent, cm
             }
             MeasurementKind::Depth(_section) => {
-                Self::compute_extent(&selected, 2) * 100.0 // z-axis extent
+                Self::compute_extent(&selected, 2) // z-axis extent, cm
             }
         }
     }
@@ -508,6 +525,33 @@ impl BodyCalibrator {
 // Nelder–Mead simplex optimiser (gradient-free)
 // ===========================================================================
 
+/// Minimise an arbitrary objective over `initial.len()` dimensions with the
+/// same Nelder–Mead simplex optimiser used by [`BodyCalibrator`]. Returns
+/// `(best_point, iterations, converged)`.
+///
+/// Exposed so param-space fits (e.g. the WASM `fit_to_measurements`, which
+/// optimises directly over engine macro parameters rather than raw morph
+/// weights) can reuse one well-tested optimiser instead of duplicating it.
+///
+/// * `objective` — cost to minimise; lower is better.
+/// * `initial` — starting point / simplex origin.
+/// * `step_size` — initial simplex edge length.
+/// * `max_iter` — iteration cap.
+/// * `tol` — convergence threshold on the simplex diameter.
+pub fn nelder_mead_minimize<F>(
+    objective: F,
+    initial: &[f64],
+    step_size: f64,
+    max_iter: usize,
+    tol: f64,
+) -> (Vec<f64>, usize, bool)
+where
+    F: FnMut(&[f64]) -> f64,
+{
+    let r = nelder_mead(objective, initial, step_size, max_iter, tol);
+    (r.best_point, r.iterations, r.converged)
+}
+
 /// Outcome of the Nelder–Mead run.
 struct NelderMeadResult {
     best_point: Vec<f64>,
@@ -522,15 +566,19 @@ const NM_RHO: f64 = 0.5; // contraction
 const NM_SIGMA: f64 = 0.5; // shrink
 
 /// Run Nelder–Mead simplex optimisation on an n-dimensional objective.
+///
+/// `objective` is `FnMut` so a caller may fit against mutable state (e.g. an
+/// engine that is re-posed and re-measured per evaluation). Immutable
+/// closures satisfy the bound unchanged.
 fn nelder_mead<F>(
-    objective: &F,
+    mut objective: F,
     initial: &[f64],
     step_size: f64,
     max_iter: usize,
     tol: f64,
 ) -> NelderMeadResult
 where
-    F: Fn(&[f64]) -> f64,
+    F: FnMut(&[f64]) -> f64,
 {
     let n = initial.len();
     if n == 0 {
@@ -624,7 +672,7 @@ where
                 values[n] = f_c;
             } else {
                 // Shrink: move all points toward best.
-                nm_shrink(&mut simplex, &mut values, objective, NM_SIGMA);
+                nm_shrink(&mut simplex, &mut values, &mut objective, NM_SIGMA);
             }
         }
     }
@@ -679,9 +727,9 @@ fn nm_contract(centroid: &[f64], point: &[f64], rho: f64) -> Vec<f64> {
 }
 
 /// Shrink all simplex vertices (except the best) toward the best vertex.
-fn nm_shrink<F>(simplex: &mut [Vec<f64>], values: &mut [f64], objective: &F, sigma: f64)
+fn nm_shrink<F>(simplex: &mut [Vec<f64>], values: &mut [f64], objective: &mut F, sigma: f64)
 where
-    F: Fn(&[f64]) -> f64,
+    F: FnMut(&[f64]) -> f64,
 {
     let best = simplex[0].clone();
     for i in 1..simplex.len() {
@@ -722,10 +770,7 @@ fn convex_hull_2d(points: &[[f64; 2]]) -> Vec<[f64; 2]> {
     pts.sort_by(|a, b| {
         a[0].partial_cmp(&b[0])
             .unwrap_or(std::cmp::Ordering::Equal)
-            .then_with(|| {
-                a[1].partial_cmp(&b[1])
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            })
+            .then_with(|| a[1].partial_cmp(&b[1]).unwrap_or(std::cmp::Ordering::Equal))
     });
     pts.dedup_by(|a, b| (a[0] - b[0]).abs() < 1e-15 && (a[1] - b[1]).abs() < 1e-15);
 
@@ -992,10 +1037,7 @@ mod tests {
             .collect();
 
         // Morph target: scale outward.
-        let deltas: Vec<[f64; 3]> = base
-            .iter()
-            .map(|v| [v[0] * 0.5, 0.0, v[2] * 0.5])
-            .collect();
+        let deltas: Vec<[f64; 3]> = base.iter().map(|v| [v[0] * 0.5, 0.0, v[2] * 0.5]).collect();
 
         let morph_targets = vec![("scale_chest".to_string(), deltas)];
 

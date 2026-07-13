@@ -4,9 +4,11 @@
 //! Clothing overlay pipeline.
 //!
 //! Deforms a clothing mesh to match a morphed base mesh using barycentric
-//! interpolation from `.mhclo` binding data (MakeHuman algorithm).
+//! interpolation from `.mhclo` binding data.
 //!
-//! Algorithm (from MakeHuman `mh2proxy.py`):
+//! This is an independent implementation of the documented `.mhclo`
+//! proxy-binding file-format semantics: each clothing vertex is bound to
+//! three base-mesh vertices with barycentric weights plus a residual offset:
 //!   `clothing_pos[i]` = sum(`weights[j]` * `base_pos[base_verts[j]]`) + offset
 //!   for j in 0..3
 

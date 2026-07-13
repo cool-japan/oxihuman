@@ -31,15 +31,20 @@ pub fn print_help() {
     println!("  variant-pack  Export multiple character variants as a named pack");
     println!("  report        Generate an HTML pipeline report");
     println!("  asset-bundle  Pack base mesh + targets into an OXB asset bundle");
-    println!("  anim-bake     Bake animation cache from params JSON array to PC2/MDD");
+    println!("  pc2           Bake a base mesh (optionally animated) to a PC2 point cache");
+    println!("  mdd           Bake a base mesh (optionally animated) to an MDD point cache");
+    println!("  anim-bake     Bake an animated params source to PC2/MDD");
     println!("  stream-export Stream-export mesh positions in chunks");
     println!("  plugin-list   List built-in plugin descriptors");
-    println!("  remesh              Remesh an OBJ (isotropic, stub)");
+    println!(
+        "  remesh              Remesh an OBJ via voxelization + Marching Cubes (--voxel-size)"
+    );
     println!("  physics-export      Export physics scene (gltf-physics or openxr)");
     println!("  camera-info         Print default camera rig JSON");
     println!("  pack-dist-manifest  Generate SHA-256 distribution manifest for a pack directory");
     println!("  pack-verify-dist    Verify a pack directory against a distribution manifest");
     println!("  pack-wizard         Interactive wizard to build an .oxp asset pack step by step");
+    println!("  pack-core           Curate MakeHuman CC0 assets into an OHPK v1 core/full pack");
     println!();
     println!("GENERATE OPTIONS:");
     println!("  --base <PATH>            Base .obj mesh file (required)");
@@ -160,6 +165,48 @@ pub fn print_help() {
     println!("  --targets <DIR>          Directory of .target morph files (required)");
     println!("  --output <BUNDLE>        Output .oxb bundle file (required)");
     println!("  --manifest <TOML>        Optional manifest TOML file");
+    println!();
+    println!("PC2 OPTIONS:");
+    println!("  --input <PATH>           Base .obj mesh file (required)");
+    println!("  --output <PATH>          Output .pc2 file (required)");
+    println!("  --targets <DIR>          Directory of .target morph files (optional)");
+    println!(
+        "  --anim <JSON>            Keyframed or snapshot params JSON (optional; see anim-bake)"
+    );
+    println!("  --frames <N>             Frame count when --anim doesn't fix it (default: 10)");
+    println!("  --fps <F32>              Sample rate stored in the header (default: 24.0)");
+    println!("  --start-time <F32>       Start time stored in the header (default: 0.0)");
+    println!();
+    println!("MDD OPTIONS:");
+    println!("  --input <PATH>           Base .obj mesh file (required)");
+    println!("  --output <PATH>          Output .mdd file (required)");
+    println!("  --targets <DIR>          Directory of .target morph files (optional)");
+    println!(
+        "  --anim <JSON>            Keyframed or snapshot params JSON (optional; see anim-bake)"
+    );
+    println!("  --frames <N>             Frame count when --anim doesn't fix it (default: 10)");
+    println!("  --fps <F32>              Playback rate; also drives per-frame timestamps (default: 24.0)");
+    println!();
+    println!("ANIM-BAKE OPTIONS:");
+    println!("  --input <PATH>           Base .obj mesh file (required)");
+    println!("  --params-json <JSON>     Params JSON: dense per-frame array, or");
+    println!("                           {{\"keyframes\":[{{\"time\":f32,\"params\":{{...}}}}]}} (required)");
+    println!("  --targets <DIR>          Directory of .target morph files (optional; needed for");
+    println!("                           animated params to actually displace vertices)");
+    println!("  --output <PATH>          Output cache file (required)");
+    println!("  --format <pc2|mdd>       Output format (default: pc2)");
+    println!("  --fps <F32>              Sample rate (default: 30.0)");
+    println!("  --frames <N>             Frame count for keyframe sources (default: derived from duration)");
+    println!();
+    println!("PACK-CORE OPTIONS:");
+    println!("  --upstream <DIR>         MakeHuman data tree (default: assets/upstream/makehuman)");
+    println!("  --tier <core|full>       core = curated adult-only budget pack; full = everything (default: core)");
+    println!(
+        "  --out <FILE>             Output .ohpk file (default: assets/packs or dist per tier)"
+    );
+    println!("  --manifest <TOML>        Asset manifest reference (default: assets/alpha_pack/oxihuman_assets.toml)");
+    println!("  --budget-gzip-bytes <N>  Core-tier on-disk byte budget (default: 2097152)");
+    println!("  --report <MD>            Reconstruction-error report path (core tier)");
     println!();
     println!("PACK-DIST-MANIFEST OPTIONS:");
     println!("  --pack-dir <DIR>         Directory to scan (required)");

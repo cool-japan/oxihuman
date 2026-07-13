@@ -3,6 +3,12 @@
 #![allow(dead_code)]
 
 //! Binary STL with attribute bytes.
+//!
+//! The slice-based functions in this module ([`mesh_to_binary_stl`],
+//! [`encode_binary_stl`]) are low-level encoders over raw positions/indices
+//! with no human-mesh provenance.  Human meshes must go through the gated
+//! [`encode_binary_stl_mesh`] entry point, which refuses a
+//! [`oxihuman_mesh::MeshBuffers`] whose `has_suit` flag is false.
 
 #[derive(Debug, Clone)]
 pub struct BinaryStlTriangle {
@@ -105,6 +111,18 @@ pub fn mesh_to_binary_stl(positions: &[[f32; 3]], indices: &[u32]) -> BinaryStlM
     mesh
 }
 
+/// Gated `MeshBuffers` entry point: encode a mesh as binary STL bytes.
+///
+/// Returns Err if the mesh has no suit applied (safety check via
+/// [`crate::export_gate::ensure_export_allowed`]).
+pub fn encode_binary_stl_mesh(mesh: &oxihuman_mesh::MeshBuffers) -> anyhow::Result<Vec<u8>> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+    Ok(encode_binary_stl(&mesh_to_binary_stl(
+        &mesh.positions,
+        &mesh.indices,
+    )))
+}
+
 pub fn binary_stl_triangle_count(mesh: &BinaryStlMesh) -> usize {
     mesh.triangles.len()
 }
@@ -185,5 +203,23 @@ mod tests {
         let m = new_binary_stl_mesh();
         let s = std::str::from_utf8(&m.header[..19]).expect("should succeed");
         assert!(s.contains("OxiHuman"));
+    }
+
+    fn buffers(has_suit: bool) -> oxihuman_mesh::MeshBuffers {
+        use oxihuman_morph::engine::MeshBuffers as MB;
+        oxihuman_mesh::MeshBuffers::from_morph(MB {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0]; 3],
+            indices: vec![0, 1, 2],
+            has_suit,
+        })
+    }
+
+    #[test]
+    fn test_encode_binary_stl_mesh_gated() {
+        assert!(encode_binary_stl_mesh(&buffers(false)).is_err());
+        let bytes = encode_binary_stl_mesh(&buffers(true)).expect("suited mesh must export");
+        assert_eq!(bytes.len(), 84 + 50);
     }
 }

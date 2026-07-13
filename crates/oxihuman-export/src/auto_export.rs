@@ -126,25 +126,21 @@ impl ExportOptions {
 
 /// Route export for the given format.
 ///
-/// For GLB and GLTF-sep, `export_glb` / `export_gltf_sep` refuse export when
-/// `mesh.has_suit == false`.  To allow auto-export of bare meshes (e.g. in
-/// tests and tooling), this function clones the mesh with `has_suit = true`
-/// before passing it to those exporters.  The flag bypass is intentional and
-/// documented here.
+/// The bodysuit invariant is enforced once here, for every format, via
+/// [`crate::export_gate::ensure_export_allowed`]: a mesh whose `has_suit`
+/// flag is `false` is refused with a clear error.  The historical
+/// "auto-export convenience" bypass that cloned the mesh with
+/// `has_suit = true` was reachable from production callers and has been
+/// removed — callers must set the flag truthfully (e.g. via
+/// `oxihuman_mesh::suit::apply_suit_flag` after suit integration).
 fn route_export(mesh: &MeshBuffers, format: ExportFormat, path: &Path) -> Result<()> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
     match format {
-        ExportFormat::Glb => {
-            // Bypass the has_suit guard for auto-export convenience.
-            let mut m = mesh.clone();
-            m.has_suit = true;
-            export_glb(&m, path)
-        }
+        ExportFormat::Glb => export_glb(mesh, path),
         ExportFormat::GltfSep => {
             // Derive the companion .bin path from the .gltf path.
             let bin_path = path.with_extension("bin");
-            let mut m = mesh.clone();
-            m.has_suit = true;
-            export_gltf_sep(&m, path, &bin_path)
+            export_gltf_sep(mesh, path, &bin_path)
         }
         ExportFormat::Obj => export_obj(mesh, path),
         ExportFormat::StlAscii => crate::export_stl_ascii(mesh, path, "oxihuman"),
@@ -208,7 +204,7 @@ mod tests {
     use super::*;
     use oxihuman_mesh::MeshBuffers;
 
-    /// Build a minimal valid mesh for testing.
+    /// Build a minimal valid (suited) mesh for testing.
     fn make_mesh() -> MeshBuffers {
         MeshBuffers {
             positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
@@ -217,7 +213,25 @@ mod tests {
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
             indices: vec![0, 1, 2],
             colors: None,
-            has_suit: false,
+            has_suit: true,
+        }
+    }
+
+    #[test]
+    fn export_auto_refuses_unsuited_mesh_for_all_formats() {
+        let mut mesh = make_mesh();
+        mesh.has_suit = false;
+        for fmt in ExportFormat::all() {
+            let path = std::env::temp_dir().join(format!(
+                "test_auto_export_unsuited.{}",
+                fmt.extension()
+            ));
+            let result = export_with_options(&mesh, &path, &ExportOptions::new(fmt));
+            assert!(
+                result.is_err(),
+                "format {fmt:?} must refuse a has_suit=false mesh"
+            );
+            assert!(!path.exists(), "format {fmt:?} must not write a file");
         }
     }
 

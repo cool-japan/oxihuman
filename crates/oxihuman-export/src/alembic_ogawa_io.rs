@@ -90,7 +90,12 @@ impl AlembicWriter {
     /// The `MeshBuffers` triangle list is converted to an [`AbcPolyMesh`] with
     /// all face counts set to 3.  Positions are widened from `f32` to `f64`
     /// and normals / UVs are included when present.
+    ///
+    /// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+    /// [`crate::export_gate::ensure_export_allowed`].
     pub fn from_mesh_buffers(mesh: &MeshBuffers) -> Result<Self> {
+        crate::export_gate::ensure_export_allowed(mesh)?;
+
         let positions: Vec<[f64; 3]> = mesh
             .positions
             .iter()
@@ -152,10 +157,15 @@ impl AlembicWriter {
     ///
     /// # Errors
     ///
-    /// Returns an error when `frames` is empty or `fps` is not positive.
+    /// Returns an error when `frames` is empty, `fps` is not positive, or any
+    /// frame has `has_suit == false` (see
+    /// [`crate::export_gate::ensure_export_allowed`]).
     pub fn from_mesh_sequence(frames: &[MeshBuffers], fps: f64) -> Result<Self> {
         ensure!(!frames.is_empty(), "frames must not be empty");
         ensure!(fps > 0.0, "fps must be positive, got {}", fps);
+        for frame in frames {
+            crate::export_gate::ensure_export_allowed(frame)?;
+        }
 
         let first = &frames[0];
         let positions: Vec<[f64; 3]> = first
@@ -720,6 +730,17 @@ mod convenience_api_tests {
             normals: vec![[0.0, 0.0, 1.0]; 3],
             uvs: vec![[0.0, 0.0]; 3],
             indices: vec![0, 1, 2],
+            has_suit: true,
+        })
+    }
+
+    /// An unsuited variant of [`make_triangle_mesh`] for gate-refusal tests.
+    fn make_unsuited_triangle_mesh() -> MeshBuffers {
+        MeshBuffers::from_morph(MorphMeshBuffers {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0]; 3],
+            indices: vec![0, 1, 2],
             has_suit: false,
         })
     }
@@ -806,5 +827,25 @@ mod convenience_api_tests {
         let frames = vec![make_triangle_mesh()];
         let result = AlembicWriter::from_mesh_sequence(&frames, 0.0);
         assert!(result.is_err());
+    }
+
+    // ── export gate ───────────────────────────────────────────────────────
+
+    #[test]
+    fn test_from_mesh_buffers_refuses_unsuited_mesh() {
+        let mesh = make_unsuited_triangle_mesh();
+        assert!(
+            AlembicWriter::from_mesh_buffers(&mesh).is_err(),
+            "from_mesh_buffers must refuse a mesh with has_suit = false"
+        );
+    }
+
+    #[test]
+    fn test_from_mesh_sequence_refuses_unsuited_frame() {
+        let frames = vec![make_triangle_mesh(), make_unsuited_triangle_mesh()];
+        assert!(
+            AlembicWriter::from_mesh_sequence(&frames, 24.0).is_err(),
+            "from_mesh_sequence must refuse when any frame has has_suit = false"
+        );
     }
 }

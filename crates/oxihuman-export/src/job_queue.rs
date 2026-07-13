@@ -296,11 +296,9 @@ fn dispatch_export(
     output_path: &std::path::Path,
 ) -> anyhow::Result<()> {
     match job_type {
-        JobType::Glb => {
-            let mut m = mesh.clone();
-            m.has_suit = true;
-            export_glb(&m, output_path)
-        }
+        // Every branch routes through a gated exporter; the mesh must already
+        // carry `has_suit = true` (no bypass — the gate is authoritative).
+        JobType::Glb => export_glb(mesh, output_path),
         JobType::Obj => export_obj(mesh, output_path),
         JobType::Stl => export_stl_binary(mesh, output_path),
         JobType::Ply => export_ply(mesh, output_path, PlyFormat::BinaryLittleEndian),
@@ -314,6 +312,8 @@ fn dispatch_export(
 mod tests {
     use super::*;
 
+    // A suited mesh: every executing job routes through a gated exporter, so
+    // the queue must be fed a mesh that has already had its suit layer applied.
     fn make_mesh() -> MeshBuffers {
         MeshBuffers {
             positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
@@ -322,8 +322,19 @@ mod tests {
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
             indices: vec![0, 1, 2],
             colors: None,
-            has_suit: false,
+            has_suit: true,
         }
+    }
+
+    // Build a per-test unique output path under the OS temp dir, avoiding the
+    // flaky shared `/tmp/test_job_queue_*` literals used previously.
+    fn tmp_path(tag: &str, ext: &str) -> PathBuf {
+        let pid = std::process::id();
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        std::env::temp_dir().join(format!("oxihuman_jobq_{tag}_{pid}_{nanos}.{ext}"))
     }
 
     #[test]
@@ -337,7 +348,7 @@ mod tests {
     #[test]
     fn add_glb_job_increases_count() {
         let mut q = ExportJobQueue::new();
-        q.add_glb("test", PathBuf::from("/tmp/test_job_queue_x.glb"));
+        q.add_glb("test", tmp_path("x", "glb"));
         assert_eq!(q.job_count(), 1);
         assert_eq!(q.pending_count(), 1);
         assert!(!q.is_empty());
@@ -346,11 +357,11 @@ mod tests {
     #[test]
     fn add_multiple_jobs() {
         let mut q = ExportJobQueue::new();
-        q.add_glb("a", PathBuf::from("/tmp/test_job_queue_a.glb"));
-        q.add_obj("b", PathBuf::from("/tmp/test_job_queue_b.obj"));
-        q.add_stl("c", PathBuf::from("/tmp/test_job_queue_c.stl"));
-        q.add_ply("d", PathBuf::from("/tmp/test_job_queue_d.ply"));
-        q.add_json("e", PathBuf::from("/tmp/test_job_queue_e.json"));
+        q.add_glb("a", tmp_path("a", "glb"));
+        q.add_obj("b", tmp_path("b", "obj"));
+        q.add_stl("c", tmp_path("c", "stl"));
+        q.add_ply("d", tmp_path("d", "ply"));
+        q.add_json("e", tmp_path("e", "json"));
         assert_eq!(q.job_count(), 5);
         assert_eq!(q.pending_count(), 5);
     }
@@ -358,7 +369,7 @@ mod tests {
     #[test]
     fn job_status_starts_pending() {
         let mut q = ExportJobQueue::new();
-        let id = q.add_glb("pending", PathBuf::from("/tmp/test_job_queue_p.glb"));
+        let id = q.add_glb("pending", tmp_path("p", "glb"));
         let job = q.get_job(id).expect("should succeed");
         assert_eq!(job.status, JobStatus::Pending);
         assert!(!job.is_done());
@@ -381,7 +392,7 @@ mod tests {
     #[test]
     fn run_single_glb_job() {
         let mut q = ExportJobQueue::new();
-        let path = PathBuf::from("/tmp/test_job_queue_single.glb");
+        let path = tmp_path("single", "glb");
         q.add_glb("single-glb", path.clone());
         let mesh = make_mesh();
         let result = q.run(&mesh, |_, _| {});
@@ -390,12 +401,13 @@ mod tests {
         assert_eq!(result.failed, 0);
         assert!(result.all_succeeded());
         assert!(path.exists(), "GLB file should have been created");
+        std::fs::remove_file(&path).ok();
     }
 
     #[test]
     fn run_single_obj_job() {
         let mut q = ExportJobQueue::new();
-        let path = PathBuf::from("/tmp/test_job_queue_single.obj");
+        let path = tmp_path("single", "obj");
         q.add_obj("single-obj", path.clone());
         let mesh = make_mesh();
         let result = q.run(&mesh, |_, _| {});
@@ -403,16 +415,22 @@ mod tests {
         assert_eq!(result.completed, 1);
         assert!(result.all_succeeded());
         assert!(path.exists(), "OBJ file should have been created");
+        std::fs::remove_file(&path).ok();
     }
 
     #[test]
     fn run_multiple_jobs_all_complete() {
         let mut q = ExportJobQueue::new();
-        q.add_glb("glb", PathBuf::from("/tmp/test_job_queue_multi.glb"));
-        q.add_obj("obj", PathBuf::from("/tmp/test_job_queue_multi.obj"));
-        q.add_stl("stl", PathBuf::from("/tmp/test_job_queue_multi.stl"));
-        q.add_ply("ply", PathBuf::from("/tmp/test_job_queue_multi.ply"));
-        q.add_json("json", PathBuf::from("/tmp/test_job_queue_multi.json"));
+        let glb = tmp_path("multi", "glb");
+        let obj = tmp_path("multi", "obj");
+        let stl = tmp_path("multi", "stl");
+        let ply = tmp_path("multi", "ply");
+        let json = tmp_path("multi", "json");
+        q.add_glb("glb", glb.clone());
+        q.add_obj("obj", obj.clone());
+        q.add_stl("stl", stl.clone());
+        q.add_ply("ply", ply.clone());
+        q.add_json("json", json.clone());
 
         let mesh = make_mesh();
         let result = q.run(&mesh, |_, _| {});
@@ -420,6 +438,9 @@ mod tests {
         assert_eq!(result.completed, 5);
         assert_eq!(result.failed, 0);
         assert!(result.all_succeeded());
+        for p in [glb, obj, stl, ply, json] {
+            std::fs::remove_file(&p).ok();
+        }
     }
 
     #[test]
@@ -439,17 +460,19 @@ mod tests {
     #[test]
     fn failed_jobs_empty_after_success() {
         let mut q = ExportJobQueue::new();
-        q.add_obj("obj", PathBuf::from("/tmp/test_job_queue_fj.obj"));
+        let path = tmp_path("fj", "obj");
+        q.add_obj("obj", path.clone());
         let mesh = make_mesh();
         q.run(&mesh, |_, _| {});
         assert!(q.failed_jobs().is_empty());
+        std::fs::remove_file(&path).ok();
     }
 
     #[test]
     fn clear_removes_all_jobs() {
         let mut q = ExportJobQueue::new();
-        q.add_glb("a", PathBuf::from("/tmp/test_job_queue_ca.glb"));
-        q.add_obj("b", PathBuf::from("/tmp/test_job_queue_cb.obj"));
+        q.add_glb("a", tmp_path("ca", "glb"));
+        q.add_obj("b", tmp_path("cb", "obj"));
         assert_eq!(q.job_count(), 2);
         q.clear();
         assert!(q.is_empty());
@@ -460,8 +483,12 @@ mod tests {
     fn remove_completed_keeps_failed() {
         let mut q = ExportJobQueue::new();
         // Add a good job and a job with a bad (non-writable) path.
-        q.add_obj("good", PathBuf::from("/tmp/test_job_queue_rc_good.obj"));
-        q.add_glb("bad", PathBuf::from("/no_such_dir/impossible.glb"));
+        let good = tmp_path("rc_good", "obj");
+        q.add_obj("good", good.clone());
+        q.add_glb(
+            "bad",
+            std::env::temp_dir().join("oxihuman_jobq_no_such_dir/impossible.glb"),
+        );
 
         let mesh = make_mesh();
         q.run(&mesh, |_, _| {});
@@ -471,14 +498,18 @@ mod tests {
         // The failed job must survive; the completed job must be gone.
         assert_eq!(q.job_count(), 1);
         assert_eq!(q.failed_jobs().len(), 1);
+        std::fs::remove_file(&good).ok();
     }
 
     #[test]
     fn progress_callback_called() {
         let mut q = ExportJobQueue::new();
-        q.add_obj("p1", PathBuf::from("/tmp/test_job_queue_prog1.obj"));
-        q.add_obj("p2", PathBuf::from("/tmp/test_job_queue_prog2.obj"));
-        q.add_obj("p3", PathBuf::from("/tmp/test_job_queue_prog3.obj"));
+        let p1 = tmp_path("prog1", "obj");
+        let p2 = tmp_path("prog2", "obj");
+        let p3 = tmp_path("prog3", "obj");
+        q.add_obj("p1", p1.clone());
+        q.add_obj("p2", p2.clone());
+        q.add_obj("p3", p3.clone());
 
         let mesh = make_mesh();
         let mut calls: Vec<(usize, usize)> = Vec::new();
@@ -488,5 +519,8 @@ mod tests {
         assert_eq!(calls[0], (1, 3));
         assert_eq!(calls[1], (2, 3));
         assert_eq!(calls[2], (3, 3));
+        for p in [p1, p2, p3] {
+            std::fs::remove_file(&p).ok();
+        }
     }
 }

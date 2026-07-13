@@ -70,6 +70,7 @@ fn main() {
         "pack-dist-manifest" => commands::pack::cmd_pack_dist_manifest(sub_args),
         "pack-verify-dist" => commands::pack::cmd_pack_verify_dist(sub_args),
         "pack-wizard" => commands::wizard::cmd_pack_wizard(sub_args),
+        "pack-core" => commands::pack_core::cmd_pack_core(sub_args),
         other => {
             eprintln!("Unknown subcommand: {}", other);
             eprintln!("Run with --help for usage.");

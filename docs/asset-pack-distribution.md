@@ -5,6 +5,37 @@ SPDX-License-Identifier: Apache-2.0
 
 ---
 
+## Current state (v0.2.1)
+
+> **This document describes an aspirational OXP distribution pipeline (GitHub
+> Releases, IPFS, `.oxp.tar.zst` archives, Ed25519 signatures). None of that is
+> the shipping path yet — treat everything below the next divider as roadmap.**
+>
+> What actually ships in v0.2.1:
+>
+> * **One bundled core pack**, checked into the repository at
+>   [`assets/packs/oxihuman-core-v1.ohpk`](../assets/packs/oxihuman-core-v1.ohpk)
+>   in the **OHPK v1** container (not OXP / `.oxp.tar.zst`): 2,093,260 B, 38 CC0
+>   morph targets, 21,833 base vertices.
+> * **Integrity** is verified by
+>   [`scripts/check_provenance.sh`](../scripts/check_provenance.sh) against
+>   [`PROVENANCE.md`](../PROVENANCE.md) and the sidecar
+>   `oxihuman-core-v1.provenance.json` (SHA-256 of the pack and of every bundled
+>   target + base mesh vs. the upstream CC0 manifest) — there is no HMAC tag,
+>   Ed25519 signature, or `.dist-manifest.json` yet.
+> * **Distribution** is by direct bundling: `scripts/build_demo.sh` copies the
+>   pack next to the demo (`demo/pack/`), the npm package ships the same file,
+>   and the browser loads it in-memory via
+>   `OxiHumanEngine.from_core_pack_bytes(bytes)` after a plain `fetch()`. There
+>   is no GitHub-Releases artifact, IPFS gateway, or CDN step.
+> * The broader, non-core target set is **not** distributed from this repository.
+>
+> The OXP archive format, release-artifact pipeline, and IPFS mirroring below
+> remain the intended direction for multi-pack distribution (M5), documented
+> here as the roadmap.
+
+---
+
 ## Overview
 
 OxiHuman uses the **OXP** (OxiHuman Pack) format for distributing body morph presets,

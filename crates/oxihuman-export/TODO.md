@@ -1,10 +1,10 @@
 # oxihuman-export -- TODO
 
-> Version: 0.2.0 | Updated: 2026-06-19
+> Version: 0.2.1 | Updated: 2026-07-13
 
 ## Status: Stable
 
-All core features implemented. 0 stubs (`todo!()`/`unimplemented!()`). 33,410 passing tests across ~883 source files. No `// TODO` or `// FIXME` comments.
+All core features implemented. 0 stubs (`todo!()`/`unimplemented!()`). 5,579 passing tests across ~883 source files. No `// TODO` or `// FIXME` comments.
 
 ## Completed
 
@@ -76,7 +76,6 @@ All core features implemented. 0 stubs (`todo!()`/`unimplemented!()`). 33,410 pa
 - [x] Softbody, fluid, collision shape exports
 
 ### Human-Specific Export
-- [x] SMPL / SMPL-X body model export
 - [x] MakeHuman export
 - [x] Biometric / EMG / galvanic / haptic / brain signal export
 - [x] Facial features (eyebrow, eyelash, beard, nail, tooth)
@@ -115,6 +114,26 @@ All core features implemented. 0 stubs (`todo!()`/`unimplemented!()`). 33,410 pa
 - [x] Godot, Unity, Unreal, Cocos, Babylon, Three.js, D3, A-Frame, WebXR
 - [x] MIDI, LilyPond, MusicXML, audio sync
 - [x] ZIP packing, Draco compression, basis texture
+
+### Asset Pack & Export Safety (0.2.1)
+- [x] OHPK v1 asset-pack container (`core_pack`): `CorePackBuilder` (build) /
+      `CorePack::parse` (read), DEFLATE body via `oxiarc-deflate`, sparse
+      `i16` max-abs quantised target deltas, `QuantizationReport`. Backs the
+      shipped `assets/packs/oxihuman-core-v1.ohpk` (2,093,260 B, 38 CC0
+      targets, 21,833 base vertices, worst-case reconstruction error
+      0.011 mm) built by `oxihuman-cli pack-core`.
+- [x] Centralised export gate (`export_gate::ensure_export_allowed`): refuses
+      to serialise any `MeshBuffers` with `has_suit == false`; wired into
+      every human-facing exporter entry point (GLB, glTF-separate, OBJ, STL,
+      VRM, COLLADA, USD, 3MF, PLY, FBX, X3D, Alembic, LOD packs,
+      `auto_export`). Covered by the cross-crate `invariant_no_nude_mesh_stage`
+      regression test in `oxihuman-tests`.
+- [x] In-memory, filesystem-free byte builders (`build_glb_bytes`,
+      `build_glb_with_meta_bytes`, `build_glb_with_skeleton_bytes`,
+      `mesh_to_obj_string`, `mesh_to_stl_ascii`, `encode_stl_binary`,
+      `VrmExporter::export`, …) alongside the `Path`-based `export_*`
+      wrappers — what lets `oxihuman-wasm`'s browser exporters avoid
+      `std::fs` / `std::env::temp_dir()` panics on `wasm32`.
 
 ## Future Work
 

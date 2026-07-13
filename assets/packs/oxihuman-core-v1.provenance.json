@@ -1,0 +1,328 @@
+{
+  "pack": {
+    "age_floor_years": 18.0,
+    "base_vertex_count": 21833,
+    "bytes": 2093260,
+    "format": "OHPK v1",
+    "license": "CC0-1.0",
+    "name": "oxihuman-core-v1.ohpk",
+    "sha256": "09c4bb1f849fe5d2bc21db6dd8a8bf7c753ee58db185bc46ab4c6b8e0dc0f6f7",
+    "target_count": 38,
+    "tier": "core"
+  },
+  "targets": [
+    {
+      "affected_verts": 21833,
+      "category": "age",
+      "name": "macrodetails/african-female-young",
+      "sha256": "92d61eeb3c164b421fd5a7c3537ee45e7e1a51de4d49bf312e19c3df2be1d8fc",
+      "source": "makehuman/data/targets/macrodetails/african-female-young.target",
+      "source_affected_verts": 19158
+    },
+    {
+      "affected_verts": 21819,
+      "category": "age",
+      "name": "macrodetails/asian-female-young",
+      "sha256": "095fe79694fa19e1fe98d93009ec116199bd524e081c640351a10eccf2cca1eb",
+      "source": "makehuman/data/targets/macrodetails/asian-female-young.target",
+      "source_affected_verts": 19150
+    },
+    {
+      "affected_verts": 21819,
+      "category": "age",
+      "name": "macrodetails/caucasian-female-young",
+      "sha256": "118379f6e8ba9266247fdb8788a20e1df40a239f97ced0b9905bcbcc74f6e820",
+      "source": "makehuman/data/targets/macrodetails/caucasian-female-young.target",
+      "source_affected_verts": 19150
+    },
+    {
+      "affected_verts": 21819,
+      "category": "height",
+      "name": "macrodetails/height/female-young-averagemuscle-averageweight-maxheight",
+      "sha256": "3baacc70187410ebba2b62c56a53775266ab859b7844d47e658d36ee78493621",
+      "source": "makehuman/data/targets/macrodetails/height/female-young-averagemuscle-averageweight-maxheight.target",
+      "source_affected_verts": 19150
+    },
+    {
+      "affected_verts": 21819,
+      "category": "height",
+      "name": "macrodetails/height/female-young-averagemuscle-averageweight-minheight",
+      "sha256": "375857dff927f67da53786fc5ac0545c473f4959e3b326727b6b91f49ebdd2e3",
+      "source": "makehuman/data/targets/macrodetails/height/female-young-averagemuscle-averageweight-minheight.target",
+      "source_affected_verts": 19150
+    },
+    {
+      "affected_verts": 21819,
+      "category": "height",
+      "name": "macrodetails/height/male-young-averagemuscle-averageweight-maxheight",
+      "sha256": "3baacc70187410ebba2b62c56a53775266ab859b7844d47e658d36ee78493621",
+      "source": "makehuman/data/targets/macrodetails/height/male-young-averagemuscle-averageweight-maxheight.target",
+      "source_affected_verts": 19150
+    },
+    {
+      "affected_verts": 21819,
+      "category": "height",
+      "name": "macrodetails/height/male-young-averagemuscle-averageweight-minheight",
+      "sha256": "76a79d873dc0820ae336645903591f8e6a8adc69865210a6a66f49908caa810b",
+      "source": "makehuman/data/targets/macrodetails/height/male-young-averagemuscle-averageweight-minheight.target",
+      "source_affected_verts": 19150
+    },
+    {
+      "affected_verts": 1964,
+      "category": "measure",
+      "name": "measure/measure-bust-circ-decr",
+      "sha256": "3d4c9f8c7d084e4d6c35ffc3a798bc35bdbe80fd56929d03e0c6f1b31ec5c736",
+      "source": "makehuman/data/targets/measure/measure-bust-circ-decr.target",
+      "source_affected_verts": 1876
+    },
+    {
+      "affected_verts": 2061,
+      "category": "measure",
+      "name": "measure/measure-bust-circ-incr",
+      "sha256": "46394c7f9cdfac31654f14950b57bbfb874c9a2fa68e48c9cc3e7bba619b75f4",
+      "source": "makehuman/data/targets/measure/measure-bust-circ-incr.target",
+      "source_affected_verts": 1972
+    },
+    {
+      "affected_verts": 1450,
+      "category": "measure",
+      "name": "measure/measure-hips-circ-decr",
+      "sha256": "8a98e80047ab89148d60067aad3b452ce715eadcaf7a1e28402140dd1ac8fb11",
+      "source": "makehuman/data/targets/measure/measure-hips-circ-decr.target",
+      "source_affected_verts": 1387
+    },
+    {
+      "affected_verts": 1482,
+      "category": "measure",
+      "name": "measure/measure-hips-circ-incr",
+      "sha256": "e4294db231dd3283680e6be4b9d3d8d81aa7c575a32f937f8d0751b1ec3d6512",
+      "source": "makehuman/data/targets/measure/measure-hips-circ-incr.target",
+      "source_affected_verts": 1418
+    },
+    {
+      "affected_verts": 2229,
+      "category": "measure",
+      "name": "measure/measure-underbust-circ-decr",
+      "sha256": "94c7a07cf0b71a2a5f6e369ba9bf10e1e30ac2ef93596567f16178623867c186",
+      "source": "makehuman/data/targets/measure/measure-underbust-circ-decr.target",
+      "source_affected_verts": 2132
+    },
+    {
+      "affected_verts": 2280,
+      "category": "measure",
+      "name": "measure/measure-underbust-circ-incr",
+      "sha256": "aa6a8fa8385b127ac000b227e64c80dd97e09640bec69728636a23aa21d6cfdf",
+      "source": "makehuman/data/targets/measure/measure-underbust-circ-incr.target",
+      "source_affected_verts": 2181
+    },
+    {
+      "affected_verts": 1554,
+      "category": "measure",
+      "name": "measure/measure-waist-circ-decr",
+      "sha256": "6a976bd7819fa037a290b381bb3e04dfd04220dddeac194c476472295d2baba8",
+      "source": "makehuman/data/targets/measure/measure-waist-circ-decr.target",
+      "source_affected_verts": 1518
+    },
+    {
+      "affected_verts": 1554,
+      "category": "measure",
+      "name": "measure/measure-waist-circ-incr",
+      "sha256": "4949212ec9a5e227b177a029ee42b0be3fd3b273a211bc91c6f4d4dbf0334856",
+      "source": "makehuman/data/targets/measure/measure-waist-circ-incr.target",
+      "source_affected_verts": 1518
+    },
+    {
+      "affected_verts": 8312,
+      "category": "weight",
+      "name": "macrodetails/universal-female-old-maxmuscle-maxweight",
+      "sha256": "11549de05d8ab39daee36ca692a56a737f3778006a89684c56f70208c2e7c452",
+      "source": "makehuman/data/targets/macrodetails/universal-female-old-maxmuscle-maxweight.target",
+      "source_affected_verts": 7721
+    },
+    {
+      "affected_verts": 7415,
+      "category": "muscle",
+      "name": "macrodetails/universal-female-old-maxmuscle-minweight",
+      "sha256": "453f066a5972f59f40b238bc7d9e6ea68e96d0f1e49cf28f486c3c8c674c192b",
+      "source": "makehuman/data/targets/macrodetails/universal-female-old-maxmuscle-minweight.target",
+      "source_affected_verts": 6964
+    },
+    {
+      "affected_verts": 10187,
+      "category": "weight",
+      "name": "macrodetails/universal-female-old-minmuscle-maxweight",
+      "sha256": "788850da7e8e75f74f37003a91473270d84a6e599b5851ed7a6fecafff8fdbd8",
+      "source": "makehuman/data/targets/macrodetails/universal-female-old-minmuscle-maxweight.target",
+      "source_affected_verts": 9526
+    },
+    {
+      "affected_verts": 13292,
+      "category": "age",
+      "name": "macrodetails/universal-female-old-minmuscle-minweight",
+      "sha256": "806f995cb9356c70645da92a6b64dddbd8de9ac5480420f64b6d1a651cff254d",
+      "source": "makehuman/data/targets/macrodetails/universal-female-old-minmuscle-minweight.target",
+      "source_affected_verts": 12239
+    },
+    {
+      "affected_verts": 8346,
+      "category": "weight",
+      "name": "macrodetails/universal-female-young-maxmuscle-maxweight",
+      "sha256": "1b4600abf475b517db2379338a4d36a5f77fb1ad94fd0b210451bfeaa9e7e9b6",
+      "source": "makehuman/data/targets/macrodetails/universal-female-young-maxmuscle-maxweight.target",
+      "source_affected_verts": 7753
+    },
+    {
+      "affected_verts": 7482,
+      "category": "muscle",
+      "name": "macrodetails/universal-female-young-maxmuscle-minweight",
+      "sha256": "05351f0063429f4e1e484501b73997a6fb129b93939db355d108f98d5479fb10",
+      "source": "makehuman/data/targets/macrodetails/universal-female-young-maxmuscle-minweight.target",
+      "source_affected_verts": 7029
+    },
+    {
+      "affected_verts": 10484,
+      "category": "weight",
+      "name": "macrodetails/universal-female-young-minmuscle-maxweight",
+      "sha256": "66600ccaea3d4c54b1427c81f49160a7cbb2794fbcb7a695ec6e6a4743d72364",
+      "source": "makehuman/data/targets/macrodetails/universal-female-young-minmuscle-maxweight.target",
+      "source_affected_verts": 9798
+    },
+    {
+      "affected_verts": 21579,
+      "category": "age",
+      "name": "macrodetails/universal-female-young-minmuscle-minweight",
+      "sha256": "856167f0a03efedd69f91e1cbad065957c8e8fef6acaaaf5b85a32b0f018fa67",
+      "source": "makehuman/data/targets/macrodetails/universal-female-young-minmuscle-minweight.target",
+      "source_affected_verts": 18910
+    },
+    {
+      "affected_verts": 8835,
+      "category": "weight",
+      "name": "macrodetails/universal-male-old-maxmuscle-maxweight",
+      "sha256": "cf232cbd26aff7177ec6e264e0a1024a4bb7696168c8040270f1990711cb1d49",
+      "source": "makehuman/data/targets/macrodetails/universal-male-old-maxmuscle-maxweight.target",
+      "source_affected_verts": 8241
+    },
+    {
+      "affected_verts": 7601,
+      "category": "muscle",
+      "name": "macrodetails/universal-male-old-maxmuscle-minweight",
+      "sha256": "bfe62f32e70f1e178af19437c0e86af21a68afaaaffd0f255b5679d72545420b",
+      "source": "makehuman/data/targets/macrodetails/universal-male-old-maxmuscle-minweight.target",
+      "source_affected_verts": 7005
+    },
+    {
+      "affected_verts": 12065,
+      "category": "weight",
+      "name": "macrodetails/universal-male-old-minmuscle-maxweight",
+      "sha256": "57ba4273844dfbf03b5548059b577901502354845f30389d9f4b083689b636a2",
+      "source": "makehuman/data/targets/macrodetails/universal-male-old-minmuscle-maxweight.target",
+      "source_affected_verts": 11115
+    },
+    {
+      "affected_verts": 9177,
+      "category": "age",
+      "name": "macrodetails/universal-male-old-minmuscle-minweight",
+      "sha256": "2d2f1bc78b1ac1f87adcf4e632a58bfb1237ab1f4b8b5527f2e6907d38b2364d",
+      "source": "makehuman/data/targets/macrodetails/universal-male-old-minmuscle-minweight.target",
+      "source_affected_verts": 8596
+    },
+    {
+      "affected_verts": 8833,
+      "category": "weight",
+      "name": "macrodetails/universal-male-young-maxmuscle-maxweight",
+      "sha256": "95392741389537889a37dc67a7d8453c93b30f27131e3e622bee3f30d1d8738c",
+      "source": "makehuman/data/targets/macrodetails/universal-male-young-maxmuscle-maxweight.target",
+      "source_affected_verts": 8239
+    },
+    {
+      "affected_verts": 7635,
+      "category": "muscle",
+      "name": "macrodetails/universal-male-young-maxmuscle-minweight",
+      "sha256": "5873f11edc96fde72a79ec35fa1d292a6a1a594b5eadfd82d59faf48834561de",
+      "source": "makehuman/data/targets/macrodetails/universal-male-young-maxmuscle-minweight.target",
+      "source_affected_verts": 7033
+    },
+    {
+      "affected_verts": 12065,
+      "category": "weight",
+      "name": "macrodetails/universal-male-young-minmuscle-maxweight",
+      "sha256": "14580444f1480b1c6b396973f8c040cc36e5ca8914addf17d11c5a023a958de2",
+      "source": "makehuman/data/targets/macrodetails/universal-male-young-minmuscle-maxweight.target",
+      "source_affected_verts": 11115
+    },
+    {
+      "affected_verts": 9181,
+      "category": "age",
+      "name": "macrodetails/universal-male-young-minmuscle-minweight",
+      "sha256": "3af713db636eb41f32af5010981bad30efe743a3ab1d4a61c619c664b610a51a",
+      "source": "makehuman/data/targets/macrodetails/universal-male-young-minmuscle-minweight.target",
+      "source_affected_verts": 8600
+    },
+    {
+      "affected_verts": 7931,
+      "category": "weight",
+      "name": "macrodetails/universal-female-old-averagemuscle-maxweight",
+      "sha256": "c7ff884ece15a4ea161bf9843c9668261e486135aa4c408ecc88dd7e5bc366b2",
+      "source": "makehuman/data/targets/macrodetails/universal-female-old-averagemuscle-maxweight.target",
+      "source_affected_verts": 7453
+    },
+    {
+      "affected_verts": 7449,
+      "category": "age",
+      "name": "macrodetails/universal-female-old-averagemuscle-minweight",
+      "sha256": "ebb291456482aab827ca0d0bb3928553b422ee0fc6900ae9c9d5fa75195dc23a",
+      "source": "makehuman/data/targets/macrodetails/universal-female-old-averagemuscle-minweight.target",
+      "source_affected_verts": 7001
+    },
+    {
+      "affected_verts": 7027,
+      "category": "muscle",
+      "name": "macrodetails/universal-female-old-maxmuscle-averageweight",
+      "sha256": "c8ab63d583bd1bcf75a3bbbd6b5e43ee30782a704584ea01a3aecbfec510dc42",
+      "source": "makehuman/data/targets/macrodetails/universal-female-old-maxmuscle-averageweight.target",
+      "source_affected_verts": 6614
+    },
+    {
+      "affected_verts": 5660,
+      "category": "age",
+      "name": "macrodetails/universal-female-old-minmuscle-averageweight",
+      "sha256": "89c2756e3abacf3d2fb9fae1cc05e68c3e0a244ba2ff244a1f3831da5897a26b",
+      "source": "makehuman/data/targets/macrodetails/universal-female-old-minmuscle-averageweight.target",
+      "source_affected_verts": 5258
+    },
+    {
+      "affected_verts": 6324,
+      "category": "weight",
+      "name": "macrodetails/universal-female-young-averagemuscle-maxweight",
+      "sha256": "3648e7f9b34d947726161b563b90ba92b29860bac4c4f82aea3cec37bad2bb4e",
+      "source": "makehuman/data/targets/macrodetails/universal-female-young-averagemuscle-maxweight.target",
+      "source_affected_verts": 6027
+    },
+    {
+      "affected_verts": 7420,
+      "category": "age",
+      "name": "macrodetails/universal-female-young-averagemuscle-minweight",
+      "sha256": "e53a4afc87ac2703460a59e8290b1111478aeee5c02ece6735328c1f8c62eb63",
+      "source": "makehuman/data/targets/macrodetails/universal-female-young-averagemuscle-minweight.target",
+      "source_affected_verts": 6968
+    },
+    {
+      "affected_verts": 6963,
+      "category": "muscle",
+      "name": "macrodetails/universal-female-young-maxmuscle-averageweight",
+      "sha256": "2e56b09b44a8497b927585447fdaac5ea7293521d1f3a3df1059495873c53f4e",
+      "source": "makehuman/data/targets/macrodetails/universal-female-young-maxmuscle-averageweight.target",
+      "source_affected_verts": 6547
+    }
+  ],
+  "upstream": {
+    "base_mesh": {
+      "path": "makehuman/data/3dobjs/base.obj",
+      "sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c"
+    },
+    "commit": "1f508f6083b2f823dab15de924b3bde72e08d77c",
+    "repo": "https://github.com/makehumancommunity/makehuman",
+    "tag": "v1.3.0"
+  }
+}

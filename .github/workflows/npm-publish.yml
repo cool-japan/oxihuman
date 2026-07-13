@@ -37,6 +37,10 @@ env:
   # Size thresholds (bytes)
   WASM_SIZE_LIMIT_WARN: 5242880    # 5 MB (warning)
   WASM_SIZE_LIMIT_HARD: 15728640   # 15 MB (fail)
+  # Repo-relative path to the release core asset pack. Must exist by the
+  # time this workflow actually publishes -- see the "Package completeness"
+  # step in the publish job, which fails loudly (by design) if it is absent.
+  PACK_ASSET: "assets/packs/oxihuman-core-v1.ohpk"
 
 jobs:
   build:
@@ -44,6 +48,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -60,14 +69,43 @@ jobs:
           key: wasm-build-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: wasm-build-
 
+      # wgpu/webgpu MUST NOT reach the browser bundle: oxihuman-viewer's
+      # optional `webgpu` feature (dep:wgpu) is not part of the wasm build's
+      # default feature set, but a future change could accidentally pull it
+      # in transitively. Fail loudly rather than silently shipping a wgpu
+      # dependency (and its native GPU backends) into a wasm32 target.
+      - name: Assert no wgpu in the wasm32 dependency graph
+        run: |
+          set +e
+          TREE_OUTPUT=$(cargo tree -p oxihuman-wasm --target wasm32-unknown-unknown --no-default-features --features bindgen 2>&1)
+          TREE_STATUS=$?
+          set -e
+          if [ "$TREE_STATUS" -ne 0 ]; then
+            echo "FAIL: 'cargo tree' itself failed (exit ${TREE_STATUS}):" >&2
+            echo "$TREE_OUTPUT" >&2
+            exit 1
+          fi
+
+          set +e
+          echo "$TREE_OUTPUT" | grep -i wgpu
+          GREP_STATUS=$?
+          set -e
+          if [ "$GREP_STATUS" -eq 0 ]; then
+            echo "FAIL: wgpu found in the oxihuman-wasm wasm32 (bindgen) dependency graph shown above." >&2
+            echo "wgpu/webgpu must never reach the published wasm32 bundle." >&2
+            exit 1
+          fi
+          echo "PASS: wgpu is not present in the oxihuman-wasm wasm32 (bindgen) dependency graph."
+
       - name: Install wasm-pack
         run: cargo install wasm-pack --version ${{ env.WASM_PACK_VERSION }} --locked || true
 
       - name: Install wasm-opt (via binaryen)
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends binaryen
+          sudo apt-get install -y --no-install-recommends binaryen binutils
           wasm-opt --version
+          strings --version
 
       - name: Build for bundler target
         working-directory: crates/oxihuman-wasm
@@ -87,6 +125,30 @@ jobs:
             echo "Optimizing: $WASM_FILE"
             wasm-opt -Oz --enable-simd "$WASM_FILE" -o "$WASM_FILE"
           fi
+
+      # Second, independent check for the wgpu exclusion invariant: scan the
+      # actual compiled/optimized binary for wgpu/webgpu symbol strings, in
+      # case a dependency pulled it in without "wgpu" appearing as a crate
+      # name in `cargo tree` (e.g. a renamed re-export).
+      - name: Scan built WASM binary for wgpu symbol strings (defense in depth)
+        working-directory: crates/oxihuman-wasm
+        run: |
+          WASM_FILE=$(find pkg-bundler -name "*.wasm" | head -1)
+          if [ -z "$WASM_FILE" ]; then
+            echo "FAIL: no .wasm file found in pkg-bundler to scan." >&2
+            exit 1
+          fi
+
+          set +e
+          MATCHES=$(strings "$WASM_FILE" | grep -i 'wgpu')
+          GREP_STATUS=$?
+          set -e
+          if [ "$GREP_STATUS" -eq 0 ]; then
+            echo "FAIL: wgpu symbol strings found in built ${WASM_FILE}:" >&2
+            echo "$MATCHES" >&2
+            exit 1
+          fi
+          echo "PASS: no wgpu symbol strings found in ${WASM_FILE}."
 
       - name: Build for web target
         working-directory: crates/oxihuman-wasm
@@ -124,6 +186,42 @@ jobs:
           if [ -n "$WASM_FILE" ]; then
             echo "Optimizing: $WASM_FILE"
             wasm-opt -Oz --enable-simd "$WASM_FILE" -o "$WASM_FILE"
+          fi
+
+      # Single source of truth for the gzip budget is
+      # crates/oxihuman-wasm/wasm-opt.toml's `wasm_gzip_budget_bytes` key --
+      # edit that file, not this workflow, to change the budget.
+      - name: Gzip size gate (budget from wasm-opt.toml)
+        working-directory: crates/oxihuman-wasm
+        run: |
+          BUDGET_LINE=$(grep -E '^\s*wasm_gzip_budget_bytes\s*=' wasm-opt.toml || true)
+          if [ -z "$BUDGET_LINE" ]; then
+            echo "FAIL: 'wasm_gzip_budget_bytes' not found in wasm-opt.toml" >&2
+            exit 1
+          fi
+          BUDGET=$(echo "$BUDGET_LINE" | sed -E 's/^[^=]*=\s*//' | tr -d '_ \r')
+          if ! [[ "$BUDGET" =~ ^[0-9]+$ ]]; then
+            echo "FAIL: could not parse a numeric wasm_gzip_budget_bytes value (got: '$BUDGET')" >&2
+            exit 1
+          fi
+          echo "Gzip size budget (from wasm-opt.toml): ${BUDGET} bytes"
+
+          FAIL=0
+          for dir in pkg-bundler pkg-web pkg-node; do
+            for WASM_FILE in ${dir}/*.wasm; do
+              [ ! -f "$WASM_FILE" ] && continue
+              GZIP_SIZE=$(gzip -9 -c "$WASM_FILE" | wc -c)
+              echo "Checking $WASM_FILE: gzip size ${GZIP_SIZE} bytes (budget ${BUDGET} bytes)"
+              if [ "$GZIP_SIZE" -gt "$BUDGET" ]; then
+                echo "  FAIL: exceeds gzip budget of ${BUDGET} bytes" >&2
+                FAIL=1
+              else
+                echo "  PASS: within gzip budget"
+              fi
+            done
+          done
+          if [ "$FAIL" -eq 1 ]; then
+            exit 1
           fi
 
       - name: Rename packages to @cooljapan/oxihuman
@@ -184,6 +282,16 @@ jobs:
             exit 1
           fi
 
+      # Exercises the actual nodejs-target build: constructs the engine,
+      # checks get_version() against the workspace version, and (once the
+      # release core pack exists) loads it and checks vertex_count. See
+      # scripts/npm_smoke_test.mjs for the full assertion list -- it fails
+      # loudly rather than skipping when an expected asset/API is missing.
+      - name: Pre-publish smoke test (nodejs target)
+        working-directory: crates/oxihuman-wasm
+        run: |
+          node ../../scripts/npm_smoke_test.mjs pkg-node "../../${PACK_ASSET}"
+
       - name: Upload bundler package
         uses: actions/upload-artifact@v4
         with:
@@ -210,6 +318,8 @@ jobs:
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -222,13 +332,110 @@ jobs:
           name: npm-pkg-bundler
           path: pkg-bundler
 
+      - name: Download web package
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-pkg-web
+          path: pkg-web
+
+      # Package completeness gate. Every published tarball MUST contain the
+      # LICENSE, the release core asset pack, and the web-target build --
+      # missing any of these fails the job rather than publishing a partial
+      # package. Also wires up package.json so `.`, `./web` and `./pack`
+      # resolve to distinct, non-colliding files.
+      - name: Assemble complete package (LICENSE, core pack, web target, exports map)
+        working-directory: pkg-bundler
+        run: |
+          set -euo pipefail
+
+          echo "=== 1. LICENSE ==="
+          cp ../LICENSE ./LICENSE
+          echo "Copied LICENSE"
+
+          echo "=== 2. Core asset pack (${PACK_ASSET}) ==="
+          PACK_SRC="../${PACK_ASSET}"
+          if [ ! -f "$PACK_SRC" ]; then
+            echo "FAIL: required asset '${PACK_ASSET}' not found at repo root." >&2
+            echo "Refusing to publish an incomplete ${NPM_PACKAGE} package." >&2
+            exit 1
+          fi
+          PACK_BASENAME="$(basename "$PACK_SRC")"
+          mkdir -p pack
+          cp "$PACK_SRC" "pack/${PACK_BASENAME}"
+          echo "Copied core pack -> pack/${PACK_BASENAME}"
+
+          echo "=== 3. Web target (./web subpath) ==="
+          if [ ! -d ../pkg-web ]; then
+            echo "FAIL: pkg-web artifact directory not found." >&2
+            exit 1
+          fi
+          mkdir -p web
+          cp ../pkg-web/*.js web/ 2>/dev/null || true
+          cp ../pkg-web/*.wasm web/ 2>/dev/null || true
+          cp ../pkg-web/*.d.ts web/ 2>/dev/null || true
+          WEB_JS=$(find web -maxdepth 1 -name '*.js' | head -1)
+          WEB_WASM=$(find web -maxdepth 1 -name '*.wasm' | head -1)
+          if [ -z "$WEB_JS" ] || [ -z "$WEB_WASM" ]; then
+            echo "FAIL: web/ subpath is missing its .js or .wasm entry after copy." >&2
+            exit 1
+          fi
+          echo "Copied web target -> web/ ($(basename "$WEB_JS"), $(basename "$WEB_WASM"))"
+
+          echo "=== 4. package.json files[] + exports{} ==="
+          PACK_BASENAME="$PACK_BASENAME" node <<'NODE_SCRIPT'
+          const fs = require('fs');
+
+          const pkgPath = './package.json';
+          const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+
+          const mainEntry = pkg.main || 'oxihuman_wasm.js';
+          const typesEntry = pkg.types || mainEntry.replace(/\.js$/, '.d.ts');
+
+          const webFiles = fs.readdirSync('web');
+          const webJs = webFiles.find((f) => f.endsWith('.js'));
+          const webDts = webFiles.find((f) => f.endsWith('.d.ts') && !f.endsWith('_bg.wasm.d.ts'));
+          if (!webJs) {
+            console.error('FAIL: no .js glue file found under web/');
+            process.exit(1);
+          }
+
+          const packBasename = process.env.PACK_BASENAME;
+          if (!packBasename) {
+            console.error('FAIL: PACK_BASENAME environment variable not set');
+            process.exit(1);
+          }
+
+          const filesSet = new Set(pkg.files || []);
+          filesSet.add('LICENSE');
+          filesSet.add('web/');
+          filesSet.add(`pack/${packBasename}`);
+          pkg.files = Array.from(filesSet);
+
+          const webExport = webDts
+            ? { types: `./web/${webDts}`, default: `./web/${webJs}` }
+            : { default: `./web/${webJs}` };
+
+          pkg.exports = {
+            '.': {
+              types: `./${typesEntry}`,
+              default: `./${mainEntry}`,
+            },
+            './web': webExport,
+            './pack': `./pack/${packBasename}`,
+            './package.json': './package.json',
+          };
+
+          fs.writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
+          console.log('Updated package.json: files[] and exports{}');
+          NODE_SCRIPT
+
       - name: Show package contents
         run: |
           echo "=== package.json ==="
           cat pkg-bundler/package.json
           echo ""
-          echo "=== Files ==="
-          ls -la pkg-bundler/
+          echo "=== Files (recursive) ==="
+          find pkg-bundler -maxdepth 3 -type f | sort
 
       # Dry run (default for workflow_dispatch, or RC tags)
       - name: Publish (dry-run)

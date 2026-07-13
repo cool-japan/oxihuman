@@ -1,10 +1,10 @@
 # oxihuman-core -- TODO
 
-> Version: 0.2.0 | Updated: 2026-06-19
+> Version: 0.2.1 | Updated: 2026-07-13
 
 ## Status: Stable
 
-Core foundation crate. ~829 source files, ~175k lines. 0 stubs. 33,410 passing tests.
+Core foundation crate. ~829 source files, ~175k lines. 0 stubs. 5,571 passing tests.
 
 ## Completed
 
@@ -75,6 +75,6 @@ Core foundation crate. ~829 source files, ~175k lines. 0 stubs. 33,410 passing t
 - [x] AABB tree (2D and 3D)
 
 ### Testing and Benchmarks
-- [x] 33,410 unit tests passing
+- [x] 5,571 unit tests passing
 - [x] Criterion benchmarks (`core_bench`)
 - [x] proptest dev-dependency available

@@ -2,13 +2,13 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Version:** 0.2.0 | **Status:** Stable | **Updated:** 2026-06-19
+**Version:** 0.2.1 | **Status:** Stable | **Updated:** 2026-07-13
 
 | Metric | Value |
 |--------|-------|
-| Passing tests | 4,974 |
+| Passing tests | 4,988 |
 | Public API items | 9,528 |
-| Source files | ~880 `.rs` files |
+| Source files | 879 `.rs` files (359 not wired into the module tree) |
 | Stub modules | 0 |
 
 ---
@@ -74,7 +74,7 @@ oxihuman-physics.workspace = true
 | `render_graph` | Declarative render graph with automatic dependency ordering |
 | `scene` | Scene graph — nodes, transforms, visibility |
 | `scene_compositor` | Multi-layer scene compositing |
-| `scene_visibility` | Frustum and occlusion visibility queries |
+| `occlusion_cull` | Occlusion culling and visibility queries (frustum culling: `frustum_cull_view`) |
 | `shader_library` | Compiled shader cache and hot-reload |
 | `gpu_buffer` | Typed GPU buffer management (vertex, index, uniform, storage) |
 | `texture_cache` | Texture asset cache with mip generation |
@@ -106,9 +106,6 @@ oxihuman-physics.workspace = true
 | `light_volume_v2` | Volumetric light scattering volumes (v2) |
 | `light_bake` | CPU-side lightmap baking pipeline |
 | `light_scatter` | Single-scattering atmosphere integration |
-| `shadow_cascade_view` | Cascaded Shadow Maps (CSM) view management |
-| `shadow_caster` | Per-light shadow map rendering |
-| `contact_shadow` | Screen-space contact shadow |
 
 ---
 
@@ -146,11 +143,11 @@ oxihuman-physics.workspace = true
 
 | Module | Description |
 |--------|-------------|
-| `bloom` | Physically-based bloom (dual Kawase) |
+| `post_process` | Bloom, SSAO, tone-mapping, FXAA, and vignette config aggregator |
 | `lens_distortion` | Barrel / pincushion lens distortion |
 | `chromatic_shift_view` | Chromatic aberration |
 | `film_grain` | Film grain noise overlay |
-| `motion_blur` | Per-object and camera motion blur |
+| `motion_blur_tile` | Tile-based motion blur (per-tile velocity reconstruction) |
 
 #### Advanced Rendering — Partial Stubs
 
@@ -233,7 +230,7 @@ oxihuman-physics.workspace = true
 | Scene graph | Stable | Production-ready |
 | GPU buffer / texture cache | Stable | Production-ready |
 | Camera systems | Stable | Production-ready |
-| Lighting (all types) | Stable / Beta | Shadow cascade is Beta |
+| Lighting (all types) | Stable / Beta | Cascade/atlas shadow-map source present, not wired in |
 | IBL / environment | Stable | |
 | Post-processing — color | Alpha | API may change |
 | Post-processing — artistic | Alpha | Stub implementations |

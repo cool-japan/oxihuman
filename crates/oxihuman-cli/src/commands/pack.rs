@@ -14,10 +14,43 @@ use oxihuman_core::{
 use oxihuman_export::asset_bundle::{bundle_from_dir, export_bundle, AssetBundle as OxbBundle};
 use oxihuman_export::pack::{build_pack, PackBuilderConfig};
 use oxihuman_export::{
-    from_target_files, morph_delta_stats, pack_mesh_assets, quantize_mesh, quantize_stats,
-    write_morph_delta_bin, write_quantized_bin,
+    from_target_files, morph_delta_stats, pack_mesh_assets_with_options, quantize_mesh,
+    quantize_stats, write_morph_delta_bin, write_quantized_bin,
 };
 use oxihuman_mesh::MeshBuffers;
+
+// ── policy helpers ───────────────────────────────────────────────────────────
+
+/// Partition a list of target/asset name *stems* into `(allowed, rejected)`
+/// per `policy`, using the same `is_target_allowed(name, &[])` name-based
+/// check that `oxihuman_export::pack::build_pack` already applies for
+/// `pack-build`. Shared with `wizard.rs`'s pack-wizard target scan.
+pub(crate) fn partition_by_policy<'a>(
+    names: &'a [String],
+    policy: &Policy,
+) -> (Vec<&'a str>, Vec<&'a str>) {
+    let mut allowed = Vec::new();
+    let mut rejected = Vec::new();
+    for name in names {
+        if policy.is_target_allowed(name, &[]) {
+            allowed.push(name.as_str());
+        } else {
+            rejected.push(name.as_str());
+        }
+    }
+    (allowed, rejected)
+}
+
+/// Print a clear, consistent rejection notice for names blocked by policy.
+pub(crate) fn warn_rejected(command: &str, rejected: &[&str]) {
+    if !rejected.is_empty() {
+        eprintln!(
+            "OxiHuman: {command}: {} target(s) rejected by policy: {}",
+            rejected.len(),
+            rejected.join(", ")
+        );
+    }
+}
 
 // ── pack-build ────────────────────────────────────────────────────────────────
 
@@ -95,6 +128,7 @@ pub fn cmd_quantize(args: &[String]) -> Result<()> {
     let mut base: Option<PathBuf> = None;
     let mut output: Option<PathBuf> = None;
     let mut stats = false;
+    let mut strict = false;
 
     let mut i = 0;
     while i < args.len() {
@@ -110,6 +144,9 @@ pub fn cmd_quantize(args: &[String]) -> Result<()> {
             "--stats" => {
                 stats = true;
             }
+            "--strict" => {
+                strict = true;
+            }
             other => bail!("unknown option: {}", other),
         }
         i += 1;
@@ -120,6 +157,23 @@ pub fn cmd_quantize(args: &[String]) -> Result<()> {
 
     if !base.exists() {
         bail!("base mesh not found: {}", base.display());
+    }
+
+    let policy = if strict {
+        Policy::new(PolicyProfile::Strict)
+    } else {
+        Policy::new(PolicyProfile::Standard)
+    };
+    let base_name = base
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("base")
+        .to_string();
+    if !policy.is_target_allowed(&base_name, &[]) {
+        bail!(
+            "quantize: input '{}' rejected by policy (blocked tag in name)",
+            base_name
+        );
     }
 
     let src = std::fs::read_to_string(&base)
@@ -168,6 +222,7 @@ pub fn cmd_morph_export(args: &[String]) -> Result<()> {
     let mut targets_dir: Option<PathBuf> = None;
     let mut output: Option<PathBuf> = None;
     let mut max_targets: Option<usize> = None;
+    let mut strict = false;
 
     let mut i = 0;
     while i < args.len() {
@@ -188,6 +243,9 @@ pub fn cmd_morph_export(args: &[String]) -> Result<()> {
                 i += 1;
                 max_targets = Some(args[i].parse()?);
             }
+            "--strict" => {
+                strict = true;
+            }
             other => bail!("unknown option: {}", other),
         }
         i += 1;
@@ -203,6 +261,12 @@ pub fn cmd_morph_export(args: &[String]) -> Result<()> {
     if !targets_dir.exists() {
         bail!("targets directory not found: {}", targets_dir.display());
     }
+
+    let policy = if strict {
+        Policy::new(PolicyProfile::Strict)
+    } else {
+        Policy::new(PolicyProfile::Standard)
+    };
 
     let src = std::fs::read_to_string(&base)
         .with_context(|| format!("reading OBJ: {}", base.display()))?;
@@ -222,6 +286,7 @@ pub fn cmd_morph_export(args: &[String]) -> Result<()> {
     }
 
     let mut target_pairs: Vec<(String, oxihuman_core::parser::target::TargetFile)> = Vec::new();
+    let mut rejected_names: Vec<String> = Vec::new();
     for entry in &entries {
         let path = entry.path();
         let name = path
@@ -229,12 +294,18 @@ pub fn cmd_morph_export(args: &[String]) -> Result<()> {
             .and_then(|s| s.to_str())
             .unwrap_or_default()
             .to_string();
+        if !policy.is_target_allowed(&name, &[]) {
+            rejected_names.push(name);
+            continue;
+        }
         let text = std::fs::read_to_string(&path)
             .with_context(|| format!("reading target: {}", path.display()))?;
         let tf = parse_target(&name, &text)
             .with_context(|| format!("parsing target: {}", path.display()))?;
         target_pairs.push((name, tf));
     }
+    let rejected_refs: Vec<&str> = rejected_names.iter().map(|s| s.as_str()).collect();
+    warn_rejected("morph-export", &rejected_refs);
 
     let ref_pairs: Vec<(String, &oxihuman_core::parser::target::TargetFile)> =
         target_pairs.iter().map(|(n, t)| (n.clone(), t)).collect();
@@ -265,6 +336,8 @@ pub fn cmd_zip_pack(args: &[String]) -> Result<()> {
     let mut base: Option<PathBuf> = None;
     let mut targets_dir: Option<PathBuf> = None;
     let mut output: Option<PathBuf> = None;
+    let mut strict = false;
+    let mut deflate = false;
 
     let mut i = 0;
     while i < args.len() {
@@ -281,6 +354,12 @@ pub fn cmd_zip_pack(args: &[String]) -> Result<()> {
                 i += 1;
                 output = Some(PathBuf::from(&args[i]));
             }
+            "--strict" => {
+                strict = true;
+            }
+            "--deflate" => {
+                deflate = true;
+            }
             other => bail!("unknown option: {}", other),
         }
         i += 1;
@@ -296,6 +375,12 @@ pub fn cmd_zip_pack(args: &[String]) -> Result<()> {
     if !targets_dir.exists() {
         bail!("targets directory not found: {}", targets_dir.display());
     }
+
+    let policy = if strict {
+        Policy::new(PolicyProfile::Strict)
+    } else {
+        Policy::new(PolicyProfile::Standard)
+    };
 
     // Build GLB from base OBJ
     let src = std::fs::read_to_string(&base)
@@ -327,17 +412,39 @@ pub fn cmd_zip_pack(args: &[String]) -> Result<()> {
         "targets": targets_dir.display().to_string(),
     }))?;
 
-    // Build manifest JSON (list of .target file names)
-    let target_names: Vec<String> = std::fs::read_dir(&targets_dir)
+    // Build manifest JSON (list of .target file names), filtered by policy so
+    // blocked-tag target names never end up embedded in the pack manifest.
+    let all_target_files: Vec<(String, String)> = std::fs::read_dir(&targets_dir)
         .with_context(|| format!("reading targets dir: {}", targets_dir.display()))?
         .flatten()
         .filter(|e| e.path().extension().map(|x| x == "target").unwrap_or(false))
-        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .map(|e| {
+            let filename = e.file_name().to_string_lossy().into_owned();
+            let stem = e
+                .path()
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or(&filename)
+                .to_string();
+            (filename, stem)
+        })
         .collect();
+    let mut target_names: Vec<String> = Vec::new();
+    let mut rejected_names: Vec<String> = Vec::new();
+    for (filename, stem) in &all_target_files {
+        if policy.is_target_allowed(stem, &[]) {
+            target_names.push(filename.clone());
+        } else {
+            rejected_names.push(stem.clone());
+        }
+    }
+    let rejected_refs: Vec<&str> = rejected_names.iter().map(|s| s.as_str()).collect();
+    warn_rejected("zip-pack", &rejected_refs);
     let manifest_json = serde_json::to_vec(&serde_json::json!({ "targets": target_names }))?;
 
-    let result = pack_mesh_assets(&glb_bytes, &params_json, &manifest_json, &output)
-        .with_context(|| format!("writing ZIP to {}", output.display()))?;
+    let result =
+        pack_mesh_assets_with_options(&glb_bytes, &params_json, &manifest_json, &output, deflate)
+            .with_context(|| format!("writing ZIP to {}", output.display()))?;
 
     println!(
         "Written ZIP pack: {} entries → {}",
@@ -358,6 +465,7 @@ pub fn cmd_asset_bundle(args: &[String]) -> Result<()> {
     let mut targets_dir: Option<PathBuf> = None;
     let mut output: Option<PathBuf> = None;
     let mut manifest: Option<PathBuf> = None;
+    let mut strict = false;
 
     let mut i = 0;
     while i < args.len() {
@@ -378,6 +486,9 @@ pub fn cmd_asset_bundle(args: &[String]) -> Result<()> {
                 i += 1;
                 manifest = Some(PathBuf::from(&args[i]));
             }
+            "--strict" => {
+                strict = true;
+            }
             other => bail!("unknown option: {}", other),
         }
         i += 1;
@@ -393,6 +504,12 @@ pub fn cmd_asset_bundle(args: &[String]) -> Result<()> {
     if !targets_dir.exists() {
         bail!("targets directory not found: {}", targets_dir.display());
     }
+
+    let policy = if strict {
+        Policy::new(PolicyProfile::Strict)
+    } else {
+        Policy::new(PolicyProfile::Standard)
+    };
 
     // Load the OBJ file bytes.
     let obj_bytes =
@@ -414,11 +531,21 @@ pub fn cmd_asset_bundle(args: &[String]) -> Result<()> {
         .with_context(|| format!("reading OBJ: {}", base.display()))?;
     let _obj = parse_obj(&obj_src).context("parsing OBJ")?;
 
-    // Scan the targets directory and add each .target file.
+    // Scan the targets directory and add each file, filtered by policy so
+    // blocked-tag targets are never bundled.
     let target_bundle = bundle_from_dir(&targets_dir)
         .with_context(|| format!("scanning targets dir: {}", targets_dir.display()))?;
     let target_count = target_bundle.entry_count();
+    let mut rejected_names: Vec<String> = Vec::new();
     for name in target_bundle.entry_names() {
+        let stem = std::path::Path::new(name)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or(name);
+        if !policy.is_target_allowed(stem, &[]) {
+            rejected_names.push(stem.to_string());
+            continue;
+        }
         if let Some(entry) = target_bundle.get(name) {
             let entry_data = entry.data.clone();
             // Avoid name collisions with base OBJ by prefixing with "targets/".
@@ -426,6 +553,8 @@ pub fn cmd_asset_bundle(args: &[String]) -> Result<()> {
             bundle.add_bytes(bundle_name, entry_data).ok(); // skip duplicates silently
         }
     }
+    let rejected_refs: Vec<&str> = rejected_names.iter().map(|s| s.as_str()).collect();
+    warn_rejected("asset-bundle", &rejected_refs);
 
     // Optionally include manifest bytes.
     if let Some(ref mp) = manifest {

@@ -50,6 +50,7 @@ pub mod service_worker;
 // Engine implementation sub-modules (private; re-exported via `engine`).
 mod engine_anim;
 mod engine_core;
+mod engine_fit;
 mod engine_io;
 mod engine_targets;
 
@@ -63,7 +64,9 @@ pub mod ts_types;
 
 // Re-exports for public API surface.
 pub use buffer::parse_mesh_bytes_header;
-pub use engine::{Particle, ParticleSystem, WasmEngine};
+pub use engine::{
+    age_param_to_years, age_years_to_param, Particle, ParticleSystem, WasmEngine, MODEL_UNIT_CM,
+};
 
 /// Buffer format tag for the raw mesh bytes returned by `build_mesh_bytes()`.
 /// Layout: [n_verts: u32 LE][n_idx: u32 LE][positions: f32*3*n][normals: f32*3*n][uvs: f32*2*n][indices: u32*m]

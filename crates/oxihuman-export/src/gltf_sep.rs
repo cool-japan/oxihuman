@@ -9,9 +9,10 @@
 use anyhow::{bail, Result};
 use bytemuck::cast_slice;
 use oxihuman_mesh::mesh::MeshBuffers;
-use oxihuman_mesh::suit::ensure_suit_mesh;
 use serde_json::json;
 use std::path::Path;
+
+use crate::export_gate::ensure_export_allowed;
 
 /// Export a mesh as separated GLTF 2.0 files.
 ///
@@ -22,7 +23,7 @@ use std::path::Path;
 /// Returns Err if `mesh.has_suit` is false (safety check).
 /// If `mesh.colors` is Some, a COLOR_0 accessor is included in the output.
 pub fn export_gltf_sep(mesh: &MeshBuffers, gltf_path: &Path, bin_path: &Path) -> Result<()> {
-    ensure_suit_mesh(mesh)?;
+    ensure_export_allowed(mesh)?;
 
     // Validate extensions
     if gltf_path.extension().and_then(|e| e.to_str()) != Some("gltf") {

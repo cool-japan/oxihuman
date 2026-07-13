@@ -7,22 +7,36 @@
 //! the full wizard flow can be exercised in unit tests using `std::io::Cursor`
 //! and `Vec<u8>` without touching the real terminal.
 
+use std::collections::HashMap;
 use std::io::{BufRead, Write};
 use std::path::PathBuf;
 
 use anyhow::{ensure, Context, Result};
 
-use oxihuman_core::asset_pack_builder::{AssetPackBuilder, AssetPackMeta};
+use oxihuman_core::asset_pack_builder::{
+    AssetPackBuilder, AssetPackMeta, MorphPreset, TextureAsset, TextureFormat,
+};
+use oxihuman_core::policy::{Policy, PolicyProfile};
+use oxihuman_core::{csv_row_count, detect_format, parse_csv, ImageFormat};
+
+use crate::commands::pack::partition_by_policy;
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /// Entry point for tests / programmatic callers: accepts any `BufRead` +
 /// `Write` pair so the wizard can run without a real terminal.
 pub fn cmd_pack_wizard_io<R: BufRead, W: Write>(
-    _args: &[String],
+    args: &[String],
     reader: &mut R,
     writer: &mut W,
 ) -> Result<()> {
+    let strict = args.iter().any(|a| a == "--strict");
+    let policy = if strict {
+        Policy::new(PolicyProfile::Strict)
+    } else {
+        Policy::new(PolicyProfile::Standard)
+    };
+
     // ── Step 1: Pack metadata ────────────────────────────────────────────────
     writeln!(writer, "=== OxiHuman Asset Pack Wizard ===").ok();
     writeln!(writer).ok();
@@ -81,6 +95,7 @@ pub fn cmd_pack_wizard_io<R: BufRead, W: Write>(
         &targets_dir,
         texture_dir.as_deref(),
         preset_csv.as_deref(),
+        &policy,
         writer,
     )?;
 
@@ -178,8 +193,9 @@ pub fn prompt_optional_path<R: BufRead, W: Write>(
 
 // ── Internal build logic ──────────────────────────────────────────────────────
 
-/// Scan `targets_dir` for `.target` files and build the OXP bytes.
-/// Prints a progress dot per file to `writer`.
+/// Scan `targets_dir` for `.target` files (filtered by `policy`), optionally
+/// ingest a `texture_dir` of raster images and a `preset_csv` of morph
+/// presets, and build the OXP bytes. Prints progress markers to `writer`.
 #[allow(clippy::too_many_arguments)]
 fn build_pack_from_wizard<W: Write>(
     pack_name: &str,
@@ -187,8 +203,9 @@ fn build_pack_from_wizard<W: Write>(
     version: &str,
     license: &str,
     targets_dir: &std::path::Path,
-    _texture_dir: Option<&std::path::Path>,
-    _preset_csv: Option<&std::path::Path>,
+    texture_dir: Option<&std::path::Path>,
+    preset_csv: Option<&std::path::Path>,
+    policy: &Policy,
     writer: &mut W,
 ) -> Result<Vec<u8>> {
     let mut builder = AssetPackBuilder::new(pack_name);
@@ -201,7 +218,7 @@ fn build_pack_from_wizard<W: Write>(
     };
     builder.set_meta(meta);
 
-    // Scan .target files in the targets directory.
+    // ── Targets: scan .target files, filtered by policy ──────────────────────
     let mut entries: Vec<std::fs::DirEntry> = std::fs::read_dir(targets_dir)
         .with_context(|| format!("reading targets dir: {}", targets_dir.display()))?
         .flatten()
@@ -209,19 +226,198 @@ fn build_pack_from_wizard<W: Write>(
         .collect();
     entries.sort_by_key(|e| e.path());
 
+    let stems: Vec<String> = entries
+        .iter()
+        .map(|e| {
+            e.path()
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("unknown")
+                .to_string()
+        })
+        .collect();
+    let (_allowed, rejected) = partition_by_policy(&stems, policy);
+    if !rejected.is_empty() {
+        writeln!(
+            writer,
+            "  {} target(s) rejected by policy: {}",
+            rejected.len(),
+            rejected.join(", ")
+        )
+        .ok();
+    }
+
     write!(writer, "  ").ok();
-    for entry in &entries {
+    for (entry, name) in entries.iter().zip(stems.iter()) {
+        if !policy.is_target_allowed(name, &[]) {
+            continue;
+        }
         let path = entry.path();
-        let name = path
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("unknown")
-            .to_string();
         let data = std::fs::read(&path)
             .with_context(|| format!("reading target file: {}", path.display()))?;
-        builder.add_target(oxihuman_core::asset_pack_builder::TargetDelta { name, data });
+        builder.add_target(oxihuman_core::asset_pack_builder::TargetDelta {
+            name: name.clone(),
+            data,
+        });
         write!(writer, ".").ok();
         writer.flush().ok();
+    }
+    writeln!(writer).ok();
+
+    // ── Textures: decode every recognised raster image in texture_dir ────────
+    if let Some(td) = texture_dir {
+        writeln!(writer, "  scanning textures in {}...", td.display()).ok();
+        let mut tex_entries: Vec<std::fs::DirEntry> = std::fs::read_dir(td)
+            .with_context(|| format!("reading texture dir: {}", td.display()))?
+            .flatten()
+            .filter(|e| e.file_type().map(|t| t.is_file()).unwrap_or(false))
+            .collect();
+        tex_entries.sort_by_key(|e| e.path());
+
+        for entry in &tex_entries {
+            let path = entry.path();
+            let bytes = std::fs::read(&path)
+                .with_context(|| format!("reading texture file: {}", path.display()))?;
+            let format = detect_format(&bytes);
+            let decoded = match format {
+                ImageFormat::Png => Some((oxihuman_core::png_decode(&bytes), TextureFormat::Png)),
+                ImageFormat::Jpeg => Some((
+                    oxihuman_core::jpeg_decode(&bytes)
+                        .map_err(|e| oxihuman_core::ImageError::DecodeError(e.to_string())),
+                    TextureFormat::Jpeg,
+                )),
+                ImageFormat::Gif => Some((
+                    oxihuman_core::gif_decode(&bytes)
+                        .map_err(|e| oxihuman_core::ImageError::DecodeError(e.to_string())),
+                    TextureFormat::Png,
+                )),
+                ImageFormat::Tiff => Some((
+                    oxihuman_core::tiff_decode(&bytes)
+                        .map_err(|e| oxihuman_core::ImageError::DecodeError(e.to_string())),
+                    TextureFormat::Png,
+                )),
+                ImageFormat::Webp => Some((
+                    oxihuman_core::webp_decode(&bytes)
+                        .map_err(|e| oxihuman_core::ImageError::DecodeError(e.to_string())),
+                    TextureFormat::Png,
+                )),
+                _ => None,
+            };
+
+            let Some((decode_result, tex_format)) = decoded else {
+                writeln!(
+                    writer,
+                    "    skip (unrecognised image format): {}",
+                    path.display()
+                )
+                .ok();
+                continue;
+            };
+
+            let raw = decode_result
+                .with_context(|| format!("decoding texture image: {}", path.display()))?;
+            let pixel_count = raw.width * raw.height;
+            if pixel_count == 0 || raw.pixels.len() % pixel_count != 0 {
+                writeln!(
+                    writer,
+                    "    skip (inconsistent pixel data): {}",
+                    path.display()
+                )
+                .ok();
+                continue;
+            }
+            let channels = (raw.pixels.len() / pixel_count) as u8;
+            if !(1..=4).contains(&channels) {
+                writeln!(
+                    writer,
+                    "    skip (unsupported channel count {}): {}",
+                    channels,
+                    path.display()
+                )
+                .ok();
+                continue;
+            }
+
+            let name = path
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("texture")
+                .to_string();
+            let texture = TextureAsset {
+                name: name.clone(),
+                width: raw.width as u32,
+                height: raw.height as u32,
+                channels,
+                data: raw.pixels,
+                format: tex_format,
+            };
+            builder
+                .add_texture(texture)
+                .with_context(|| format!("adding texture '{}'", name))?;
+            write!(writer, ".").ok();
+            writer.flush().ok();
+        }
+        writeln!(writer).ok();
+    }
+
+    // ── Presets: parse preset_csv into MorphPreset entries ────────────────────
+    if let Some(csv_path) = preset_csv {
+        writeln!(writer, "  parsing presets from {}...", csv_path.display()).ok();
+        let csv_text = std::fs::read_to_string(csv_path)
+            .with_context(|| format!("reading preset CSV: {}", csv_path.display()))?;
+        let table = parse_csv(&csv_text);
+        ensure!(
+            table.headers.iter().any(|h| h == "name"),
+            "preset CSV must have a 'name' column: {}",
+            csv_path.display()
+        );
+
+        let param_cols: Vec<&str> = table
+            .headers
+            .iter()
+            .map(|h| h.as_str())
+            .filter(|h| *h != "name" && *h != "description" && *h != "tags")
+            .collect();
+
+        for row in 0..csv_row_count(&table) {
+            let name = oxihuman_core::csv_field(&table, row, "name")
+                .unwrap_or_default()
+                .to_string();
+            if name.is_empty() {
+                continue;
+            }
+            let description = oxihuman_core::csv_field(&table, row, "description")
+                .unwrap_or_default()
+                .to_string();
+            let tags: Vec<String> = oxihuman_core::csv_field(&table, row, "tags")
+                .unwrap_or_default()
+                .split(';')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+
+            let mut params: HashMap<String, f64> = HashMap::new();
+            for col in &param_cols {
+                if let Some(raw) = oxihuman_core::csv_field(&table, row, col) {
+                    if let Ok(v) = raw.trim().parse::<f64>() {
+                        params.insert((*col).to_string(), v);
+                    }
+                }
+            }
+
+            let preset = MorphPreset {
+                name: name.clone(),
+                description,
+                params,
+                tags,
+            };
+            builder
+                .add_preset(preset)
+                .with_context(|| format!("adding preset '{}'", name))?;
+            write!(writer, ".").ok();
+            writer.flush().ok();
+        }
+        writeln!(writer).ok();
     }
 
     builder.build()
@@ -403,6 +599,131 @@ mod tests {
         let _ = std::fs::remove_file(&output_path);
         let _ = std::fs::remove_file(&manifest_path);
 
+        Ok(())
+    }
+
+    // ── Test 4: texture-dir and preset-CSV inputs are actually wired in ──────
+
+    #[test]
+    fn wizard_ingests_textures_and_presets() -> Result<()> {
+        use oxihuman_core::asset_pack_builder::load_pack_from_bytes;
+        use oxihuman_core::png_encode_rgb;
+
+        let tmp = std::env::temp_dir().join(format!(
+            "oxihuman_wizard_test_textures_presets_{}",
+            std::process::id()
+        ));
+        std::fs::create_dir_all(&tmp)?;
+
+        let targets_dir = tmp.join("targets");
+        std::fs::create_dir_all(&targets_dir)?;
+        std::fs::write(targets_dir.join("height-up.target"), b"1 0.1 0.0 0.0\n")?;
+
+        // A tiny 2x2 RGB PNG.
+        let texture_dir = tmp.join("textures");
+        std::fs::create_dir_all(&texture_dir)?;
+        let pixels: Vec<u8> = vec![255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 0];
+        let png_bytes = png_encode_rgb(2, 2, &pixels).context("encoding test PNG")?;
+        std::fs::write(texture_dir.join("skin_albedo.png"), &png_bytes)?;
+
+        // A 2-row preset CSV with one numeric param column.
+        let preset_csv = tmp.join("presets.csv");
+        std::fs::write(
+            &preset_csv,
+            "name,description,tags,height\nTall,Above average,body;height,1.5\nShort,Below average,body,0.5\n",
+        )?;
+
+        let output_path = tmp.join("bundle.oxp");
+        let input_lines = vec![
+            "textured_pack",
+            "COOLJAPAN OU",
+            "0.1.0",
+            "Apache-2.0",
+            targets_dir.to_str().unwrap_or_default(),
+            texture_dir.to_str().unwrap_or_default(),
+            preset_csv.to_str().unwrap_or_default(),
+            output_path.to_str().unwrap_or_default(),
+        ];
+        let mut reader = make_input(&input_lines);
+        let mut writer: Vec<u8> = Vec::new();
+
+        cmd_pack_wizard_io(&[], &mut reader, &mut writer)?;
+
+        let pack_bytes = std::fs::read(&output_path)?;
+        let index = load_pack_from_bytes(&pack_bytes).context("loading built pack")?;
+
+        assert_eq!(index.textures.len(), 1, "one texture must be ingested");
+        assert_eq!(index.textures[0].name, "skin_albedo");
+        assert_eq!(index.textures[0].width, 2);
+        assert_eq!(index.textures[0].height, 2);
+
+        assert_eq!(
+            index.presets.len(),
+            2,
+            "both preset CSV rows must be ingested"
+        );
+        let tall = index
+            .presets
+            .iter()
+            .find(|p| p.name == "Tall")
+            .expect("Tall preset must exist");
+        assert!((tall.params.get("height").copied().unwrap_or(0.0) - 1.5).abs() < 1e-9);
+        assert!(tall.tags.contains(&"height".to_string()));
+
+        assert!(
+            index.target_names.iter().any(|n| n == "height-up"),
+            "target must still be ingested alongside textures/presets"
+        );
+
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    // ── Test 5: policy gate rejects blocked-tag target names ──────────────────
+
+    #[test]
+    fn wizard_filters_blocked_targets_by_policy() -> Result<()> {
+        use oxihuman_core::asset_pack_builder::load_pack_from_bytes;
+
+        let tmp = std::env::temp_dir().join(format!(
+            "oxihuman_wizard_test_policy_{}",
+            std::process::id()
+        ));
+        std::fs::create_dir_all(&tmp)?;
+        std::fs::write(tmp.join("height-up.target"), b"1 0.1 0.0 0.0\n")?;
+        std::fs::write(tmp.join("explicit-pose.target"), b"1 0.1 0.0 0.0\n")?;
+
+        let output_path = tmp.join("filtered.oxp");
+        let input_lines = vec![
+            "policy_pack",
+            "COOLJAPAN OU",
+            "0.1.0",
+            "Apache-2.0",
+            tmp.to_str().unwrap_or_default(),
+            "",
+            "",
+            output_path.to_str().unwrap_or_default(),
+        ];
+        let mut reader = make_input(&input_lines);
+        let mut writer: Vec<u8> = Vec::new();
+
+        cmd_pack_wizard_io(&[], &mut reader, &mut writer)?;
+
+        let pack_bytes = std::fs::read(&output_path)?;
+        let index = load_pack_from_bytes(&pack_bytes).context("loading built pack")?;
+        assert!(index.target_names.iter().any(|n| n == "height-up"));
+        assert!(
+            !index.target_names.iter().any(|n| n == "explicit-pose"),
+            "blocked-tag target must be excluded from the pack"
+        );
+
+        let output_text = String::from_utf8_lossy(&writer);
+        assert!(
+            output_text.contains("rejected by policy"),
+            "wizard output should note rejected targets"
+        );
+
+        let _ = std::fs::remove_dir_all(&tmp);
         Ok(())
     }
 }

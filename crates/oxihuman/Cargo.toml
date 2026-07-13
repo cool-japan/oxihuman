@@ -7,10 +7,10 @@ license.workspace = true
 repository.workspace = true
 homepage      = "https://github.com/cool-japan/oxihuman"
 documentation = "https://docs.rs/oxihuman"
-description   = "Privacy-first, client-side human body generator — pure Rust MakeHuman port (facade crate)"
+description   = "Privacy-first, client-side human body generator in pure Rust — MakeHuman-compatible independent implementation (facade crate)"
 readme        = "README.md"
 keywords      = ["human", "makehuman", "3d", "mesh", "pure-rust"]
-categories    = ["graphics", "game-development", "science", "rendering"]
+categories    = ["graphics", "games", "science", "rendering"]
 
 [dependencies]
 anyhow.workspace           = true

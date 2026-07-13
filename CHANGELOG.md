@@ -5,6 +5,125 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - Unreleased
+
+The **BodyLab production release**: a fully client-side, browser-ready human
+body generator. Ships the first real CC0 asset pack (OHPK v1), in-memory
+browser exports, a live three.js demo, a measurement-fit solver, and the legal
+/ safety cleanroom that makes the whole thing shippable.
+
+### Added
+- **M0 — Legal & safety cleanroom.** Added the clean-room verification record
+  [`docs/CLEANROOM_AUDIT.md`](docs/CLEANROOM_AUDIT.md), the CC0 provenance chain
+  [`PROVENANCE.md`](PROVENANCE.md) with a machine-checkable
+  [`scripts/check_provenance.sh`](scripts/check_provenance.sh) (verifies the
+  pack SHA-256, the sidecar `.provenance.json`, all 38 bundled targets + the
+  base mesh against the upstream CC0 manifest, and the `alpha_pack` manifest
+  digest), [`CONTRIBUTING.md`](CONTRIBUTING.md) (forbidden-sources policy) and
+  [`NOTICE`](NOTICE). Safety by construction: a named regression test
+  `invariant_no_nude_mesh_stage`, an export gate enforced on every export entry
+  point (GLB / VRM / OBJ / STL / COLLADA / USD / 3MF / X3D), a client-side age
+  floor clamp (18 y for the shipped core pack), and [`SAFETY.md`](SAFETY.md).
+- **M1 — Asset pack + OHPK v1 format.** New `core_pack` container in
+  `oxihuman-export` and the `oxihuman-cli pack-core` command
+  (`crates/oxihuman-cli/src/commands/pack_core.rs`, with `--report`) that builds
+  the shipped [`assets/packs/oxihuman-core-v1.ohpk`](assets/packs) — 2,093,260 B,
+  38 CC0 morph targets (30 macrodetails corners + 8 `measure/` girth targets),
+  21,833 base vertices, sparse `i16` max-abs quantised deltas (worst-case
+  reconstruction error 0.011 mm, see
+  [`docs/bench/pack-reconstruction-error.md`](docs/bench/pack-reconstruction-error.md)).
+  Added `scripts/fetch_upstream_assets.sh`, a precise cross-section body
+  measurer (`oxihuman-morph` `measurements/cross_section.rs`, `body_measurement`,
+  `units.rs`) that reads convex-hull tape circumferences of the isolated torso.
+- **M2 — Browser exports + measurement fit.** `WasmEngine` gains in-memory,
+  filesystem-free exporters `export_glb` / `export_vrm` / `export_stl` /
+  `export_obj` (feature-gated behind `bindgen`), the
+  `from_core_pack_bytes(bytes)` constructor that loads an OHPK pack directly in
+  the browser, and `fit_to_measurements` (`engine_fit.rs`): height solved
+  directly on the monotone stature response (bisection), Nelder–Mead over
+  `weight / muscle / gender`, then a lever-gated coordinate-descent refinement
+  over the `measure/` bust / underbust / waist / hips weights. The `brief-172`
+  probe fits to |Δ| ≤ 0.66 cm in ~0.9 s under Node (see
+  [`docs/bench/measurement-error.md`](docs/bench/measurement-error.md)). Also
+  adds hand-written TypeScript `interface` definitions (`ts_types.rs`)
+  injected into the generated `.d.ts` for richer IDE type hints on the WASM
+  API.
+- **M3 — BodyLab demo.** A fully static [`demo/`](demo/) app (parameter sliders,
+  live preview, browser GLB/OBJ/STL export) rendering with **three.js r160**
+  vendored under `demo/vendor/` (`three.module.min.js`, `OrbitControls.js`; see
+  `demo/vendor/VENDOR.md`), split into `demo/src/{viewer,controls,badges}.js`.
+  Added `scripts/build_demo.sh` (one-shot WASM + pack bundling) and
+  `scripts/demo_serve_check.sh` (serves the static site and asserts every
+  referenced asset returns 200). Verified end-to-end in headless Chrome.
+- **M4 — Zero-copy geometry, benchmarks, CI.** Zero-copy geometry hand-off for
+  three.js/WebGL: `wasm_memory()`, `refresh_geometry()`, `positions_ptr()` /
+  `positions_len()` expose the engine's vertex buffer as a `Float32Array` view
+  with no JS-side copy. Reproducible bench harness: `web/bench/fps_bench.mjs`
+  (engine morph cost, p50 ≈ 0.52 ms/frame at 21,833 verts), `web/bench/sizes.sh`,
+  `scripts/wasm_node_check.mjs` (60 checks), `scripts/validate_exports.mjs`
+  (25 checks), `scripts/measure_roundtrip.sh`, and the `docs/bench/` reports.
+  Hardened `.github/workflows/npm-publish.yml` with a gzip size gate that reads
+  the single-source-of-truth budget from `crates/oxihuman-wasm/wasm-opt.toml`.
+
+### Changed
+- Workspace version bumped from `0.2.0` to `0.2.1`.
+- Branding reworded across the workspace from "pure Rust MakeHuman port" to
+  "MakeHuman-compatible independent implementation (reads `.target` / `.mhclo`
+  formats)" — root `Cargo.toml` and the `oxihuman` facade crate description.
+- Routine dependency maintenance: `oxiarc-deflate` `0.3.3` → `0.3.5`, `anyhow`
+  `1.0.102` → `1.0.103`, `wasm-bindgen` `0.2.125` → `0.2.126`, `wasm-bindgen-test`
+  `0.3.75` → `0.3.76`.
+- Removed the unused `js-sys` dependency from `oxihuman-wasm` (zero references
+  anywhere in the workspace; caught by `cargo-udeps` on the `bindgen` feature).
+
+### Fixed
+- **`export_glb` (and every wasm exporter) panicked on wasm32 (P0).** The
+  exporters reached `std::fs` / `std::env::temp_dir()`, which *panics* on
+  wasm32 (no filesystem); the trap poisoned the engine object's wasm-bindgen
+  `WasmRefCell` borrow flag, so every subsequent call failed with "recursive use
+  of an object detected". All exporters now use the in-memory byte builders from
+  `oxihuman-export`, so a single engine instance can export repeatedly in the
+  browser.
+- **Macro corner targets summed into a giant — partition-of-unity composition
+  (P0).** The ~30 macrodetails corner targets were being *summed*, so at the
+  neutral slider centre the base mesh ballooned. `oxihuman-wasm` now composes
+  them as a partition of unity (`gender · age · muscle · weight` product blend,
+  with a monotone stature handling for the height corners and a 1/3 ethnicity
+  share), so neutral sliders yield the base body and each slider drives a
+  realistically-scaled result.
+- **Pack targets applied to permuted vertices — index remap (P0).** Earlier
+  packs stored `.target` deltas in raw MakeHuman v-line order while the pack's
+  base mesh stores vertices in the OBJ loader's face-first-occurrence order
+  (21,833 packed verts after UV-seam splits vs 19,158 v-lines), so every target
+  deformed the wrong vertices and the localised `measure/` girth targets moved
+  noise. `oxihuman-cli pack-core` now re-indexes every target through the
+  loader's raw→packed mapping (duplicating each delta across seam copies,
+  verified by the `pack_core` invariant tests); the lever-gated girth refinement
+  now engages end-to-end and every girth residual is sub-1.5 cm.
+- **CLI de-stubs.** Real animation export (`pc2` / `mdd` / `anim-bake` via
+  `commands/anim_params.rs`) and pack / pipeline command fixes replace prior
+  placeholders.
+
+### Removed
+- **SMPL / SMPL-X export modules deleted** (`smpl_export.rs`, `smplx_export.rs`)
+  per the forbidden-sources policy — OxiHuman ships no SMPL-family shape basis.
+- Six dead / phantom export modules that were never reachable from the public
+  API or were superseded duplicates: `glb_export.rs`, `obj_export.rs`,
+  `obj_export_v2.rs`, `stl_export.rs`, `stl_export_v2.rs`, `three_mf_export.rs`.
+
+### Testing
+- **33,569 tests** (up from 33,410 in 0.2.0) — 0 failures across the full
+  `--workspace --all-features` suite, including the new OHPK round-trip, pack
+  index-remap invariants, measurement/fit round-trip, export well-formedness,
+  and the `invariant_no_nude_mesh_stage` safety regression.
+- 0 clippy warnings (workspace, all targets, all features) · 0 `unwrap` /
+  `expect` in production code · `cargo fmt` clean.
+
+> **Publish to crates.io / npm: awaiting approval.** This release is prepared
+> and verified but not yet published.
+
+---
+
 ## [0.2.0] - 2026-06-19
 
 ### Added

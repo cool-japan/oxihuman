@@ -149,6 +149,58 @@ export interface MeshBytes {
 "#;
 
     // -----------------------------------------------------------------------
+    // Custom TypeScript section: core-pack loading + zero-copy geometry
+    // -----------------------------------------------------------------------
+
+    /// Custom TypeScript section documenting the recommended engine bootstrap
+    /// (OHPK core pack) and the zero-copy per-frame geometry pattern.
+    #[wasm_bindgen(typescript_custom_section)]
+    const TS_CORE_PACK_AND_ZERO_COPY: &'static str = r#"
+/**
+ * ## Recommended bootstrap: OHPK core pack
+ *
+ * ```ts
+ * const bytes = new Uint8Array(await (await fetch(packUrl)).arrayBuffer());
+ * const engine = OxiHumanEngine.from_core_pack_bytes(bytes);
+ * engine.set_param("height", 0.7); // pack targets are driven by params
+ * ```
+ *
+ * The pack's `age_floor_years` (if declared) clamps the `age` parameter;
+ * read it via `engine.age_floor_years()`.
+ *
+ * ## Zero-copy per-frame geometry (no per-frame copies into JS)
+ *
+ * The engine owns persistent, stable-address geometry buffers inside WASM
+ * linear memory. After changing params, call `refresh_geometry()` (cheap,
+ * incremental, writes in place) and read the buffers through typed-array
+ * views:
+ *
+ * ```ts
+ * const memory: WebAssembly.Memory = wasm_memory();
+ * let gen = engine.refresh_geometry();
+ * let positions = new Float32Array(memory.buffer, engine.positions_ptr(), engine.positions_len());
+ * let normals   = new Float32Array(memory.buffer, engine.normals_ptr(),   engine.normals_len());
+ * let indices   = new Uint32Array (memory.buffer, engine.indices_ptr(),   engine.indices_len());
+ *
+ * function frame(t: number) {
+ *   engine.set_param("weight", 0.5 + 0.5 * Math.sin(t));
+ *   const g = engine.refresh_geometry();
+ *   // Re-create views when (a) the mesh generation bumped (topology /
+ *   // vertex-count change) or (b) WASM memory grew (buffer identity change
+ *   // detaches all existing views).
+ *   if (g !== gen || positions.buffer !== memory.buffer) {
+ *     gen = g;
+ *     positions = new Float32Array(memory.buffer, engine.positions_ptr(), engine.positions_len());
+ *     normals   = new Float32Array(memory.buffer, engine.normals_ptr(),   engine.normals_len());
+ *     indices   = new Uint32Array (memory.buffer, engine.indices_ptr(),   engine.indices_len());
+ *   }
+ *   // Upload `positions` / `normals` to WebGL/WebGPU without copying in JS.
+ * }
+ * ```
+ */
+"#;
+
+    // -----------------------------------------------------------------------
     // Custom TypeScript section: ServiceWorkerConfig interface
     // -----------------------------------------------------------------------
 

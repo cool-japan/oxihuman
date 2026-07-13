@@ -19,8 +19,14 @@ pub mod apply;
 #[path = "blend_profile.rs"]
 pub mod blend_profile;
 
+#[path = "body_measurement.rs"]
+pub mod body_measurement;
+
 #[path = "cache.rs"]
 pub mod cache;
+
+#[path = "calibration.rs"]
+pub mod calibration;
 
 #[path = "colors.rs"]
 pub mod colors;

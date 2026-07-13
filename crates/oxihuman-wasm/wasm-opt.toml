@@ -5,9 +5,10 @@ lto = true               # Link-time optimization
 codegen-units = 1        # Single codegen unit for better optimization
 
 [wasm]
-# Target size budget: < 2MB gzipped for core functionality
-size_budget_bytes = 2_097_152
-# Features to include in minimal build
-minimal_features = ["core", "morph"]
-# Features for full build
-full_features = ["core", "morph", "mesh", "export", "physics"]
+# Gzip'd size budget (bytes) for the release oxihuman_wasm_bg.wasm build.
+#
+# This is the single source of truth consumed by the "Gzip size gate" step
+# in .github/workflows/npm-publish.yml -- change the budget here, not in
+# the workflow. Measured as:
+#   gzip -9 -c <pkg-dir>/oxihuman_wasm_bg.wasm | wc -c
+wasm_gzip_budget_bytes = 2_097_152

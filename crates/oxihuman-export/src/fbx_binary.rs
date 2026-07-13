@@ -502,7 +502,12 @@ impl FbxBinaryWriter {
 /// node, and the corresponding Connections, ready for import into any
 /// FBX-compatible DCC tool.  Large arrays (> 512 elements)
 /// are automatically zlib-compressed per the FBX spec (encoding = 1).
+///
+/// Refuses (returns `Err`) when `mesh.has_suit` is `false` — see
+/// [`crate::export_gate::ensure_export_allowed`].
 pub fn export_mesh_fbx_binary(mesh: &MeshBuffers) -> anyhow::Result<Vec<u8>> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
+
     let mut writer = FbxBinaryWriter::new();
     writer.write_header()?;
 
@@ -755,6 +760,18 @@ mod tests {
             uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
             indices: vec![0, 1, 2],
             colors: None,
+            has_suit: true,
+        }
+    }
+
+    fn unsuited_mesh() -> MeshBuffers {
+        MeshBuffers {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            normals: vec![[0.0, 0.0, 1.0]; 3],
+            tangents: vec![[1.0, 0.0, 0.0, 1.0]; 3],
+            uvs: vec![[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
+            indices: vec![0, 1, 2],
+            colors: None,
             has_suit: false,
         }
     }
@@ -838,5 +855,14 @@ mod tests {
 
         let data = w.finish().expect("finish");
         assert!(data.len() > 300);
+    }
+
+    #[test]
+    fn test_export_mesh_fbx_binary_refuses_unsuited_mesh() {
+        let mesh = unsuited_mesh();
+        assert!(
+            export_mesh_fbx_binary(&mesh).is_err(),
+            "export_mesh_fbx_binary must refuse a mesh with has_suit = false"
+        );
     }
 }

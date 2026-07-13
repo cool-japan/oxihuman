@@ -37,7 +37,3 @@ oxihuman-test-utils = { path = "../oxihuman-test-utils" }
 [[test]]
 name    = "e2e_tests"
 path    = "tests/e2e_tests.rs"
-
-[[test]]
-name    = "unit_tests"
-path    = "tests/unit_tests.rs"

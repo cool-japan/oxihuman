@@ -4,9 +4,11 @@
 //! CLI subcommand implementations, split into logical groups.
 
 pub mod anim;
+pub mod anim_params;
 pub mod export;
 pub mod generate;
 pub mod info;
 pub mod misc;
 pub mod pack;
+pub mod pack_core;
 pub mod wizard;

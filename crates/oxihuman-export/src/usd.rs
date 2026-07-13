@@ -141,11 +141,16 @@ pub fn build_usda(mesh: &MeshBuffers, opts: &UsdExportOptions) -> String {
 // ── file-level exports ────────────────────────────────────────────────────────
 
 /// Export a single mesh to a `.usda` file.
+///
+/// Returns Err if the mesh has no suit applied (safety check via
+/// [`crate::export_gate::ensure_export_allowed`]). [`build_usda`] is the
+/// low-level string builder.
 pub fn export_usda(
     mesh: &MeshBuffers,
     path: &Path,
     opts: &UsdExportOptions,
 ) -> anyhow::Result<UsdExportStats> {
+    crate::export_gate::ensure_export_allowed(mesh)?;
     let content = build_usda(mesh, opts);
     let bytes = content.as_bytes();
 
@@ -167,11 +172,16 @@ pub fn export_usda(
 }
 
 /// Export multiple meshes as a USDA scene (each as a separate Mesh prim).
+///
+/// Returns Err if any mesh has no suit applied (safety check).
 pub fn export_usda_scene(
     meshes: &[(&MeshBuffers, &str)],
     path: &Path,
     opts: &UsdExportOptions,
 ) -> anyhow::Result<()> {
+    for (mesh, _name) in meshes {
+        crate::export_gate::ensure_export_allowed(mesh)?;
+    }
     let mut out = format!(
         "#usda 1.0\n(\n    defaultPrim = \"{root}\"\n    upAxis = \"{up}\"\n    metersPerUnit = {mpu}\n)\n\n",
         root = opts.root_name,
@@ -375,6 +385,19 @@ mod tests {
         let data: Vec<u32> = vec![0, 1, 2, 3];
         let result = format_int_array(&data);
         assert_eq!(result, "[0, 1, 2, 3]");
+    }
+
+    #[test]
+    fn test_export_usda_refuses_unsuited_mesh() {
+        let mut mesh = two_tri_mesh();
+        mesh.has_suit = false;
+        let opts = UsdExportOptions::default();
+        let path = std::env::temp_dir().join("test_export_unsuited.usda");
+        assert!(export_usda(&mesh, &path, &opts).is_err());
+        assert!(!path.exists());
+        let meshes: Vec<(&MeshBuffers, &str)> = vec![(&mesh, "Bad")];
+        assert!(export_usda_scene(&meshes, &path, &opts).is_err());
+        assert!(!path.exists());
     }
 
     #[test]
