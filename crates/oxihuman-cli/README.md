@@ -2,7 +2,7 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 193 passing | **Commands:** 30 subcommands | **Version:** 0.2.1 | **Updated:** 2026-07-13
+**Status:** Stable | **Tests:** 193 passing | **Commands:** 30 subcommands | **Version:** 0.2.2 | **Updated:** 2026-07-13
 
 Command-line interface for OxiHuman body generation and export. Binary: `oxihuman`
 

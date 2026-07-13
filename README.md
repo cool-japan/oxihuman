@@ -3,14 +3,14 @@
 **Privacy-first, client-side parametric human body generator — pure Rust, compiled to WebAssembly.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.2.1-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.2-green.svg)](CHANGELOG.md)
 [![Rust Edition](https://img.shields.io/badge/rust-edition%202021-orange.svg)](https://doc.rust-lang.org/edition-guide/rust-2021/)
 
 ![OxiHuman BodyLab: a lit 3-D human generated entirely in-browser from height / chest / waist / hip measurements, shown beside a live target / measured / Δ readout with a sub-centimetre fit and a "0 bytes uploaded" privacy badge.](docs/media/bodylab-hero.png)
 
 *The **BodyLab** demo: type real centimetres, press **Fit body**, and read an honest per-measurement Δ re-measured from the generated mesh — all on-device, `0 bytes uploaded`. [Try it below.](#demo)*
 
-> **Version 0.2.1** — Unreleased
+> **Version 0.2.2** — Unreleased
 > **Author**: COOLJAPAN OU (Team Kitasan)
 > **Repository**: https://github.com/cool-japan/oxihuman
 > **License**: Apache-2.0 (code) / CC0-1.0 (bundled body-mesh data)

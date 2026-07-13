@@ -2,7 +2,7 @@
 
 Core infrastructure for the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 5,571 passing | **Version:** 0.2.1 | **Updated:** 2026-07-13
+**Status:** Stable | **Tests:** 5,571 passing | **Version:** 0.2.2 | **Updated:** 2026-07-13
 
 ---
 
@@ -18,7 +18,7 @@ The crate is purely declarative in its public API surface — no hidden global m
 
 ```toml
 [dependencies]
-oxihuman-core = "0.2.1"
+oxihuman-core = "0.2.2"
 ```
 
 All subsystems are included by default with no feature flags required, except the optional `net` feature (off by default), which enables a `tokio`-backed TCP networking module for streaming/collaboration use cases.
@@ -68,7 +68,7 @@ All subsystems are included by default with no feature flags required, except th
 
 ## Stability
 
-All public items in this crate follow semantic versioning. The 0.2.1 release is considered stable for downstream consumption within the OxiHuman workspace. Breaking changes will be accompanied by a minor-version bump until a 1.0 release is declared.
+All public items in this crate follow semantic versioning. The 0.2.2 release is considered stable for downstream consumption within the OxiHuman workspace. Breaking changes will be accompanied by a minor-version bump until a 1.0 release is declared.
 
 ---
 

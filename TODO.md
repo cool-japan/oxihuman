@@ -1,7 +1,7 @@
 # OxiHuman TODO
 
 > Last updated: 2026-07-13
-> Version: 0.2.1 (unreleased — BodyLab production release, awaiting publish approval)
+> Version: 0.2.2 (in development)
 > Total SLoC: ~973,000 Rust (5,345 source files)
 > Tests: 33,569 passing · 0 clippy warnings (workspace, all features) · 0 `unwrap` in production
 
@@ -24,7 +24,7 @@
 
 ## Release Milestones
 
-### v0.2.1 (current) — Production Release (BodyLab)
+### v0.2.1 (released 2026-07-13) — Production Release (BodyLab)
 
 The fully client-side, browser-ready body generator. All milestones delivered:
 
@@ -243,7 +243,7 @@ All 44 stub files replaced with real implementations. Zero `todo!()` and zero `u
 - [x] Full documentation (rustdoc, user guide, developer guide, TypeScript examples)
 - [x] Security audit complete (security.rs: path sanitization, checked arithmetic, magic bytes; 1 low advisory)
 
-### v0.2.1 (current) — Production Release (BodyLab) — complete, see "Release Milestones" above for the full M0–M4 breakdown
+### v0.2.1 (released 2026-07-13) — Production Release (BodyLab) — complete, see "Release Milestones" above for the full M0–M4 breakdown
 
 ### v0.2.0 (released 2026-06-19) — 8 Algorithm De-fakes + 13 Dead-code Module Removals
 

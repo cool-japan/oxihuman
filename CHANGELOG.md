@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.1] - Unreleased
+## [0.2.2] - Unreleased
+
+## [0.2.1] - 2026-07-13
 
 The **BodyLab production release**: a fully client-side, browser-ready human
 body generator. Ships the first real CC0 asset pack (OHPK v1), in-memory
@@ -118,9 +120,6 @@ browser exports, a live three.js demo, a measurement-fit solver, and the legal
   and the `invariant_no_nude_mesh_stage` safety regression.
 - 0 clippy warnings (workspace, all targets, all features) · 0 `unwrap` /
   `expect` in production code · `cargo fmt` clean.
-
-> **Publish to crates.io / npm: awaiting approval.** This release is prepared
-> and verified but not yet published.
 
 ---
 

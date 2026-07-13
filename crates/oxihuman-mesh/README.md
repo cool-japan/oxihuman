@@ -21,7 +21,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 
 ```toml
 [dependencies]
-oxihuman-mesh = "0.2.1"
+oxihuman-mesh = "0.2.2"
 ```
 
 ## Module Reference

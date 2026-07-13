@@ -15,7 +15,7 @@ members = [
 ]
 
 [workspace.package]
-version       = "0.2.1"
+version       = "0.2.2"
 edition       = "2021"
 authors       = ["COOLJAPAN OU (Team KitaSan)"]
 license       = "Apache-2.0"
@@ -77,15 +77,15 @@ criterion   = { version = "0.8.2", features = ["html_reports"] }
 proptest    = "1.11.0"
 
 # Intra-workspace
-oxihuman         = { path = "crates/oxihuman",         version = "0.2.1" }
-oxihuman-core    = { path = "crates/oxihuman-core",    version = "0.2.1" }
-oxihuman-morph   = { path = "crates/oxihuman-morph",   version = "0.2.1" }
-oxihuman-mesh    = { path = "crates/oxihuman-mesh",    version = "0.2.1" }
-oxihuman-export  = { path = "crates/oxihuman-export",  version = "0.2.1" }
-oxihuman-physics = { path = "crates/oxihuman-physics", version = "0.2.1" }
-oxihuman-viewer  = { path = "crates/oxihuman-viewer",  version = "0.2.1" }
-oxihuman-wasm    = { path = "crates/oxihuman-wasm",    version = "0.2.1" }
-oxihuman-cli      = { path = "crates/oxihuman-cli",       version = "0.2.1" }
+oxihuman         = { path = "crates/oxihuman",         version = "0.2.2" }
+oxihuman-core    = { path = "crates/oxihuman-core",    version = "0.2.2" }
+oxihuman-morph   = { path = "crates/oxihuman-morph",   version = "0.2.2" }
+oxihuman-mesh    = { path = "crates/oxihuman-mesh",    version = "0.2.2" }
+oxihuman-export  = { path = "crates/oxihuman-export",  version = "0.2.2" }
+oxihuman-physics = { path = "crates/oxihuman-physics", version = "0.2.2" }
+oxihuman-viewer  = { path = "crates/oxihuman-viewer",  version = "0.2.2" }
+oxihuman-wasm    = { path = "crates/oxihuman-wasm",    version = "0.2.2" }
+oxihuman-cli      = { path = "crates/oxihuman-cli",       version = "0.2.2" }
 oxihuman-test-utils = { path = "crates/oxihuman-test-utils" }
 
 [workspace.lints.rust]

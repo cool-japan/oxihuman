@@ -2,7 +2,7 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Version:** 0.2.1 | **Status:** Stable | **Updated:** 2026-07-13
+**Version:** 0.2.2 | **Status:** Stable | **Updated:** 2026-07-13
 
 | Metric | Value |
 |--------|-------|

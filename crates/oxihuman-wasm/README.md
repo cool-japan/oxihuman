@@ -2,7 +2,7 @@
 
 Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side human body generator in pure Rust.
 
-**Status:** Stable | **Tests:** 198 passing | **API:** 78 WasmEngine methods | **Version:** 0.2.1 | **Updated:** 2026-07-13
+**Status:** Stable | **Tests:** 198 passing | **API:** 78 WasmEngine methods | **Version:** 0.2.2 | **Updated:** 2026-07-13
 
 WebAssembly bindings for OxiHuman — full browser-ready API via wasm-bindgen. `WasmEngine` is the native Rust engine (a thin wrapper around `oxihuman_morph::engine::HumanEngine`) exposing a flat, JS-friendly method surface; built with `--features bindgen`, it is surfaced to JavaScript/TypeScript through the `OxiHumanEngine` wasm-bindgen class (`wasm_api.rs`), enabling privacy-preserving, client-side human body generation with no server round-trips.
 
@@ -39,7 +39,7 @@ compiles for native testing and CLI pipelines.
 
 ```toml
 [dependencies]
-oxihuman-wasm = { version = "0.2.1", features = ["wasm"] }
+oxihuman-wasm = { version = "0.2.2", features = ["wasm"] }
 ```
 
 ---
@@ -237,7 +237,7 @@ Added in 0.2.1 (M2), implemented in `engine_fit.rs`.
 | `parse_mesh_bytes_header(buffer)` | Parse the format header from a binary mesh buffer; returns JSON with format version and field offsets |
 | `wasm_memory()` (feature `bindgen`) | Return the module's `WebAssembly.Memory` object, for building zero-copy typed-array views over `positions_ptr()` / `normals_ptr()` / `uvs_ptr()` / `indices_ptr()` |
 | `set_panic_hook()` (feature `bindgen`) | Install `console.error` as the Rust panic hook; call once at startup |
-| `get_version()` (feature `bindgen`) | Return the crate version string (e.g. `"0.2.1"`) |
+| `get_version()` (feature `bindgen`) | Return the crate version string (e.g. `"0.2.2"`) |
 
 ---
 

@@ -23,7 +23,7 @@ Part of the [OxiHuman](../../README.md) workspace — privacy-first, client-side
 
 ```toml
 [dependencies]
-oxihuman-export = "0.2.1"
+oxihuman-export = "0.2.2"
 ```
 
 ## Format Matrix

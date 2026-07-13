@@ -1,6 +1,6 @@
 # oxihuman -- TODO
 
-> Version: 0.2.1 | Updated: 2026-07-13
+> Version: 0.2.2 | Updated: 2026-07-13
 
 ## Status: Stable
 
