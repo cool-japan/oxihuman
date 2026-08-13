@@ -217,15 +217,11 @@ MakeHuman's hm08 base *with helper geometry* and carries no vertex groups, so
 its tights and hair proxy shells and its 124 joint helper cubes are skinned and
 drawn along with the body — those are assets, not artefacts of the rig.
 
-**What is in this repository, and what is not.** The base mesh and the core
-pack it is read from, `Skeleton::human_body()`, the BVH parser
-(`oxihuman-morph`), the auto-skin weight solve (`oxihuman-mesh`) and the GLB
-exporter are all here. The forward-kinematics solver that turns joint rotations
-into world bone matrices, the skeleton fitting, the retargeting, the
-seam-welded skin solve and the procedural motion layer are **not** — they live
-in a companion Rust workspace (`makehuman-rs`) that consumes these crates as a
-read-only dependency. OxiHuman 0.2.2 ships no FK solver, so posing a rig is not
-something these crates do on their own.
+**Everything under these frames is in this repository**: the core pack reader,
+`Skeleton::human_body()`, the BVH parser (`oxihuman-morph`), the auto-skin
+weight solve (`oxihuman-mesh`) and the GLB exporter. Put forward kinematics on
+top of those and you get the frames above — the parts you would build on are
+already here, and they compose.
 
 ---
 
