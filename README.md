@@ -179,6 +179,56 @@ fit (172 / 96 / 82 / 98) closes to |Δ| ≤ 0.66 cm.
 
 ---
 
+## The base mesh, rigged
+
+The shipped 21,833-vertex base mesh with `Skeleton::human_body()` fitted onto
+it, skinned, and deformed a frame at a time. Every frame below is real output,
+rendered offline from the same rest mesh, bone weights and per-frame skinning
+matrices the GLB exporter writes — not a re-simulation for the picture.
+
+<table>
+<tr>
+<td align="center" width="33%">
+<img src="docs/media/rigged-proxy-bvh.gif" width="240"
+     alt="A synthesized figure built from tube-shaped limbs raises both arms overhead and dips into a shallow squat, turning slowly as it moves.">
+</td>
+<td align="center" width="33%">
+<img src="docs/media/rigged-basemesh-bvh.gif" width="240"
+     alt="The OxiHuman base mesh, wearing its bodysuit, raises both arms overhead and dips into a shallow squat while turning slowly.">
+</td>
+<td align="center" width="33%">
+<img src="docs/media/rigged-basemesh-groove.gif" width="240"
+     alt="The OxiHuman base mesh, wearing its bodysuit, sways its hips, twists its torso and swings its arms through a repeating twelve-beat dance while turning slowly.">
+</td>
+</tr>
+<tr>
+<td align="center"><sub><b>Rig only</b> — a synthesized tube body, <i>not</i>
+OxiHuman geometry, so the skeleton and the motion can be read without the mesh
+in the way.</sub></td>
+<td align="center"><sub><b>Base mesh, imported motion</b> — the shipped pack
+driven by a BVH clip, 40 frames at 30 fps.</sub></td>
+<td align="center"><sub><b>Base mesh, composed motion</b> — no source file:
+nine layered oscillators over a beat clock, twelve beats at 100 bpm.</sub></td>
+</tr>
+</table>
+
+The figure is wearing the bodysuit the pack ships. The shipped mesh is
+MakeHuman's hm08 base *with helper geometry* and carries no vertex groups, so
+its tights and hair proxy shells and its 124 joint helper cubes are skinned and
+drawn along with the body — those are assets, not artefacts of the rig.
+
+**What is in this repository, and what is not.** The base mesh and the core
+pack it is read from, `Skeleton::human_body()`, the BVH parser
+(`oxihuman-morph`), the auto-skin weight solve (`oxihuman-mesh`) and the GLB
+exporter are all here. The forward-kinematics solver that turns joint rotations
+into world bone matrices, the skeleton fitting, the retargeting, the
+seam-welded skin solve and the procedural motion layer are **not** — they live
+in a companion Rust workspace (`makehuman-rs`) that consumes these crates as a
+read-only dependency. OxiHuman 0.2.2 ships no FK solver, so posing a rig is not
+something these crates do on their own.
+
+---
+
 ## Development
 
 ### Workspace layout
