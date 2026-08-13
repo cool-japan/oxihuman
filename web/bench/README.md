@@ -17,7 +17,7 @@ values here are never hardcoded into the page.
 
 | # | Number | Command | Last measured |
 |---|--------|---------|---------------|
-| 1 | WASM transfer size (raw / gzip) | `web/bench/sizes.sh` | **707.17 KB raw · 258.92 KB gzip** (`oxihuman_wasm_bg.wasm`) |
+| 1 | WASM transfer size (raw / gzip) | `web/bench/sizes.sh` | **498.43 KB raw · 208.42 KB gzip** (`oxihuman_wasm_bg.wasm`; Linux, rustc 1.97.1, `wasm-pack build --release`, workspace `[profile.release]` opt-level="z"/lto=true/codegen-units=1) |
 | 2 | Core-pack size (raw / gzip) | `web/bench/sizes.sh` | **2.00 MB raw · 1.97 MB gzip** (`oxihuman-core-v1.ohpk`, v3 index-remapped) — the container is already entropy-coded, so gzip barely helps |
 | 3 | Engine morph cost (p50 / p95, ms) | `node web/bench/fps_bench.mjs` | **p50 0.52 ms · p95 0.55 ms** → 1935 / 1818 fps CPU headroom |
 | 4 | End-to-end demo FPS | live badge on the demo canvas (`hud-fps`); see `fps_overlay.md` | **vsync-bound (≈60 fps)** on WebGL2 hardware |

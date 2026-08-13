@@ -103,10 +103,10 @@ Represents a single active particle. Carries `position` (Float32Array), `velocit
 
 | Method | Description |
 |--------|-------------|
-| `set_height(value)` | Set body height parameter (metres) |
-| `set_weight(value)` | Set body weight parameter (normalized) |
-| `set_muscle(value)` | Set musculature parameter |
-| `set_age(value)` | Set age parameter |
+| `set_height(value)` | Set body height parameter (normalized `[0.0, 1.0]`) |
+| `set_weight(value)` | Set body weight parameter (normalized `[0.0, 1.0]`) |
+| `set_muscle(value)` | Set musculature parameter (normalized `[0.0, 1.0]`) |
+| `set_age(value)` | Set age parameter (normalized `[0.0, 1.0]`) |
 | `set_param(key, value)` | Set any named parameter by string key |
 | `reset_params()` | Reset all body parameters to defaults |
 | `reset_all_weights()` | Reset all morph target blend weights to zero |
@@ -342,11 +342,11 @@ const packBytes = new Uint8Array(await fetch("targets.zip").then(r => r.arrayBuf
 const count = engine.load_zip_pack_bytes(packBytes);
 console.log(`Loaded ${count} targets`);
 
-// Set body parameters
-engine.set_param("height", 1.75);
+// Set body parameters (all normalized [0.0, 1.0])
+engine.set_param("height", 0.7);
 engine.set_param("weight", 0.4);
 engine.set_param("muscle", 0.6);
-engine.set_param("age", 30.0);
+engine.set_param("age", 0.5);
 
 // Build mesh and use binary data
 const meshBytes = engine.build_mesh_bytes();

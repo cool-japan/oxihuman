@@ -93,3 +93,16 @@ dead_code = "allow"
 
 [workspace.lints.clippy]
 too_many_arguments = "allow"
+
+# Release profile tuned primarily for the oxihuman-wasm build's gzip'd
+# size budget (see crates/oxihuman-wasm/wasm-opt.toml's `wasm_gzip_budget_bytes`
+# and the "Gzip size gate" step in .github/workflows/npm-publish.yml).
+# Cargo profiles are workspace-wide (not per-target-triple on stable), so
+# this also applies opt-level="z" to native release builds (CLI/viewer/
+# physics); if that ever regresses native perf unacceptably, split it out
+# via a package-specific `[profile.release.package.oxihuman-wasm]` override
+# instead of reverting this section.
+[profile.release]
+opt-level = "z"      # Optimize for size (matches crates/oxihuman-wasm/wasm-opt.toml intent)
+lto = true            # Link-time optimization
+codegen-units = 1     # Single codegen unit for better optimization

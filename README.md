@@ -30,7 +30,7 @@ Measured, not aspirational, numbers as of this release:
 
 | Metric | Value |
 |---|---|
-| WASM web build (gzip) | ~259 KB (258.92 KB / 265,138 B, `oxihuman_wasm_bg.wasm`, release + wasm-opt) |
+| WASM web build (gzip) | ~208 KB (208.42 KB / 213,418 B, `oxihuman_wasm_bg.wasm`, release + wasm-opt; see [web/bench/README.md](web/bench/README.md#numbers--how-to-reproduce-them)) |
 | Core asset pack | `oxihuman-core-v1.ohpk`, 2,093,260 B (≈ 2.00 MB), 38 CC0-licensed morph targets (30 macro-shape corners + 8 `measure/` girth targets), 21,833 base vertices |
 | Worst-case quantisation error | 0.011 mm (see [docs/bench/pack-reconstruction-error.md](docs/bench/pack-reconstruction-error.md)) |
 | Measurement fit (`brief-172` probe) | \|Δ\| ≤ 0.66 cm, ~0.9 s for a four-measurement fit under Node (see [docs/bench/measurement-error.md](docs/bench/measurement-error.md)) |

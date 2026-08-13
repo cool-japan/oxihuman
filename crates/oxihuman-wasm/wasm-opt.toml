@@ -1,8 +1,11 @@
 # WASM optimization settings for oxihuman-wasm
-[profile.release]
-opt-level = "z"          # Optimize for size
-lto = true               # Link-time optimization
-codegen-units = 1        # Single codegen unit for better optimization
+#
+# NOTE: Cargo does NOT read [profile.*] sections from arbitrary TOML files --
+# only from the workspace root Cargo.toml (or a crate's own Cargo.toml for a
+# non-workspace build). The actual opt-level="z" / lto=true / codegen-units=1
+# release profile lives in the workspace root Cargo.toml's [profile.release]
+# section. This file's job is the [wasm] budget below; it is not itself
+# consumed by `cargo build`.
 
 [wasm]
 # Gzip'd size budget (bytes) for the release oxihuman_wasm_bg.wasm build.
@@ -11,4 +14,10 @@ codegen-units = 1        # Single codegen unit for better optimization
 # in .github/workflows/npm-publish.yml -- change the budget here, not in
 # the workflow. Measured as:
 #   gzip -9 -c <pkg-dir>/oxihuman_wasm_bg.wasm | wc -c
-wasm_gzip_budget_bytes = 2_097_152
+#
+# Last measured 2026-08-13 (Linux, rustc 1.97.1, `wasm-pack build --release
+# --target web --no-default-features --features bindgen`, with the
+# workspace root [profile.release] opt-level="z"/lto=true/codegen-units=1
+# fix applied): 213,418 B gzip / 510,393 B raw. Budget below is that
+# measurement + ~25% headroom, rounded to a clean number.
+wasm_gzip_budget_bytes = 270_000
