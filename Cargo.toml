@@ -48,10 +48,10 @@ bytemuck    = { version = "1.25.0", features = ["derive"] }
 wide        = "1.5.0"
 
 # zlib compression for FBX binary array encoding (COOLJAPAN: use oxiarc-deflate, not miniz_oxide)
-oxiarc-deflate = "0.4.1"
+oxiarc-deflate = "0.4.2"
 
 # ZIP archive container reading/writing (COOLJAPAN: use oxiarc-archive, not the `zip` crate)
-oxiarc-archive = "0.4.1"
+oxiarc-archive = "0.4.2"
 
 # PNG encode/decode (Pure Rust)
 zune-png    = "0.5.2"
